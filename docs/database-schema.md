@@ -1,7 +1,7 @@
-# Database Schema — Current State (Post-Refactor 015)
+# Database Schema — Current State (Post-Refactor 015 + 016)
 
 **Date**: 2026-09-05  
-**Source**: `specs/015-budgeting-backend-completion/data-model.md`
+**Sources**: `specs/015-budgeting-backend-completion/data-model.md`, `specs/016-unified-party-document/data-model.md`
 
 ## Renamed Tables
 
@@ -90,3 +90,59 @@
 | `StripPaymentOrderAggregates` | T035 | Drop stored aggregate/approval columns from PaymentOrder* |
 | `ExtendAccountingEvent` | T043 | Add JournalEntryId FK, rename columns, unique constraint, EventType string→enum |
 | `ExtendPaymentMethod` | T049 | Renumber Other 5→6 for InKind insertion (if data migration needed) |
+
+---
+
+## 016 — Unified Party + Document Infrastructure
+
+### New Tables
+
+| Table | Key Columns | Constraints |
+|-------|-------------|-------------|
+| `Parties` | Id, PartyCode, PartyType (enum), NameAr, NameEn, TaxNumber, NationalId, Phone, Email, Address, Notes, IsActive, RowVersion | UNIQUE (PartyCode); INDEX (PartyType, IsActive); INDEX (TaxNumber); INDEX (NameAr) |
+| `DocumentStatusLogs` | Id, EntityName, DocumentId, FromStatus, ToStatus, ChangedById (FK→Users), ChangedAt, Reason | INDEX (EntityName, DocumentId); INDEX (ChangedAt) |
+| `DocumentAttachmentRequirements` | Id, DocumentType, AttachmentTypeCode, TitleAr, IsMandatory, IsActive, RowVersion | UNIQUE (DocumentType, AttachmentTypeCode); INDEX (DocumentType) |
+
+### New Enums
+
+| Enum | Values | File |
+|------|--------|------|
+| `PartyType` | Supplier=0, Customer=1, GovEntity=2, TaxAuthority=3, Other=4 | `src/Domain/Parties/Enums/PartyType.cs` |
+| `ApprovalAction` | Submit=0, Approve=1, Reject=2, Return=3, Cancel=4 | `src/Domain/Security/Enums/ApprovalAction.cs` |
+
+### Modified Tables
+
+#### ApprovalHistory
+- **Added**: `ApprovalStep` (int, default 1), `Action` (ApprovalAction enum)
+- **Retained**: `Decision` (legacy note; Action is authoritative)
+
+#### Attachments
+- **Added**: `DocumentType` (string, required), `IsRequired` (bool, default false), `AttachmentTypeCode` (string, required)
+
+#### PaymentOrders
+- **Added**: `VendorPartyId` (int, FK→Parties)
+
+#### Encumbrances
+- **Added**: `VendorPartyId` (nullable int, FK→Parties)
+
+#### PurchaseOrders
+- **Added**: `SupplierPartyId` (int, FK→Parties)
+- **Removed**: `Supplier` navigation property
+
+#### Quotations
+- **Added**: `PartyId` (int, FK→Parties)
+
+#### RFQSuppliers
+- **Added**: `PartyId` (int, FK→Parties)
+
+### Deleted Tables
+
+| Table | Migration |
+|-------|-----------|
+| `Suppliers` | 016 migration (data migrated to Parties with first-wins dedup) |
+
+### New Pending Migration
+
+| Migration | Task | Description |
+|-----------|------|-------------|
+| `AddPartyAndDocumentInfrastructure` | 016 | Create Parties, DocumentStatusLogs, DocumentAttachmentRequirements; alter ApprovalHistory, Attachments; FK migration; data backfill; drop Suppliers; seed prefixes (PTY, RCV, DSL, DSB, PAY) |
