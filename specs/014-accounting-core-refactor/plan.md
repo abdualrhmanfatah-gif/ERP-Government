@@ -6,7 +6,7 @@
 
 ## Summary
 
-Rename Move → JournalEntry and MoveLine → JournalEntryLine across the entire solution, add five analytic dimension FKs to JournalEntryLine, convert EntryStatus from string to enum, extend AccountingEvent with JournalEntryId and structured enums, strip all stored aggregates and inline approval columns from the Payments domain, and add InKind to PaymentMethod. Executes after Command 1 (ApprovalHistory + Party exist).
+Rename Move → JournalEntry and MoveLine → JournalEntryLine across the entire solution, add five analytic dimension FKs to JournalEntryLine, convert EntryStatus from string to enum, extend AccountingEvent with JournalEntryId and structured enums, and add InKind to PaymentMethod. Executes after 016 (Party, DocumentStatusLog, ApprovalHistory with Action/Step, generic document endpoints, PTY/RCV/DSL/DSB/PAY sequences all delivered). PaymentOrder inline-approval columns already stripped in 016 — no aggregate strip needed.
 
 ## Technical Context
 
@@ -24,7 +24,7 @@ Rename Move → JournalEntry and MoveLine → JournalEntryLine across the entire
 
 **Performance Goals**: No explicit targets — standard web-app latency expectations apply
 
-**Constraints**: Single-entity deployment (NO EntityId), zero stored computed fields (Payments), ApprovalHistory only for approvals, FluentValidation + MediatR, EF migrations for all schema changes
+**Constraints**: Single-entity deployment (NO EntityId), zero stored computed fields, ApprovalHistory only for approvals, FluentValidation + MediatR, EF migrations for all schema changes
 
 **Scale/Scope**: Government ERP — medium-scale departmental use, not high-traffic public API
 
@@ -68,9 +68,9 @@ src/
 │   │       └── EventStatus.cs           # Renamed from AccountingEventStatus
 │   └── Payments/
 │       ├── Entities/
-│       │   ├── PaymentOrder.cs          # Stripped of aggregates + approvals
-│       │   ├── PaymentOrderLine.cs      # Stripped of computed fields
-│       │   └── PaymentOrderDeduction.cs # Stripped of BaseAmount
+│       │   ├── PaymentOrder.cs          # Already stripped in 016 — no changes needed
+│       │   ├── PaymentOrderLine.cs      # Already stripped in 016
+│       │   └── PaymentOrderDeduction.cs # Already stripped in 016
 │       └── Enums/
 │           └── PaymentMethod.cs         # Added InKind
 ├── Infrastructure/
@@ -81,9 +81,9 @@ src/
 │       │   │   ├── JournalEntryLineConfiguration.cs # Renamed from MoveLineConfiguration.cs
 │       │   │   └── AccountingEventConfiguration.cs # Extended
 │       │   └── Payments/
-│       │       ├── PaymentOrderConfiguration.cs     # Updated
-│       │       ├── PaymentOrderLineConfiguration.cs # Updated
-│       │       └── PaymentOrderDeductionConfiguration.cs # Updated
+│       │       ├── PaymentOrderConfiguration.cs     # No changes needed (stripped in 016)
+│       │       ├── PaymentOrderLineConfiguration.cs # No changes needed (stripped in 016)
+│       │       └── PaymentOrderDeductionConfiguration.cs # No changes needed (stripped in 016)
 │       └── Migrations/
 │           └── [timestamp]_AccountingCoreRefactor.cs # EF migration
 ├── Application/
