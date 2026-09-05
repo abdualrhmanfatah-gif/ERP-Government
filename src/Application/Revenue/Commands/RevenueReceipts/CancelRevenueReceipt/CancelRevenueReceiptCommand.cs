@@ -20,7 +20,7 @@ public class CancelRevenueReceiptCommandHandler(
     {
         var entity = await context.RevenueReceipts.FindAsync(request.Id, cancellationToken);
         if (entity is null)
-            return Result.Failure(["Revenue receipt not found."]);
+            return Result.Failure(new[] { "Revenue receipt not found."});
 
         entity.CancellationReason = request.Reason;
         entity.Status = RevenueReceiptStatus.Cancelled;
@@ -39,7 +39,7 @@ public class CancelRevenueReceiptCommandHandler(
         }
         catch (DbUpdateConcurrencyException)
         {
-            return Result.Failure(["Receipt was modified by another user. Please refresh and try again."]);
+            return Result.Failure(new[] { "Receipt was modified by another user. Please refresh and try again."});
         }
 
         return Result.Success();

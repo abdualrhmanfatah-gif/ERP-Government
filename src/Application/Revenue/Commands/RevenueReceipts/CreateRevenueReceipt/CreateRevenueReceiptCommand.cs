@@ -29,21 +29,21 @@ public class CreateRevenueReceiptCommandHandler(
     {
         // Validate lines present
         if (request.Lines.Count == 0)
-            return Result.Failure(["At least one line is required."]);
+            return Result.Failure(new[] { "At least one line is required."});
 
         // Validate line amounts > 0
         if (request.Lines.Any(l => l.Amount <= 0))
-            return Result.Failure(["Each line amount must be greater than zero."]);
+            return Result.Failure(new[] { "Each line amount must be greater than zero."});
 
         // Validate Fund active
         var fund = await context.Funds.FindAsync(request.FundId, cancellationToken);
         if (fund is null || !fund.IsActive)
-            return Result.Failure(["Fund not found or inactive."]);
+            return Result.Failure(new[] { "Fund not found or inactive."});
 
         // Validate Currency active
         var currency = await context.Currencies.FindAsync(request.CurrencyId, cancellationToken);
         if (currency is null || !currency.IsActive)
-            return Result.Failure(["Currency not found or inactive."]);
+            return Result.Failure(new[] { "Currency not found or inactive."});
 
         // Validate BudgetClassification if set
         if (request.BudgetClassificationId.HasValue)
@@ -51,7 +51,7 @@ public class CreateRevenueReceiptCommandHandler(
             var bcExists = await context.BudgetClassifications
                 .AnyAsync(x => x.Id == request.BudgetClassificationId.Value, cancellationToken);
             if (!bcExists)
-                return Result.Failure(["Budget classification not found."]);
+                return Result.Failure(new[] { "Budget classification not found."});
         }
 
         // Calculate total
@@ -96,7 +96,7 @@ public class CreateRevenueReceiptCommandHandler(
         }
         catch (DbUpdateConcurrencyException)
         {
-            return Result.Failure(["Receipt was modified by another user. Please refresh and try again."]);
+            return Result.Failure(new[] { "Receipt was modified by another user. Please refresh and try again."});
         }
 
         return Result.Success();

@@ -13,5 +13,8 @@ public enum EventType
     RevenueReceiptPosted = 8,
     JournalEntryPosted = 9,
     DepreciationPosted = 10,
-    PaymentOrderExecuted = 11
+    PaymentOrderExecuted = 11,
+    ReceiptVoucherCollected = 12,
+    CheckCleared = 13,
+    ClosingEntry = 14
 }

@@ -19,7 +19,7 @@ public class PostRevenueReceiptCommandHandler(
     {
         var entity = await context.RevenueReceipts.FindAsync(request.Id, cancellationToken);
         if (entity is null)
-            return Result.Failure(["Revenue receipt not found."]);
+            return Result.Failure(new[] { "Revenue receipt not found."});
 
         // Idempotency: already posted → return success
         if (entity.JournalEntryId.HasValue)
@@ -29,18 +29,18 @@ public class PostRevenueReceiptCommandHandler(
         var postingRule = await context.PostingRules
             .FirstOrDefaultAsync(x => x.EventType == "RevenueReceiptPosted" && x.IsActive, cancellationToken);
         if (postingRule is null)
-            return Result.Failure(["No posting rule configured for revenue receipts."]);
+            return Result.Failure(new[] { "No posting rule configured for revenue receipts."});
 
         // Resolve debit account from Fund default
         var fund = await context.Funds.FindAsync(entity.FundId, cancellationToken);
         if (fund is null || fund.DefaultRevenueDebitAccountId is null)
-            return Result.Failure(["No default revenue debit account configured for fund."]);
+            return Result.Failure(new[] { "No default revenue debit account configured for fund."});
 
         // Validate fiscal year open
         var fiscalYear = await context.FiscalYears
             .FirstOrDefaultAsync(x => x.StartDate <= entity.ReceiptDate && x.EndDate >= entity.ReceiptDate, cancellationToken);
         if (fiscalYear is null || fiscalYear.Status == ERP_Government.Domain.FinancialSettings.Enums.FiscalYearStatus.HardClosed)
-            return Result.Failure(["No open fiscal year for receipt date."]);
+            return Result.Failure(new[] { "No open fiscal year for receipt date."});
 
         // Validate fiscal period open
         var fiscalPeriod = await context.FiscalPeriods
@@ -48,7 +48,7 @@ public class PostRevenueReceiptCommandHandler(
                 && x.StartDate <= entity.ReceiptDate && x.EndDate >= entity.ReceiptDate
                 && !x.IsLockedForPosting, cancellationToken);
         if (fiscalPeriod is null)
-            return Result.Failure(["No open fiscal period for receipt date."]);
+            return Result.Failure(new[] { "No open fiscal period for receipt date."});
 
         // Set status — GL posting delegated to PostingRules/AccountingEvent pipeline
         entity.Status = RevenueReceiptStatus.Posted;
@@ -69,7 +69,7 @@ public class PostRevenueReceiptCommandHandler(
         }
         catch (DbUpdateConcurrencyException)
         {
-            return Result.Failure(["Receipt was modified by another user. Please refresh and try again."]);
+            return Result.Failure(new[] { "Receipt was modified by another user. Please refresh and try again."});
         }
 
         return Result.Success();

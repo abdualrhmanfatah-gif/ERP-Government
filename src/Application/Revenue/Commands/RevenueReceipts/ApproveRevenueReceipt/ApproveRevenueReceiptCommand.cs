@@ -19,20 +19,20 @@ public class ApproveRevenueReceiptCommandHandler(
     {
         var entity = await context.RevenueReceipts.FindAsync(request.Id, cancellationToken);
         if (entity is null)
-            return Result.Failure(["Revenue receipt not found."]);
+            return Result.Failure(new[] { "Revenue receipt not found."});
 
         // Validate lines exist
         var lineCount = await context.RevenueReceiptLines
             .CountAsync(x => x.ReceiptId == request.Id, cancellationToken);
         if (lineCount == 0)
-            return Result.Failure(["Receipt must have at least one line."]);
+            return Result.Failure(new[] { "Receipt must have at least one line."});
 
         // Validate line sum = header total
         var lineSum = await context.RevenueReceiptLines
             .Where(x => x.ReceiptId == request.Id)
             .SumAsync(x => x.Amount, cancellationToken);
         if (lineSum != entity.AmountTotal)
-            return Result.Failure([$"Line sum ({lineSum:C}) does not match header total ({entity.AmountTotal:C})."]);
+            return Result.Failure(new[] { $"Line sum ({lineSum:C}) does not match header total ({entity.AmountTotal:C})."});
 
         entity.Status = RevenueReceiptStatus.Approved;
 
@@ -48,7 +48,7 @@ public class ApproveRevenueReceiptCommandHandler(
         }
         catch (DbUpdateConcurrencyException)
         {
-            return Result.Failure(["Receipt was modified by another user. Please refresh and try again."]);
+            return Result.Failure(new[] { "Receipt was modified by another user. Please refresh and try again."});
         }
 
         return Result.Success();
