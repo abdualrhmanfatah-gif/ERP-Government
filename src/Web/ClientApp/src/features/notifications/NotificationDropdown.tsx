@@ -1,0 +1,157 @@
+import { Check, X } from 'lucide-react';
+import { useNotifications, useMarkAsRead, useMarkAllAsRead, useDeleteNotification, useClearAllNotifications } from './hooks';
+import type { NotificationDto } from './types';
+
+interface Props {
+  onClose: () => void;
+}
+
+function relativeTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return 'الآن';
+  if (diffMin < 60) return `منذ ${diffMin} دقيقة`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `منذ ${diffHr} ساعة`;
+  const diffDay = Math.floor(diffHr / 24);
+  return `منذ ${diffDay} يوم`;
+}
+
+function notificationTypeIcon(type: string): string {
+  switch (type) {
+    case 'Success': return '✓';
+    case 'Warning': return '⚠';
+    case 'Error': return '✗';
+    case 'Info':
+    default: return 'ℹ';
+  }
+}
+
+function NotificationItem({
+  notification,
+  onMarkAsRead,
+  onDelete,
+}: {
+  notification: NotificationDto;
+  onMarkAsRead: (id: number) => void;
+  onDelete: (id: number) => void;
+}) {
+  return (
+    <li
+      className={`px-4 py-3 border-b border-[var(--color-border-container)] last:border-b-0 transition-colors ${
+        notification.isRead ? 'bg-[var(--color-surface)]' : 'bg-[var(--color-surface-container-low)]'
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        <span className="text-body-sm mt-0.5" aria-hidden="true">
+          {notificationTypeIcon(notification.notificationType)}
+        </span>
+        <div className="flex-1 min-w-0">
+          <div className="text-body-sm text-[var(--color-on-surface)] font-medium truncate">
+            {notification.title}
+          </div>
+          <div className="text-label-sm text-[var(--color-on-surface-variant)] mt-0.5 line-clamp-2">
+            {notification.message}
+          </div>
+          <div className="text-label-sm text-[var(--color-on-surface-variant)] mt-1">
+            {relativeTime(notification.created)}
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          {!notification.isRead ? (
+            <button
+              type="button"
+              className="p-2 min-w-9 min-h-9 rounded-lg hover:bg-[var(--color-surface-container-high)] transition-colors text-[var(--color-on-surface-variant)]"
+              aria-label="تحديد كمقروء"
+              onClick={() => onMarkAsRead(notification.id)}
+            >
+              <Check size={16} />
+            </button>
+          ) : null}
+          <button
+            type="button"
+              className="p-2 min-w-9 min-h-9 rounded-lg hover:bg-[var(--color-surface-container-high)] transition-colors text-[var(--color-on-surface-variant)]"
+            aria-label="حذف"
+            onClick={() => onDelete(notification.id)}
+          >
+            <X size={16} />
+          </button>
+        </div>
+      </div>
+    </li>
+  );
+}
+
+export function NotificationDropdown({ onClose: _onClose }: Props) {
+  const { data, isLoading } = useNotifications(1, 50);
+  const markAsRead = useMarkAsRead();
+  const markAllAsRead = useMarkAllAsRead();
+  const deleteNotification = useDeleteNotification();
+  const clearAll = useClearAllNotifications();
+
+  const unreadCount = data?.items.filter((n) => !n.isRead).length ?? 0;
+
+  function handleMarkAllAsRead() {
+    markAllAsRead.mutate();
+  }
+
+  function handleClearAll() {
+    clearAll.mutate();
+  }
+
+  return (
+    <div
+      role="dialog"
+      aria-label="الإشعارات"
+      className="absolute start-0 top-full mt-2 w-80 bg-[var(--color-surface-container-low)] rounded-xl shadow-lg border border-[var(--color-border-container)] z-[300] overflow-hidden"
+    >
+      <div className="px-4 py-3 border-b border-[var(--color-border-container)] flex items-center justify-between">
+        <span className="text-body-sm font-semibold text-[var(--color-on-surface)]">الإشعارات</span>
+        <div className="flex items-center gap-2">
+          {unreadCount > 0 ? (
+            <button
+              type="button"
+              className="text-label-sm text-[var(--color-primary)] hover:text-[var(--color-primary-container)] transition-colors"
+              onClick={handleMarkAllAsRead}
+              disabled={markAllAsRead.isPending}
+            >
+              تحديد الكل كمقروء
+            </button>
+          ) : null}
+          {data && data.items.length > 0 ? (
+            <button
+              type="button"
+              className="text-label-sm text-[var(--color-error)] transition-colors"
+              onClick={handleClearAll}
+              disabled={clearAll.isPending}
+            >
+              مسح الكل
+            </button>
+          ) : null}
+        </div>
+      </div>
+      {isLoading ? (
+        <div className="px-4 py-6 text-center text-body-sm text-[var(--color-on-surface-variant)]">
+          جاري التحميل...
+        </div>
+      ) : data && data.items.length > 0 ? (
+        <ul className="list-none m-0 p-0 max-h-64 overflow-y-auto">
+          {data.items.map((notification) => (
+            <NotificationItem
+              key={notification.id}
+              notification={notification}
+              onMarkAsRead={(id) => markAsRead.mutate(id)}
+              onDelete={(id) => deleteNotification.mutate(id)}
+            />
+          ))}
+        </ul>
+      ) : (
+        <div className="px-4 py-6 text-center text-body-sm text-[var(--color-on-surface-variant)]">
+          لا توجد إشعارات
+        </div>
+      )}
+    </div>
+  );
+}

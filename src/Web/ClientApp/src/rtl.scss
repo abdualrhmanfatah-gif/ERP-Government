@@ -1,0 +1,41 @@
+// RTL Foundation
+// Authority: docs/analysis/00-governance/DESIGN-SYSTEM-INSTITUTIONAL-PROTOCOL.md
+// Base: html[lang="ar"] in index.html
+
+// ── Logical properties (automatically RTL-aware) ──────────────────────────────
+// Use these in component styles instead of physical properties.
+// margin-inline-start/end, padding-inline-start/end, inset-inline-* etc.
+
+// ── Padding direction ─────────────────────────────────────────────────────────
+// Pico CSS uses padding-inline which is RTL-aware by default.
+// Custom components should use logical properties:
+//   padding-inline-start  → replaces padding-left in LTR
+//   padding-inline-end    → replaces padding-right in LTR
+
+// ── Border direction ──────────────────────────────────────────────────────────
+// Use border-inline-start/end instead of border-left/right.
+
+// ── Text alignment ────────────────────────────────────────────────────────────
+// text-align: start replaces text-align: left
+// text-align: end replaces text-align: right
+
+// ── Navigation arrow ──────────────────────────────────────────────────────────
+// In RTL: back arrow is → (right), forward arrow is ← (left)
+// Lucide icons used with logical CSS auto-flip where needed.
+// For explicit direction icons, use the RTL-aware classes below.
+
+// ── RTL-aware utility classes ─────────────────────────────────────────────────
+// direction-aware-start  → padding-inline-start
+// direction-aware-end    → padding-inline-end
+// direction-aware-border → border-inline-start
+
+// ── Back/Front arrow swap ─────────────────────────────────────────────────────
+[dir="rtl"] .icon-mirror {
+  transform: scaleX(-1);
+}
+
+// ── Sidebar direction ─────────────────────────────────────────────────────────
+// Sidebar is always on the right in ERP Government (Protocol Section 12).
+// Main content always on the left.
+// Layout direction: [Main Content | Right Sidebar]
+// This is opposite to standard LTR layouts.

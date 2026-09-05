@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "skills": {
+    "feature-discovery": {
+      "source": "Jamie-BitFlight/claude_skills",
+      "ref": "main",
+      "sourceType": "github",
+      "skillPath": "plugins/plugin-creator/skills/feature-discovery/SKILL.md",
+      "computedHash": "27f64a9b707e2e47fbf9fa9f957a214b9b67d8254d36fd4c8baa174657d60238"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "d1de8ff8d228cd4204bf06eb959ef4317d5b927908d9f42765971e33e80c8a7e"
+    }
+  }
+}

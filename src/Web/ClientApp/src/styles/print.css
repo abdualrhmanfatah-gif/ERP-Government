@@ -1,0 +1,70 @@
+@media print {
+  /* Hide navigation and sidebar */
+  nav[aria-label="التنقل الرئيسي"],
+  aside[aria-label="القائمة الرئيسية"],
+  header,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Show report content only */
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Page breaks */
+  section {
+    page-break-inside: avoid;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  /* Ensure RTL rendering */
+  [dir="rtl"] {
+    direction: rtl !important;
+  }
+
+  /* Tabular numerals for financial data */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums !important;
+  }
+
+  /* Clean borders for tables */
+  table {
+    border-collapse: collapse !important;
+  }
+
+  th, td {
+    border: 1px solid #ccc !important;
+    padding: 4px 8px !important;
+  }
+
+  /* Bold totals */
+  .font-bold {
+    font-weight: bold !important;
+  }
+
+  /* Hide loading states */
+  .animate-pulse {
+    display: none !important;
+  }
+
+  /* Hide export buttons */
+  button {
+    display: none !important;
+  }
+
+  /* Show report grids */
+  [dir="rtl"] .space-y-4,
+  [dir="rtl"] .space-y-6 {
+    display: block !important;
+  }
+}

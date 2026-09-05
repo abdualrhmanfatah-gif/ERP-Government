@@ -1,0 +1,393 @@
+openapi: 3.0.3
+info:
+  title: Account Groups API — 005-account-groups
+  version: 1.0.0
+  description: |
+    Master-data for Account Groups (Asset/Liability/Equity/Revenue/Expense) — hierarchical 5 levels, permanent Code unique,
+    type inheritance, dual-mode listing. Arabic messages, problem-details, RowVersion concurrency, fail-closed auth.
+    Spec: specs/005-account-groups/spec.md
+servers:
+  - url: /api
+    description: Relative (Aspire Web)
+
+paths:
+  /account-groups:
+    get:
+      operationId: getAccountGroupsList
+      summary: List account groups — tree (no search) or flat (with search/filters), paginated
+      tags: [Accounting]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema: { type: string, maxLength: 200 }
+          description: Partial contains on Code/Name, case-insensitive, trimmed. Presence triggers flat mode.
+        - name: type
+          in: query
+          required: false
+          schema: { type: string, enum: [Asset, Liability, Equity, Revenue, Expense] }
+          description: Filter by AccountGroupType. Presence triggers flat mode.
+        - name: isActive
+          in: query
+          required: false
+          schema: { type: boolean }
+          description: Filter by IsActive. Null = all.
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: pageSize
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        '200':
+          description: Paginated result. Mode determined by query presence.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAccountGroupsResponse'
+              examples:
+                tree:
+                  summary: Without search/filters — tree mode (roots paginated, children nested)
+                  value:
+                    mode: tree
+                    page: 1
+                    pageSize: 20
+                    totalCount: 42
+                    totalPages: 3
+                    items:
+                      - id: 1
+                        code: AST-100
+                        name: "أصول متداولة"
+                        type: Asset
+                        normalBalance: Debit
+                        description: null
+                        parentId: null
+                        level: 1
+                        isActive: true
+                        rowVersion: "AAAAAAAAB9E="
+                        children:
+                          - id: 7
+                            code: AST-110
+                            name: "نقدية"
+                            type: Asset
+                            normalBalance: Debit
+                            parentId: 1
+                            level: 2
+                            isActive: true
+                            rowVersion: "AAAAAAAAB9F="
+                            children: []
+                flat:
+                  summary: With search/type filter — flat mode with breadcrumb
+                  value:
+                    mode: flat
+                    page: 1
+                    pageSize: 20
+                    totalCount: 3
+                    totalPages: 1
+                    items:
+                      - id: 7
+                        code: AST-110
+                        name: "نقدية"
+                        type: Asset
+                        normalBalance: Debit
+                        parentId: 1
+                        level: 2
+                        isActive: true
+                        rowVersion: "AAAAAAAAB9F="
+                        ancestorPath: [{ id: 1, code: AST-100, name: "أصول متداولة" }]
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+      x-permission: Accounting.ChartOfAccounts.Read
+
+    post:
+      operationId: createAccountGroup
+      summary: Create account group
+      tags: [Accounting]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateAccountGroupRequest' }
+      responses:
+        '200':
+          description: Created (returns id)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { id: { type: integer } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+      x-permission: Accounting.ChartOfAccounts.Create
+
+  /account-groups/{id}:
+    get:
+      operationId: getAccountGroupById
+      summary: Get account group detail (core fields + children + accounts + audit)
+      tags: [Accounting]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AccountGroupDetailResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+      x-permission: Accounting.ChartOfAccounts.Read
+
+    put:
+      operationId: updateAccountGroup
+      summary: Update account group (Name/Type/NormalBalance/Description/ParentId) + RowVersion
+      tags: [Accounting]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateAccountGroupRequest' }
+      responses:
+        '204': { description: No Content — updated }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+      x-permission: Accounting.ChartOfAccounts.Edit
+
+  /account-groups/{id}/toggle-active:
+    post:
+      operationId: toggleAccountGroupActive
+      summary: Deactivate/activate account group (deep guard + RowVersion)
+      tags: [Accounting]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ToggleActiveRequest' }
+      responses:
+        '204': { description: Toggled }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+      x-permission: Accounting.ChartOfAccounts.Edit
+
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+
+  schemas:
+    AccountGroupTreeItem:
+      type: object
+      required: [id, code, name, type, normalBalance, level, isActive, rowVersion]
+      properties:
+        id: { type: integer }
+        code: { type: string, maxLength: 20 }
+        name: { type: string, maxLength: 200 }
+        type: { type: string, enum: [Asset, Liability, Equity, Revenue, Expense] }
+        normalBalance: { type: string, enum: [Debit, Credit] }
+        description: { type: string, nullable: true, maxLength: 500 }
+        parentId: { type: integer, nullable: true }
+        level: { type: integer, minimum: 1, maximum: 5 }
+        isActive: { type: boolean }
+        rowVersion: { type: string, format: byte, description: Base64 concurrency token }
+        ancestorPath:
+          type: array
+          nullable: true
+          items: { $ref: '#/components/schemas/AncestorRef' }
+          description: Only in flat mode — breadcrumb to root
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/AccountGroupTreeItem' }
+          description: Only in tree mode — direct children (recursive)
+
+    AncestorRef:
+      type: object
+      required: [id, code, name]
+      properties:
+        id: { type: integer }
+        code: { type: string }
+        name: { type: string }
+
+    AccountGroupListItem:
+      type: object
+      required: [id, code, name, type, normalBalance, level, isActive, rowVersion]
+      properties:
+        id: { type: integer }
+        code: { type: string }
+        name: { type: string }
+        type: { type: string, enum: [Asset, Liability, Equity, Revenue, Expense] }
+        normalBalance: { type: string, enum: [Debit, Credit] }
+        description: { type: string, nullable: true }
+        parentId: { type: integer, nullable: true }
+        level: { type: integer }
+        isActive: { type: boolean }
+        rowVersion: { type: string, format: byte }
+        ancestorPath:
+          type: array
+          items: { $ref: '#/components/schemas/AncestorRef' }
+
+    PaginatedAccountGroupsResponse:
+      type: object
+      required: [mode, page, pageSize, totalCount, totalPages, items]
+      properties:
+        mode: { type: string, enum: [tree, flat] }
+        page: { type: integer }
+        pageSize: { type: integer }
+        totalCount: { type: integer }
+        totalPages: { type: integer }
+        items:
+          type: array
+          items:
+            oneOf:
+              - { $ref: '#/components/schemas/AccountGroupTreeItem' }
+              - { $ref: '#/components/schemas/AccountGroupListItem' }
+
+    AccountGroupDetailResponse:
+      type: object
+      required: [group, children, accounts, audit]
+      properties:
+        group:
+          $ref: '#/components/schemas/AccountGroupListItem'
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/AccountGroupListItem' }
+          description: Direct children only
+        accounts:
+          type: array
+          items: { $ref: '#/components/schemas/LinkedAccountRef' }
+        audit:
+          type: array
+          items: { $ref: '#/components/schemas/AuditEntry' }
+
+    LinkedAccountRef:
+      type: object
+      required: [id, code, name, isActive]
+      properties:
+        id: { type: integer }
+        code: { type: string }
+        name: { type: string }
+        isActive: { type: boolean }
+        isPostable: { type: boolean }
+
+    AuditEntry:
+      type: object
+      required: [id, action, timestamp]
+      properties:
+        id: { type: integer, format: int64 }
+        action: { type: string, enum: [Create, Update, Deactivate, Activate] }
+        userId: { type: integer, nullable: true }
+        userName: { type: string, nullable: true }
+        timestamp: { type: string, format: date-time }
+        fieldChanges: { type: string, nullable: true, description: JSON {field:{Old,New}} }
+        changeSummary: { type: string, nullable: true }
+        ipAddress: { type: string, nullable: true }
+
+    CreateAccountGroupRequest:
+      type: object
+      required: [code, name, type, normalBalance]
+      properties:
+        code: { type: string, maxLength: 20, description: Trimmed, permanent unique case-insensitive }
+        name: { type: string, maxLength: 200 }
+        type: { type: string, enum: [Asset, Liability, Equity, Revenue, Expense] }
+        normalBalance: { type: string, enum: [Debit, Credit] }
+        description: { type: string, nullable: true, maxLength: 500 }
+        parentId: { type: integer, nullable: true }
+
+    UpdateAccountGroupRequest:
+      type: object
+      required: [id, name, type, normalBalance, rowVersion]
+      properties:
+        id: { type: integer }
+        name: { type: string, maxLength: 200 }
+        type: { type: string, enum: [Asset, Liability, Equity, Revenue, Expense] }
+        normalBalance: { type: string, enum: [Debit, Credit] }
+        description: { type: string, nullable: true, maxLength: 500 }
+        parentId: { type: integer, nullable: true }
+        rowVersion: { type: string, format: byte }
+
+    ToggleActiveRequest:
+      type: object
+      required: [rowVersion, isActive]
+      properties:
+        rowVersion: { type: string, format: byte }
+        isActive: { type: boolean, description: Target state — false=deactivate, true=activate }
+
+    ProblemDetails:
+      type: object
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        errors: { type: object, additionalProperties: { type: array, items: { type: string } } }
+
+  responses:
+    ValidationError:
+      description: 400 validation (Arabic message)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+          example:
+            type: https://tools.ietf.org/html/rfc9110#section-15.5.1
+            title: Validation Failed
+            status: 400
+            detail: "الرصيد الطبيعي غير متوافق مع النوع"
+            errors: { NormalBalance: ["الرصيد الطبيعي غير متوافق مع النوع"] }
+    Unauthorized:
+      description: 401
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    Forbidden:
+      description: 403 fail-closed
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    NotFound:
+      description: 404
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    Conflict:
+      description: 409 RowVersion conflict
+      content:
+        application/json:
+          schema:
+            allOf:
+              - { $ref: '#/components/schemas/ProblemDetails' }
+              - type: object
+                properties:
+                  current:
+                    $ref: '#/components/schemas/AccountGroupListItem'
+          example:
+            title: Concurrency Conflict
+            status: 409
+            detail: "تم تعديل البيانات من قبل مستخدم آخر، يرجى التحديث والمحاولة مرة أخرى"
+            current: { id: 1, code: AST-100, name: "أصول متداولة", type: Asset, normalBalance: Debit, level: 1, isActive: true, rowVersion: "AAAAAAAAB9E=" }

@@ -1,0 +1,15 @@
+﻿global using Ardalis.GuardClauses;
+global using AutoMapper;
+global using AutoMapper.QueryableExtensions;
+global using Microsoft.EntityFrameworkCore;
+global using FluentValidation;
+global using MediatR;
+global using ERP_Government.Application.Common.Models;
+global using ERP_Government.Application.Common.Interfaces;
+global using ERP_Government.Application.Common.Exceptions;
+global using ERP_Government.Domain.Common;
+global using ERP_Government.Domain.Events.Common;
+global using ERP_Government.Domain.FinancialSettings.Entities;
+global using ERP_Government.Domain.Security.Entities;
+global using ERP_Government.Domain.Organization.Entities;
+global using ERP_Government.Domain.Banking.Entities;
