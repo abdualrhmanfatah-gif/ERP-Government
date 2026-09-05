@@ -234,8 +234,8 @@
 
 ### Tests for User Story 7
 
-- [ ] T098 [P] [US7] Write sequence prefix generation test in tests/Application.UnitTests/DocumentSequenceTests.cs — verify PTY, RCV, DSL, DSB, PAY generate correct format
-- [ ] T099 [P] [US7] Write sequence concurrency test — verify concurrent requests produce unique numbers
+- [x] T098 [P] [US7] Write sequence prefix generation test in tests/Application.UnitTests/DocumentSequenceServiceTests.cs — verify PTY, RCV, DSL, DSB, PAY generate correct format
+- [x] T099 [P] [US7] Write sequence concurrency test — verify concurrent requests produce unique numbers
 
 ### Implementation for User Story 7
 
@@ -252,8 +252,8 @@
 **Purpose**: Validation, documentation, final verification
 
 - [ ] T103 Run quickstart.md validation scenarios V1–V8 and record results
-- [ ] T104 [P] Update docs/database-schema.md with new/modified/deleted tables
-- [ ] T105 [P] Run full test suite — dotnet test on all test projects
+- [x] T104 [P] Update docs/database-schema.md with new/modified/deleted tables
+- [x] T105 [P] Run full test suite — dotnet test on all test projects
 - [x] T106 Verify zero "Supplier" references remain in src/ via grep
 - [x] T107 Verify all new endpoints have declared permissions per Constitution Principle VII
 - [x] T108 Verify OpenAPI contract matches implementation for all new endpoints

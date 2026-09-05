@@ -285,4 +285,75 @@ public class DocumentSequenceServiceTests
         prefixMap.ContainsKey("PAYMENTORDER").ShouldBeTrue();
         prefixMap.ContainsKey("budget").ShouldBeTrue();
     }
+
+    [Test]
+    public void PrefixMap_ContainsPartyPrefixes()
+    {
+        var field = typeof(DocumentSequenceService)
+            .GetField("PrefixMap", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+
+        var prefixMap = (Dictionary<string, string>)field!.GetValue(null)!;
+
+        prefixMap.ShouldContainKey("Party");
+        prefixMap.ShouldContainKey("ReceiptVoucher");
+        prefixMap.ShouldContainKey("DepositSlip");
+        prefixMap.ShouldContainKey("DisbursementRequest");
+        prefixMap.ShouldContainKey("Payment");
+    }
+
+    [Test]
+    public void PrefixMap_PartyPrefixesAreCorrect()
+    {
+        var field = typeof(DocumentSequenceService)
+            .GetField("PrefixMap", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+
+        var prefixMap = (Dictionary<string, string>)field!.GetValue(null)!;
+
+        prefixMap["Party"].ShouldBe("PTY");
+        prefixMap["ReceiptVoucher"].ShouldBe("RCV");
+        prefixMap["DepositSlip"].ShouldBe("DSL");
+        prefixMap["DisbursementRequest"].ShouldBe("DSB");
+        prefixMap["Payment"].ShouldBe("PAY");
+    }
+
+    [Test]
+    [TestCase("Party", "PTY")]
+    [TestCase("ReceiptVoucher", "RCV")]
+    [TestCase("DepositSlip", "DSL")]
+    [TestCase("DisbursementRequest", "DSB")]
+    [TestCase("Payment", "PAY")]
+    public async Task GenerateNextNumber_NewPrefixes_ShouldReturnFormattedNumber(string documentType, string expectedPrefix)
+    {
+        var sequence = new DocumentSequence
+        {
+            Id = 1,
+            DocumentType = documentType,
+            IsActive = true,
+            CurrentNumber = 0,
+            RowVersion = [1, 2, 3]
+        };
+
+        var sequences = new List<DocumentSequence> { sequence }
+            .AsQueryable()
+            .BuildMockForAsync();
+
+        _contextMock.Setup(c => c.DocumentSequences).Returns(sequences.Object);
+        _contextMock.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
+        var result = await _service.GenerateNextNumberAsync(documentType, CancellationToken.None);
+
+        result.ShouldBe($"{expectedPrefix}-000001");
+        sequence.CurrentNumber.ShouldBe(1);
+    }
+
+    [Test]
+    public void PrefixMap_TotalCount_ShouldBe23()
+    {
+        var field = typeof(DocumentSequenceService)
+            .GetField("PrefixMap", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+
+        var prefixMap = (Dictionary<string, string>)field!.GetValue(null)!;
+
+        prefixMap.Count.ShouldBe(23);
+    }
 }
