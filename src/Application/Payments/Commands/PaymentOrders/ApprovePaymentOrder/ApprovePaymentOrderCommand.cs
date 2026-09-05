@@ -28,6 +28,9 @@ public class ApprovePaymentOrderCommandHandler(
         ApprovePaymentOrderCommand request,
         CancellationToken cancellationToken)
     {
+        if (user.Id is not int userId)
+            return Result.Failure(["User identity is required for this operation."]);
+
         var entity = await context.PaymentOrders
             .FindAsync(request.Id, cancellationToken);
 
@@ -46,8 +49,6 @@ public class ApprovePaymentOrderCommandHandler(
         if (missingAttachments.Count > 0)
             return Result.Failure([$"Cannot approve: missing mandatory attachments ({string.Join(", ", missingAttachments)})."]);
 
-        var executingUserId = user.Id ?? 0;
-
         var evaluationResults = await evaluationService.EvaluateAsync(
             "PaymentOrder",
             entity.AmountGross,
@@ -62,7 +63,7 @@ public class ApprovePaymentOrderCommandHandler(
         foreach (var rule in evaluationResults)
         {
             if (string.IsNullOrEmpty(rule.RequiredRole)) continue;
-            if (await identityService.IsInRoleAsync(executingUserId, rule.RequiredRole))
+            if (await identityService.IsInRoleAsync(userId, rule.RequiredRole))
             {
                 matchedRole = rule.RequiredRole;
                 break;
@@ -90,15 +91,15 @@ public class ApprovePaymentOrderCommandHandler(
             DocumentId = entity.Id,
             ApprovalStep = 1,
             Action = ApprovalAction.Approve,
-            ApproverUserId = executingUserId,
+            ApproverUserId = userId,
             RequiredRole = matchedRole,
             Decision = "Approved",
             DecisionAt = DateTimeOffset.UtcNow,
             EvaluationSnapshot = evaluationSnapshot,
             Created = DateTimeOffset.UtcNow,
-            CreatedBy = executingUserId.ToString(),
+            CreatedBy = userId.ToString(),
             LastModified = DateTimeOffset.UtcNow,
-            LastModifiedBy = executingUserId.ToString()
+            LastModifiedBy = userId.ToString()
         };
         context.ApprovalHistory.Add(history);
 
@@ -109,7 +110,7 @@ public class ApprovePaymentOrderCommandHandler(
             entity.Id,
             PaymentOrderStatus.Submitted.ToString(),
             PaymentOrderStatus.Approved.ToString(),
-            executingUserId,
+            userId,
             null,
             cancellationToken);
 
