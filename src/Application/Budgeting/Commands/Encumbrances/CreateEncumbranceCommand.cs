@@ -1,4 +1,5 @@
 using ERP_Government.Application.Budgeting.Common;
+using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.FinancialSettings.Common.Services;
 using ERP_Government.Application.Parties.Common;
@@ -25,12 +26,16 @@ public class CreateEncumbranceCommandHandler(
     IApplicationDbContext context,
     IDocumentSequenceService sequenceService,
     IBudgetAvailabilityService availabilityService,
-    IDocumentStatusLogger statusLogger) : IRequestHandler<CreateEncumbranceCommand, Result<int>>
+    IDocumentStatusLogger statusLogger,
+    IUser user) : IRequestHandler<CreateEncumbranceCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(
         CreateEncumbranceCommand request,
         CancellationToken cancellationToken)
     {
+        if (user.Id is not int userId)
+            return Result<int>.Failure(["User identity is required for this operation."]);
+
         var appropriation = await context.Appropriations
             .Include(a => a.BudgetItem)
             .ThenInclude(bi => bi!.Budget)
@@ -74,7 +79,7 @@ public class CreateEncumbranceCommandHandler(
             entity.Id,
             "",
             EncumbranceStatus.Draft.ToString(),
-            0,
+            userId,
             null,
             cancellationToken);
 
@@ -84,7 +89,7 @@ public class CreateEncumbranceCommandHandler(
             {
                 DocumentType = "Encumbrance",
                 DocumentId = entity.Id,
-                ApproverUserId = 0,
+                ApproverUserId = userId,
                 RequiredRole = "",
                 Decision = "Created (Warning override)",
                 DecisionAt = DateTimeOffset.UtcNow,

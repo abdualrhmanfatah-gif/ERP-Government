@@ -20,6 +20,9 @@ public class ActivateAppropriationCommandHandler(
         ActivateAppropriationCommand request,
         CancellationToken cancellationToken)
     {
+        if (currentUser.Id is not int userId)
+            return Result.Failure(new[] { "User identity is required for this operation." });
+
         var entity = await context.Appropriations
             .FindAsync(request.Id, cancellationToken);
 
@@ -53,14 +56,14 @@ public class ActivateAppropriationCommandHandler(
 
         entity.Status = AppropriationStatus.Active;
 
-        RecordApproval(context, entity, AppropriationStatus.Approved, AppropriationStatus.Active, currentUser.Id);
+        RecordApproval(context, entity, AppropriationStatus.Approved, AppropriationStatus.Active, userId);
 
         await statusLogger.LogAsync(
             "appropriations",
             entity.Id,
             AppropriationStatus.Approved.ToString(),
             AppropriationStatus.Active.ToString(),
-            currentUser.Id ?? 0,
+            userId,
             null,
             cancellationToken);
 
@@ -74,13 +77,13 @@ public class ActivateAppropriationCommandHandler(
         Domain.Budgeting.Entities.Appropriation appropriation,
         AppropriationStatus from,
         AppropriationStatus to,
-        int? userId)
+        int userId)
     {
         context.ApprovalHistory.Add(new ERP_Government.Domain.Security.Entities.ApprovalHistory
         {
             DocumentType = "Appropriation",
             DocumentId = appropriation.Id,
-            ApproverUserId = userId ?? 0,
+            ApproverUserId = userId,
             RequiredRole = string.Empty,
             Decision = $"{from} -> {to}",
             DecisionAt = DateTimeOffset.UtcNow

@@ -1,7 +1,7 @@
-# Database Schema — Current State (Post-Refactor 015 + 016)
+# Database Schema — Current State (Post-Refactor 015 + 016 + 019)
 
-**Date**: 2026-09-05  
-**Sources**: `specs/015-budgeting-backend-completion/data-model.md`, `specs/016-unified-party-document/data-model.md`
+**Date**: 2026-09-06  
+**Sources**: `specs/015-budgeting-backend-completion/data-model.md`, `specs/016-unified-party-document/data-model.md`, `specs/019-budget-availability-closing/data-model.md`
 
 ## Renamed Tables
 
@@ -146,3 +146,98 @@
 | Migration | Task | Description |
 |-----------|------|-------------|
 | `AddPartyAndDocumentInfrastructure` | 016 | Create Parties, DocumentStatusLogs, DocumentAttachmentRequirements; alter ApprovalHistory, Attachments; FK migration; data backfill; drop Suppliers; seed prefixes (PTY, RCV, DSL, DSB, PAY) |
+
+## Feature 019: Financial Control Layer
+
+### New Enums
+
+| Enum | Values | File |
+|------|--------|------|
+| `YearClosingRunStatus` | Completed=0, Reversed=1 | `src/Domain/Budgeting/Enums/YearClosingRunStatus.cs` |
+| `FinalAccountStatus` | Draft=0, Issued=1 | `src/Domain/Budgeting/Enums/FinalAccountStatus.cs` |
+| `YearClosingRunType` | Lapse=0, Reopen=1 | `src/Domain/Budgeting/Enums/YearClosingRunType.cs` |
+| `FinalAccountLineDimension` | Fund=0, Program=1, Project=2, Item=3 | `src/Domain/Budgeting/Enums/FinalAccountLineDimension.cs` |
+
+### New Tables
+
+#### YearClosingRun
+Append-only record of fiscal year closing or reopening operations.
+
+| Column | Type | Constraints | Notes |
+|--------|------|-------------|-------|
+| `Id` | int | PK, Identity | |
+| `FiscalYearId` | int | FK→FiscalYears, NOT NULL | |
+| `RunAt` | DateTimeOffset | NOT NULL | Timestamp of the run |
+| `RunById` | int | FK→Users, NOT NULL | Actor who initiated |
+| `RunType` | int | NOT NULL | Lapse=0, Reopen=1 |
+| `LapsedAppropriationTotal` | decimal(23,2) | NOT NULL, default 0 | Total appropriation amount lapsed |
+| `LapsedEncumbranceTotal` | decimal(23,2) | NOT NULL, default 0 | Total encumbrance amount lapsed |
+| `Status` | int | NOT NULL | Completed=0, Reversed=1 |
+| `ReversedById` | int? | FK→Users, nullable | Set when Status=Reversed |
+| `ReversedAt` | DateTimeOffset? | nullable | Set when Status=Reversed |
+| `RowVersion` | byte[] | concurrency token | |
+| `Created` | DateTimeOffset | NOT NULL | Audit |
+| `CreatedBy` | string? | nullable | Audit |
+| `LastModified` | DateTimeOffset | NOT NULL | Audit |
+| `LastModifiedBy` | string? | nullable | Audit |
+
+**Indexes**:
+- Unique filtered: `(FiscalYearId) WHERE Status = 0` — prevents duplicate active lapses
+
+#### FinalAccount
+Authoritative financial statement for a closed fiscal year.
+
+| Column | Type | Constraints | Notes |
+|--------|------|-------------|-------|
+| `Id` | int | PK, Identity | |
+| `FiscalYearId` | int | FK→FiscalYears, UNIQUE, NOT NULL | One final account per year |
+| `GeneratedAt` | DateTimeOffset | NOT NULL | |
+| `GeneratedById` | int | FK→Users, NOT NULL | |
+| `Status` | int | NOT NULL | Draft=0, Issued=1 |
+| `IssuedAt` | DateTimeOffset? | nullable | Set on approval |
+| `IssuedById` | int? | FK→Users, nullable | Set on approval |
+| `RowVersion` | byte[] | concurrency token | |
+| `Created` | DateTimeOffset | NOT NULL | Audit |
+| `CreatedBy` | string? | nullable | Audit |
+| `LastModified` | DateTimeOffset | NOT NULL | Audit |
+| `LastModifiedBy` | string? | nullable | Audit |
+
+**State transitions**: Draft → Issued (immutable after Issued)
+
+#### FinalAccountLine
+Line item in the final account — materialized at generation time.
+
+| Column | Type | Constraints | Notes |
+|--------|------|-------------|-------|
+| `Id` | int | PK, Identity | |
+| `FinalAccountId` | int | FK→FinalAccounts, NOT NULL | |
+| `Dimension` | int | NOT NULL | Fund=0, Program=1, Project=2, Item=3 |
+| `DimensionId` | int | NOT NULL | FK value for the dimension entity |
+| `DimensionCode` | string | NOT NULL | Denormalized code for display |
+| `DimensionName` | string | NOT NULL | Denormalized name for display |
+| `BudgetedAmount` | decimal(23,2) | NOT NULL | Appropriation amount |
+| `ActualAmount` | decimal(23,2) | NOT NULL | Executed payment amount |
+| `Variance` | decimal(23,2) | NOT NULL | BudgetedAmount - ActualAmount |
+| `RowVersion` | byte[] | concurrency token | |
+
+**Indexes**:
+- Unique: `(FinalAccountId, Dimension, DimensionId)` — one line per dimension value per final account
+
+### New Permission Codes
+
+| Code | Module | Description |
+|------|--------|-------------|
+| `FinancialControl.LapseYear` | Budgeting | Lapse and reopen fiscal year operations |
+| `FinancialControl.ApproveFinalAccount` | Budgeting | Generate and issue final account |
+
+### New Domain Event
+
+| Event | SourceEntityType | File |
+|-------|-----------------|------|
+| `ClosingEntryGenerated` | FinalAccount | `src/Domain/Events/Budgeting/ClosingEntryGenerated.cs` |
+
+### New EventType
+
+| Value | Name | Description |
+|-------|------|-------------|
+| 14 | `ClosingEntry` | Closing entry for revenue/expense accounts at year-end |

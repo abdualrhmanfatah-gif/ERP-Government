@@ -18,6 +18,9 @@ public class CloseBudgetCommandHandler(
         CloseBudgetCommand request,
         CancellationToken cancellationToken)
     {
+        if (currentUser.Id is not int userId)
+            return Result.Failure(new[] { "User identity is required for this operation." });
+
         var entity = await context.Budgets
             .FindAsync(request.Id, cancellationToken);
 
@@ -33,14 +36,14 @@ public class CloseBudgetCommandHandler(
         var previousStatus = entity.Status;
         entity.Status = BudgetStatus.Closed;
 
-        RecordApproval(context, entity, previousStatus, BudgetStatus.Closed, currentUser.Id);
+        RecordApproval(context, entity, previousStatus, BudgetStatus.Closed, userId);
 
         await statusLogger.LogAsync(
             "budgets",
             entity.Id,
             previousStatus.ToString(),
             BudgetStatus.Closed.ToString(),
-            currentUser.Id ?? 0,
+            userId,
             null,
             cancellationToken);
 
@@ -54,13 +57,13 @@ public class CloseBudgetCommandHandler(
         Domain.Budgeting.Entities.Budget budget,
         BudgetStatus from,
         BudgetStatus to,
-        int? userId)
+        int userId)
     {
         context.ApprovalHistory.Add(new ERP_Government.Domain.Security.Entities.ApprovalHistory
         {
             DocumentType = "Budget",
             DocumentId = budget.Id,
-            ApproverUserId = userId ?? 0,
+            ApproverUserId = userId,
             RequiredRole = string.Empty,
             Decision = $"{from} -> {to}",
             DecisionAt = DateTimeOffset.UtcNow

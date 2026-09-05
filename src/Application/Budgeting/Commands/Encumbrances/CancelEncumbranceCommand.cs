@@ -23,6 +23,9 @@ public class CancelEncumbranceCommandHandler(
 
     public async Task<Result> Handle(CancelEncumbranceCommand request, CancellationToken cancellationToken)
     {
+        if (user.Id is not int userId)
+            return Result.Failure(["User identity is required for this operation."]);
+
         var entity = await context.Encumbrances.FindAsync(request.Id, cancellationToken);
         if (entity is null)
             return Result.Failure(["Encumbrance not found."]);
@@ -40,7 +43,7 @@ public class CancelEncumbranceCommandHandler(
         {
             DocumentType = "Encumbrance",
             DocumentId = entity.Id,
-            ApproverUserId = user.Id ?? 0,
+            ApproverUserId = userId,
             RequiredRole = "",
             Decision = $"{fromStatus} -> Cancelled",
             DecisionAt = DateTimeOffset.UtcNow,
@@ -52,7 +55,7 @@ public class CancelEncumbranceCommandHandler(
             entity.Id,
             fromStatus.ToString(),
             EncumbranceStatus.Cancelled.ToString(),
-            user.Id ?? 0,
+            userId,
             request.Reason,
             cancellationToken);
 

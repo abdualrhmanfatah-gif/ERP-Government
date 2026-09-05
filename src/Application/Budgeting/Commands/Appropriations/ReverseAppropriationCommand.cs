@@ -18,6 +18,9 @@ public class ReverseAppropriationCommandHandler(
         ReverseAppropriationCommand request,
         CancellationToken cancellationToken)
     {
+        if (currentUser.Id is not int userId)
+            return Result<int>.Failure(new[] { "User identity is required for this operation." });
+
         var entity = await context.Appropriations
             .FindAsync(request.Id, cancellationToken);
 
@@ -47,14 +50,14 @@ public class ReverseAppropriationCommandHandler(
         // Mark original as Reversed
         entity.Status = AppropriationStatus.Reversed;
 
-        RecordApproval(context, entity, AppropriationStatus.Active, AppropriationStatus.Reversed, currentUser.Id);
+        RecordApproval(context, entity, AppropriationStatus.Active, AppropriationStatus.Reversed, userId);
 
         await statusLogger.LogAsync(
             "appropriations",
             entity.Id,
             AppropriationStatus.Active.ToString(),
             AppropriationStatus.Reversed.ToString(),
-            currentUser.Id ?? 0,
+            userId,
             null,
             cancellationToken);
 
@@ -68,13 +71,13 @@ public class ReverseAppropriationCommandHandler(
         Domain.Budgeting.Entities.Appropriation appropriation,
         AppropriationStatus from,
         AppropriationStatus to,
-        int? userId)
+        int userId)
     {
         context.ApprovalHistory.Add(new ERP_Government.Domain.Security.Entities.ApprovalHistory
         {
             DocumentType = "Appropriation",
             DocumentId = appropriation.Id,
-            ApproverUserId = userId ?? 0,
+            ApproverUserId = userId,
             RequiredRole = string.Empty,
             Decision = $"{from} -> {to}",
             DecisionAt = DateTimeOffset.UtcNow

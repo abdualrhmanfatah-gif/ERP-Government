@@ -18,6 +18,9 @@ public class SuspendBudgetCommandHandler(
         SuspendBudgetCommand request,
         CancellationToken cancellationToken)
     {
+        if (currentUser.Id is not int userId)
+            return Result.Failure(new[] { "User identity is required for this operation." });
+
         var entity = await context.Budgets
             .FindAsync(request.Id, cancellationToken);
 
@@ -32,14 +35,14 @@ public class SuspendBudgetCommandHandler(
 
         entity.Status = BudgetStatus.Suspended;
 
-        RecordApproval(context, entity, BudgetStatus.Active, BudgetStatus.Suspended, currentUser.Id);
+        RecordApproval(context, entity, BudgetStatus.Active, BudgetStatus.Suspended, userId);
 
         await statusLogger.LogAsync(
             "budgets",
             entity.Id,
             BudgetStatus.Active.ToString(),
             BudgetStatus.Suspended.ToString(),
-            currentUser.Id ?? 0,
+            userId,
             null,
             cancellationToken);
 
@@ -53,13 +56,13 @@ public class SuspendBudgetCommandHandler(
         Domain.Budgeting.Entities.Budget budget,
         BudgetStatus from,
         BudgetStatus to,
-        int? userId)
+        int userId)
     {
         context.ApprovalHistory.Add(new ERP_Government.Domain.Security.Entities.ApprovalHistory
         {
             DocumentType = "Budget",
             DocumentId = budget.Id,
-            ApproverUserId = userId ?? 0,
+            ApproverUserId = userId,
             RequiredRole = string.Empty,
             Decision = $"{from} -> {to}",
             DecisionAt = DateTimeOffset.UtcNow

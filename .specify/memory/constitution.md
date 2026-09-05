@@ -1,13 +1,13 @@
 <!--
 Sync Impact Report
-- Version change: 1.1.0 -> 1.2.0 (MINOR: amended Principle XI with TDD requirement)
-- Modified principles: Principle XI — added TDD non-negotiable for new features
+- Version change: 1.2.0 -> 1.3.0 (MINOR: expanded Principle V to full budget control chain)
+- Modified principles: Principle V — extended to cover appropriations → encumbrances → payments chain
 - Added sections: none
 - Removed sections: none
 - Feature registry: no change
-- Decision record: none (approved inline via /speckit.tdd.setup)
+- Decision record: none (approved inline via /speckit.implement)
 - Follow-up TODOs: none
-- Previous version: 1.1.0 (last amended 2026-09-04)
+- Previous version: 1.2.0 (last amended 2026-09-04)
 -->
 
 # ERP-Government Constitution
@@ -84,6 +84,11 @@ direct references; the outbox and accounting-event retry machinery are establish
 - The budget's configured control level (none/warning/blocking) and overrun policy MUST be
   honored; overruns MUST follow the configured approval path.
 - Commitments MUST reserve budget before payment execution consumes it.
+- Multi-dimensional availability checks (fund, program, project, budget item) MUST be
+  supported for budget control. The full chain appropriations -> encumbrances -> payments
+  applies across all dimensions.
+- Fiscal year closing (lapse) MUST block new payments against lapsed items. Reopening MUST
+  restore the pre-lapse state unless payments exist against lapsed items.
 
 ### VI. Data Integrity
 
@@ -278,4 +283,4 @@ This Constitution governs every phase of the Spec-Driven Development workflow
   with owner, rationale, scope, and remediation path, kept in the repository's decision log.
   Unregistered deviation from any principle is treated as a defect in review.
 
-**Version**: 1.2.0 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-09-04
+**Version**: 1.3.0 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-09-06

@@ -9,6 +9,7 @@ public interface IBudgetAvailabilityService
     Task<decimal> GetAvailableForAppropriationAsync(int budgetItemId);
     Task<decimal> GetAvailableForEncumbranceAsync(int appropriationId);
     Task<BudgetAvailabilitySummary> GetAvailabilitySummaryAsync(int budgetItemId);
+    Task<List<AvailabilityBreakdownDto>> GetAvailabilityBreakdownAsync(int budgetItemId, int fiscalYearId);
     bool EvaluateAllowOverrun(bool? budgetItemAllowOverrun, bool? budgetAllowOverrun, bool budgetTypeAllowOverrun);
     (bool Allowed, string? Warning) EvaluateControlMethod(BudgetControlMethod controlMethod, decimal requested, decimal available);
 }
@@ -104,6 +105,95 @@ public class BudgetAvailabilityService : IBudgetAvailabilityService
             netAppropriated - encumbered,
             effectiveAllowOverrun,
             controlMethod);
+    }
+
+    public async Task<List<AvailabilityBreakdownDto>> GetAvailabilityBreakdownAsync(int budgetItemId, int fiscalYearId)
+    {
+        var item = await _context.BudgetItems
+            .FirstOrDefaultAsync(bi => bi.Id == budgetItemId);
+
+        if (item == null)
+            return [];
+
+        var budget = await _context.Budgets
+            .Include(b => b.BudgetType)
+            .FirstOrDefaultAsync(b => b.Id == item.BudgetId);
+
+        var effectiveAllowOverrun = EvaluateAllowOverrun(
+            item.AllowOverrun,
+            budget?.AllowOverrun,
+            budget?.BudgetType?.AllowOverrun ?? false);
+
+        var controlMethod = budget?.BudgetType?.ControlMethod ?? BudgetControlMethod.None;
+
+        var appropriations = await _context.Appropriations
+            .Where(a => a.BudgetItemId == budgetItemId
+                && a.Status == AppropriationStatus.Active)
+            .ToListAsync();
+
+        var appropriationIds = appropriations.Select(a => a.Id).ToList();
+
+        var encumbrances = await _context.Encumbrances
+            .Where(e => appropriationIds.Contains(e.AppropriationId)
+                && (e.Status == EncumbranceStatus.Active
+                    || e.Status == EncumbranceStatus.PartiallyReleased
+                    || e.Status == EncumbranceStatus.PartiallyLiquidated)
+                && e.ReversalOfId == null)
+            .ToListAsync();
+
+        var breakdown = appropriations
+            .GroupBy(a => new
+            {
+                FundId = item.FundId ?? 0,
+                FundCode = "DEFAULT",
+                FundName = "Default Fund",
+                ProgramId = (int?)null,
+                ProgramCode = (string?)null,
+                ProgramName = (string?)null,
+                ProjectId = (int?)null,
+                ProjectCode = (string?)null,
+                ProjectName = (string?)null
+            })
+            .Select(g => new AvailabilityBreakdownDto(
+                g.Key.FundId,
+                g.Key.FundCode,
+                g.Key.FundName,
+                g.Key.ProgramId,
+                g.Key.ProgramCode,
+                g.Key.ProgramName,
+                g.Key.ProjectId,
+                g.Key.ProjectCode,
+                g.Key.ProjectName,
+                budgetItemId,
+                item.ItemCode,
+                g.Sum(a => a.AppropriationType == Domain.Budgeting.Enums.AppropriationType.Original ? a.Amount :
+                    a.AppropriationType == Domain.Budgeting.Enums.AppropriationType.Supplement ? a.Amount :
+                    a.AppropriationType == Domain.Budgeting.Enums.AppropriationType.Reduction ? -a.Amount :
+                    a.AppropriationType == Domain.Budgeting.Enums.AppropriationType.Adjustment ? a.Amount : 0m),
+                encumbrances
+                    .Where(e => g.Any(a => a.Id == e.AppropriationId))
+                    .Sum(e => e.Amount),
+                0m,
+                0m))
+            .ToList();
+
+        var result = new List<AvailabilityBreakdownDto>();
+
+        foreach (var line in breakdown)
+        {
+            var lineEncumbered = encumbrances
+                .Where(e => appropriations.Any(a => a.Id == e.AppropriationId))
+                .Sum(e => e.Amount);
+
+            var available = line.AppropriationAmount - lineEncumbered - line.PaidAmount;
+            result.Add(line with
+            {
+                EncumberedAmount = lineEncumbered,
+                AvailableAmount = available
+            });
+        }
+
+        return result;
     }
 
     public bool EvaluateAllowOverrun(bool? budgetItemAllowOverrun, bool? budgetAllowOverrun, bool budgetTypeAllowOverrun)
