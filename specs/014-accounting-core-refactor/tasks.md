@@ -228,7 +228,7 @@ With multiple developers after Phase 1:
 
 **Purpose**: Gap remediation from spec-code assessment
 
-- [ ] T056 [HIGH] Add database CHECK constraint on JournalEntryLine Debit/Credit XOR in `src/Infrastructure/Data/Configurations/Accounting/JournalEntryLineConfiguration.cs` — `HasCheckConstraint("CK_JournalEntryLines_DebitCreditXOR", "(Debit > 0) != (Credit > 0)")` — and create EF migration per FR-003 (missing)
-- [ ] T057 [P] [MED] Update spec.md US3 acceptance scenarios to note PaymentOrder strip was completed in 016 and verified in 014 — not new work (contradicts)
-- [ ] T058 [P] [MED] Reconcile PaymentMethod enum values in spec.md — confirm WireTransfer vs DebitCard, update spec to match actual enum (contradicts)
-- [ ] T059 [P] [MED] Update spec.md EventType list to include all 12 values from code (ReceiptCollection, DepositClearing, PaymentExecution, Reversal, Other, PurchaseOrderApproved, GoodsReceiptNoteApproved, BankReconciliationPosted, RevenueReceiptPosted, JournalEntryPosted, DepreciationPosted, PaymentOrderExecuted) (contradicts)
+- [x] T056 [HIGH] Add database CHECK constraint on JournalEntryLine Debit/Credit XOR in `src/Infrastructure/Data/Configurations/Accounting/JournalEntryLineConfiguration.cs` — `HasCheckConstraint("CK_JournalEntryLines_DebitCreditXOR", "(Debit > 0) != (Credit > 0)")` — and create EF migration per FR-003 (missing)
+- [x] T057 [P] [MED] Update spec.md US3 acceptance scenarios to note PaymentOrder strip was completed in 016 and verified in 014 — not new work (contradicts)
+- [x] T058 [P] [MED] Reconcile PaymentMethod enum values in spec.md — confirm WireTransfer vs DebitCard, update spec to match actual enum (contradicts) — already matches (WireTransfer=4 in both spec and code)
+- [x] T059 [P] [MED] Update spec.md EventType list to include all 12 values from code (ReceiptCollection, DepositClearing, PaymentExecution, Reversal, Other, PurchaseOrderApproved, GoodsReceiptNoteApproved, BankReconciliationPosted, RevenueReceiptPosted, JournalEntryPosted, DepreciationPosted, PaymentOrderExecuted) (contradicts)

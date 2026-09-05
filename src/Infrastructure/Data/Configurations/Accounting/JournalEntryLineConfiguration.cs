@@ -25,6 +25,10 @@ public class JournalEntryLineConfiguration : IEntityTypeConfiguration<JournalEnt
         builder.Property(e => e.Credit)
             .HasColumnType("decimal(23,2)");
 
+        builder.ToTable(t => t.HasCheckConstraint(
+            "CK_JournalEntryLines_DebitCreditXOR",
+            "([Debit] > 0) != ([Credit] > 0)"));
+
         builder.Property(e => e.RowVersion)
             .IsRowVersion();
 

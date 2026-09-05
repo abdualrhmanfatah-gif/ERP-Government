@@ -45,7 +45,9 @@ Accountants tag each journal entry line with analytic dimensions: Fund, Project,
 
 ---
 
-### User Story 3 — PaymentOrder without Stored Aggregates (Priority: P3)
+### User Story 3 — PaymentOrder without Stored Aggregates (Priority: P3) ✅ VERIFIED
+
+> **Note**: PaymentOrder aggregate/approval strip was implemented in specs/016-unified-party-document. This story verifies the strip is complete and adds the computed totals endpoint.
 
 Payment orders no longer store computed totals (AmountNet, TotalPaidAmount, TotalRemainingAmount, IsFullyPaid, etc.) or inline approval columns (ApprovedById, RejectedById, etc.). Totals are computed on demand from lines, deductions, and completed payments. Approval status comes exclusively from ApprovalHistory.
 
@@ -122,7 +124,7 @@ The PaymentMethod enum includes all payment types in a single definition: Cash, 
 - **FR-011**: System MUST drop BaseAmount from PaymentOrderDeduction (Amount and DeductionPercent remain as entered inputs)
 - **FR-012**: System MUST add JournalEntryId (nullable FK) to AccountingEvent — set when the event posts
 - **FR-013**: System MUST add EventCategory enum to AccountingEvent: Revenue, Expenditure, Transfer, Adjustment, Other
-- **FR-014**: System MUST add EventType enum to AccountingEvent as operation-level discriminator (e.g., ReceiptCollection, DepositClearing, PaymentExecution, Reversal)
+- **FR-014**: System MUST add EventType enum to AccountingEvent as operation-level discriminator with values: ReceiptCollection, DepositClearing, PaymentExecution, Reversal, Other, PurchaseOrderApproved, GoodsReceiptNoteApproved, BankReconciliationPosted, RevenueReceiptPosted, JournalEntryPosted, DepreciationPosted, PaymentOrderExecuted
 - **FR-015**: System MUST add Status enum (EventStatus: Pending, Posted, Reversed) to AccountingEvent
 - **FR-016**: System MUST enforce a unique constraint on AccountingEvent: one posted event per (EventType, SourceDocumentType, SourceDocumentId) — a three-column composite key preventing double-posting of the same source operation across any entity type
 - **FR-017**: System MUST add "InKind" to the PaymentMethod enum, producing the final set: Cash, BankTransfer, Check, CreditCard, WireTransfer, InKind, Other
