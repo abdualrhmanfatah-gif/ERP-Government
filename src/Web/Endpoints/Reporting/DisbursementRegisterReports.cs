@@ -1,3 +1,4 @@
+using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Reporting.DisbursementRegister.GetDisbursementRegisterDetail;
 using ERP_Government.Application.Reporting.DisbursementRegister.GetDisbursementRegisterQuery;
@@ -5,6 +6,7 @@ using ERP_Government.Application.Reporting.Common;
 using ERP_Government.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP_Government.Web.Endpoints.Reporting;
 
@@ -44,16 +46,21 @@ public class DisbursementRegisterReports : IEndpointGroup
     [EndpointSummary("Export disbursement register report to Excel or PDF")]
     public static async Task<IResult> ExportDisbursementRegister(
         ISender sender,
+        [FromServices] IApplicationDbContext context,
         [FromQuery] string format,
         [AsParameters] GetDisbursementRegisterQuery query)
     {
         var result = await sender.Send(query);
+        var currencyCode = await context.Currencies
+            .Where(c => c.IsBase)
+            .Select(c => c.Code)
+            .FirstOrDefaultAsync();
         var stream = new MemoryStream();
         var exporter = format?.ToLower() == "pdf"
             ? (ERP_Government.Application.Accounting.Reports.Common.IReportExporter)new ERP_Government.Infrastructure.Services.PdfReportExporter()
             : new ERP_Government.Infrastructure.Services.ExcelReportExporter();
 
-        var reportResult = result.ToReportResult();
+        var reportResult = result.ToReportResult(currencyCode);
 
         await exporter.ExportExcelAsync(reportResult, "Disbursement Register", stream);
         stream.Position = 0;

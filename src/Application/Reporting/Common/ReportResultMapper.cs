@@ -9,10 +9,10 @@ namespace ERP_Government.Application.Reporting.Common;
 
 public static class ReportResultMapper
 {
-    public static ReportResult ToReportResult(this BudgetExecutionReportDto report) =>
+    public static ReportResult ToReportResult(this BudgetExecutionReportDto report, string? currencyCode) =>
         new()
         {
-            Currency = "SAR",
+            Currency = currencyCode ?? string.Empty,
             GeneratedAt = DateTimeOffset.UtcNow,
             Sections =
             [
@@ -32,10 +32,10 @@ public static class ReportResultMapper
             ]
         };
 
-    public static ReportResult ToReportResult(this RevenueCollectionsReportDto report) =>
+    public static ReportResult ToReportResult(this RevenueCollectionsReportDto report, string? currencyCode) =>
         new()
         {
-            Currency = "SAR",
+            Currency = currencyCode ?? string.Empty,
             GeneratedAt = DateTimeOffset.UtcNow,
             Sections =
             [
@@ -55,10 +55,10 @@ public static class ReportResultMapper
             ]
         };
 
-    public static ReportResult ToReportResult(this DisbursementRegisterDto report) =>
+    public static ReportResult ToReportResult(this DisbursementRegisterDto report, string? currencyCode) =>
         new()
         {
-            Currency = "SAR",
+            Currency = currencyCode ?? string.Empty,
             GeneratedAt = DateTimeOffset.UtcNow,
             Sections =
             [
@@ -78,10 +78,10 @@ public static class ReportResultMapper
             ]
         };
 
-    public static ReportResult ToReportResult(this AvailabilitySnapshotDto report) =>
+    public static ReportResult ToReportResult(this AvailabilitySnapshotDto report, string? currencyCode) =>
         new()
         {
-            Currency = "SAR",
+            Currency = currencyCode ?? string.Empty,
             GeneratedAt = DateTimeOffset.UtcNow,
             Sections =
             [
@@ -101,10 +101,10 @@ public static class ReportResultMapper
             ]
         };
 
-    public static ReportResult ToReportResult(this TrialBalanceReportDto report) =>
+    public static ReportResult ToReportResult(this TrialBalanceReportDto report, string? currencyCode) =>
         new()
         {
-            Currency = "SAR",
+            Currency = currencyCode ?? string.Empty,
             GeneratedAt = DateTimeOffset.UtcNow,
             Sections =
             [
