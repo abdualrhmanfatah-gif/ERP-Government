@@ -2,108 +2,139 @@
 
 **Branch**: `025-journal-entry-lifecycle` | **Date**: 2026-09-06 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `/specs/025-journal-entry-lifecycle/spec.md`
-
 ## Summary
 
-Rebuild the journal entry lifecycle screens (list, create, detail) to serve as the accountant's complete working surface for the six-state machine (Draft → Submitted → Approved → Posted → Reversed / Cancelled). Replaces stale MovesListPage/MoveCreatePage/MoveDetailPage with modern patterns matching the budgeting/financial-settings features. Frontend-only work — no backend changes. Uses POST-style lifecycle actions (not PATCH) via NSwag client methods.
+Rebuild journal entry lifecycle screens for the six-state machine. 3 pages (list/create/detail), 1 dialog (reverse). POST-style lifecycle actions. Frontend-only.
 
-## Technical Context
+## FIELD-COVERAGE TABLE
 
-**Language/Version**: TypeScript 5.x, React 19, Vite
+| Field | Screen | Component | Mode | Permission |
+|-------|--------|-----------|------|------------|
+| `entryNumber` | List, Detail | DataGrid col, Header | Read-only | Read |
+| `entryStatus` | List, Detail | StatusBadge | Read-only | Read |
+| `documentDate` | Create, Detail | Input, Header | R/W (create) | Read/Create |
+| `postingDate` | Detail | Header | Read-only | Read |
+| `entryType` | Create, Detail | Select, Header | R/W (create) | Read/Create |
+| `journalId` | Create, Detail | Select, Header | R/W (create) | Read/Create |
+| `periodId` | Detail | Header | Read-only | Read |
+| `fiscalYearId` | Detail | Header | Read-only | Read |
+| `narration` | Create, Detail | Textarea, Header | R/W | Read/Create |
+| `ref` | Create, Detail | Input, Header | R/W | Read/Create |
+| `reversalOfId` | Detail | Reversal link | Read-only | Read |
+| `reversalReason` | Detail | Reversal card | Read-only | Read |
+| `postedById/At` | Detail | Header | Read-only | Read |
+| `cancelledById/At` | Detail | Header | Read-only | Read |
+| `isSystemGenerated` | List, Detail | Badge, Header | Read-only | Read |
+| `rowVersion` | All mutations | Hidden | Optimistic | Read |
+| `sourceEventId` | Detail | Source badge | Read-only | Read |
+| `sequence` | Create, Detail | Table col | Auto | Read |
+| `accountId` | Create, Detail | Select, Table | R/W (Draft) | UpdateLines |
+| `description` | Create, Detail | Input, Table | R/W (Draft) | UpdateLines |
+| `currencyId` | Create | Select | R/W (Draft) | UpdateLines |
+| `exchangeRate` | Create | Input | R/W (Draft) | UpdateLines |
+| `debit` | Create, Detail | Input, Table | R/W (Draft) | UpdateLines |
+| `credit` | Create, Detail | Input, Table | R/W (Draft) | UpdateLines |
+| `fundId` | Create, Detail | DimensionPickers | R/W (Draft) | UpdateLines |
+| `projectId` | Create, Detail | DimensionPickers | R/W (Draft) | UpdateLines |
+| `budgetItemId` | Create, Detail | DimensionPickers | R/W (Draft) | UpdateLines |
+| `encumbranceId` | Create, Detail | DimensionPickers | R/W (Draft) | UpdateLines |
+| `paymentOrderId` | Create, Detail | DimensionPickers | R/W (Draft) | UpdateLines |
+| `costCenterId` | Create, Detail | DimensionPickers | R/W (Draft) | UpdateLines |
 
-**Primary Dependencies**: TanStack Query (useQuery/useMutation), react-router-dom, lucide-react icons, Tailwind CSS with design tokens, NSwag-generated API client (JournalEntriesClient)
+## DESIGN SECTION
 
-**Storage**: None (frontend consumes existing backend APIs)
+### List Page
+- Status filter chips (6 clickable pills, not dropdown)
+- Search by entry number/ref
+- DataGrid: entryNumber (mono + system badge), documentDate, StatusBadge, journalName, totalDebit, totalCredit
 
-**Testing**: Vitest + @testing-library/react + @testing-library/jest-dom/vitest
+### Create Page
+- Header form: documentDate (triggers FiscalYearIndicator), journal, entryType, narration, ref
+- Line editor: table + inline editing, XOR validation, DimensionPickers, running balance
+- Submit button disabled when unbalanced or zero lines
 
-**Target Platform**: Web (SPA), Arabic-first RTL, dark mode support
+### Detail Page
+- Header card: entryNumber + system badge + documentDate + StatusBadge
+- Info grid: period, fiscalYear, journal, narration, ref, postedBy, cancelledBy
+- Lines table with dimensions
+- EntryLifecycleActions bar (POST-style)
+- Reversal card (bidirectional link)
+- StatusLogPanel + ApprovalsPanel
 
-**Project Type**: Web application frontend (journal entry lifecycle UI over existing backend)
+## STATE MATRIX
 
-**Performance Goals**: Standard SPA — instant page transitions, <1s data loads, live balance totals update within 500ms
+| Page | Loading | Empty | Error | Unauthorized | Not Found | Normal |
+|------|---------|-------|-------|--------------|-----------|--------|
+| List | Skeleton | "لا توجد قيود" | Toast | Guard | N/A | DataGrid + chips |
+| Create | N/A | N/A | Toast | Guard | N/A | Form + lines + balance |
+| Detail | Spinner | N/A | Error card | Guard (actions) | Not found msg | Full detail + lifecycle |
 
-**Constraints**: Must use shared UI component library; no per-feature duplicate primitives; all monetary values through MoneyDisplay; RTL layout throughout; POST-style lifecycle actions (NOT PATCH)
+## TEST MAP
 
-**Scale/Scope**: 3 pages (list/detail/create), 1 dialog (reverse), ~6 hooks, ~8 components, ~10 tests
+| Test ID | File | Description |
+|---------|------|-------------|
+| T-025-001 | JournalEntriesListPage.test.tsx | 6 status chips |
+| T-025-002 | JournalEntriesListPage.test.tsx | Search by entry number |
+| T-025-003 | JournalEntriesListPage.test.tsx | System badge |
+| T-025-004 | JournalEntryCreatePage.test.tsx | Header form |
+| T-025-005 | JournalEntryLinesEditor.test.tsx | XOR validation |
+| T-025-006 | JournalEntryCreatePage.test.tsx | Balance live update |
+| T-025-007 | JournalEntryCreatePage.test.tsx | Submit blocked unbalanced |
+| T-025-008 | JournalEntryDetailPage.test.tsx | Lifecycle buttons per state |
+| T-025-009 | JournalEntryDetailPage.test.tsx | Posted read-only |
+| T-025-010 | JournalEntryDetailPage.test.tsx | Reversal linkage |
+| T-025-011 | JournalEntryDetailPage.test.tsx | Conflict toast 409 |
+| T-025-012 | JournalEntryDetailPage.test.tsx | Status log panel |
+| T-025-013 | JournalEntryDetailPage.test.tsx | Approvals panel |
+| T-025-014 | StatusBadge.test.tsx | 6 states |
+| T-025-015 | ReverseDialog.test.tsx | Reason required |
+
+## COMPLETENESS GATE
+
+```
+entryNumber → List (col), Detail (header)
+entryStatus → List (StatusBadge), Detail (StatusBadge)
+documentDate → Create (input), Detail (header)
+postingDate → Detail (header)
+entryType → Create (select), Detail (header)
+journalId → Create (select), Detail (header)
+periodId → Detail (header)
+fiscalYearId → Detail (header)
+narration → Create (textarea), Detail (header)
+ref → Create (input), Detail (header)
+reversalOfId → Detail (reversal link)
+reversalReason → Detail (reversal card)
+postedById/At → Detail (header)
+cancelledById/At → Detail (header)
+isSystemGenerated → List (badge), Detail (badge)
+rowVersion → hooks (optimistic)
+sourceEventId → Detail (source badge)
+sequence → Create (line table), Detail (line table)
+accountId → Create (line editor), Detail (line table)
+description → Create (line editor), Detail (line table)
+debit → Create (line editor), Detail (line table)
+credit → Create (line editor), Detail (line table)
+fundId → Create (DimensionPickers), Detail (dimension display)
+projectId → Create (DimensionPickers), Detail (dimension display)
+budgetItemId → Create (DimensionPickers), Detail (dimension display)
+encumbranceId → Create (DimensionPickers), Detail (dimension display)
+paymentOrderId → Create (DimensionPickers), Detail (dimension display)
+costCenterId → Create (DimensionPickers)
+```
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+| Principle | Status |
+|-----------|--------|
+| I. Layered Architectural Integrity | ✅ PASS |
+| II. Bounded Contexts | ✅ PASS |
+| III. Server-Side Business-Rule Integrity | ✅ PASS |
+| IV. Financial Integrity | ✅ PASS |
+| VII. Authorization | ⚠️ PLACEHOLDER |
+| VIII. Approval Workflows | ✅ PASS |
+| IX. API and Frontend Contract Integrity | ✅ PASS |
+| X. UI and Design System Consistency | ✅ PASS |
+| XI. Testing, Verification, and Evidence | ✅ PASS |
+| XII. Controlled Architectural Change | ✅ PASS |
 
-| Principle | Status | Notes |
-|-----------|--------|-------|
-| I. Layered Architectural Integrity | ✅ PASS | Frontend is separate application consuming HTTP contract only. No backend references. |
-| II. Bounded Contexts | ✅ PASS | Frontend feature folder is self-contained under `features/accounting/`. |
-| III. Server-Side Business-Rule Integrity | ✅ PASS | All business rules enforced server-side. Frontend mirrors state machine for UI gating only. |
-| IV. Financial Integrity | ✅ PASS | Balance checks are UI convenience; server is authoritative. Reversal creates counter-entry server-side. |
-| V. Budget Control | ✅ PASS | Not applicable — journal entries are accounting, not budget control. |
-| VI. Data Integrity | ✅ PASS | No schema changes. Frontend reads/writes via API contracts. RowVersion sent on every action. |
-| VII. Authorization | ⚠️ REGISTERED EXCEPTION | Frontend permission stubs (exception #4). Use `usePermission` hook with server as authority. |
-| VIII. Approval Workflows | ✅ PASS | Approval uses existing backend approval pipeline. ApprovalsPanel displays history. |
-| IX. API and Frontend Contract Integrity | ✅ PASS | NSwag-generated clients from OpenAPI spec. Contract-conformant modules. |
-| X. UI and Design System Consistency | ✅ PASS | All design from tokens. Shared component library. RTL throughout. MoneyDisplay for monetary values. |
-| XI. Testing, Verification, and Evidence | ✅ PASS | TDD mandatory. Frontend tests in Vitest. |
-| XII. Controlled Architectural Change | ✅ PASS | No architectural changes — UI replacement only. |
-
-**Gate Result**: PASS. One registered exception (#4 — frontend permission stubs) applies; no new violations.
-
-## Project Structure
-
-### Documentation (this feature)
-
-```text
-specs/025-journal-entry-lifecycle/
-├── plan.md              # This file
-├── research.md          # Phase 0 output
-├── data-model.md        # Phase 1 output
-├── quickstart.md        # Phase 1 output
-├── contracts/           # Phase 1 output
-└── tasks.md             # Phase 2 output (/speckit.tasks)
-```
-
-### Source Code (repository root)
-
-```text
-src/Web/ClientApp/src/features/accounting/
-├── types.ts                          # DTOs, enums, commands (EXTEND — add missing fields)
-├── shared/
-│   └── client.ts                     # Hand-written fetch wrappers (NEW — wrap NSwag clients)
-│
-├── pages/
-│   ├── JournalEntriesListPage.tsx    # REBUILD — status filter chips, pagination, system badge
-│   ├── JournalEntryCreatePage.tsx    # REBUILD — header form + line editor + balance footer
-│   └── JournalEntryDetailPage.tsx    # REBUILD — header, lines, lifecycle actions, approvals, status log
-│
-├── components/
-│   ├── JournalEntriesGrid.tsx        # REBUILD — modern table with filters, status badges, system badge
-│   ├── JournalEntryDetail.tsx        # REBUILD — full detail with lifecycle action bar
-│   ├── JournalEntryHeaderForm.tsx    # REBUILD — react-hook-form + zod header creation
-│   ├── JournalEntryLinesEditor.tsx   # REBUILD — line editing with XOR validation
-│   ├── EntryLifecycleActions.tsx     # NEW — POST-style lifecycle action bar (NOT LifecycleActions)
-│   ├── BalanceIndicator.tsx          # KEEP — debit/credit balance check
-│   ├── DimensionPickers.tsx          # KEEP — fund/project/budget-item/encumbrance/PO pickers
-│   ├── FiscalYearIndicator.tsx       # KEEP — shows fiscal year + period for a date
-│   ├── ReverseDialog.tsx             # REBUILD — mandatory reason + counter-line preview
-│   └── StatusBadge.tsx               # KEEP — entry-status-specific badge
-│
-├── hooks/
-│   ├── useJournalEntries.ts          # REBUILD — list, get, create, update, submit, approve, post, reverse, cancel
-│   ├── useJournalEntryLines.ts       # REBUILD — create, update, remove lines
-│   └── useJournalsList.ts            # KEEP — query active journals
-│
-└── __tests__/
-    ├── JournalEntriesListPage.test.tsx    # NEW — filter chips, search, system badge
-    ├── JournalEntryCreatePage.test.tsx    # NEW — form, line editor, balance, submit
-    ├── JournalEntryDetailPage.test.tsx    # NEW — lifecycle actions per state, reversal linkage
-    ├── EntryLifecycleActions.test.tsx     # NEW — action rendering per state machine
-    ├── ReverseDialog.test.tsx             # NEW — reason required, counter-line preview
-    └── JournalEntryLinesEditor.test.tsx   # EXISTING — update with XOR validation tests
-```
-
-**Structure Decision**: Rebuild within existing `features/accounting/` feature folder. Replace stale journal entry pages/components while keeping account-related pages untouched. Reuse ApprovalsPanel and StatusLogPanel from documents feature. Create new EntryLifecycleActions component (POST-style, not budgeting LifecycleActions).
-
-## Complexity Tracking
-
-No violations. No complexity tracking needed.
+**Gate**: PASS

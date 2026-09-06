@@ -164,6 +164,116 @@ An accountant browses the journal entry list with filtering by status (all six),
 - **Approval History**: Append-only record of approval decisions — actor, decision, timestamp, reason, rule evaluation snapshot.
 - **Document Status Log**: Append-only record of every status transition — from-status, to-status, actor, timestamp.
 
+### Field Contract
+
+#### Entry Header Fields
+
+| Field | Type | Editable | Notes |
+|-------|------|----------|-------|
+| `entryNumber` | string | No (issued at creation) | Displayed in list + detail |
+| `entryStatus` | enum (int) | No (server-enforced) | Draft=0, Submitted=1, Approved=2, Posted=3, Reversed=4, Cancelled=5 |
+| `documentDate` | Date | Yes (create) | Required, must be within open period |
+| `postingDate` | Date? | No (set at post) | Read-only |
+| `entryType` | string | Yes (create) | Standard/Reversing/Adjusting |
+| `journalId` | number? | Yes (create) | Journal picker |
+| `periodId` | number | No (auto-resolved) | From documentDate |
+| `fiscalYearId` | number | No (auto-resolved) | From documentDate |
+| `narration` | string? | Yes (create) | Optional |
+| `ref` | string? | Yes (create + edit) | Optional reference |
+| `reversalOfId` | number? | No | Link to original (set at reverse) |
+| `reversalReason` | string? | No (set at reverse) | Mandatory on reverse |
+| `postedById` | number? | No | Audit (set at post) |
+| `postedByName` | string? | No | Audit (set at post) |
+| `postedAt` | Date? | No | Audit (set at post) |
+| `cancelledById` | number? | No | Audit (set at cancel) |
+| `cancelledByName` | string? | No | Audit (set at cancel) |
+| `cancelledAt` | Date? | No | Audit (set at cancel) |
+| `isSystemGenerated` | boolean | No | Read-only lock badge |
+| `rowVersion` | string | No (optimistic concurrency) | Conflict toast + refetch |
+| `sourceEventId` | number? | No | Source badge + link |
+
+#### Line Fields
+
+| Field | Type | Editable | Notes |
+|-------|------|----------|-------|
+| `sequence` | number | Yes (auto) | Line order |
+| `accountId` | number | Yes (required) | Account picker |
+| `description` | string? | Yes | Optional |
+| `currencyId` | number | Yes | Currency picker |
+| `exchangeRate` | number | Yes | Exchange rate |
+| `debit` | number | Yes (XOR credit) | Debit amount |
+| `credit` | number | Yes (XOR debit) | Credit amount |
+| `costCenterId` | number? | Yes | Dimension picker |
+| `fundId` | number? | Yes | Dimension picker |
+| `projectId` | number? | Yes | Dimension picker |
+| `budgetItemId` | number? | Yes | Dimension picker |
+| `encumbranceId` | number? | Yes | Dimension picker |
+| `paymentOrderId` | number? | Yes | Dimension picker |
+| `id` (lineId) | long | No | Line identifier for update/remove |
+
+#### Line Constraints
+
+- **Debit XOR Credit**: Exactly one of debit/credit must be non-zero. Both-zero: "يجب إدخال مبلغ مدين أو دائن". Both-set: "يجب أن يكون السطر مدين أو دائن فقط".
+- **Line Operations (Draft only)**: create, update, remove. Immutable after submit.
+
+#### State Machine Transitions (server-enforced)
+
+| Current | Valid Actions | Transition |
+|---------|--------------|------------|
+| Draft (0) | submit, cancel, edit lines | POST /{id}/submit → Submitted (1) |
+| Submitted (1) | approve, cancel | POST /{id}/approve → Approved (2) |
+| Approved (2) | post | POST /{id}/post → Posted (3) |
+| Posted (3) | reverse | POST /{id}/reverse → Reversed (4) |
+| Reversed (4) | none | Terminal |
+| Cancelled (5) | none | Terminal |
+
+**Guards**:
+- submit: ≥1 line, balanced totals
+- post: period unlocked, documentDate within period range
+- reverse: period unlocked, year Open, not finalized, reason MANDATORY, reverse-of-reverse rejected
+- cancel: only from Draft or Submitted
+
+**Lifecycle API**: POST /{id}/{action} — NOT patch-fetch.
+
+### Permissions
+
+- **FR-PERM-001**: `Accounting.JournalEntries.Read` — View list + detail
+- **FR-PERM-002**: `Accounting.JournalEntries.Create` — Create new entry
+- **FR-PERM-003**: `Accounting.JournalEntries.UpdateLines` — Edit lines on Draft
+- **FR-PERM-004**: `Accounting.JournalEntries.Submit` — Submit Draft→Submitted
+- **FR-PERM-005**: `Accounting.JournalEntries.Approve` — Approve Submitted→Approved
+- **FR-PERM-006**: `Accounting.JournalEntries.Post` — Post Approved→Posted
+- **FR-PERM-007**: `Accounting.JournalEntries.Reverse` — Reverse Posted→Reversed
+- **FR-PERM-008**: `Accounting.JournalEntries.Cancel` — Cancel Draft/Submitted→Cancelled
+
+### UI States Required
+
+| Page | Loading | Empty | Error | Unauthorized | Not Found | Normal |
+|------|---------|-------|-------|--------------|-----------|--------|
+| List | Skeleton | "لا توجد قيود" | Toast | Guard | N/A | DataGrid + status chips + search |
+| Create | N/A | N/A | Toast on error | Guard | N/A | Header form + line editor + balance |
+| Detail | Spinner | N/A | Error card + back | Guard (actions) | Not found msg | Header + lines + lifecycle actions + panels |
+
+### Tests Expected
+
+| ID | Page | Test |
+|----|------|------|
+| T-025-001 | List | 6 status filter chips render |
+| T-025-002 | List | Search by entry number |
+| T-025-003 | List | System badge on system-generated entries |
+| T-025-004 | Create | Header form renders all fields |
+| T-025-005 | Create | Line editor XOR validation |
+| T-025-006 | Create | Balance totals update live |
+| T-025-007 | Create | Submit blocked when unbalanced |
+| T-025-008 | Detail | Lifecycle buttons per state |
+| T-025-009 | Detail | Posted entries read-only |
+| T-025-010 | Detail | Reversal linkage bidirectional |
+| T-025-011 | Detail | Conflict toast on 409 |
+| T-025-012 | Detail | Status log panel renders |
+| T-025-013 | Detail | Approvals panel renders for Submitted/Approved |
+| T-025-014 | Shared | StatusBadge renders 6 states |
+| T-025-015 | Shared | ReverseDialog requires reason |
+
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
