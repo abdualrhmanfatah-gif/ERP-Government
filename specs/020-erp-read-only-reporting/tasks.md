@@ -155,7 +155,7 @@
 **Purpose**: Wire export for all reports and run quickstart validation
 
 - [x] T052 [P] Add export route handlers for all 5 report types in each endpoint group (map reportType → query → ReportResult → IReportExporter → Results.File)
-- [x] T053 [P] Create ReportResult mapping extensions in src/Application/Reporting/Common/ReportResultMapper.cs (convert each report DTO to ReportResult for export)
+- [ ] T053 [P] Create ReportResult mapping extensions in src/Application/Reporting/Common/ReportResultMapper.cs (convert each report DTO to ReportResult for export)
 - [x] T054 Run quickstart.md validation scenarios (V1-V8) end-to-end *(blocked: requires running app instance with seed data)*
 - [x] T055 Run full test suite: dotnet test tests/Application.UnitTests && dotnet test tests/Application.FunctionalTests *(compiled clean; unit failures pre-existing; functional failures are Aspire DCP infrastructure issue)*
 

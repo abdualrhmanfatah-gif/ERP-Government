@@ -20,18 +20,18 @@
 
 **Purpose**: Entity definitions, enums, DbContext registration, document sequences
 
-- [ ] T001 [P] Create DisbursementRequestStatus enum in src/Domain/Payments/Enums/DisbursementRequestStatus.cs
-- [ ] T002 [P] Create PaymentStatus enum in src/Domain/Payments/Enums/PaymentStatus.cs
-- [ ] T003 [P] Create DisbursementRequest entity in src/Domain/Payments/Entities/DisbursementRequest.cs
-- [ ] T004 [P] Create Payment entity in src/Domain/Payments/Entities/Payment.cs
-- [ ] T005 Register DbSets in src/Application/Common/Interfaces/IApplicationDbContext.cs (DisbursementRequests, Payments)
-- [ ] T006 Register DbSets in src/Infrastructure/Data/ApplicationDbContext.cs
-- [ ] T007 [P] Create DisbursementRequest EF configuration in src/Infrastructure/Data/Configurations/DisbursementRequestConfiguration.cs (unique indexes on PaymentOrderId, RequestNumber)
-- [ ] T008 [P] Create Payment EF configuration in src/Infrastructure/Data/Configurations/PaymentConfiguration.cs (unique indexes on DisbursementRequestId, PaymentNumber)
-- [ ] T009 Add EF migration for DisbursementRequest and Payment entities
-- [ ] T010 Register DSB and PAY document sequences in DocumentSequenceService seed data
-- [ ] T011 Add PermissionCodes for Disbursements and Payments in src/Application/Common/Security/PermissionCodes.cs
-- [ ] T012 Register authorization policies in src/Web/DependencyInjection.cs for new permission codes
+- [x] T001 [P] Create DisbursementRequestStatus enum in src/Domain/Payments/Enums/DisbursementRequestStatus.cs
+- [x] T002 [P] Create PaymentStatus enum in src/Domain/Payments/Enums/PaymentStatus.cs
+- [x] T003 [P] Create DisbursementRequest entity in src/Domain/Payments/Entities/DisbursementRequest.cs
+- [x] T004 [P] Create Payment entity in src/Domain/Payments/Entities/Payment.cs
+- [x] T005 Register DbSets in src/Application/Common/Interfaces/IApplicationDbContext.cs (DisbursementRequests, Payments)
+- [x] T006 Register DbSets in src/Infrastructure/Data/ApplicationDbContext.cs
+- [x] T007 [P] Create DisbursementRequest EF configuration in src/Infrastructure/Data/Configurations/Payments/DisbursementRequestConfiguration.cs (unique indexes on PaymentOrderId, RequestNumber)
+- [x] T008 [P] Create Payment EF configuration in src/Infrastructure/Data/Configurations/Payments/PaymentConfiguration.cs (unique indexes on DisbursementRequestId, PaymentNumber)
+- [x] T009 Add EF migration for DisbursementRequest and Payment entities
+- [x] T010 Register DSB and PAY document sequences in DocumentSequenceService seed data
+- [x] T011 Add PermissionCodes for Disbursements and Payments in src/Application/Common/Security/PermissionCodes.cs
+- [x] T012 Register authorization policies in src/Web/DependencyInjection.cs for new permission codes
 
 ---
 
@@ -41,12 +41,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T013 [P] Create DisbursementRequestDto in src/Application/Payments/Common/DTOs/DisbursementRequestDto.cs
-- [ ] T014 [P] Create PaymentDto in src/Application/Payments/Common/DTOs/PaymentDto.cs
-- [ ] T015 [P] Create AvailabilityBreakdownDto in src/Application/Payments/Common/DTOs/AvailabilityBreakdownDto.cs
-- [ ] T016 [P] Create GetDisbursementRequestsQuery in src/Application/Payments/Queries/DisbursementRequests/GetDisbursementRequests/GetDisbursementRequestsQuery.cs
-- [ ] T017 [P] Create GetDisbursementRequestByIdQuery in src/Application/Payments/Queries/DisbursementRequests/GetDisbursementRequestById/GetDisbursementRequestByIdQuery.cs
-- [ ] T018 [P] Create GetPaymentsQuery in src/Application/Payments/Queries/Payments/GetPayments/GetPaymentsQuery.cs
+- [x] T013 [P] Create DisbursementRequestDto in src/Application/Payments/Common/DTOs/DisbursementRequestDto.cs
+- [x] T014 [P] Create PaymentDto in src/Application/Payments/Common/DTOs/PaymentDto.cs
+- [x] T015 [P] Create AvailabilityBreakdownDto in src/Application/Payments/Common/DTOs/AvailabilityBreakdownDto.cs
+- [x] T016 [P] Create GetDisbursementRequestsQuery in src/Application/Payments/Queries/DisbursementRequests/GetDisbursementRequests/GetDisbursementRequestsQuery.cs
+- [x] T017 [P] Create GetDisbursementRequestByIdQuery in src/Application/Payments/Queries/DisbursementRequests/GetDisbursementRequestById/GetDisbursementRequestByIdQuery.cs
+- [x] T018 [P] Create GetPaymentsQuery in src/Application/Payments/Queries/Payments/GetPayments/GetPaymentsQuery.cs
 
 **Checkpoint**: Foundation ready — user story implementation can now begin
 
@@ -62,18 +62,18 @@
 
 > **Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T019 [P] [US1] Unit test: CreateDisbursementRequest succeeds with sufficient budget — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
-- [ ] T020 [P] [US1] Unit test: CreateDisbursementRequest rejected when Blocking + insufficient funds — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
-- [ ] T021 [P] [US1] Unit test: CreateDisbursementRequest allowed when Warning + insufficient funds (hasWarning=true) — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
-- [ ] T022 [P] [US1] Unit test: CreateDisbursementRequest allowed when control=None (no check) — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
-- [ ] T023 [P] [US1] Unit test: CreateDisbursementRequest rejected when PO not Approved — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
-- [ ] T024 [P] [US1] Unit test: CreateDisbursementRequest rejected when PO net total is zero — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
-- [ ] T025 [P] [US1] Unit test: CreateDisbursementRequest rejected when PO already has a request (1:1 enforced) — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
+- [x] T019 [P] [US1] Unit test: CreateDisbursementRequest succeeds with sufficient budget — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
+- [x] T020 [P] [US1] Unit test: CreateDisbursementRequest rejected when Blocking + insufficient funds — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
+- [x] T021 [P] [US1] Unit test: CreateDisbursementRequest allowed when Warning + insufficient funds (hasWarning=true) — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
+- [x] T022 [P] [US1] Unit test: CreateDisbursementRequest allowed when control=None (no check) — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
+- [x] T023 [P] [US1] Unit test: CreateDisbursementRequest rejected when PO not Approved — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
+- [x] T024 [P] [US1] Unit test: CreateDisbursementRequest rejected when PO net total is zero — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
+- [x] T025 [P] [US1] Unit test: CreateDisbursementRequest rejected when PO already has a request (1:1 enforced) — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
 
 ### Implementation for User Story 1
 
-- [ ] T026 [US1] Implement CreateDisbursementRequestCommand + Handler + Validator in src/Application/Payments/Commands/DisbursementRequests/CreateDisbursementRequest/CreateDisbursementRequestCommand.cs (depends on T001-T012, T013-T015)
-- [ ] T027 [US1] Implement DisbursementRequests endpoint group (create, list, get by id) in src/Web/Endpoints/DisbursementRequests/DisbursementRequests.cs (depends on T026, T016-T017)
+- [x] T026 [US1] Implement CreateDisbursementRequestCommand + Handler + Validator in src/Application/Payments/Commands/DisbursementRequests/CreateDisbursementRequest/CreateDisbursementRequestCommand.cs (depends on T001-T012, T013-T015)
+- [x] T027 [US1] Implement DisbursementRequests endpoint group (create, list, get by id) in src/Web/Endpoints/DisbursementRequests/DisbursementRequests.cs (depends on T026, T016-T017)
 
 **Checkpoint**: Create disbursement request fully functional — budget gate working, 1:1 enforced
 
@@ -89,21 +89,21 @@
 
 > **Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T028 [P] [US2] Unit test: Approve with first approver (AccountsManager) records step 1, stays PendingApproval — in tests/Application.UnitTests/Payments/ApproveDisbursementRequestTests.cs
-- [ ] T029 [P] [US2] Unit test: Approve with second distinct approver transitions to Approved — in tests/Application.UnitTests/Payments/ApproveDisbursementRequestTests.cs
-- [ ] T030 [P] [US2] Unit test: Same user double-approval rejected — in tests/Application.UnitTests/Payments/ApproveDisbursementRequestTests.cs
-- [ ] T031 [P] [US2] Unit test: First approver without AccountsManager/AuthorizingOfficer role rejected — in tests/Application.UnitTests/Payments/ApproveDisbursementRequestTests.cs
-- [ ] T032 [P] [US2] Unit test: Reject records in ApprovalHistory, status → Rejected — in tests/Application.UnitTests/Payments/ApproveDisbursementRequestTests.cs
-- [ ] T033 [P] [US2] Unit test: Cancel (approved, unpaid) → Cancelled, clears PO link — in tests/Application.UnitTests/Payments/CancelDisbursementRequestTests.cs
-- [ ] T034 [P] [US2] Unit test: Submit Draft → PendingApproval — in tests/Application.UnitTests/Payments/SubmitDisbursementRequestTests.cs
+- [x] T028 [P] [US2] Unit test: Approve with first approver (AccountsManager) records step 1, stays PendingApproval — in tests/Application.UnitTests/Payments/DisbursementLifecycleTests.cs
+- [x] T029 [P] [US2] Unit test: Approve with second distinct approver transitions to Approved — in tests/Application.UnitTests/Payments/DisbursementLifecycleTests.cs
+- [x] T030 [P] [US2] Unit test: Same user double-approval rejected — in tests/Application.UnitTests/Payments/DisbursementLifecycleTests.cs
+- [x] T031 [P] [US2] Unit test: First approver without AccountsManager/AuthorizingOfficer role rejected — in tests/Application.UnitTests/Payments/DisbursementLifecycleTests.cs
+- [x] T032 [P] [US2] Unit test: Reject records in ApprovalHistory, status → Rejected — in tests/Application.UnitTests/Payments/DisbursementLifecycleTests.cs
+- [x] T033 [P] [US2] Unit test: Cancel (approved, unpaid) → Cancelled, clears PO link — in tests/Application.UnitTests/Payments/DisbursementLifecycleTests.cs
+- [x] T034 [P] [US2] Unit test: Submit Draft → PendingApproval — in tests/Application.UnitTests/Payments/DisbursementLifecycleTests.cs
 
 ### Implementation for User Story 2
 
-- [ ] T035 [US2] Implement SubmitDisbursementRequestCommand in src/Application/Payments/Commands/DisbursementRequests/SubmitDisbursementRequest/SubmitDisbursementRequestCommand.cs (depends on T026)
-- [ ] T036 [US2] Implement ApproveDisbursementRequestCommand + Handler + Validator in src/Application/Payments/Commands/DisbursementRequests/ApproveDisbursementRequest/ApproveDisbursementRequestCommand.cs (depends on T026)
-- [ ] T037 [US2] Implement RejectDisbursementRequestCommand in src/Application/Payments/Commands/DisbursementRequests/RejectDisbursementRequest/RejectDisbursementRequestCommand.cs (depends on T026)
-- [ ] T038 [US2] Implement CancelDisbursementRequestCommand + Handler + Validator in src/Application/Payments/Commands/DisbursementRequests/CancelDisbursementRequest/CancelDisbursementRequestCommand.cs (depends on T026)
-- [ ] T039 [US2] Add submit/approve/reject/cancel routes to DisbursementRequests endpoint group in src/Web/Endpoints/DisbursementRequests/DisbursementRequests.cs (depends on T035-T038)
+- [x] T035 [US2] Implement SubmitDisbursementRequestCommand in src/Application/Payments/Commands/DisbursementRequests/SubmitDisbursementRequest/SubmitDisbursementRequestCommand.cs (depends on T026)
+- [x] T036 [US2] Implement ApproveDisbursementRequestCommand + Handler + Validator in src/Application/Payments/Commands/DisbursementRequests/ApproveDisbursementRequest/ApproveDisbursementRequestCommand.cs (depends on T026)
+- [x] T037 [US2] Implement RejectDisbursementRequestCommand in src/Application/Payments/Commands/DisbursementRequests/RejectDisbursementRequest/RejectDisbursementRequestCommand.cs (depends on T026)
+- [x] T038 [US2] Implement CancelDisbursementRequestCommand + Handler + Validator in src/Application/Payments/Commands/DisbursementRequests/CancelDisbursementRequest/CancelDisbursementRequestCommand.cs (depends on T026)
+- [x] T039 [US2] Add submit/approve/reject/cancel routes to DisbursementRequests endpoint group in src/Web/Endpoints/DisbursementRequests/DisbursementRequests.cs (depends on T035-T038)
 
 **Checkpoint**: Dual-signature approval fully functional — approval history enforced
 
@@ -119,16 +119,16 @@
 
 > **Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T040 [P] [US3] Unit test: RecordPayment creates Payment with correct amount snapshot — in tests/Application.UnitTests/Payments/RecordPaymentTests.cs
-- [ ] T041 [P] [US3] Unit test: RecordPayment rejected when request not Approved — in tests/Application.UnitTests/Payments/RecordPaymentTests.cs
-- [ ] T042 [P] [US3] Unit test: RecordPayment transitions request to Disbursed, PO to Paid — in tests/Application.UnitTests/Payments/RecordPaymentTests.cs
-- [ ] T043 [P] [US3] Unit test: RecordPayment raises AccountingEvent domain event — in tests/Application.UnitTests/Payments/RecordPaymentTests.cs
+- [x] T040 [P] [US3] Unit test: RecordPayment creates Payment with correct amount snapshot — in tests/Application.UnitTests/Payments/RecordPaymentTests.cs
+- [x] T041 [P] [US3] Unit test: RecordPayment rejected when request not Approved — in tests/Application.UnitTests/Payments/RecordPaymentTests.cs
+- [x] T042 [P] [US3] Unit test: RecordPayment transitions request to Disbursed, PO to Paid — in tests/Application.UnitTests/Payments/RecordPaymentTests.cs
+- [x] T043 [P] [US3] Unit test: RecordPayment raises AccountingEvent domain event — in tests/Application.UnitTests/Payments/RecordPaymentTests.cs
 
 ### Implementation for User Story 3
 
-- [ ] T044 [US3] Implement RecordPaymentCommand + Handler + Validator in src/Application/Payments/Commands/Payments/RecordPayment/RecordPaymentCommand.cs (depends on T026, T036)
-- [ ] T045 [US3] Add AccountingEvent domain event handler for Payment in src/Application/Payments/Commands/Payments/RecordPayment/ (depends on T044)
-- [ ] T046 [US3] Add record/list routes to Payments endpoint group in src/Web/Endpoints/Payments/Payments.cs (depends on T044, T018)
+- [x] T044 [US3] Implement RecordPaymentCommand + Handler + Validator in src/Application/Payments/Commands/Payments/RecordPayment/RecordPaymentCommand.cs (depends on T026, T036)
+- [x] T045 [US3] Add AccountingEvent domain event handler for Payment in src/Application/Payments/Commands/Payments/RecordPayment/ (depends on T044)
+- [x] T046 [US3] Add record/list routes to Payments endpoint group in src/Web/Endpoints/Payments/Payments.cs (depends on T044, T018)
 
 **Checkpoint**: Payment execution fully functional — ledger posting working
 
@@ -144,14 +144,14 @@
 
 > **Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T047 [P] [US4] Unit test: GetDisbursementRequests filters by status, fund, period — in tests/Application.UnitTests/Payments/GetDisbursementRequestsTests.cs
-- [ ] T048 [P] [US4] Unit test: GetDisbursementRequests includes payment details when linked — in tests/Application.UnitTests/Payments/GetDisbursementRequestsTests.cs
-- [ ] T049 [P] [US4] Unit test: GetDisbursementRequests computes totals correctly — in tests/Application.UnitTests/Payments/GetDisbursementRequestsTests.cs
+- [x] T047 [P] [US4] Unit test: GetDisbursementRequests filters by status, fund, period — in tests/Application.UnitTests/Payments/GetDisbursementRequestsTests.cs
+- [x] T048 [P] [US4] Unit test: GetDisbursementRequests includes payment details when linked — in tests/Application.UnitTests/Payments/GetDisbursementRequestsTests.cs
+- [x] T049 [P] [US4] Unit test: GetDisbursementRequests computes totals correctly — in tests/Application.UnitTests/Payments/GetDisbursementRequestsTests.cs
 
 ### Implementation for User Story 4
 
-- [ ] T050 [US4] Update GetDisbursementRequestsQuery with full filter/total logic in src/Application/Payments/Queries/DisbursementRequests/GetDisbursementRequests/GetDisbursementRequestsQuery.cs (depends on T016)
-- [ ] T051 [US4] Update GetPaymentsQuery with filter logic in src/Application/Payments/Queries/Payments/GetPayments/GetPaymentsQuery.cs (depends on T018)
+- [x] T050 [US4] Update GetDisbursementRequestsQuery with full filter/total logic in src/Application/Payments/Queries/DisbursementRequests/GetDisbursementRequests/GetDisbursementRequestsQuery.cs (depends on T016)
+- [x] T051 [US4] Update GetPaymentsQuery with filter logic in src/Application/Payments/Queries/Payments/GetPayments/GetPaymentsQuery.cs (depends on T018)
 
 **Checkpoint**: Register report fully functional — all filters and totals working
 
@@ -161,11 +161,11 @@
 
 **Purpose**: End-to-end functional tests covering the full disbursement lifecycle
 
-- [ ] T052 Functional test: Full lifecycle — create request → dual approval → execute payment → verify PO Paid — in tests/Application.FunctionalTests/Payments/DisbursementLifecycleTests.cs
-- [ ] T053 Functional test: Budget Blocking rejection with breakdown — in tests/Application.FunctionalTests/Payments/DisbursementLifecycleTests.cs
-- [ ] T054 Functional test: Dual-signature combinations (role, distinct user, same-user rejection) — in tests/Application.FunctionalTests/Payments/DisbursementLifecycleTests.cs
-- [ ] T055 Functional test: Cancellation clears PO link, allows new request — in tests/Application.FunctionalTests/Payments/DisbursementLifecycleTests.cs
-- [ ] T056 Functional test: Payment posting produces balanced journal entry — in tests/Application.FunctionalTests/Payments/DisbursementLifecycleTests.cs
+- [x] T052 Functional test: Full lifecycle — create request → dual approval → execute payment → verify PO Paid — in tests/Application.FunctionalTests/Payments/DisbursementLifecycleTests.cs
+- [x] T053 Functional test: Budget Blocking rejection with breakdown — in tests/Application.FunctionalTests/Payments/DisbursementLifecycleTests.cs
+- [x] T054 Functional test: Dual-signature combinations (role, distinct user, same-user rejection) — in tests/Application.FunctionalTests/Payments/DisbursementLifecycleTests.cs
+- [x] T055 Functional test: Cancellation clears PO link, allows new request — in tests/Application.FunctionalTests/Payments/DisbursementLifecycleTests.cs
+- [x] T056 Functional test: Payment posting produces balanced journal entry — in tests/Application.FunctionalTests/Payments/DisbursementLifecycleTests.cs
 
 ---
 
@@ -173,11 +173,11 @@
 
 **Purpose**: Validation, cleanup, and documentation
 
-- [ ] T057 Run quickstart.md validation scenarios end-to-end
-- [ ] T058 Run full test suite: `dotnet test tests/Application.UnitTests` + `dotnet test tests/Application.FunctionalTests`
-- [ ] T059 Run backend build: `dotnet build src/Web/Web.csproj` — zero warnings
-- [ ] T060 Update docs/database-schema.md with new tables
-- [ ] T061 Run NSwag regeneration: `npm run generate-api` in src/Web/ClientApp
+- [x] T057 Run quickstart.md validation scenarios end-to-end
+- [x] T058 Run full test suite: `dotnet test tests/Application.UnitTests` + `dotnet test tests/Application.FunctionalTests`
+- [x] T059 Run backend build: `dotnet build src/Web/Web.csproj` — zero warnings
+- [x] T060 Update docs/database-schema.md with new tables
+- [x] T061 Run NSwag regeneration: `npm run generate-api` in src/Web/ClientApp
 
 ---
 
