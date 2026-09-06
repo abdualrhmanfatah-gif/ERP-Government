@@ -48,6 +48,9 @@ public class CreateWorkflowDefinitionCommandHandler(
         CreateWorkflowDefinitionCommand request,
         CancellationToken cancellationToken)
     {
+        if (user.Id is not int userId)
+            throw new InvalidOperationException("User identity is required for this operation.");
+
         // Get next version number for this entity
         var lastVersion = await context.WorkflowDefinitions
             .Where(d => d.EntityName == request.EntityName)
@@ -90,7 +93,6 @@ public class CreateWorkflowDefinitionCommandHandler(
         await context.SaveChangesAsync(cancellationToken);
 
         // Audit log
-        var userId = user.Id ?? 0;
         var auditPayload = new
         {
             WorkflowDefinitionId = definition.Id,

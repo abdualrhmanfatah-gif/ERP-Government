@@ -24,9 +24,9 @@ public class LoggingBehaviour<TRequest> : IRequestPreProcessor<TRequest>
         var userId = _user.Id?.ToString() ?? string.Empty;
         string? userName = string.Empty;
 
-        if (!string.IsNullOrEmpty(userId))
+        if (_user.Id is int id)
         {
-            userName = await _identityService.GetUserNameAsync(_user.Id ?? 0) ?? string.Empty;
+            userName = await _identityService.GetUserNameAsync(id) ?? string.Empty;
         }
 
         _logger.LogInformation("ERP_Government Request: {Name} {@UserId} {@UserName} {@Request}",

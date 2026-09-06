@@ -31,6 +31,9 @@ public class CancelWorkflowInstanceCommandHandler(
         CancelWorkflowInstanceCommand request,
         CancellationToken cancellationToken)
     {
+        if (user.Id is not int userId)
+            throw new InvalidOperationException("User identity is required for this operation.");
+
         var instance = await context.WorkflowInstances
             .FirstOrDefaultAsync(i => i.Id == request.InstanceId, cancellationToken);
 
@@ -44,8 +47,6 @@ public class CancelWorkflowInstanceCommandHandler(
         instance.CompletedAt = DateTimeOffset.UtcNow;
         instance.LastModified = DateTimeOffset.UtcNow;
         instance.LastModifiedBy = "system"; // TODO: Get from current user
-
-        var userId = user.Id ?? 0;
 
         // Create history entry
         context.WorkflowHistory.Add(new Domain.Workflow.Entities.WorkflowHistory

@@ -40,6 +40,9 @@ public class AdvanceWorkflowInstanceCommandHandler(
         AdvanceWorkflowInstanceCommand request,
         CancellationToken cancellationToken)
     {
+        if (user.Id is not int userId)
+            throw new InvalidOperationException("User identity is required for this operation.");
+
         var instance = await context.WorkflowInstances
             .Include(i => i.Definition)
             .ThenInclude(d => d!.Steps.Where(s => s.IsActive))
@@ -73,8 +76,6 @@ public class AdvanceWorkflowInstanceCommandHandler(
                 ? instance.Definition.Steps.FirstOrDefault(s => s.Id == currentStep.EscalateToStepId.Value)
                 : null;
         }
-
-        var userId = user.Id ?? 0;
 
         if (nextStep == null)
         {

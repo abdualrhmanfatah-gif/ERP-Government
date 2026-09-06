@@ -40,9 +40,9 @@ public class PerformanceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequ
             var userId = _user.Id?.ToString() ?? string.Empty;
             var userName = string.Empty;
 
-            if (!string.IsNullOrEmpty(userId))
+            if (_user.Id is int id)
             {
-                userName = await _identityService.GetUserNameAsync(_user.Id ?? 0) ?? string.Empty;
+                userName = await _identityService.GetUserNameAsync(id) ?? string.Empty;
             }
 
             _logger.LogWarning("ERP_Government Long Running Request: {Name} ({ElapsedMilliseconds} milliseconds) {@UserId} {@UserName} {@Request}",

@@ -2944,7 +2944,7 @@ export class ClosingEntriesClient {
      * Approve closing entry
      * @return No Content
      */
-    approve(id: number): Promise<void> {
+    approvePOST(id: number): Promise<void> {
         let url_ = this.baseUrl + "/api/ClosingEntries/{id}/approve";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -2958,11 +2958,11 @@ export class ClosingEntriesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprove(_response);
+            return this.processApprovePOST(_response);
         });
     }
 
-    protected processApprove(response: Response): Promise<void> {
+    protected processApprovePOST(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -2993,7 +2993,7 @@ export class ClosingEntriesClient {
      * Reverse closing entry
      * @return OK
      */
-    reverse(id: number, body: ReverseClosingEntryCommand): Promise<number> {
+    reversePOST(id: number, body: ReverseClosingEntryCommand): Promise<number> {
         let url_ = this.baseUrl + "/api/ClosingEntries/{id}/reverse";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -3012,11 +3012,11 @@ export class ClosingEntriesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processReverse(_response);
+            return this.processReversePOST(_response);
         });
     }
 
-    protected processReverse(response: Response): Promise<number> {
+    protected processReversePOST(response: Response): Promise<number> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -3342,7 +3342,7 @@ export class CurrenciesClient {
      * Activate a currency
      * @return No Content
      */
-    activate(id: number, body: ActivateCurrencyCommand): Promise<void> {
+    activatePOST(id: number, body: ActivateCurrencyCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/Currencies/{id}/activate";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -3360,11 +3360,11 @@ export class CurrenciesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processActivate(_response);
+            return this.processActivatePOST(_response);
         });
     }
 
-    protected processActivate(response: Response): Promise<void> {
+    protected processActivatePOST(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -4043,7 +4043,7 @@ export class ExchangeRatesClient {
      * Activate an exchange rate
      * @return No Content
      */
-    activate2(id: number, body: ActivateExchangeRateCommand): Promise<void> {
+    activatePOST2(id: number, body: ActivateExchangeRateCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/ExchangeRates/{id}/activate";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -4061,11 +4061,11 @@ export class ExchangeRatesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processActivate2(_response);
+            return this.processActivatePOST2(_response);
         });
     }
 
-    protected processActivate2(response: Response): Promise<void> {
+    protected processActivatePOST2(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -4803,7 +4803,7 @@ export class FiscalYearsClient {
      * Close an open fiscal year
      * @return No Content
      */
-    close(id: number): Promise<void> {
+    closePOST(id: number): Promise<void> {
         let url_ = this.baseUrl + "/api/FiscalYears/{id}/close";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -4817,11 +4817,11 @@ export class FiscalYearsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processClose(_response);
+            return this.processClosePOST(_response);
         });
     }
 
-    protected processClose(response: Response): Promise<void> {
+    protected processClosePOST(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -4900,6 +4900,3461 @@ export class FiscalYearsClient {
             });
         }
         return Promise.resolve<GetFiscalYearPeriodByDateResult>(null as any);
+    }
+}
+
+export class AppropriationsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Get all appropriations with optional filters
+     * @param budgetId (optional) 
+     * @param budgetItemId (optional) 
+     * @param status (optional) 
+     * @param appropriationType (optional) 
+     * @return OK
+     */
+    appropriationsAll(budgetId: number | undefined, budgetItemId: number | undefined, status: AppropriationStatus | undefined, appropriationType: AppropriationType | undefined): Promise<AppropriationDto[]> {
+        let url_ = this.baseUrl + "/api/Appropriations?";
+        if (budgetId === null)
+            throw new globalThis.Error("The parameter 'budgetId' cannot be null.");
+        else if (budgetId !== undefined)
+            url_ += "BudgetId=" + encodeURIComponent("" + budgetId) + "&";
+        if (budgetItemId === null)
+            throw new globalThis.Error("The parameter 'budgetItemId' cannot be null.");
+        else if (budgetItemId !== undefined)
+            url_ += "BudgetItemId=" + encodeURIComponent("" + budgetItemId) + "&";
+        if (status === null)
+            throw new globalThis.Error("The parameter 'status' cannot be null.");
+        else if (status !== undefined)
+            url_ += "Status=" + encodeURIComponent("" + status) + "&";
+        if (appropriationType === null)
+            throw new globalThis.Error("The parameter 'appropriationType' cannot be null.");
+        else if (appropriationType !== undefined)
+            url_ += "AppropriationType=" + encodeURIComponent("" + appropriationType) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAppropriationsAll(_response);
+        });
+    }
+
+    protected processAppropriationsAll(response: Response): Promise<AppropriationDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(AppropriationDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<AppropriationDto[]>(null as any);
+    }
+
+    /**
+     * Create a new appropriation
+     * @return Created
+     */
+    appropriationsPOST(body: CreateAppropriationRequest): Promise<number> {
+        let url_ = this.baseUrl + "/api/Appropriations";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAppropriationsPOST(_response);
+        });
+    }
+
+    protected processAppropriationsPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result201 = resultData201 !== undefined ? resultData201 : null as any;
+    
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * Get appropriation by ID
+     * @return OK
+     */
+    appropriationsGET(id: number): Promise<AppropriationDto> {
+        let url_ = this.baseUrl + "/api/Appropriations/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAppropriationsGET(_response);
+        });
+    }
+
+    protected processAppropriationsGET(response: Response): Promise<AppropriationDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = AppropriationDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("Not Found", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<AppropriationDto>(null as any);
+    }
+
+    /**
+     * Update an appropriation (Draft only)
+     * @return No Content
+     */
+    appropriationsPUT(id: number, body: UpdateAppropriationRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Appropriations/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAppropriationsPUT(_response);
+        });
+    }
+
+    protected processAppropriationsPUT(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Delete an appropriation (Draft only)
+     * @return No Content
+     */
+    appropriationsDELETE(id: number): Promise<void> {
+        let url_ = this.baseUrl + "/api/Appropriations/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAppropriationsDELETE(_response);
+        });
+    }
+
+    protected processAppropriationsDELETE(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Get availability for the appropriation's budget item
+     * @return OK
+     */
+    availability(id: number): Promise<BudgetAvailabilitySummary> {
+        let url_ = this.baseUrl + "/api/Appropriations/{id}/availability";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAvailability(_response);
+        });
+    }
+
+    protected processAvailability(response: Response): Promise<BudgetAvailabilitySummary> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BudgetAvailabilitySummary.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("Not Found", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetAvailabilitySummary>(null as any);
+    }
+
+    /**
+     * Create a transfer pair (negative source + positive target)
+     * @return OK
+     */
+    transfers(body: CreateTransferRequest): Promise<TransferPairResult> {
+        let url_ = this.baseUrl + "/api/Appropriations/transfers";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processTransfers(_response);
+        });
+    }
+
+    protected processTransfers(response: Response): Promise<TransferPairResult> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = TransferPairResult.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TransferPairResult>(null as any);
+    }
+
+    /**
+     * Submit an appropriation for approval
+     * @return No Content
+     */
+    submitPATCH(id: number, body: AppropriationActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Appropriations/{id}/submit";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSubmitPATCH(_response);
+        });
+    }
+
+    protected processSubmitPATCH(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Approve a submitted appropriation
+     * @return No Content
+     */
+    approvePATCH(id: number, body: AppropriationActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Appropriations/{id}/approve";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processApprovePATCH(_response);
+        });
+    }
+
+    protected processApprovePATCH(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Activate an approved appropriation
+     * @return No Content
+     */
+    activatePATCH(id: number, body: AppropriationActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Appropriations/{id}/activate";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processActivatePATCH(_response);
+        });
+    }
+
+    protected processActivatePATCH(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Suspend an active appropriation
+     * @return No Content
+     */
+    suspend(id: number, body: AppropriationActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Appropriations/{id}/suspend";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSuspend(_response);
+        });
+    }
+
+    protected processSuspend(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Close an active or suspended appropriation
+     * @return No Content
+     */
+    closePATCH(id: number, body: AppropriationActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Appropriations/{id}/close";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processClosePATCH(_response);
+        });
+    }
+
+    protected processClosePATCH(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Cancel a draft, pending, or suspended appropriation
+     * @return No Content
+     */
+    cancelPATCH(id: number, body: AppropriationActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Appropriations/{id}/cancel";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCancelPATCH(_response);
+        });
+    }
+
+    protected processCancelPATCH(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Reverse an active appropriation (creates Adjustment with negative amount)
+     * @return OK
+     */
+    reversePATCH(id: number, body: AppropriationActionRequest): Promise<number> {
+        let url_ = this.baseUrl + "/api/Appropriations/{id}/reverse";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processReversePATCH(_response);
+        });
+    }
+
+    protected processReversePATCH(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+}
+
+export class BudgetClassificationsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Get all budget classifications (flat list)
+     * @return OK
+     */
+    budgetClassificationsAll(): Promise<BudgetClassificationDto[]> {
+        let url_ = this.baseUrl + "/api/BudgetClassifications";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetClassificationsAll(_response);
+        });
+    }
+
+    protected processBudgetClassificationsAll(response: Response): Promise<BudgetClassificationDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(BudgetClassificationDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetClassificationDto[]>(null as any);
+    }
+
+    /**
+     * Create a new budget classification
+     * @return Created
+     */
+    budgetClassificationsPOST(body: CreateBudgetClassificationRequest): Promise<number> {
+        let url_ = this.baseUrl + "/api/BudgetClassifications";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetClassificationsPOST(_response);
+        });
+    }
+
+    protected processBudgetClassificationsPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result201 = resultData201 !== undefined ? resultData201 : null as any;
+    
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * Get budget classifications as hierarchical tree
+     * @return OK
+     */
+    tree(): Promise<BudgetClassificationDto[]> {
+        let url_ = this.baseUrl + "/api/BudgetClassifications/tree";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processTree(_response);
+        });
+    }
+
+    protected processTree(response: Response): Promise<BudgetClassificationDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(BudgetClassificationDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetClassificationDto[]>(null as any);
+    }
+
+    /**
+     * Get budget classification by ID
+     * @return OK
+     */
+    budgetClassificationsGET(id: number): Promise<BudgetClassificationDto> {
+        let url_ = this.baseUrl + "/api/BudgetClassifications/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetClassificationsGET(_response);
+        });
+    }
+
+    protected processBudgetClassificationsGET(response: Response): Promise<BudgetClassificationDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BudgetClassificationDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("Not Found", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetClassificationDto>(null as any);
+    }
+
+    /**
+     * Update a budget classification
+     * @return No Content
+     */
+    budgetClassificationsPUT(id: number, body: UpdateBudgetClassificationRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/BudgetClassifications/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetClassificationsPUT(_response);
+        });
+    }
+
+    protected processBudgetClassificationsPUT(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Toggle budget classification active status
+     * @return No Content
+     */
+    toggleActivePATCH(id: number, body: BudgetClassificationToggleActiveRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/BudgetClassifications/{id}/toggle-active";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processToggleActivePATCH(_response);
+        });
+    }
+
+    protected processToggleActivePATCH(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
+export class BudgetItemsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    availability2(id: number): Promise<BudgetAvailabilitySummary> {
+        let url_ = this.baseUrl + "/api/BudgetItems/{id}/availability";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAvailability2(_response);
+        });
+    }
+
+    protected processAvailability2(response: Response): Promise<BudgetAvailabilitySummary> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BudgetAvailabilitySummary.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("Not Found", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetAvailabilitySummary>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    monthlyPlanAll(id: number): Promise<MonthlyPlanDto[]> {
+        let url_ = this.baseUrl + "/api/BudgetItems/{id}/monthly-plan";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processMonthlyPlanAll(_response);
+        });
+    }
+
+    protected processMonthlyPlanAll(response: Response): Promise<MonthlyPlanDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(MonthlyPlanDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<MonthlyPlanDto[]>(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    monthlyPlan(id: number, body: SaveMonthlyPlanRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/BudgetItems/{id}/monthly-plan";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processMonthlyPlan(_response);
+        });
+    }
+
+    protected processMonthlyPlan(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
+export class BudgetsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Get all budgets with optional filters
+     * @param fiscalYearId (optional) 
+     * @param fundId (optional) 
+     * @param budgetTypeId (optional) 
+     * @param status (optional) 
+     * @return OK
+     */
+    budgetsAll(fiscalYearId: number | undefined, fundId: number | undefined, budgetTypeId: number | undefined, status: BudgetStatus | undefined): Promise<BudgetDto[]> {
+        let url_ = this.baseUrl + "/api/Budgets?";
+        if (fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' cannot be null.");
+        else if (fiscalYearId !== undefined)
+            url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        if (fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
+        else if (fundId !== undefined)
+            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
+        if (budgetTypeId === null)
+            throw new globalThis.Error("The parameter 'budgetTypeId' cannot be null.");
+        else if (budgetTypeId !== undefined)
+            url_ += "BudgetTypeId=" + encodeURIComponent("" + budgetTypeId) + "&";
+        if (status === null)
+            throw new globalThis.Error("The parameter 'status' cannot be null.");
+        else if (status !== undefined)
+            url_ += "Status=" + encodeURIComponent("" + status) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetsAll(_response);
+        });
+    }
+
+    protected processBudgetsAll(response: Response): Promise<BudgetDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(BudgetDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetDto[]>(null as any);
+    }
+
+    /**
+     * Create a new budget
+     * @return Created
+     */
+    budgetsPOST(body: CreateBudgetRequest): Promise<number> {
+        let url_ = this.baseUrl + "/api/Budgets";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetsPOST(_response);
+        });
+    }
+
+    protected processBudgetsPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result201 = resultData201 !== undefined ? resultData201 : null as any;
+    
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * Get budget by ID
+     * @return OK
+     */
+    budgetsGET(id: number): Promise<BudgetDto> {
+        let url_ = this.baseUrl + "/api/Budgets/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetsGET(_response);
+        });
+    }
+
+    protected processBudgetsGET(response: Response): Promise<BudgetDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BudgetDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("Not Found", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetDto>(null as any);
+    }
+
+    /**
+     * Update a budget
+     * @return No Content
+     */
+    budgetsPUT(id: number, body: UpdateBudgetRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Budgets/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetsPUT(_response);
+        });
+    }
+
+    protected processBudgetsPUT(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Submit a budget for approval
+     * @return No Content
+     */
+    submitPATCH2(id: number, body: BudgetActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Budgets/{id}/submit";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSubmitPATCH2(_response);
+        });
+    }
+
+    protected processSubmitPATCH2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Approve a submitted budget
+     * @return No Content
+     */
+    approvePATCH2(id: number, body: BudgetActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Budgets/{id}/approve";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processApprovePATCH2(_response);
+        });
+    }
+
+    protected processApprovePATCH2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Activate an approved budget
+     * @return No Content
+     */
+    activatePATCH2(id: number, body: BudgetActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Budgets/{id}/activate";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processActivatePATCH2(_response);
+        });
+    }
+
+    protected processActivatePATCH2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Suspend an active budget
+     * @return No Content
+     */
+    suspend2(id: number, body: BudgetActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Budgets/{id}/suspend";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSuspend2(_response);
+        });
+    }
+
+    protected processSuspend2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Close an active or suspended budget
+     * @return No Content
+     */
+    closePATCH2(id: number, body: BudgetActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Budgets/{id}/close";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processClosePATCH2(_response);
+        });
+    }
+
+    protected processClosePATCH2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Cancel a draft, submitted, or suspended budget
+     * @return No Content
+     */
+    cancelPATCH2(id: number, body: BudgetActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Budgets/{id}/cancel";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCancelPATCH2(_response);
+        });
+    }
+
+    protected processCancelPATCH2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Get budget items for a budget
+     * @return OK
+     */
+    itemsAll(id: number): Promise<BudgetItemDto[]> {
+        let url_ = this.baseUrl + "/api/Budgets/{id}/items";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processItemsAll(_response);
+        });
+    }
+
+    protected processItemsAll(response: Response): Promise<BudgetItemDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(BudgetItemDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetItemDto[]>(null as any);
+    }
+
+    /**
+     * Create a new budget item under a budget
+     * @return Created
+     */
+    itemsPOST(id: number, body: CreateBudgetItemRequest): Promise<number> {
+        let url_ = this.baseUrl + "/api/Budgets/{id}/items";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processItemsPOST(_response);
+        });
+    }
+
+    protected processItemsPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result201 = resultData201 !== undefined ? resultData201 : null as any;
+    
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * Get budget items as hierarchical tree for a budget
+     * @return OK
+     */
+    tree2(id: number): Promise<BudgetItemDto[]> {
+        let url_ = this.baseUrl + "/api/Budgets/{id}/items/tree";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processTree2(_response);
+        });
+    }
+
+    protected processTree2(response: Response): Promise<BudgetItemDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(BudgetItemDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetItemDto[]>(null as any);
+    }
+
+    /**
+     * Update a budget item
+     * @return No Content
+     */
+    itemsPUT(budgetId: number, itemId: number, body: UpdateBudgetItemRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Budgets/{budgetId}/items/{itemId}";
+        if (budgetId === undefined || budgetId === null)
+            throw new globalThis.Error("The parameter 'budgetId' must be defined.");
+        url_ = url_.replace("{budgetId}", encodeURIComponent("" + budgetId));
+        if (itemId === undefined || itemId === null)
+            throw new globalThis.Error("The parameter 'itemId' must be defined.");
+        url_ = url_.replace("{itemId}", encodeURIComponent("" + itemId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processItemsPUT(_response);
+        });
+    }
+
+    protected processItemsPUT(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Delete a budget item
+     * @return No Content
+     */
+    itemsDELETE(budgetId: number, itemId: number): Promise<void> {
+        let url_ = this.baseUrl + "/api/Budgets/{budgetId}/items/{itemId}";
+        if (budgetId === undefined || budgetId === null)
+            throw new globalThis.Error("The parameter 'budgetId' must be defined.");
+        url_ = url_.replace("{budgetId}", encodeURIComponent("" + budgetId));
+        if (itemId === undefined || itemId === null)
+            throw new globalThis.Error("The parameter 'itemId' must be defined.");
+        url_ = url_.replace("{itemId}", encodeURIComponent("" + itemId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processItemsDELETE(_response);
+        });
+    }
+
+    protected processItemsDELETE(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Move a budget item to a new parent
+     * @return No Content
+     */
+    move(budgetId: number, itemId: number, body: MoveBudgetItemRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Budgets/{budgetId}/items/{itemId}/move";
+        if (budgetId === undefined || budgetId === null)
+            throw new globalThis.Error("The parameter 'budgetId' must be defined.");
+        url_ = url_.replace("{budgetId}", encodeURIComponent("" + budgetId));
+        if (itemId === undefined || itemId === null)
+            throw new globalThis.Error("The parameter 'itemId' must be defined.");
+        url_ = url_.replace("{itemId}", encodeURIComponent("" + itemId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processMove(_response);
+        });
+    }
+
+    protected processMove(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
+export class BudgetTypesClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Get all budget types
+     * @return OK
+     */
+    budgetTypesAll(): Promise<BudgetTypeDto[]> {
+        let url_ = this.baseUrl + "/api/BudgetTypes";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetTypesAll(_response);
+        });
+    }
+
+    protected processBudgetTypesAll(response: Response): Promise<BudgetTypeDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(BudgetTypeDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetTypeDto[]>(null as any);
+    }
+
+    /**
+     * Create a new budget type
+     * @return Created
+     */
+    budgetTypesPOST(body: CreateBudgetTypeRequest): Promise<number> {
+        let url_ = this.baseUrl + "/api/BudgetTypes";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetTypesPOST(_response);
+        });
+    }
+
+    protected processBudgetTypesPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result201 = resultData201 !== undefined ? resultData201 : null as any;
+    
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * Get budget type by ID
+     * @return OK
+     */
+    budgetTypesGET(id: number): Promise<BudgetTypeDto> {
+        let url_ = this.baseUrl + "/api/BudgetTypes/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetTypesGET(_response);
+        });
+    }
+
+    protected processBudgetTypesGET(response: Response): Promise<BudgetTypeDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BudgetTypeDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("Not Found", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetTypeDto>(null as any);
+    }
+
+    /**
+     * Update a budget type
+     * @return No Content
+     */
+    budgetTypesPUT(id: number, body: UpdateBudgetTypeRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/BudgetTypes/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetTypesPUT(_response);
+        });
+    }
+
+    protected processBudgetTypesPUT(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Toggle budget type active status
+     * @return No Content
+     */
+    toggleActivePATCH2(id: number, body: BudgetTypeToggleActiveRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/BudgetTypes/{id}/toggle-active";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processToggleActivePATCH2(_response);
+        });
+    }
+
+    protected processToggleActivePATCH2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
+export class EncumbrancesClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param appropriationId (optional) 
+     * @param type (optional) 
+     * @param status (optional) 
+     * @return OK
+     */
+    encumbrancesAll(appropriationId: number | undefined, type: EncumbranceType | undefined, status: EncumbranceStatus | undefined): Promise<EncumbranceListItemDto[]> {
+        let url_ = this.baseUrl + "/api/Encumbrances?";
+        if (appropriationId === null)
+            throw new globalThis.Error("The parameter 'appropriationId' cannot be null.");
+        else if (appropriationId !== undefined)
+            url_ += "appropriationId=" + encodeURIComponent("" + appropriationId) + "&";
+        if (type === null)
+            throw new globalThis.Error("The parameter 'type' cannot be null.");
+        else if (type !== undefined)
+            url_ += "type=" + encodeURIComponent("" + type) + "&";
+        if (status === null)
+            throw new globalThis.Error("The parameter 'status' cannot be null.");
+        else if (status !== undefined)
+            url_ += "status=" + encodeURIComponent("" + status) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processEncumbrancesAll(_response);
+        });
+    }
+
+    protected processEncumbrancesAll(response: Response): Promise<EncumbranceListItemDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(EncumbranceListItemDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<EncumbranceListItemDto[]>(null as any);
+    }
+
+    /**
+     * @return Created
+     */
+    encumbrancesPOST(body: CreateEncumbranceRequest): Promise<number> {
+        let url_ = this.baseUrl + "/api/Encumbrances";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processEncumbrancesPOST(_response);
+        });
+    }
+
+    protected processEncumbrancesPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result201 = resultData201 !== undefined ? resultData201 : null as any;
+    
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    encumbrancesGET(id: number): Promise<EncumbranceDetailDto> {
+        let url_ = this.baseUrl + "/api/Encumbrances/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processEncumbrancesGET(_response);
+        });
+    }
+
+    protected processEncumbrancesGET(response: Response): Promise<EncumbranceDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = EncumbranceDetailDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("Not Found", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<EncumbranceDetailDto>(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    encumbrancesPUT(id: number, body: UpdateEncumbranceRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Encumbrances/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processEncumbrancesPUT(_response);
+        });
+    }
+
+    protected processEncumbrancesPUT(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    encumbrancesDELETE(id: number, body: EncumbranceActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Encumbrances/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processEncumbrancesDELETE(_response);
+        });
+    }
+
+    protected processEncumbrancesDELETE(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    submitPATCH3(id: number, body: EncumbranceActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Encumbrances/{id}/submit";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSubmitPATCH3(_response);
+        });
+    }
+
+    protected processSubmitPATCH3(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    approvePATCH3(id: number, body: EncumbranceActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Encumbrances/{id}/approve";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processApprovePATCH3(_response);
+        });
+    }
+
+    protected processApprovePATCH3(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    activatePATCH3(id: number, body: EncumbranceActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Encumbrances/{id}/activate";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processActivatePATCH3(_response);
+        });
+    }
+
+    protected processActivatePATCH3(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    suspend3(id: number, body: EncumbranceActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Encumbrances/{id}/suspend";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSuspend3(_response);
+        });
+    }
+
+    protected processSuspend3(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    closePATCH3(id: number, body: EncumbranceActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Encumbrances/{id}/close";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processClosePATCH3(_response);
+        });
+    }
+
+    protected processClosePATCH3(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    cancelPATCH3(id: number, body: EncumbranceActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Encumbrances/{id}/cancel";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCancelPATCH3(_response);
+        });
+    }
+
+    protected processCancelPATCH3(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    reversePATCH2(id: number, body: ReverseEncumbranceRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Encumbrances/{id}/reverse";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processReversePATCH2(_response);
+        });
+    }
+
+    protected processReversePATCH2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
+export class FundsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Get all funds
+     * @return OK
+     */
+    fundsAll(): Promise<FundDto[]> {
+        let url_ = this.baseUrl + "/api/Funds";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processFundsAll(_response);
+        });
+    }
+
+    protected processFundsAll(response: Response): Promise<FundDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(FundDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FundDto[]>(null as any);
+    }
+
+    /**
+     * Create a new fund
+     * @return Created
+     */
+    fundsPOST(body: CreateFundRequest): Promise<number> {
+        let url_ = this.baseUrl + "/api/Funds";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processFundsPOST(_response);
+        });
+    }
+
+    protected processFundsPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result201 = resultData201 !== undefined ? resultData201 : null as any;
+    
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * Get fund by ID
+     * @return OK
+     */
+    fundsGET(id: number): Promise<FundDto> {
+        let url_ = this.baseUrl + "/api/Funds/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processFundsGET(_response);
+        });
+    }
+
+    protected processFundsGET(response: Response): Promise<FundDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = FundDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("Not Found", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FundDto>(null as any);
+    }
+
+    /**
+     * Update a fund
+     * @return No Content
+     */
+    fundsPUT(id: number, body: UpdateFundRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Funds/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processFundsPUT(_response);
+        });
+    }
+
+    protected processFundsPUT(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Toggle fund active status
+     * @return No Content
+     */
+    toggleActivePATCH3(id: number, body: FundToggleActiveRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Funds/{id}/toggle-active";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processToggleActivePATCH3(_response);
+        });
+    }
+
+    protected processToggleActivePATCH3(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
     }
 }
 
@@ -5077,7 +8532,7 @@ export class BankReconciliationsClient {
      * Approve a bank reconciliation
      * @return No Content
      */
-    approve2(id: number): Promise<void> {
+    approvePOST2(id: number): Promise<void> {
         let url_ = this.baseUrl + "/api/BankReconciliations/{id}/approve";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -5091,11 +8546,11 @@ export class BankReconciliationsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprove2(_response);
+            return this.processApprovePOST2(_response);
         });
     }
 
-    protected processApprove2(response: Response): Promise<void> {
+    protected processApprovePOST2(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -5175,7 +8630,7 @@ export class BankReconciliationsClient {
      * Reject bank reconciliation (Completed -> Rejected, terminal)
      * @return No Content
      */
-    reject(id: number, body: RejectBankReconciliationCommand): Promise<void> {
+    rejectPOST(id: number, body: RejectBankReconciliationCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/BankReconciliations/{id}/reject";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -5193,11 +8648,11 @@ export class BankReconciliationsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processReject(_response);
+            return this.processRejectPOST(_response);
         });
     }
 
-    protected processReject(response: Response): Promise<void> {
+    protected processRejectPOST(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -5611,7 +9066,7 @@ export class BankStatementsClient {
      * Cancel bank statement (Draft -> Cancelled)
      * @return No Content
      */
-    cancel(id: number): Promise<void> {
+    cancelPOST(id: number): Promise<void> {
         let url_ = this.baseUrl + "/api/BankStatements/{id}/cancel";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -5625,11 +9080,11 @@ export class BankStatementsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancel(_response);
+            return this.processCancelPOST(_response);
         });
     }
 
-    protected processCancel(response: Response): Promise<void> {
+    protected processCancelPOST(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -5884,7 +9339,7 @@ export class BackgroundJobsEndpointsClient {
     /**
      * @return OK
      */
-    cancel2(id: number): Promise<CancelBackgroundJobResponse> {
+    cancelPOST2(id: number): Promise<CancelBackgroundJobResponse> {
         let url_ = this.baseUrl + "/api/background-jobs/{id}/cancel";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -5899,11 +9354,11 @@ export class BackgroundJobsEndpointsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancel2(_response);
+            return this.processCancelPOST2(_response);
         });
     }
 
-    protected processCancel2(response: Response): Promise<CancelBackgroundJobResponse> {
+    protected processCancelPOST2(response: Response): Promise<CancelBackgroundJobResponse> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -6496,7 +9951,7 @@ export class WorkflowInstancesClient {
      * @param body (optional) 
      * @return No Content
      */
-    approve3(id: number, stepId: number, body: StepDecisionRequest | null | undefined): Promise<void> {
+    approvePOST3(id: number, stepId: number, body: StepDecisionRequest | null | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/WorkflowInstances/{id}/steps/{stepId}/approve";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -6517,11 +9972,11 @@ export class WorkflowInstancesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprove3(_response);
+            return this.processApprovePOST3(_response);
         });
     }
 
-    protected processApprove3(response: Response): Promise<void> {
+    protected processApprovePOST3(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -6553,7 +10008,7 @@ export class WorkflowInstancesClient {
      * @param body (optional) 
      * @return No Content
      */
-    reject2(id: number, stepId: number, body: StepDecisionRequest | null | undefined): Promise<void> {
+    rejectPOST2(id: number, stepId: number, body: StepDecisionRequest | null | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/WorkflowInstances/{id}/steps/{stepId}/reject";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -6574,11 +10029,11 @@ export class WorkflowInstancesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processReject2(_response);
+            return this.processRejectPOST2(_response);
         });
     }
 
-    protected processReject2(response: Response): Promise<void> {
+    protected processRejectPOST2(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -6610,7 +10065,7 @@ export class WorkflowInstancesClient {
      * @param body (optional) 
      * @return No Content
      */
-    cancel3(id: number, body: CancelWorkflowInstanceRequest | null | undefined): Promise<void> {
+    cancelPOST3(id: number, body: CancelWorkflowInstanceRequest | null | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/WorkflowInstances/{id}/cancel";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -6628,11 +10083,11 @@ export class WorkflowInstancesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancel3(_response);
+            return this.processCancelPOST3(_response);
         });
     }
 
-    protected processCancel3(response: Response): Promise<void> {
+    protected processCancelPOST3(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -7197,6 +10652,1110 @@ export class ApprovalRulesClient {
     }
 }
 
+export class ChecksClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Clear a check (bank confirmation)
+     * @return No Content
+     */
+    clear(id: number, body: ClearCheckCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/Checks/{id}/clear";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processClear(_response);
+        });
+    }
+
+    protected processClear(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Bounce a check (bank notification)
+     * @return OK
+     */
+    bounce(id: number, body: BounceCheckCommand): Promise<number> {
+        let url_ = this.baseUrl + "/api/Checks/{id}/bounce";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBounce(_response);
+        });
+    }
+
+    protected processBounce(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * Replace a bounced check with new payment
+     * @return No Content
+     */
+    replace(id: number, body: ReplaceCheckCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/Checks/{id}/replace";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processReplace(_response);
+        });
+    }
+
+    protected processReplace(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
+export class DepositSlipsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Get all deposit slips
+     * @param status (optional) 
+     * @param formType (optional) 
+     * @param fromDate (optional) 
+     * @param toDate (optional) 
+     * @return OK
+     */
+    depositSlipsAll(status: DepositSlipStatus | undefined, formType: FormType | undefined, fromDate: Date | undefined, toDate: Date | undefined, page: number, pageSize: number): Promise<DepositSlipDto[]> {
+        let url_ = this.baseUrl + "/api/DepositSlips?";
+        if (status === null)
+            throw new globalThis.Error("The parameter 'status' cannot be null.");
+        else if (status !== undefined)
+            url_ += "Status=" + encodeURIComponent("" + status) + "&";
+        if (formType === null)
+            throw new globalThis.Error("The parameter 'formType' cannot be null.");
+        else if (formType !== undefined)
+            url_ += "FormType=" + encodeURIComponent("" + formType) + "&";
+        if (fromDate === null)
+            throw new globalThis.Error("The parameter 'fromDate' cannot be null.");
+        else if (fromDate !== undefined)
+            url_ += "FromDate=" + encodeURIComponent(fromDate ? "" + fromDate.toISOString() : "") + "&";
+        if (toDate === null)
+            throw new globalThis.Error("The parameter 'toDate' cannot be null.");
+        else if (toDate !== undefined)
+            url_ += "ToDate=" + encodeURIComponent(toDate ? "" + toDate.toISOString() : "") + "&";
+        if (page === undefined || page === null)
+            throw new globalThis.Error("The parameter 'page' must be defined and cannot be null.");
+        else
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === undefined || pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' must be defined and cannot be null.");
+        else
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDepositSlipsAll(_response);
+        });
+    }
+
+    protected processDepositSlipsAll(response: Response): Promise<DepositSlipDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(DepositSlipDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<DepositSlipDto[]>(null as any);
+    }
+
+    /**
+     * Create a new deposit slip
+     * @return Created
+     */
+    depositSlipsPOST(body: CreateDepositSlipCommand): Promise<number> {
+        let url_ = this.baseUrl + "/api/DepositSlips";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDepositSlipsPOST(_response);
+        });
+    }
+
+    protected processDepositSlipsPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result201 = resultData201 !== undefined ? resultData201 : null as any;
+    
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * Get deposit slip by ID
+     * @return OK
+     */
+    depositSlipsGET(id: number): Promise<DepositSlipDto> {
+        let url_ = this.baseUrl + "/api/DepositSlips/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDepositSlipsGET(_response);
+        });
+    }
+
+    protected processDepositSlipsGET(response: Response): Promise<DepositSlipDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DepositSlipDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<DepositSlipDto>(null as any);
+    }
+
+    /**
+     * Get monthly collections statement
+     * @return OK
+     */
+    monthlyStatement(year: number, month: number, fundId: number): Promise<MonthlyStatementDto> {
+        let url_ = this.baseUrl + "/api/DepositSlips/monthly-statement?";
+        if (year === undefined || year === null)
+            throw new globalThis.Error("The parameter 'year' must be defined and cannot be null.");
+        else
+            url_ += "Year=" + encodeURIComponent("" + year) + "&";
+        if (month === undefined || month === null)
+            throw new globalThis.Error("The parameter 'month' must be defined and cannot be null.");
+        else
+            url_ += "Month=" + encodeURIComponent("" + month) + "&";
+        if (fundId === undefined || fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' must be defined and cannot be null.");
+        else
+            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processMonthlyStatement(_response);
+        });
+    }
+
+    protected processMonthlyStatement(response: Response): Promise<MonthlyStatementDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = MonthlyStatementDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<MonthlyStatementDto>(null as any);
+    }
+
+    /**
+     * Add voucher to deposit slip
+     * @return No Content
+     */
+    addVoucher(id: number, body: AddVoucherToSlipCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/DepositSlips/{id}/add-voucher";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAddVoucher(_response);
+        });
+    }
+
+    protected processAddVoucher(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Remove voucher from deposit slip
+     * @return No Content
+     */
+    removeVoucher(id: number, body: RemoveVoucherFromSlipCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/DepositSlips/{id}/remove-voucher";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRemoveVoucher(_response);
+        });
+    }
+
+    protected processRemoveVoucher(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Approve deposit slip (Treasury manager)
+     * @return No Content
+     */
+    approvePOST4(id: number, body: ApproveDepositSlipCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/DepositSlips/{id}/approve";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processApprovePOST4(_response);
+        });
+    }
+
+    protected processApprovePOST4(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
+export class ReceiptVouchersClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Get all receipt vouchers
+     * @param partyId (optional) 
+     * @param status (optional) 
+     * @param fromDate (optional) 
+     * @param toDate (optional) 
+     * @return OK
+     */
+    receiptVouchersAll(partyId: number | undefined, status: ReceiptVoucherStatus | undefined, fromDate: Date | undefined, toDate: Date | undefined, page: number, pageSize: number): Promise<ReceiptVoucherDto[]> {
+        let url_ = this.baseUrl + "/api/ReceiptVouchers?";
+        if (partyId === null)
+            throw new globalThis.Error("The parameter 'partyId' cannot be null.");
+        else if (partyId !== undefined)
+            url_ += "PartyId=" + encodeURIComponent("" + partyId) + "&";
+        if (status === null)
+            throw new globalThis.Error("The parameter 'status' cannot be null.");
+        else if (status !== undefined)
+            url_ += "Status=" + encodeURIComponent("" + status) + "&";
+        if (fromDate === null)
+            throw new globalThis.Error("The parameter 'fromDate' cannot be null.");
+        else if (fromDate !== undefined)
+            url_ += "FromDate=" + encodeURIComponent(fromDate ? "" + fromDate.toISOString() : "") + "&";
+        if (toDate === null)
+            throw new globalThis.Error("The parameter 'toDate' cannot be null.");
+        else if (toDate !== undefined)
+            url_ += "ToDate=" + encodeURIComponent(toDate ? "" + toDate.toISOString() : "") + "&";
+        if (page === undefined || page === null)
+            throw new globalThis.Error("The parameter 'page' must be defined and cannot be null.");
+        else
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === undefined || pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' must be defined and cannot be null.");
+        else
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processReceiptVouchersAll(_response);
+        });
+    }
+
+    protected processReceiptVouchersAll(response: Response): Promise<ReceiptVoucherDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ReceiptVoucherDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ReceiptVoucherDto[]>(null as any);
+    }
+
+    /**
+     * Create a new receipt voucher
+     * @return Created
+     */
+    receiptVouchersPOST(body: CreateReceiptVoucherCommand): Promise<number> {
+        let url_ = this.baseUrl + "/api/ReceiptVouchers";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processReceiptVouchersPOST(_response);
+        });
+    }
+
+    protected processReceiptVouchersPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result201 = resultData201 !== undefined ? resultData201 : null as any;
+    
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * Get receipt voucher by ID
+     * @return OK
+     */
+    receiptVouchersGET(id: number): Promise<ReceiptVoucherDto> {
+        let url_ = this.baseUrl + "/api/ReceiptVouchers/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processReceiptVouchersGET(_response);
+        });
+    }
+
+    protected processReceiptVouchersGET(response: Response): Promise<ReceiptVoucherDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ReceiptVoucherDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ReceiptVoucherDto>(null as any);
+    }
+
+    /**
+     * Get receipt vouchers by party
+     * @return OK
+     */
+    byParty(partyIdPath: number, page: number, pageSize: number): Promise<ReceiptVoucherDto[]> {
+        let url_ = this.baseUrl + "/api/ReceiptVouchers/by-party/{partyId}?";
+        if (partyIdPath === undefined || partyIdPath === null)
+            throw new globalThis.Error("The parameter 'partyIdPath' must be defined.");
+        url_ = url_.replace("{partyId}", encodeURIComponent("" + partyIdPath));
+        if (page === undefined || page === null)
+            throw new globalThis.Error("The parameter 'page' must be defined and cannot be null.");
+        else
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === undefined || pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' must be defined and cannot be null.");
+        else
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processByParty(_response);
+        });
+    }
+
+    protected processByParty(response: Response): Promise<ReceiptVoucherDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ReceiptVoucherDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ReceiptVoucherDto[]>(null as any);
+    }
+
+    /**
+     * Get receipt vouchers by date period
+     * @return OK
+     */
+    byPeriod(fromDate: Date, toDate: Date, page: number, pageSize: number): Promise<ReceiptVoucherDto[]> {
+        let url_ = this.baseUrl + "/api/ReceiptVouchers/by-period?";
+        if (fromDate === undefined || fromDate === null)
+            throw new globalThis.Error("The parameter 'fromDate' must be defined and cannot be null.");
+        else
+            url_ += "FromDate=" + encodeURIComponent(fromDate ? "" + fromDate.toISOString() : "") + "&";
+        if (toDate === undefined || toDate === null)
+            throw new globalThis.Error("The parameter 'toDate' must be defined and cannot be null.");
+        else
+            url_ += "ToDate=" + encodeURIComponent(toDate ? "" + toDate.toISOString() : "") + "&";
+        if (page === undefined || page === null)
+            throw new globalThis.Error("The parameter 'page' must be defined and cannot be null.");
+        else
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === undefined || pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' must be defined and cannot be null.");
+        else
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processByPeriod(_response);
+        });
+    }
+
+    protected processByPeriod(response: Response): Promise<ReceiptVoucherDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ReceiptVoucherDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ReceiptVoucherDto[]>(null as any);
+    }
+
+    /**
+     * Submit receipt voucher for review
+     * @return No Content
+     */
+    submitPOST(id: number, body: SubmitReceiptVoucherCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/ReceiptVouchers/{id}/submit";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSubmitPOST(_response);
+        });
+    }
+
+    protected processSubmitPOST(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Approve receipt voucher (reviewer gate)
+     * @return No Content
+     */
+    approvePOST5(id: number, body: ApproveReceiptVoucherCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/ReceiptVouchers/{id}/approve";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processApprovePOST5(_response);
+        });
+    }
+
+    protected processApprovePOST5(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Cancel receipt voucher
+     * @return No Content
+     */
+    cancelPOST4(id: number, body: CancelReceiptVoucherCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/ReceiptVouchers/{id}/cancel";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCancelPOST4(_response);
+        });
+    }
+
+    protected processCancelPOST4(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
 export class RevenueReceiptsClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -7396,7 +11955,7 @@ export class RevenueReceiptsClient {
      * Approve a revenue receipt
      * @return No Content
      */
-    approve4(id: number, body: ApproveRevenueReceiptCommand): Promise<void> {
+    approvePOST6(id: number, body: ApproveRevenueReceiptCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/RevenueReceipts/{id}/approve";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -7414,11 +11973,11 @@ export class RevenueReceiptsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprove4(_response);
+            return this.processApprovePOST6(_response);
         });
     }
 
-    protected processApprove4(response: Response): Promise<void> {
+    protected processApprovePOST6(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -7502,7 +12061,7 @@ export class RevenueReceiptsClient {
      * Cancel a revenue receipt
      * @return No Content
      */
-    cancel4(id: number, body: CancelRevenueReceiptCommand): Promise<void> {
+    cancelPOST5(id: number, body: CancelRevenueReceiptCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/RevenueReceipts/{id}/cancel";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -7520,11 +12079,11 @@ export class RevenueReceiptsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancel4(_response);
+            return this.processCancelPOST5(_response);
         });
     }
 
-    protected processCancel4(response: Response): Promise<void> {
+    protected processCancelPOST5(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -7974,6 +12533,1009 @@ export class ReportsClient {
     }
 }
 
+export class AvailabilitySnapshotReportsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Get budget availability snapshot
+     * @param budgetItemId (optional) 
+     * @param fundId (optional) 
+     * @return OK
+     */
+    availabilitySnapshotReports(fiscalYearId: number, budgetItemId: number | undefined, fundId: number | undefined): Promise<AvailabilitySnapshotDto> {
+        let url_ = this.baseUrl + "/api/AvailabilitySnapshotReports?";
+        if (fiscalYearId === undefined || fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
+        else
+            url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        if (budgetItemId === null)
+            throw new globalThis.Error("The parameter 'budgetItemId' cannot be null.");
+        else if (budgetItemId !== undefined)
+            url_ += "BudgetItemId=" + encodeURIComponent("" + budgetItemId) + "&";
+        if (fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
+        else if (fundId !== undefined)
+            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAvailabilitySnapshotReports(_response);
+        });
+    }
+
+    protected processAvailabilitySnapshotReports(response: Response): Promise<AvailabilitySnapshotDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = AvailabilitySnapshotDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<AvailabilitySnapshotDto>(null as any);
+    }
+
+    /**
+     * Get availability snapshot detail for a budget line
+     * @param fundId (optional) 
+     * @return OK
+     */
+    detail(budgetItemIdPath: number, fiscalYearId: number, fundId: number | undefined): Promise<AvailabilitySnapshotDetailDto> {
+        let url_ = this.baseUrl + "/api/AvailabilitySnapshotReports/{budgetItemId}/detail?";
+        if (budgetItemIdPath === undefined || budgetItemIdPath === null)
+            throw new globalThis.Error("The parameter 'budgetItemIdPath' must be defined.");
+        url_ = url_.replace("{budgetItemId}", encodeURIComponent("" + budgetItemIdPath));
+        if (fiscalYearId === undefined || fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
+        else
+            url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        if (fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
+        else if (fundId !== undefined)
+            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDetail(_response);
+        });
+    }
+
+    protected processDetail(response: Response): Promise<AvailabilitySnapshotDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = AvailabilitySnapshotDetailDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<AvailabilitySnapshotDetailDto>(null as any);
+    }
+
+    /**
+     * Export availability snapshot report to Excel or PDF
+     * @param budgetItemId (optional) 
+     * @param fundId (optional) 
+     * @return OK
+     */
+    export2(format: string, fiscalYearId: number, budgetItemId: number | undefined, fundId: number | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/AvailabilitySnapshotReports/export?";
+        if (format === undefined || format === null)
+            throw new globalThis.Error("The parameter 'format' must be defined and cannot be null.");
+        else
+            url_ += "format=" + encodeURIComponent("" + format) + "&";
+        if (fiscalYearId === undefined || fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
+        else
+            url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        if (budgetItemId === null)
+            throw new globalThis.Error("The parameter 'budgetItemId' cannot be null.");
+        else if (budgetItemId !== undefined)
+            url_ += "BudgetItemId=" + encodeURIComponent("" + budgetItemId) + "&";
+        if (fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
+        else if (fundId !== undefined)
+            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processExport2(_response);
+        });
+    }
+
+    protected processExport2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
+export class BudgetExecutionReportsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Get budget execution report
+     * @param fiscalPeriodId (optional) 
+     * @param fundId (optional) 
+     * @param programId (optional) 
+     * @param projectId (optional) 
+     * @param budgetItemId (optional) 
+     * @return OK
+     */
+    budgetExecutionReports(fiscalYearId: number, fiscalPeriodId: number | undefined, fundId: number | undefined, programId: number | undefined, projectId: number | undefined, budgetItemId: number | undefined): Promise<BudgetExecutionReportDto> {
+        let url_ = this.baseUrl + "/api/BudgetExecutionReports?";
+        if (fiscalYearId === undefined || fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
+        else
+            url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        if (fiscalPeriodId === null)
+            throw new globalThis.Error("The parameter 'fiscalPeriodId' cannot be null.");
+        else if (fiscalPeriodId !== undefined)
+            url_ += "FiscalPeriodId=" + encodeURIComponent("" + fiscalPeriodId) + "&";
+        if (fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
+        else if (fundId !== undefined)
+            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
+        if (programId === null)
+            throw new globalThis.Error("The parameter 'programId' cannot be null.");
+        else if (programId !== undefined)
+            url_ += "ProgramId=" + encodeURIComponent("" + programId) + "&";
+        if (projectId === null)
+            throw new globalThis.Error("The parameter 'projectId' cannot be null.");
+        else if (projectId !== undefined)
+            url_ += "ProjectId=" + encodeURIComponent("" + projectId) + "&";
+        if (budgetItemId === null)
+            throw new globalThis.Error("The parameter 'budgetItemId' cannot be null.");
+        else if (budgetItemId !== undefined)
+            url_ += "BudgetItemId=" + encodeURIComponent("" + budgetItemId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetExecutionReports(_response);
+        });
+    }
+
+    protected processBudgetExecutionReports(response: Response): Promise<BudgetExecutionReportDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BudgetExecutionReportDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetExecutionReportDto>(null as any);
+    }
+
+    /**
+     * Get budget execution detail for a budget line
+     * @param fundId (optional) 
+     * @return OK
+     */
+    detail2(budgetItemIdPath: number, fiscalYearId: number, fundId: number | undefined): Promise<BudgetExecutionDetailDto> {
+        let url_ = this.baseUrl + "/api/BudgetExecutionReports/{budgetItemId}/detail?";
+        if (budgetItemIdPath === undefined || budgetItemIdPath === null)
+            throw new globalThis.Error("The parameter 'budgetItemIdPath' must be defined.");
+        url_ = url_.replace("{budgetItemId}", encodeURIComponent("" + budgetItemIdPath));
+        if (fiscalYearId === undefined || fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
+        else
+            url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        if (fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
+        else if (fundId !== undefined)
+            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDetail2(_response);
+        });
+    }
+
+    protected processDetail2(response: Response): Promise<BudgetExecutionDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BudgetExecutionDetailDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetExecutionDetailDto>(null as any);
+    }
+
+    /**
+     * Export budget execution report to Excel or PDF
+     * @param fiscalPeriodId (optional) 
+     * @param fundId (optional) 
+     * @param programId (optional) 
+     * @param projectId (optional) 
+     * @param budgetItemId (optional) 
+     * @return OK
+     */
+    export3(format: string, fiscalYearId: number, fiscalPeriodId: number | undefined, fundId: number | undefined, programId: number | undefined, projectId: number | undefined, budgetItemId: number | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/BudgetExecutionReports/export?";
+        if (format === undefined || format === null)
+            throw new globalThis.Error("The parameter 'format' must be defined and cannot be null.");
+        else
+            url_ += "format=" + encodeURIComponent("" + format) + "&";
+        if (fiscalYearId === undefined || fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
+        else
+            url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        if (fiscalPeriodId === null)
+            throw new globalThis.Error("The parameter 'fiscalPeriodId' cannot be null.");
+        else if (fiscalPeriodId !== undefined)
+            url_ += "FiscalPeriodId=" + encodeURIComponent("" + fiscalPeriodId) + "&";
+        if (fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
+        else if (fundId !== undefined)
+            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
+        if (programId === null)
+            throw new globalThis.Error("The parameter 'programId' cannot be null.");
+        else if (programId !== undefined)
+            url_ += "ProgramId=" + encodeURIComponent("" + programId) + "&";
+        if (projectId === null)
+            throw new globalThis.Error("The parameter 'projectId' cannot be null.");
+        else if (projectId !== undefined)
+            url_ += "ProjectId=" + encodeURIComponent("" + projectId) + "&";
+        if (budgetItemId === null)
+            throw new globalThis.Error("The parameter 'budgetItemId' cannot be null.");
+        else if (budgetItemId !== undefined)
+            url_ += "BudgetItemId=" + encodeURIComponent("" + budgetItemId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processExport3(_response);
+        });
+    }
+
+    protected processExport3(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
+export class DisbursementRegisterReportsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Get disbursement register report
+     * @param fiscalPeriodId (optional) 
+     * @param fundId (optional) 
+     * @param status (optional) 
+     * @param approverId (optional) 
+     * @return OK
+     */
+    disbursementRegisterReports(fiscalYearId: number, fiscalPeriodId: number | undefined, fundId: number | undefined, status: string | undefined, approverId: number | undefined): Promise<DisbursementRegisterDto> {
+        let url_ = this.baseUrl + "/api/DisbursementRegisterReports?";
+        if (fiscalYearId === undefined || fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
+        else
+            url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        if (fiscalPeriodId === null)
+            throw new globalThis.Error("The parameter 'fiscalPeriodId' cannot be null.");
+        else if (fiscalPeriodId !== undefined)
+            url_ += "FiscalPeriodId=" + encodeURIComponent("" + fiscalPeriodId) + "&";
+        if (fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
+        else if (fundId !== undefined)
+            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
+        if (status === null)
+            throw new globalThis.Error("The parameter 'status' cannot be null.");
+        else if (status !== undefined)
+            url_ += "Status=" + encodeURIComponent("" + status) + "&";
+        if (approverId === null)
+            throw new globalThis.Error("The parameter 'approverId' cannot be null.");
+        else if (approverId !== undefined)
+            url_ += "ApproverId=" + encodeURIComponent("" + approverId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDisbursementRegisterReports(_response);
+        });
+    }
+
+    protected processDisbursementRegisterReports(response: Response): Promise<DisbursementRegisterDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DisbursementRegisterDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<DisbursementRegisterDto>(null as any);
+    }
+
+    /**
+     * Get disbursement register detail for a payment order
+     * @return OK
+     */
+    detail3(paymentOrderIdPath: number): Promise<DisbursementRegisterDetailDto> {
+        let url_ = this.baseUrl + "/api/DisbursementRegisterReports/{paymentOrderId}/detail";
+        if (paymentOrderIdPath === undefined || paymentOrderIdPath === null)
+            throw new globalThis.Error("The parameter 'paymentOrderIdPath' must be defined.");
+        url_ = url_.replace("{paymentOrderId}", encodeURIComponent("" + paymentOrderIdPath));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDetail3(_response);
+        });
+    }
+
+    protected processDetail3(response: Response): Promise<DisbursementRegisterDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DisbursementRegisterDetailDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<DisbursementRegisterDetailDto>(null as any);
+    }
+}
+
+export class RevenueCollectionsReportsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Get revenue collections report
+     * @param fiscalPeriodId (optional) 
+     * @param fundId (optional) 
+     * @param revenueAccountId (optional) 
+     * @param partyId (optional) 
+     * @param paymentMethod (optional) 
+     * @return OK
+     */
+    revenueCollectionsReports(fiscalYearId: number, fiscalPeriodId: number | undefined, fundId: number | undefined, revenueAccountId: number | undefined, partyId: number | undefined, paymentMethod: string | undefined): Promise<RevenueCollectionsReportDto> {
+        let url_ = this.baseUrl + "/api/RevenueCollectionsReports?";
+        if (fiscalYearId === undefined || fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
+        else
+            url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        if (fiscalPeriodId === null)
+            throw new globalThis.Error("The parameter 'fiscalPeriodId' cannot be null.");
+        else if (fiscalPeriodId !== undefined)
+            url_ += "FiscalPeriodId=" + encodeURIComponent("" + fiscalPeriodId) + "&";
+        if (fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
+        else if (fundId !== undefined)
+            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
+        if (revenueAccountId === null)
+            throw new globalThis.Error("The parameter 'revenueAccountId' cannot be null.");
+        else if (revenueAccountId !== undefined)
+            url_ += "RevenueAccountId=" + encodeURIComponent("" + revenueAccountId) + "&";
+        if (partyId === null)
+            throw new globalThis.Error("The parameter 'partyId' cannot be null.");
+        else if (partyId !== undefined)
+            url_ += "PartyId=" + encodeURIComponent("" + partyId) + "&";
+        if (paymentMethod === null)
+            throw new globalThis.Error("The parameter 'paymentMethod' cannot be null.");
+        else if (paymentMethod !== undefined)
+            url_ += "PaymentMethod=" + encodeURIComponent("" + paymentMethod) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRevenueCollectionsReports(_response);
+        });
+    }
+
+    protected processRevenueCollectionsReports(response: Response): Promise<RevenueCollectionsReportDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = RevenueCollectionsReportDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<RevenueCollectionsReportDto>(null as any);
+    }
+
+    /**
+     * Get revenue collections detail for a receipt voucher
+     * @return OK
+     */
+    detail4(receiptVoucherIdPath: number): Promise<RevenueCollectionsDetailDto> {
+        let url_ = this.baseUrl + "/api/RevenueCollectionsReports/{receiptVoucherId}/detail";
+        if (receiptVoucherIdPath === undefined || receiptVoucherIdPath === null)
+            throw new globalThis.Error("The parameter 'receiptVoucherIdPath' must be defined.");
+        url_ = url_.replace("{receiptVoucherId}", encodeURIComponent("" + receiptVoucherIdPath));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDetail4(_response);
+        });
+    }
+
+    protected processDetail4(response: Response): Promise<RevenueCollectionsDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = RevenueCollectionsDetailDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<RevenueCollectionsDetailDto>(null as any);
+    }
+
+    /**
+     * Export revenue collections report to Excel or PDF
+     * @param fiscalPeriodId (optional) 
+     * @param fundId (optional) 
+     * @param revenueAccountId (optional) 
+     * @param partyId (optional) 
+     * @param paymentMethod (optional) 
+     * @return OK
+     */
+    export4(format: string, fiscalYearId: number, fiscalPeriodId: number | undefined, fundId: number | undefined, revenueAccountId: number | undefined, partyId: number | undefined, paymentMethod: string | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/RevenueCollectionsReports/export?";
+        if (format === undefined || format === null)
+            throw new globalThis.Error("The parameter 'format' must be defined and cannot be null.");
+        else
+            url_ += "format=" + encodeURIComponent("" + format) + "&";
+        if (fiscalYearId === undefined || fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
+        else
+            url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        if (fiscalPeriodId === null)
+            throw new globalThis.Error("The parameter 'fiscalPeriodId' cannot be null.");
+        else if (fiscalPeriodId !== undefined)
+            url_ += "FiscalPeriodId=" + encodeURIComponent("" + fiscalPeriodId) + "&";
+        if (fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
+        else if (fundId !== undefined)
+            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
+        if (revenueAccountId === null)
+            throw new globalThis.Error("The parameter 'revenueAccountId' cannot be null.");
+        else if (revenueAccountId !== undefined)
+            url_ += "RevenueAccountId=" + encodeURIComponent("" + revenueAccountId) + "&";
+        if (partyId === null)
+            throw new globalThis.Error("The parameter 'partyId' cannot be null.");
+        else if (partyId !== undefined)
+            url_ += "PartyId=" + encodeURIComponent("" + partyId) + "&";
+        if (paymentMethod === null)
+            throw new globalThis.Error("The parameter 'paymentMethod' cannot be null.");
+        else if (paymentMethod !== undefined)
+            url_ += "PaymentMethod=" + encodeURIComponent("" + paymentMethod) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processExport4(_response);
+        });
+    }
+
+    protected processExport4(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
+export class TrialBalanceReportsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Get trial balance report
+     * @param fiscalPeriodId (optional) 
+     * @param fundId (optional) 
+     * @param projectId (optional) 
+     * @return OK
+     */
+    trialBalanceReports(fiscalYearId: number, fiscalPeriodId: number | undefined, fundId: number | undefined, projectId: number | undefined): Promise<TrialBalanceReportDto> {
+        let url_ = this.baseUrl + "/api/TrialBalanceReports?";
+        if (fiscalYearId === undefined || fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
+        else
+            url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        if (fiscalPeriodId === null)
+            throw new globalThis.Error("The parameter 'fiscalPeriodId' cannot be null.");
+        else if (fiscalPeriodId !== undefined)
+            url_ += "FiscalPeriodId=" + encodeURIComponent("" + fiscalPeriodId) + "&";
+        if (fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
+        else if (fundId !== undefined)
+            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
+        if (projectId === null)
+            throw new globalThis.Error("The parameter 'projectId' cannot be null.");
+        else if (projectId !== undefined)
+            url_ += "ProjectId=" + encodeURIComponent("" + projectId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processTrialBalanceReports(_response);
+        });
+    }
+
+    protected processTrialBalanceReports(response: Response): Promise<TrialBalanceReportDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = TrialBalanceReportDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TrialBalanceReportDto>(null as any);
+    }
+
+    /**
+     * Get ledger movement for an account
+     * @param fundId (optional) 
+     * @return OK
+     */
+    ledgerMovement(accountIdPath: number, fiscalYearId: number, fundId: number | undefined): Promise<LedgerMovementDto> {
+        let url_ = this.baseUrl + "/api/TrialBalanceReports/{accountId}/ledger-movement?";
+        if (accountIdPath === undefined || accountIdPath === null)
+            throw new globalThis.Error("The parameter 'accountIdPath' must be defined.");
+        url_ = url_.replace("{accountId}", encodeURIComponent("" + accountIdPath));
+        if (fiscalYearId === undefined || fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
+        else
+            url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        if (fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
+        else if (fundId !== undefined)
+            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processLedgerMovement(_response);
+        });
+    }
+
+    protected processLedgerMovement(response: Response): Promise<LedgerMovementDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = LedgerMovementDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<LedgerMovementDto>(null as any);
+    }
+
+    /**
+     * Export trial balance report to Excel or PDF
+     * @param fiscalPeriodId (optional) 
+     * @param fundId (optional) 
+     * @param projectId (optional) 
+     * @return OK
+     */
+    export5(format: string, fiscalYearId: number, fiscalPeriodId: number | undefined, fundId: number | undefined, projectId: number | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/TrialBalanceReports/export?";
+        if (format === undefined || format === null)
+            throw new globalThis.Error("The parameter 'format' must be defined and cannot be null.");
+        else
+            url_ += "format=" + encodeURIComponent("" + format) + "&";
+        if (fiscalYearId === undefined || fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
+        else
+            url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        if (fiscalPeriodId === null)
+            throw new globalThis.Error("The parameter 'fiscalPeriodId' cannot be null.");
+        else if (fiscalPeriodId !== undefined)
+            url_ += "FiscalPeriodId=" + encodeURIComponent("" + fiscalPeriodId) + "&";
+        if (fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
+        else if (fundId !== undefined)
+            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
+        if (projectId === null)
+            throw new globalThis.Error("The parameter 'projectId' cannot be null.");
+        else if (projectId !== undefined)
+            url_ += "ProjectId=" + encodeURIComponent("" + projectId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processExport5(_response);
+        });
+    }
+
+    protected processExport5(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
 export class BankAccountsClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -8201,7 +13763,7 @@ export class BankAccountsClient {
      * Activate a bank account
      * @return No Content
      */
-    activate3(id: number, body: ActivateBankAccountCommand): Promise<void> {
+    activatePOST3(id: number, body: ActivateBankAccountCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/BankAccounts/{id}/activate";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -8219,11 +13781,11 @@ export class BankAccountsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processActivate3(_response);
+            return this.processActivatePOST3(_response);
         });
     }
 
-    protected processActivate3(response: Response): Promise<void> {
+    protected processActivatePOST3(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -8490,10 +14052,63 @@ export class PaymentOrdersClient {
     }
 
     /**
+     * Get computed totals for a payment order
+     * @return OK
+     */
+    totals(id: number): Promise<PaymentOrderTotalsDto> {
+        let url_ = this.baseUrl + "/api/PaymentOrders/{id}/totals";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processTotals(_response);
+        });
+    }
+
+    protected processTotals(response: Response): Promise<PaymentOrderTotalsDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PaymentOrderTotalsDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PaymentOrderTotalsDto>(null as any);
+    }
+
+    /**
      * Submit payment order for approval
      * @return No Content
      */
-    submit(id: number, body: SubmitPaymentOrderCommand): Promise<void> {
+    submitPOST2(id: number, body: SubmitPaymentOrderCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/PaymentOrders/{id}/submit";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -8511,11 +14126,11 @@ export class PaymentOrdersClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processSubmit(_response);
+            return this.processSubmitPOST2(_response);
         });
     }
 
-    protected processSubmit(response: Response): Promise<void> {
+    protected processSubmitPOST2(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -8546,7 +14161,7 @@ export class PaymentOrdersClient {
      * Approve a submitted payment order
      * @return No Content
      */
-    approve5(id: number, body: ApprovePaymentOrderCommand): Promise<void> {
+    approvePOST7(id: number, body: ApprovePaymentOrderCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/PaymentOrders/{id}/approve";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -8564,11 +14179,11 @@ export class PaymentOrdersClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprove5(_response);
+            return this.processApprovePOST7(_response);
         });
     }
 
-    protected processApprove5(response: Response): Promise<void> {
+    protected processApprovePOST7(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -8599,7 +14214,7 @@ export class PaymentOrdersClient {
      * Reject a submitted payment order
      * @return No Content
      */
-    reject3(id: number, body: RejectPaymentOrderCommand): Promise<void> {
+    rejectPOST3(id: number, body: RejectPaymentOrderCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/PaymentOrders/{id}/reject";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -8617,11 +14232,11 @@ export class PaymentOrdersClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processReject3(_response);
+            return this.processRejectPOST3(_response);
         });
     }
 
-    protected processReject3(response: Response): Promise<void> {
+    protected processRejectPOST3(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -8652,7 +14267,7 @@ export class PaymentOrdersClient {
      * Cancel a payment order
      * @return No Content
      */
-    cancel5(id: number, body: CancelPaymentOrderCommand): Promise<void> {
+    cancelPOST6(id: number, body: CancelPaymentOrderCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/PaymentOrders/{id}/cancel";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -8670,11 +14285,11 @@ export class PaymentOrdersClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancel5(_response);
+            return this.processCancelPOST6(_response);
         });
     }
 
-    protected processCancel5(response: Response): Promise<void> {
+    protected processCancelPOST6(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -8805,6 +14420,430 @@ export class PaymentOrdersClient {
             });
         }
         return Promise.resolve<void>(null as any);
+    }
+}
+
+export class PaymentsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param status (optional) 
+     * @param fundId (optional) 
+     * @param fromDate (optional) 
+     * @param toDate (optional) 
+     * @return OK
+     */
+    paymentsAll(status: PaymentStatus | undefined, fundId: number | undefined, fromDate: Date | undefined, toDate: Date | undefined): Promise<PaymentDto[]> {
+        let url_ = this.baseUrl + "/api/Payments?";
+        if (status === null)
+            throw new globalThis.Error("The parameter 'status' cannot be null.");
+        else if (status !== undefined)
+            url_ += "status=" + encodeURIComponent("" + status) + "&";
+        if (fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
+        else if (fundId !== undefined)
+            url_ += "fundId=" + encodeURIComponent("" + fundId) + "&";
+        if (fromDate === null)
+            throw new globalThis.Error("The parameter 'fromDate' cannot be null.");
+        else if (fromDate !== undefined)
+            url_ += "fromDate=" + encodeURIComponent(fromDate ? "" + fromDate.toISOString() : "") + "&";
+        if (toDate === null)
+            throw new globalThis.Error("The parameter 'toDate' cannot be null.");
+        else if (toDate !== undefined)
+            url_ += "toDate=" + encodeURIComponent(toDate ? "" + toDate.toISOString() : "") + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPaymentsAll(_response);
+        });
+    }
+
+    protected processPaymentsAll(response: Response): Promise<PaymentDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(PaymentDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PaymentDto[]>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    paymentsPOST(body: RecordPaymentRequest): Promise<PaymentDto> {
+        let url_ = this.baseUrl + "/api/Payments";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPaymentsPOST(_response);
+        });
+    }
+
+    protected processPaymentsPOST(response: Response): Promise<PaymentDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PaymentDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PaymentDto>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    paymentsGET(id: number): Promise<PaymentDto> {
+        let url_ = this.baseUrl + "/api/Payments/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPaymentsGET(_response);
+        });
+    }
+
+    protected processPaymentsGET(response: Response): Promise<PaymentDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PaymentDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PaymentDto>(null as any);
+    }
+}
+
+export class PartiesClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param partyType (optional) 
+     * @param isActive (optional) 
+     * @param search (optional) 
+     * @return OK
+     */
+    partiesAll(partyType: PartyType | undefined, isActive: boolean | undefined, search: string | undefined): Promise<PartyResponse[]> {
+        let url_ = this.baseUrl + "/api/Parties?";
+        if (partyType === null)
+            throw new globalThis.Error("The parameter 'partyType' cannot be null.");
+        else if (partyType !== undefined)
+            url_ += "partyType=" + encodeURIComponent("" + partyType) + "&";
+        if (isActive === null)
+            throw new globalThis.Error("The parameter 'isActive' cannot be null.");
+        else if (isActive !== undefined)
+            url_ += "isActive=" + encodeURIComponent("" + isActive) + "&";
+        if (search === null)
+            throw new globalThis.Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "search=" + encodeURIComponent("" + search) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPartiesAll(_response);
+        });
+    }
+
+    protected processPartiesAll(response: Response): Promise<PartyResponse[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(PartyResponse.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PartyResponse[]>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    partiesPOST(body: CreatePartyRequest): Promise<number> {
+        let url_ = this.baseUrl + "/api/Parties";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPartiesPOST(_response);
+        });
+    }
+
+    protected processPartiesPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    partiesGET(id: number): Promise<PartyResponse> {
+        let url_ = this.baseUrl + "/api/Parties/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPartiesGET(_response);
+        });
+    }
+
+    protected processPartiesGET(response: Response): Promise<PartyResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PartyResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PartyResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    partiesPUT(id: number, body: UpdatePartyRequest): Promise<Result> {
+        let url_ = this.baseUrl + "/api/Parties/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPartiesPUT(_response);
+        });
+    }
+
+    protected processPartiesPUT(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    toggleActivePATCH4(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/Parties/{id}/toggle-active";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processToggleActivePATCH4(_response);
+        });
+    }
+
+    protected processToggleActivePATCH4(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
     }
 }
 
@@ -9114,6 +15153,1112 @@ export class NotificationsClient {
             });
         }
         return Promise.resolve<void>(null as any);
+    }
+}
+
+export class AvailabilityClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    availability(budgetItemId: number, fiscalYearId: number): Promise<AvailabilityBreakdownResponse> {
+        let url_ = this.baseUrl + "/api/Availability/{budgetItemId}?";
+        if (budgetItemId === undefined || budgetItemId === null)
+            throw new globalThis.Error("The parameter 'budgetItemId' must be defined.");
+        url_ = url_.replace("{budgetItemId}", encodeURIComponent("" + budgetItemId));
+        if (fiscalYearId === undefined || fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
+        else
+            url_ += "fiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAvailability(_response);
+        });
+    }
+
+    protected processAvailability(response: Response): Promise<AvailabilityBreakdownResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = AvailabilityBreakdownResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<AvailabilityBreakdownResponse>(null as any);
+    }
+}
+
+export class FinalAccountsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    generate(body: GenerateFinalAccountRequest): Promise<GenerateFinalAccountResponse> {
+        let url_ = this.baseUrl + "/api/FinalAccounts/Generate";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGenerate(_response);
+        });
+    }
+
+    protected processGenerate(response: Response): Promise<GenerateFinalAccountResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = GenerateFinalAccountResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GenerateFinalAccountResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    issue(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/FinalAccounts/{id}/Issue";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processIssue(_response);
+        });
+    }
+
+    protected processIssue(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    finalAccounts(id: number): Promise<FinalAccountResponse> {
+        let url_ = this.baseUrl + "/api/FinalAccounts/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processFinalAccounts(_response);
+        });
+    }
+
+    protected processFinalAccounts(response: Response): Promise<FinalAccountResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = FinalAccountResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FinalAccountResponse>(null as any);
+    }
+}
+
+export class StatementsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    collection(fiscalYearId: number): Promise<CollectionStatementResponse> {
+        let url_ = this.baseUrl + "/api/Statements/Collection?";
+        if (fiscalYearId === undefined || fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
+        else
+            url_ += "fiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCollection(_response);
+        });
+    }
+
+    protected processCollection(response: Response): Promise<CollectionStatementResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = CollectionStatementResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<CollectionStatementResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    disbursement(fiscalYearId: number): Promise<DisbursementStatementResponse> {
+        let url_ = this.baseUrl + "/api/Statements/Disbursement?";
+        if (fiscalYearId === undefined || fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
+        else
+            url_ += "fiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDisbursement(_response);
+        });
+    }
+
+    protected processDisbursement(response: Response): Promise<DisbursementStatementResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DisbursementStatementResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<DisbursementStatementResponse>(null as any);
+    }
+}
+
+export class YearClosingClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    lapse(body: LapseFiscalYearRequest): Promise<LapseFiscalYearResponse> {
+        let url_ = this.baseUrl + "/api/YearClosing/Lapse";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processLapse(_response);
+        });
+    }
+
+    protected processLapse(response: Response): Promise<LapseFiscalYearResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = LapseFiscalYearResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<LapseFiscalYearResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    reopen(body: ReopenFiscalYearRequest): Promise<ReopenFiscalYearResponse> {
+        let url_ = this.baseUrl + "/api/YearClosing/Reopen";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processReopen(_response);
+        });
+    }
+
+    protected processReopen(response: Response): Promise<ReopenFiscalYearResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ReopenFiscalYearResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ReopenFiscalYearResponse>(null as any);
+    }
+}
+
+export class DocumentsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    approvals(documentType: string, documentId: number): Promise<void> {
+        let url_ = this.baseUrl + "/api/Documents/{documentType}/{documentId}/approvals";
+        if (documentType === undefined || documentType === null)
+            throw new globalThis.Error("The parameter 'documentType' must be defined.");
+        url_ = url_.replace("{documentType}", encodeURIComponent("" + documentType));
+        if (documentId === undefined || documentId === null)
+            throw new globalThis.Error("The parameter 'documentId' must be defined.");
+        url_ = url_.replace("{documentId}", encodeURIComponent("" + documentId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processApprovals(_response);
+        });
+    }
+
+    protected processApprovals(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    statusLog(documentType: string, documentId: number): Promise<void> {
+        let url_ = this.baseUrl + "/api/Documents/{documentType}/{documentId}/status-log";
+        if (documentType === undefined || documentType === null)
+            throw new globalThis.Error("The parameter 'documentType' must be defined.");
+        url_ = url_.replace("{documentType}", encodeURIComponent("" + documentType));
+        if (documentId === undefined || documentId === null)
+            throw new globalThis.Error("The parameter 'documentId' must be defined.");
+        url_ = url_.replace("{documentId}", encodeURIComponent("" + documentId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processStatusLog(_response);
+        });
+    }
+
+    protected processStatusLog(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    attachmentsGET(documentType: string, documentId: number): Promise<void> {
+        let url_ = this.baseUrl + "/api/Documents/{documentType}/{documentId}/attachments";
+        if (documentType === undefined || documentType === null)
+            throw new globalThis.Error("The parameter 'documentType' must be defined.");
+        url_ = url_.replace("{documentType}", encodeURIComponent("" + documentType));
+        if (documentId === undefined || documentId === null)
+            throw new globalThis.Error("The parameter 'documentId' must be defined.");
+        url_ = url_.replace("{documentId}", encodeURIComponent("" + documentId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAttachmentsGET(_response);
+        });
+    }
+
+    protected processAttachmentsGET(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @param attachmentTypeCode (optional) 
+     * @param file (optional) 
+     * @return OK
+     */
+    attachmentsPOST(documentType: string, documentId: number, attachmentTypeCode: string | undefined, file: FileParameter | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/Documents/{documentType}/{documentId}/attachments?";
+        if (documentType === undefined || documentType === null)
+            throw new globalThis.Error("The parameter 'documentType' must be defined.");
+        url_ = url_.replace("{documentType}", encodeURIComponent("" + documentType));
+        if (documentId === undefined || documentId === null)
+            throw new globalThis.Error("The parameter 'documentId' must be defined.");
+        url_ = url_.replace("{documentId}", encodeURIComponent("" + documentId));
+        if (attachmentTypeCode === null)
+            throw new globalThis.Error("The parameter 'attachmentTypeCode' cannot be null.");
+        else if (attachmentTypeCode !== undefined)
+            url_ += "attachmentTypeCode=" + encodeURIComponent("" + attachmentTypeCode) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (file === null || file === undefined)
+            throw new globalThis.Error("The parameter 'file' cannot be null.");
+        else
+            content_.append("file", file.data, file.fileName ? file.fileName : "file");
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAttachmentsPOST(_response);
+        });
+    }
+
+    protected processAttachmentsPOST(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    attachmentRequirements(documentType: string): Promise<void> {
+        let url_ = this.baseUrl + "/api/Documents/{documentType}/attachment-requirements";
+        if (documentType === undefined || documentType === null)
+            throw new globalThis.Error("The parameter 'documentType' must be defined.");
+        url_ = url_.replace("{documentType}", encodeURIComponent("" + documentType));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAttachmentRequirements(_response);
+        });
+    }
+
+    protected processAttachmentRequirements(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    attachmentsDELETE(id: number): Promise<void> {
+        let url_ = this.baseUrl + "/api/Documents/attachments/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAttachmentsDELETE(_response);
+        });
+    }
+
+    protected processAttachmentsDELETE(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
+export class DisbursementRequestsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param status (optional) 
+     * @param fundId (optional) 
+     * @param fromDate (optional) 
+     * @param toDate (optional) 
+     * @param paymentOrderId (optional) 
+     * @return OK
+     */
+    disbursementRequestsAll(status: DisbursementRequestStatus | undefined, fundId: number | undefined, fromDate: Date | undefined, toDate: Date | undefined, paymentOrderId: number | undefined): Promise<DisbursementRequestDto[]> {
+        let url_ = this.baseUrl + "/api/DisbursementRequests?";
+        if (status === null)
+            throw new globalThis.Error("The parameter 'status' cannot be null.");
+        else if (status !== undefined)
+            url_ += "status=" + encodeURIComponent("" + status) + "&";
+        if (fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
+        else if (fundId !== undefined)
+            url_ += "fundId=" + encodeURIComponent("" + fundId) + "&";
+        if (fromDate === null)
+            throw new globalThis.Error("The parameter 'fromDate' cannot be null.");
+        else if (fromDate !== undefined)
+            url_ += "fromDate=" + encodeURIComponent(fromDate ? "" + fromDate.toISOString() : "") + "&";
+        if (toDate === null)
+            throw new globalThis.Error("The parameter 'toDate' cannot be null.");
+        else if (toDate !== undefined)
+            url_ += "toDate=" + encodeURIComponent(toDate ? "" + toDate.toISOString() : "") + "&";
+        if (paymentOrderId === null)
+            throw new globalThis.Error("The parameter 'paymentOrderId' cannot be null.");
+        else if (paymentOrderId !== undefined)
+            url_ += "paymentOrderId=" + encodeURIComponent("" + paymentOrderId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDisbursementRequestsAll(_response);
+        });
+    }
+
+    protected processDisbursementRequestsAll(response: Response): Promise<DisbursementRequestDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(DisbursementRequestDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<DisbursementRequestDto[]>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    disbursementRequestsPOST(body: CreateDisbursementRequestRequest): Promise<DisbursementRequestDto> {
+        let url_ = this.baseUrl + "/api/DisbursementRequests";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDisbursementRequestsPOST(_response);
+        });
+    }
+
+    protected processDisbursementRequestsPOST(response: Response): Promise<DisbursementRequestDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DisbursementRequestDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<DisbursementRequestDto>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    disbursementRequestsGET(id: number): Promise<DisbursementRequestDetailDto> {
+        let url_ = this.baseUrl + "/api/DisbursementRequests/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDisbursementRequestsGET(_response);
+        });
+    }
+
+    protected processDisbursementRequestsGET(response: Response): Promise<DisbursementRequestDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DisbursementRequestDetailDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<DisbursementRequestDetailDto>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    submitPATCH4(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/DisbursementRequests/{id}/submit";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSubmitPATCH4(_response);
+        });
+    }
+
+    protected processSubmitPATCH4(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    approvePATCH4(id: number, body: ApproveDisbursementRequestRequest): Promise<Result> {
+        let url_ = this.baseUrl + "/api/DisbursementRequests/{id}/approve";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processApprovePATCH4(_response);
+        });
+    }
+
+    protected processApprovePATCH4(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    rejectPATCH(id: number, body: RejectDisbursementRequestRequest): Promise<Result> {
+        let url_ = this.baseUrl + "/api/DisbursementRequests/{id}/reject";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRejectPATCH(_response);
+        });
+    }
+
+    protected processRejectPATCH(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    cancelPATCH4(id: number, body: CancelDisbursementRequestRequest): Promise<Result> {
+        let url_ = this.baseUrl + "/api/DisbursementRequests/{id}/cancel";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCancelPATCH4(_response);
+        });
+    }
+
+    protected processCancelPATCH4(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
     }
 }
 
@@ -9703,7 +16848,7 @@ export class CommitteeMembersClient {
      * Activate a committee member
      * @return No Content
      */
-    activate4(id: number, body: ActivateMemberCommand): Promise<void> {
+    activatePOST4(id: number, body: ActivateMemberCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/CommitteeMembers/{id}/activate";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -9721,11 +16866,11 @@ export class CommitteeMembersClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processActivate4(_response);
+            return this.processActivatePOST4(_response);
         });
     }
 
-    protected processActivate4(response: Response): Promise<void> {
+    protected processActivatePOST4(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -9990,7 +17135,7 @@ export class CommitteesClient {
      * Activate a committee
      * @return No Content
      */
-    activate5(id: number, body: ActivateCommitteeCommand): Promise<void> {
+    activatePOST5(id: number, body: ActivateCommitteeCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/Committees/{id}/activate";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -10008,11 +17153,11 @@ export class CommitteesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processActivate5(_response);
+            return this.processActivatePOST5(_response);
         });
     }
 
-    protected processActivate5(response: Response): Promise<void> {
+    protected processActivatePOST5(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -10119,3197 +17264,6 @@ export class CommitteesClient {
     }
 
     protected processDissolve(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-}
-
-export class AppropriationsClient {
-    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
-
-    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
-        this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "";
-    }
-
-    /**
-     * Get appropriations
-     * @param budgetId (optional) 
-     * @param budgetItemId (optional) 
-     * @param status (optional) 
-     * @return OK
-     */
-    appropriationsAll(budgetId: number | undefined, budgetItemId: number | undefined, status: AppropriationStatus | null | undefined): Promise<AppropriationDto[]> {
-        let url_ = this.baseUrl + "/api/Appropriations?";
-        if (budgetId === null)
-            throw new globalThis.Error("The parameter 'budgetId' cannot be null.");
-        else if (budgetId !== undefined)
-            url_ += "BudgetId=" + encodeURIComponent("" + budgetId) + "&";
-        if (budgetItemId === null)
-            throw new globalThis.Error("The parameter 'budgetItemId' cannot be null.");
-        else if (budgetItemId !== undefined)
-            url_ += "BudgetItemId=" + encodeURIComponent("" + budgetItemId) + "&";
-        if (status !== undefined && status !== null)
-            url_ += "Status=" + encodeURIComponent("" + status) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processAppropriationsAll(_response);
-        });
-    }
-
-    protected processAppropriationsAll(response: Response): Promise<AppropriationDto[]> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(AppropriationDto.fromJS(item));
-            }
-            else {
-                result200 = null as any;
-            }
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<AppropriationDto[]>(null as any);
-    }
-
-    /**
-     * Create a new appropriation
-     * @return Created
-     */
-    appropriationsPOST(body: CreateAppropriationCommand): Promise<number> {
-        let url_ = this.baseUrl + "/api/Appropriations";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processAppropriationsPOST(_response);
-        });
-    }
-
-    protected processAppropriationsPOST(response: Response): Promise<number> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 201) {
-            return response.text().then((_responseText) => {
-            let result201: any = null;
-            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                result201 = resultData201 !== undefined ? resultData201 : null as any;
-    
-            return result201;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<number>(null as any);
-    }
-
-    /**
-     * Get appropriation by ID
-     * @return OK
-     */
-    appropriationsGET(id: number): Promise<AppropriationDto> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processAppropriationsGET(_response);
-        });
-    }
-
-    protected processAppropriationsGET(response: Response): Promise<AppropriationDto> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = AppropriationDto.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<AppropriationDto>(null as any);
-    }
-
-    /**
-     * Update a draft appropriation
-     * @return No Content
-     */
-    appropriationsPUT(id: number, body: UpdateAppropriationCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processAppropriationsPUT(_response);
-        });
-    }
-
-    protected processAppropriationsPUT(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Delete a draft appropriation
-     * @return No Content
-     */
-    appropriationsDELETE(id: number, body: DeleteAppropriationCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processAppropriationsDELETE(_response);
-        });
-    }
-
-    protected processAppropriationsDELETE(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Get computed availability for a budget item
-     * @return OK
-     */
-    availability(budgetItemId: number): Promise<ItemAvailabilityDto> {
-        let url_ = this.baseUrl + "/api/Appropriations/availability?";
-        if (budgetItemId === undefined || budgetItemId === null)
-            throw new globalThis.Error("The parameter 'budgetItemId' must be defined and cannot be null.");
-        else
-            url_ += "budgetItemId=" + encodeURIComponent("" + budgetItemId) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processAvailability(_response);
-        });
-    }
-
-    protected processAvailability(response: Response): Promise<ItemAvailabilityDto> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = ItemAvailabilityDto.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<ItemAvailabilityDto>(null as any);
-    }
-
-    /**
-     * Submit appropriation for approval
-     * @return No Content
-     */
-    submit2(id: number, body: SubmitAppropriationCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}/submit";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processSubmit2(_response);
-        });
-    }
-
-    protected processSubmit2(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Approve appropriation
-     * @return No Content
-     */
-    approve6(id: number, body: ApproveAppropriationCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}/approve";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprove6(_response);
-        });
-    }
-
-    protected processApprove6(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Activate appropriation
-     * @return No Content
-     */
-    activate6(id: number, body: ActivateAppropriationCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}/activate";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processActivate6(_response);
-        });
-    }
-
-    protected processActivate6(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Suspend appropriation
-     * @return No Content
-     */
-    suspend(id: number, body: SuspendAppropriationCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}/suspend";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processSuspend(_response);
-        });
-    }
-
-    protected processSuspend(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Close appropriation
-     * @return No Content
-     */
-    close2(id: number, body: CloseAppropriationCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}/close";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processClose2(_response);
-        });
-    }
-
-    protected processClose2(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Cancel appropriation
-     * @return No Content
-     */
-    cancel6(id: number, body: CancelAppropriationCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}/cancel";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancel6(_response);
-        });
-    }
-
-    protected processCancel6(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-}
-
-export class BudgetClassificationsClient {
-    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
-
-    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
-        this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "";
-    }
-
-    /**
-     * Get budget classifications tree
-     * @param isActive (optional) 
-     * @return OK
-     */
-    tree(isActive: boolean | undefined): Promise<BudgetClassificationTreeDto[]> {
-        let url_ = this.baseUrl + "/api/BudgetClassifications/tree?";
-        if (isActive === null)
-            throw new globalThis.Error("The parameter 'isActive' cannot be null.");
-        else if (isActive !== undefined)
-            url_ += "IsActive=" + encodeURIComponent("" + isActive) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processTree(_response);
-        });
-    }
-
-    protected processTree(response: Response): Promise<BudgetClassificationTreeDto[]> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(BudgetClassificationTreeDto.fromJS(item));
-            }
-            else {
-                result200 = null as any;
-            }
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<BudgetClassificationTreeDto[]>(null as any);
-    }
-
-    /**
-     * Get budget classification by ID
-     * @return OK
-     */
-    budgetClassificationsGET(id: number): Promise<BudgetClassificationDto> {
-        let url_ = this.baseUrl + "/api/BudgetClassifications/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processBudgetClassificationsGET(_response);
-        });
-    }
-
-    protected processBudgetClassificationsGET(response: Response): Promise<BudgetClassificationDto> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = BudgetClassificationDto.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<BudgetClassificationDto>(null as any);
-    }
-
-    /**
-     * Update an existing budget classification
-     * @return No Content
-     */
-    budgetClassificationsPUT(id: number, body: UpdateBudgetClassificationCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/BudgetClassifications/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processBudgetClassificationsPUT(_response);
-        });
-    }
-
-    protected processBudgetClassificationsPUT(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Create a new budget classification
-     * @return Created
-     */
-    budgetClassificationsPOST(body: CreateBudgetClassificationCommand): Promise<number> {
-        let url_ = this.baseUrl + "/api/BudgetClassifications";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processBudgetClassificationsPOST(_response);
-        });
-    }
-
-    protected processBudgetClassificationsPOST(response: Response): Promise<number> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 201) {
-            return response.text().then((_responseText) => {
-            let result201: any = null;
-            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                result201 = resultData201 !== undefined ? resultData201 : null as any;
-    
-            return result201;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<number>(null as any);
-    }
-
-    /**
-     * Activate or deactivate a budget classification
-     * @return No Content
-     */
-    toggleActive(id: number, body: ToggleBudgetClassificationActiveCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/BudgetClassifications/{id}/toggle-active";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processToggleActive(_response);
-        });
-    }
-
-    protected processToggleActive(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-}
-
-export class BudgetsClient {
-    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
-
-    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
-        this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "";
-    }
-
-    /**
-     * Get all budgets
-     * @param fiscalYearId (optional) 
-     * @param fundId (optional) 
-     * @param status (optional) 
-     * @return OK
-     */
-    budgetsAll(fiscalYearId: number | undefined, fundId: number | undefined, status: BudgetStatus | null | undefined): Promise<BudgetDto[]> {
-        let url_ = this.baseUrl + "/api/Budgets?";
-        if (fiscalYearId === null)
-            throw new globalThis.Error("The parameter 'fiscalYearId' cannot be null.");
-        else if (fiscalYearId !== undefined)
-            url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
-        if (fundId === null)
-            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
-        else if (fundId !== undefined)
-            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
-        if (status !== undefined && status !== null)
-            url_ += "Status=" + encodeURIComponent("" + status) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processBudgetsAll(_response);
-        });
-    }
-
-    protected processBudgetsAll(response: Response): Promise<BudgetDto[]> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(BudgetDto.fromJS(item));
-            }
-            else {
-                result200 = null as any;
-            }
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<BudgetDto[]>(null as any);
-    }
-
-    /**
-     * Create a new budget
-     * @return Created
-     */
-    budgetsPOST(body: CreateBudgetCommand): Promise<number> {
-        let url_ = this.baseUrl + "/api/Budgets";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processBudgetsPOST(_response);
-        });
-    }
-
-    protected processBudgetsPOST(response: Response): Promise<number> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 201) {
-            return response.text().then((_responseText) => {
-            let result201: any = null;
-            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                result201 = resultData201 !== undefined ? resultData201 : null as any;
-    
-            return result201;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<number>(null as any);
-    }
-
-    /**
-     * Get budget by ID
-     * @return OK
-     */
-    budgetsGET(id: number): Promise<BudgetDto> {
-        let url_ = this.baseUrl + "/api/Budgets/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processBudgetsGET(_response);
-        });
-    }
-
-    protected processBudgetsGET(response: Response): Promise<BudgetDto> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = BudgetDto.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<BudgetDto>(null as any);
-    }
-
-    /**
-     * Update an existing budget
-     * @return No Content
-     */
-    budgetsPUT(id: number, body: UpdateBudgetCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Budgets/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processBudgetsPUT(_response);
-        });
-    }
-
-    protected processBudgetsPUT(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Submit budget for approval
-     * @return No Content
-     */
-    submit3(id: number, body: SubmitBudgetCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Budgets/{id}/submit";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processSubmit3(_response);
-        });
-    }
-
-    protected processSubmit3(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Approve budget
-     * @return No Content
-     */
-    approve7(id: number, body: ApproveBudgetCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Budgets/{id}/approve";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprove7(_response);
-        });
-    }
-
-    protected processApprove7(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Activate budget
-     * @return No Content
-     */
-    activate7(id: number, body: ActivateBudgetCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Budgets/{id}/activate";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processActivate7(_response);
-        });
-    }
-
-    protected processActivate7(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Suspend budget
-     * @return No Content
-     */
-    suspend2(id: number, body: SuspendBudgetCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Budgets/{id}/suspend";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processSuspend2(_response);
-        });
-    }
-
-    protected processSuspend2(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Close budget
-     * @return No Content
-     */
-    close3(id: number, body: CloseBudgetCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Budgets/{id}/close";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processClose3(_response);
-        });
-    }
-
-    protected processClose3(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Cancel budget
-     * @return No Content
-     */
-    cancel7(id: number, body: CancelBudgetCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Budgets/{id}/cancel";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancel7(_response);
-        });
-    }
-
-    protected processCancel7(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Get budget items tree
-     * @return OK
-     */
-    tree2(id: number): Promise<BudgetItemTreeDto[]> {
-        let url_ = this.baseUrl + "/api/Budgets/{id}/items/tree";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processTree2(_response);
-        });
-    }
-
-    protected processTree2(response: Response): Promise<BudgetItemTreeDto[]> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(BudgetItemTreeDto.fromJS(item));
-            }
-            else {
-                result200 = null as any;
-            }
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<BudgetItemTreeDto[]>(null as any);
-    }
-
-    /**
-     * Create a new budget item
-     * @return Created
-     */
-    itemsPOST(id: number, body: CreateBudgetItemCommand): Promise<number> {
-        let url_ = this.baseUrl + "/api/Budgets/{id}/items";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processItemsPOST(_response);
-        });
-    }
-
-    protected processItemsPOST(response: Response): Promise<number> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 201) {
-            return response.text().then((_responseText) => {
-            let result201: any = null;
-            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                result201 = resultData201 !== undefined ? resultData201 : null as any;
-    
-            return result201;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<number>(null as any);
-    }
-
-    /**
-     * Get budget item by ID
-     * @return OK
-     */
-    itemsGET(itemId: number): Promise<BudgetItemDto> {
-        let url_ = this.baseUrl + "/api/Budgets/items/{itemId}";
-        if (itemId === undefined || itemId === null)
-            throw new globalThis.Error("The parameter 'itemId' must be defined.");
-        url_ = url_.replace("{itemId}", encodeURIComponent("" + itemId));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processItemsGET(_response);
-        });
-    }
-
-    protected processItemsGET(response: Response): Promise<BudgetItemDto> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = BudgetItemDto.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<BudgetItemDto>(null as any);
-    }
-
-    /**
-     * Update an existing budget item
-     * @return No Content
-     */
-    itemsPUT(itemId: number, body: UpdateBudgetItemCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Budgets/items/{itemId}";
-        if (itemId === undefined || itemId === null)
-            throw new globalThis.Error("The parameter 'itemId' must be defined.");
-        url_ = url_.replace("{itemId}", encodeURIComponent("" + itemId));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processItemsPUT(_response);
-        });
-    }
-
-    protected processItemsPUT(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Delete a budget item
-     * @return No Content
-     */
-    itemsDELETE(itemId: number, body: DeleteBudgetItemCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Budgets/items/{itemId}";
-        if (itemId === undefined || itemId === null)
-            throw new globalThis.Error("The parameter 'itemId' must be defined.");
-        url_ = url_.replace("{itemId}", encodeURIComponent("" + itemId));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processItemsDELETE(_response);
-        });
-    }
-
-    protected processItemsDELETE(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Move a budget item to a new parent
-     * @return No Content
-     */
-    move(itemId: number, body: MoveBudgetItemCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Budgets/items/{itemId}/move";
-        if (itemId === undefined || itemId === null)
-            throw new globalThis.Error("The parameter 'itemId' must be defined.");
-        url_ = url_.replace("{itemId}", encodeURIComponent("" + itemId));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processMove(_response);
-        });
-    }
-
-    protected processMove(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-}
-
-export class BudgetTypesClient {
-    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
-
-    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
-        this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "";
-    }
-
-    /**
-     * Get all budget types
-     * @param isActive (optional) 
-     * @return OK
-     */
-    budgetTypesAll(isActive: boolean | undefined): Promise<BudgetTypeDto[]> {
-        let url_ = this.baseUrl + "/api/BudgetTypes?";
-        if (isActive === null)
-            throw new globalThis.Error("The parameter 'isActive' cannot be null.");
-        else if (isActive !== undefined)
-            url_ += "IsActive=" + encodeURIComponent("" + isActive) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processBudgetTypesAll(_response);
-        });
-    }
-
-    protected processBudgetTypesAll(response: Response): Promise<BudgetTypeDto[]> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(BudgetTypeDto.fromJS(item));
-            }
-            else {
-                result200 = null as any;
-            }
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<BudgetTypeDto[]>(null as any);
-    }
-
-    /**
-     * Create a new budget type
-     * @return Created
-     */
-    budgetTypesPOST(body: CreateBudgetTypeCommand): Promise<number> {
-        let url_ = this.baseUrl + "/api/BudgetTypes";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processBudgetTypesPOST(_response);
-        });
-    }
-
-    protected processBudgetTypesPOST(response: Response): Promise<number> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 201) {
-            return response.text().then((_responseText) => {
-            let result201: any = null;
-            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                result201 = resultData201 !== undefined ? resultData201 : null as any;
-    
-            return result201;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<number>(null as any);
-    }
-
-    /**
-     * Get budget type by ID
-     * @return OK
-     */
-    budgetTypesGET(id: number): Promise<BudgetTypeDto> {
-        let url_ = this.baseUrl + "/api/BudgetTypes/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processBudgetTypesGET(_response);
-        });
-    }
-
-    protected processBudgetTypesGET(response: Response): Promise<BudgetTypeDto> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = BudgetTypeDto.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<BudgetTypeDto>(null as any);
-    }
-
-    /**
-     * Update an existing budget type
-     * @return No Content
-     */
-    budgetTypesPUT(id: number, body: UpdateBudgetTypeCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/BudgetTypes/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processBudgetTypesPUT(_response);
-        });
-    }
-
-    protected processBudgetTypesPUT(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Activate or deactivate a budget type
-     * @return No Content
-     */
-    toggleActive2(id: number, body: ToggleBudgetTypeActiveCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/BudgetTypes/{id}/toggle-active";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processToggleActive2(_response);
-        });
-    }
-
-    protected processToggleActive2(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-}
-
-export class EncumbrancesClient {
-    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
-
-    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
-        this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "";
-    }
-
-    /**
-     * Get encumbrances
-     * @param appropriationId (optional) 
-     * @param status (optional) 
-     * @return OK
-     */
-    encumbrancesAll(appropriationId: number | undefined, status: EncumbranceStatus | null | undefined): Promise<EncumbranceDto[]> {
-        let url_ = this.baseUrl + "/api/Encumbrances?";
-        if (appropriationId === null)
-            throw new globalThis.Error("The parameter 'appropriationId' cannot be null.");
-        else if (appropriationId !== undefined)
-            url_ += "AppropriationId=" + encodeURIComponent("" + appropriationId) + "&";
-        if (status !== undefined && status !== null)
-            url_ += "Status=" + encodeURIComponent("" + status) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processEncumbrancesAll(_response);
-        });
-    }
-
-    protected processEncumbrancesAll(response: Response): Promise<EncumbranceDto[]> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(EncumbranceDto.fromJS(item));
-            }
-            else {
-                result200 = null as any;
-            }
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<EncumbranceDto[]>(null as any);
-    }
-
-    /**
-     * Create a new encumbrance
-     * @return Created
-     */
-    encumbrancesPOST(body: CreateEncumbranceCommand): Promise<number> {
-        let url_ = this.baseUrl + "/api/Encumbrances";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processEncumbrancesPOST(_response);
-        });
-    }
-
-    protected processEncumbrancesPOST(response: Response): Promise<number> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 201) {
-            return response.text().then((_responseText) => {
-            let result201: any = null;
-            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                result201 = resultData201 !== undefined ? resultData201 : null as any;
-    
-            return result201;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<number>(null as any);
-    }
-
-    /**
-     * Get encumbrance by ID
-     * @return OK
-     */
-    encumbrancesGET(id: number): Promise<EncumbranceDto> {
-        let url_ = this.baseUrl + "/api/Encumbrances/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processEncumbrancesGET(_response);
-        });
-    }
-
-    protected processEncumbrancesGET(response: Response): Promise<EncumbranceDto> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = EncumbranceDto.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<EncumbranceDto>(null as any);
-    }
-
-    /**
-     * Get computed availability for an encumbrance appropriation
-     * @return OK
-     */
-    availability2(appropriationId: number): Promise<EncumbranceAvailabilityDto> {
-        let url_ = this.baseUrl + "/api/Encumbrances/availability?";
-        if (appropriationId === undefined || appropriationId === null)
-            throw new globalThis.Error("The parameter 'appropriationId' must be defined and cannot be null.");
-        else
-            url_ += "appropriationId=" + encodeURIComponent("" + appropriationId) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processAvailability2(_response);
-        });
-    }
-
-    protected processAvailability2(response: Response): Promise<EncumbranceAvailabilityDto> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = EncumbranceAvailabilityDto.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<EncumbranceAvailabilityDto>(null as any);
-    }
-
-    /**
-     * Submit encumbrance for approval
-     * @return No Content
-     */
-    submit4(id: number, body: SubmitEncumbranceCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Encumbrances/{id}/submit";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processSubmit4(_response);
-        });
-    }
-
-    protected processSubmit4(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Approve encumbrance
-     * @return No Content
-     */
-    approve8(id: number, body: ApproveEncumbranceCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Encumbrances/{id}/approve";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprove8(_response);
-        });
-    }
-
-    protected processApprove8(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Activate encumbrance
-     * @return No Content
-     */
-    activate8(id: number, body: ActivateEncumbranceCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Encumbrances/{id}/activate";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processActivate8(_response);
-        });
-    }
-
-    protected processActivate8(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Release encumbrance
-     * @return No Content
-     */
-    release(id: number, body: ReleaseEncumbranceCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Encumbrances/{id}/release";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processRelease(_response);
-        });
-    }
-
-    protected processRelease(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Partially liquidate encumbrance
-     * @return No Content
-     */
-    liquidatePartial(id: number, body: LiquidateEncumbrancePartialCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Encumbrances/{id}/liquidate-partial";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processLiquidatePartial(_response);
-        });
-    }
-
-    protected processLiquidatePartial(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Fully liquidate encumbrance
-     * @return No Content
-     */
-    liquidateFull(id: number, body: LiquidateEncumbranceFullCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Encumbrances/{id}/liquidate-full";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processLiquidateFull(_response);
-        });
-    }
-
-    protected processLiquidateFull(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Close encumbrance
-     * @return No Content
-     */
-    close4(id: number, body: CloseEncumbranceCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Encumbrances/{id}/close";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processClose4(_response);
-        });
-    }
-
-    protected processClose4(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Cancel encumbrance
-     * @return No Content
-     */
-    cancel8(id: number, body: CancelEncumbranceCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Encumbrances/{id}/cancel";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancel8(_response);
-        });
-    }
-
-    protected processCancel8(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Reverse encumbrance
-     * @return Created
-     */
-    reverse2(id: number, body: ReverseEncumbranceCommand): Promise<number> {
-        let url_ = this.baseUrl + "/api/Encumbrances/{id}/reverse";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processReverse2(_response);
-        });
-    }
-
-    protected processReverse2(response: Response): Promise<number> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 201) {
-            return response.text().then((_responseText) => {
-            let result201: any = null;
-            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                result201 = resultData201 !== undefined ? resultData201 : null as any;
-    
-            return result201;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<number>(null as any);
-    }
-}
-
-export class FundsClient {
-    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
-
-    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
-        this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "";
-    }
-
-    /**
-     * Get all funds
-     * @param isActive (optional) 
-     * @return OK
-     */
-    fundsAll(isActive: boolean | undefined): Promise<FundDto[]> {
-        let url_ = this.baseUrl + "/api/Funds?";
-        if (isActive === null)
-            throw new globalThis.Error("The parameter 'isActive' cannot be null.");
-        else if (isActive !== undefined)
-            url_ += "IsActive=" + encodeURIComponent("" + isActive) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processFundsAll(_response);
-        });
-    }
-
-    protected processFundsAll(response: Response): Promise<FundDto[]> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(FundDto.fromJS(item));
-            }
-            else {
-                result200 = null as any;
-            }
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<FundDto[]>(null as any);
-    }
-
-    /**
-     * Create a new fund
-     * @return Created
-     */
-    fundsPOST(body: CreateFundCommand): Promise<number> {
-        let url_ = this.baseUrl + "/api/Funds";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processFundsPOST(_response);
-        });
-    }
-
-    protected processFundsPOST(response: Response): Promise<number> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 201) {
-            return response.text().then((_responseText) => {
-            let result201: any = null;
-            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                result201 = resultData201 !== undefined ? resultData201 : null as any;
-    
-            return result201;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<number>(null as any);
-    }
-
-    /**
-     * Get fund by ID
-     * @return OK
-     */
-    fundsGET(id: number): Promise<FundDto> {
-        let url_ = this.baseUrl + "/api/Funds/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processFundsGET(_response);
-        });
-    }
-
-    protected processFundsGET(response: Response): Promise<FundDto> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = FundDto.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<FundDto>(null as any);
-    }
-
-    /**
-     * Update an existing fund
-     * @return No Content
-     */
-    fundsPUT(id: number, body: UpdateFundCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Funds/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processFundsPUT(_response);
-        });
-    }
-
-    protected processFundsPUT(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Activate a fund
-     * @return No Content
-     */
-    activate9(id: number, body: ActivateFundCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Funds/{id}/activate";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processActivate9(_response);
-        });
-    }
-
-    protected processActivate9(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Deactivate a fund
-     * @return No Content
-     */
-    deactivatePOST8(id: number, body: DeactivateFundCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Funds/{id}/deactivate";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processDeactivatePOST8(_response);
-        });
-    }
-
-    protected processDeactivatePOST8(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -13578,7 +17532,7 @@ export class AccountGroupsClient {
      * Get account group detail
      * @return OK
      */
-    detail(id: number): Promise<AccountGroupDetailResponse> {
+    detail5(id: number): Promise<AccountGroupDetailResponse> {
         let url_ = this.baseUrl + "/api/AccountGroups/{id}/detail";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -13593,11 +17547,11 @@ export class AccountGroupsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processDetail(_response);
+            return this.processDetail5(_response);
         });
     }
 
-    protected processDetail(response: Response): Promise<AccountGroupDetailResponse> {
+    protected processDetail5(response: Response): Promise<AccountGroupDetailResponse> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -13631,7 +17585,7 @@ export class AccountGroupsClient {
      * Toggle account group active
      * @return No Content
      */
-    toggleActive3(id: number, body: ToggleAccountGroupActiveCommand): Promise<void> {
+    toggleActivePOST(id: number, body: ToggleAccountGroupActiveCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/AccountGroups/{id}/toggle-active";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -13649,11 +17603,11 @@ export class AccountGroupsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processToggleActive3(_response);
+            return this.processToggleActivePOST(_response);
         });
     }
 
-    protected processToggleActive3(response: Response): Promise<void> {
+    protected processToggleActivePOST(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -13767,7 +17721,7 @@ export class AccountingBalancesClient {
     }
 
     /**
-     * Reconcile materialized balances against source MoveLines
+     * Reconcile materialized balances against source JournalEntryLines
      * @return OK
      */
     reconcileGET(fiscalYearId: number, fiscalPeriodId: number): Promise<ReconciliationResultDto> {
@@ -13988,19 +17942,19 @@ export class AccountingEventsClient {
     /**
      * Get pending accounting events
      * @param eventType (optional) 
-     * @param sourceTable (optional) 
+     * @param sourceDocumentType (optional) 
      * @return OK
      */
-    pending2(eventType: string | undefined, sourceTable: string | undefined): Promise<AccountingEventDto[]> {
+    pending2(eventType: string | undefined, sourceDocumentType: string | undefined): Promise<AccountingEventDto[]> {
         let url_ = this.baseUrl + "/api/AccountingEvents/pending?";
         if (eventType === null)
             throw new globalThis.Error("The parameter 'eventType' cannot be null.");
         else if (eventType !== undefined)
             url_ += "EventType=" + encodeURIComponent("" + eventType) + "&";
-        if (sourceTable === null)
-            throw new globalThis.Error("The parameter 'sourceTable' cannot be null.");
-        else if (sourceTable !== undefined)
-            url_ += "SourceTable=" + encodeURIComponent("" + sourceTable) + "&";
+        if (sourceDocumentType === null)
+            throw new globalThis.Error("The parameter 'sourceDocumentType' cannot be null.");
+        else if (sourceDocumentType !== undefined)
+            url_ += "SourceDocumentType=" + encodeURIComponent("" + sourceDocumentType) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {
@@ -14297,6 +18251,676 @@ export class AccountsClient {
     }
 }
 
+export class JournalEntriesClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Get all journal entries
+     * @param entryStatus (optional) 
+     * @param journalId (optional) 
+     * @param fromDate (optional) 
+     * @param toDate (optional) 
+     * @return OK
+     */
+    journalEntriesAll(entryStatus: string | undefined, journalId: number | undefined, fromDate: Date | undefined, toDate: Date | undefined): Promise<JournalEntryDto[]> {
+        let url_ = this.baseUrl + "/api/JournalEntries?";
+        if (entryStatus === null)
+            throw new globalThis.Error("The parameter 'entryStatus' cannot be null.");
+        else if (entryStatus !== undefined)
+            url_ += "EntryStatus=" + encodeURIComponent("" + entryStatus) + "&";
+        if (journalId === null)
+            throw new globalThis.Error("The parameter 'journalId' cannot be null.");
+        else if (journalId !== undefined)
+            url_ += "JournalId=" + encodeURIComponent("" + journalId) + "&";
+        if (fromDate === null)
+            throw new globalThis.Error("The parameter 'fromDate' cannot be null.");
+        else if (fromDate !== undefined)
+            url_ += "FromDate=" + encodeURIComponent(fromDate ? "" + fromDate.toISOString() : "") + "&";
+        if (toDate === null)
+            throw new globalThis.Error("The parameter 'toDate' cannot be null.");
+        else if (toDate !== undefined)
+            url_ += "ToDate=" + encodeURIComponent(toDate ? "" + toDate.toISOString() : "") + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processJournalEntriesAll(_response);
+        });
+    }
+
+    protected processJournalEntriesAll(response: Response): Promise<JournalEntryDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(JournalEntryDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<JournalEntryDto[]>(null as any);
+    }
+
+    /**
+     * Create a new journal entry
+     * @return OK
+     */
+    journalEntriesPOST(body: CreateJournalEntryCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/JournalEntries";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processJournalEntriesPOST(_response);
+        });
+    }
+
+    protected processJournalEntriesPOST(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Get journal entry by ID
+     * @return OK
+     */
+    journalEntriesGET(id: number): Promise<JournalEntryDto> {
+        let url_ = this.baseUrl + "/api/JournalEntries/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processJournalEntriesGET(_response);
+        });
+    }
+
+    protected processJournalEntriesGET(response: Response): Promise<JournalEntryDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = JournalEntryDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<JournalEntryDto>(null as any);
+    }
+
+    /**
+     * Update a journal entry header
+     * @return No Content
+     */
+    journalEntriesPUT(id: number, body: UpdateJournalEntryCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/JournalEntries/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processJournalEntriesPUT(_response);
+        });
+    }
+
+    protected processJournalEntriesPUT(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Cancel a journal entry
+     * @return No Content
+     */
+    cancelPOST7(id: number, body: CancelJournalEntryCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/JournalEntries/{id}/cancel";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCancelPOST7(_response);
+        });
+    }
+
+    protected processCancelPOST7(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Submit a journal entry for approval
+     * @return No Content
+     */
+    submitPOST3(id: number, body: SubmitJournalEntryCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/JournalEntries/{id}/submit";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSubmitPOST3(_response);
+        });
+    }
+
+    protected processSubmitPOST3(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Approve a submitted journal entry
+     * @return No Content
+     */
+    approvePOST8(id: number, body: ApproveJournalEntryCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/JournalEntries/{id}/approve";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processApprovePOST8(_response);
+        });
+    }
+
+    protected processApprovePOST8(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Post an approved journal entry
+     * @return No Content
+     */
+    post2(id: number, body: PostJournalEntryCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/JournalEntries/{id}/post";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPost2(_response);
+        });
+    }
+
+    protected processPost2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Reverse a posted journal entry
+     * @return OK
+     */
+    reversePOST2(id: number, body: ReverseJournalEntryCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/JournalEntries/{id}/reverse";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processReversePOST2(_response);
+        });
+    }
+
+    protected processReversePOST2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Create a journal entry line
+     * @return OK
+     */
+    linesPOST3(id: number, body: CreateJournalEntryLineCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/JournalEntries/{id}/lines";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processLinesPOST3(_response);
+        });
+    }
+
+    protected processLinesPOST3(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Update a journal entry line
+     * @return No Content
+     */
+    linesPUT(id: number, lineId: number, body: UpdateJournalEntryLineCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/JournalEntries/{id}/lines/{lineId}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (lineId === undefined || lineId === null)
+            throw new globalThis.Error("The parameter 'lineId' must be defined.");
+        url_ = url_.replace("{lineId}", encodeURIComponent("" + lineId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processLinesPUT(_response);
+        });
+    }
+
+    protected processLinesPUT(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Remove a journal entry line
+     * @return No Content
+     */
+    linesDELETE(id: number, lineId: number): Promise<void> {
+        let url_ = this.baseUrl + "/api/JournalEntries/{id}/lines/{lineId}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (lineId === undefined || lineId === null)
+            throw new globalThis.Error("The parameter 'lineId' must be defined.");
+        url_ = url_.replace("{lineId}", encodeURIComponent("" + lineId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processLinesDELETE(_response);
+        });
+    }
+
+    protected processLinesDELETE(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
 export class JournalsClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -14502,676 +19126,6 @@ export class JournalsClient {
     }
 
     protected processJournalsPUT(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-}
-
-export class MovesClient {
-    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
-
-    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
-        this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "";
-    }
-
-    /**
-     * Get all moves
-     * @param entryStatus (optional) 
-     * @param journalId (optional) 
-     * @param fromDate (optional) 
-     * @param toDate (optional) 
-     * @return OK
-     */
-    movesAll(entryStatus: string | undefined, journalId: number | undefined, fromDate: Date | undefined, toDate: Date | undefined): Promise<MoveDto[]> {
-        let url_ = this.baseUrl + "/api/Moves?";
-        if (entryStatus === null)
-            throw new globalThis.Error("The parameter 'entryStatus' cannot be null.");
-        else if (entryStatus !== undefined)
-            url_ += "EntryStatus=" + encodeURIComponent("" + entryStatus) + "&";
-        if (journalId === null)
-            throw new globalThis.Error("The parameter 'journalId' cannot be null.");
-        else if (journalId !== undefined)
-            url_ += "JournalId=" + encodeURIComponent("" + journalId) + "&";
-        if (fromDate === null)
-            throw new globalThis.Error("The parameter 'fromDate' cannot be null.");
-        else if (fromDate !== undefined)
-            url_ += "FromDate=" + encodeURIComponent(fromDate ? "" + fromDate.toISOString() : "") + "&";
-        if (toDate === null)
-            throw new globalThis.Error("The parameter 'toDate' cannot be null.");
-        else if (toDate !== undefined)
-            url_ += "ToDate=" + encodeURIComponent(toDate ? "" + toDate.toISOString() : "") + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processMovesAll(_response);
-        });
-    }
-
-    protected processMovesAll(response: Response): Promise<MoveDto[]> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(MoveDto.fromJS(item));
-            }
-            else {
-                result200 = null as any;
-            }
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<MoveDto[]>(null as any);
-    }
-
-    /**
-     * Create a new move
-     * @return OK
-     */
-    movesPOST(body: CreateMoveCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Moves";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processMovesPOST(_response);
-        });
-    }
-
-    protected processMovesPOST(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Get move by ID
-     * @return OK
-     */
-    movesGET(id: number): Promise<MoveDto> {
-        let url_ = this.baseUrl + "/api/Moves/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processMovesGET(_response);
-        });
-    }
-
-    protected processMovesGET(response: Response): Promise<MoveDto> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = MoveDto.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<MoveDto>(null as any);
-    }
-
-    /**
-     * Update a move header
-     * @return No Content
-     */
-    movesPUT(id: number, body: UpdateMoveCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Moves/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processMovesPUT(_response);
-        });
-    }
-
-    protected processMovesPUT(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Cancel a move
-     * @return No Content
-     */
-    cancel9(id: number, body: CancelMoveCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Moves/{id}/cancel";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancel9(_response);
-        });
-    }
-
-    protected processCancel9(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Submit a move for approval
-     * @return No Content
-     */
-    submit5(id: number, body: SubmitMoveCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Moves/{id}/submit";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processSubmit5(_response);
-        });
-    }
-
-    protected processSubmit5(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Approve a submitted move
-     * @return No Content
-     */
-    approve9(id: number, body: ApproveMoveCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Moves/{id}/approve";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprove9(_response);
-        });
-    }
-
-    protected processApprove9(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Post an approved move
-     * @return No Content
-     */
-    post2(id: number, body: PostMoveCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Moves/{id}/post";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processPost2(_response);
-        });
-    }
-
-    protected processPost2(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Reverse a posted move
-     * @return OK
-     */
-    reverse3(id: number, body: ReverseMoveCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Moves/{id}/reverse";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processReverse3(_response);
-        });
-    }
-
-    protected processReverse3(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Create a move line
-     * @return OK
-     */
-    linesPOST3(id: number, body: CreateMoveLineCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Moves/{id}/lines";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processLinesPOST3(_response);
-        });
-    }
-
-    protected processLinesPOST3(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Update a move line
-     * @return No Content
-     */
-    linesPUT(id: number, lineId: number, body: UpdateMoveLineCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Moves/{id}/lines/{lineId}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        if (lineId === undefined || lineId === null)
-            throw new globalThis.Error("The parameter 'lineId' must be defined.");
-        url_ = url_.replace("{lineId}", encodeURIComponent("" + lineId));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processLinesPUT(_response);
-        });
-    }
-
-    protected processLinesPUT(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Remove a move line
-     * @return No Content
-     */
-    linesDELETE(id: number, lineId: number): Promise<void> {
-        let url_ = this.baseUrl + "/api/Moves/{id}/lines/{lineId}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        if (lineId === undefined || lineId === null)
-            throw new globalThis.Error("The parameter 'lineId' must be defined.");
-        url_ = url_.replace("{lineId}", encodeURIComponent("" + lineId));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "DELETE",
-            headers: {
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processLinesDELETE(_response);
-        });
-    }
-
-    protected processLinesDELETE(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -15783,7 +19737,7 @@ export class RecurringEntriesClient {
      * Cancel a recurring entry
      * @return No Content
      */
-    cancel10(id: number, body: CancelRecurringEntryCommand): Promise<void> {
+    cancelPOST8(id: number, body: CancelRecurringEntryCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/RecurringEntries/{id}/cancel";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -15801,11 +19755,11 @@ export class RecurringEntriesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancel10(_response);
+            return this.processCancelPOST8(_response);
         });
     }
 
-    protected processCancel10(response: Response): Promise<void> {
+    protected processCancelPOST8(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -16568,7 +20522,7 @@ export class AccountingEventDto implements IAccountingEventDto {
     sourceTable?: string;
     sourceId?: number;
     status?: string;
-    moveId?: number | undefined;
+    journalEntryId?: number | undefined;
     errorMessage?: string | undefined;
     processedAt?: Date | undefined;
     retryCount?: number;
@@ -16595,7 +20549,7 @@ export class AccountingEventDto implements IAccountingEventDto {
             this.sourceTable = _data["sourceTable"];
             this.sourceId = _data["sourceId"];
             this.status = _data["status"];
-            this.moveId = _data["moveId"];
+            this.journalEntryId = _data["journalEntryId"];
             this.errorMessage = _data["errorMessage"];
             this.processedAt = _data["processedAt"] ? new Date(_data["processedAt"].toString()) : undefined as any;
             this.retryCount = _data["retryCount"];
@@ -16620,7 +20574,7 @@ export class AccountingEventDto implements IAccountingEventDto {
         data["sourceTable"] = this.sourceTable;
         data["sourceId"] = this.sourceId;
         data["status"] = this.status;
-        data["moveId"] = this.moveId;
+        data["journalEntryId"] = this.journalEntryId;
         data["errorMessage"] = this.errorMessage;
         data["processedAt"] = this.processedAt ? this.processedAt.toISOString() : undefined as any;
         data["retryCount"] = this.retryCount;
@@ -16634,7 +20588,7 @@ export interface IAccountingEventDto {
     sourceTable?: string;
     sourceId?: number;
     status?: string;
-    moveId?: number | undefined;
+    journalEntryId?: number | undefined;
     errorMessage?: string | undefined;
     processedAt?: Date | undefined;
     retryCount?: number;
@@ -16647,58 +20601,6 @@ export enum AccountType {
     External = "External",
     System = "System",
     Service = "Service",
-}
-
-export class ActivateAppropriationCommand implements IActivateAppropriationCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: IActivateAppropriationCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): ActivateAppropriationCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new ActivateAppropriationCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface IActivateAppropriationCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
 }
 
 export class ActivateBankAccountCommand implements IActivateBankAccountCommand {
@@ -16747,58 +20649,6 @@ export class ActivateBankAccountCommand implements IActivateBankAccountCommand {
 }
 
 export interface IActivateBankAccountCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class ActivateBudgetCommand implements IActivateBudgetCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: IActivateBudgetCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): ActivateBudgetCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new ActivateBudgetCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface IActivateBudgetCommand {
     id?: number;
     rowVersion?: string;
 
@@ -16905,58 +20755,6 @@ export interface IActivateCurrencyCommand {
     [key: string]: any;
 }
 
-export class ActivateEncumbranceCommand implements IActivateEncumbranceCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: IActivateEncumbranceCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): ActivateEncumbranceCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new ActivateEncumbranceCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface IActivateEncumbranceCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
 export class ActivateExchangeRateCommand implements IActivateExchangeRateCommand {
     id?: number;
     rowVersion?: string;
@@ -17003,58 +20801,6 @@ export class ActivateExchangeRateCommand implements IActivateExchangeRateCommand
 }
 
 export interface IActivateExchangeRateCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class ActivateFundCommand implements IActivateFundCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: IActivateFundCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): ActivateFundCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new ActivateFundCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface IActivateFundCommand {
     id?: number;
     rowVersion?: string;
 
@@ -17177,6 +20923,62 @@ export interface IAddCommitteeMemberCommand {
     [key: string]: any;
 }
 
+export class AddVoucherToSlipCommand implements IAddVoucherToSlipCommand {
+    slipId?: number;
+    voucherId?: number;
+    rowVersion?: string;
+
+    [key: string]: any;
+
+    constructor(data?: IAddVoucherToSlipCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.slipId = _data["slipId"];
+            this.voucherId = _data["voucherId"];
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): AddVoucherToSlipCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddVoucherToSlipCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["slipId"] = this.slipId;
+        data["voucherId"] = this.voucherId;
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IAddVoucherToSlipCommand {
+    slipId?: number;
+    voucherId?: number;
+    rowVersion?: string;
+
+    [key: string]: any;
+}
+
 export class AncestorRefDto implements IAncestorRefDto {
     id?: number;
     code?: string;
@@ -17233,24 +21035,136 @@ export interface IAncestorRefDto {
     [key: string]: any;
 }
 
+export class AppropriationActionRequest implements IAppropriationActionRequest {
+    rowVersion!: string;
+
+    [key: string]: any;
+
+    constructor(data?: IAppropriationActionRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): AppropriationActionRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new AppropriationActionRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IAppropriationActionRequest {
+    rowVersion: string;
+
+    [key: string]: any;
+}
+
+export class AppropriationDetailDto implements IAppropriationDetailDto {
+    appropriationId?: number;
+    appropriationNumber?: string;
+    type?: string;
+    amount?: number;
+    status?: string;
+
+    [key: string]: any;
+
+    constructor(data?: IAppropriationDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.appropriationId = _data["appropriationId"];
+            this.appropriationNumber = _data["appropriationNumber"];
+            this.type = _data["type"];
+            this.amount = _data["amount"];
+            this.status = _data["status"];
+        }
+    }
+
+    static fromJS(data: any): AppropriationDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AppropriationDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["appropriationId"] = this.appropriationId;
+        data["appropriationNumber"] = this.appropriationNumber;
+        data["type"] = this.type;
+        data["amount"] = this.amount;
+        data["status"] = this.status;
+        return data;
+    }
+}
+
+export interface IAppropriationDetailDto {
+    appropriationId?: number;
+    appropriationNumber?: string;
+    type?: string;
+    amount?: number;
+    status?: string;
+
+    [key: string]: any;
+}
+
 export class AppropriationDto implements IAppropriationDto {
     id?: number;
     appropriationNumber?: string;
     budgetId?: number;
-    budgetNumber?: string;
     budgetItemId?: number;
-    itemCode?: string;
-    fundId?: number;
-    fundName?: string;
-    fiscalYearId?: number;
-    appropriationType?: string;
+    appropriationType?: AppropriationType;
     documentType?: string;
     documentId?: number;
     amount?: number;
-    status?: string;
-    availableForItem?: number;
-    latestApproval?: ApprovalDecisionDto | undefined;
+    status?: AppropriationStatus;
+    rowVersion?: string;
+    created?: Date;
     createdBy?: string | undefined;
+    fundNumber?: string;
+    fundName?: string;
+    fiscalYearName?: string;
+    itemCode?: string;
+    itemName?: string;
 
     [key: string]: any;
 
@@ -17272,20 +21186,20 @@ export class AppropriationDto implements IAppropriationDto {
             this.id = _data["id"];
             this.appropriationNumber = _data["appropriationNumber"];
             this.budgetId = _data["budgetId"];
-            this.budgetNumber = _data["budgetNumber"];
             this.budgetItemId = _data["budgetItemId"];
-            this.itemCode = _data["itemCode"];
-            this.fundId = _data["fundId"];
-            this.fundName = _data["fundName"];
-            this.fiscalYearId = _data["fiscalYearId"];
             this.appropriationType = _data["appropriationType"];
             this.documentType = _data["documentType"];
             this.documentId = _data["documentId"];
             this.amount = _data["amount"];
             this.status = _data["status"];
-            this.availableForItem = _data["availableForItem"];
-            this.latestApproval = _data["latestApproval"] ? ApprovalDecisionDto.fromJS(_data["latestApproval"]) : undefined as any;
+            this.rowVersion = _data["rowVersion"];
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
             this.createdBy = _data["createdBy"];
+            this.fundNumber = _data["fundNumber"];
+            this.fundName = _data["fundName"];
+            this.fiscalYearName = _data["fiscalYearName"];
+            this.itemCode = _data["itemCode"];
+            this.itemName = _data["itemName"];
         }
     }
 
@@ -17305,20 +21219,20 @@ export class AppropriationDto implements IAppropriationDto {
         data["id"] = this.id;
         data["appropriationNumber"] = this.appropriationNumber;
         data["budgetId"] = this.budgetId;
-        data["budgetNumber"] = this.budgetNumber;
         data["budgetItemId"] = this.budgetItemId;
-        data["itemCode"] = this.itemCode;
-        data["fundId"] = this.fundId;
-        data["fundName"] = this.fundName;
-        data["fiscalYearId"] = this.fiscalYearId;
         data["appropriationType"] = this.appropriationType;
         data["documentType"] = this.documentType;
         data["documentId"] = this.documentId;
         data["amount"] = this.amount;
         data["status"] = this.status;
-        data["availableForItem"] = this.availableForItem;
-        data["latestApproval"] = this.latestApproval ? this.latestApproval.toJSON() : undefined as any;
+        data["rowVersion"] = this.rowVersion;
+        data["created"] = this.created ? this.created.toISOString() : undefined as any;
         data["createdBy"] = this.createdBy;
+        data["fundNumber"] = this.fundNumber;
+        data["fundName"] = this.fundName;
+        data["fiscalYearName"] = this.fiscalYearName;
+        data["itemCode"] = this.itemCode;
+        data["itemName"] = this.itemName;
         return data;
     }
 }
@@ -17327,20 +21241,20 @@ export interface IAppropriationDto {
     id?: number;
     appropriationNumber?: string;
     budgetId?: number;
-    budgetNumber?: string;
     budgetItemId?: number;
-    itemCode?: string;
-    fundId?: number;
-    fundName?: string;
-    fiscalYearId?: number;
-    appropriationType?: string;
+    appropriationType?: AppropriationType;
     documentType?: string;
     documentId?: number;
     amount?: number;
-    status?: string;
-    availableForItem?: number;
-    latestApproval?: ApprovalDecisionDto | undefined;
+    status?: AppropriationStatus;
+    rowVersion?: string;
+    created?: Date;
     createdBy?: string | undefined;
+    fundNumber?: string;
+    fundName?: string;
+    fiscalYearName?: string;
+    itemCode?: string;
+    itemName?: string;
 
     [key: string]: any;
 }
@@ -17353,77 +21267,15 @@ export enum AppropriationStatus {
     Suspended = "Suspended",
     Closed = "Closed",
     Cancelled = "Cancelled",
+    Reversed = "Reversed",
 }
 
 export enum AppropriationType {
     Original = "Original",
     Supplement = "Supplement",
     Reduction = "Reduction",
+    Transfer = "Transfer",
     Adjustment = "Adjustment",
-}
-
-export class ApprovalDecisionDto implements IApprovalDecisionDto {
-    decision?: string;
-    decisionAt?: Date;
-    approverUserId?: number;
-    requiredRole?: string | undefined;
-    reason?: string | undefined;
-
-    [key: string]: any;
-
-    constructor(data?: IApprovalDecisionDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.decision = _data["decision"];
-            this.decisionAt = _data["decisionAt"] ? new Date(_data["decisionAt"].toString()) : undefined as any;
-            this.approverUserId = _data["approverUserId"];
-            this.requiredRole = _data["requiredRole"];
-            this.reason = _data["reason"];
-        }
-    }
-
-    static fromJS(data: any): ApprovalDecisionDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new ApprovalDecisionDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["decision"] = this.decision;
-        data["decisionAt"] = this.decisionAt ? this.decisionAt.toISOString() : undefined as any;
-        data["approverUserId"] = this.approverUserId;
-        data["requiredRole"] = this.requiredRole;
-        data["reason"] = this.reason;
-        return data;
-    }
-}
-
-export interface IApprovalDecisionDto {
-    decision?: string;
-    decisionAt?: Date;
-    approverUserId?: number;
-    requiredRole?: string | undefined;
-    reason?: string | undefined;
-
-    [key: string]: any;
 }
 
 export class ApprovalDelegationDto implements IApprovalDelegationDto {
@@ -17586,14 +21438,82 @@ export interface IApprovalRuleDto {
     [key: string]: any;
 }
 
-export class ApproveAppropriationCommand implements IApproveAppropriationCommand {
+export class ApprovalStepDto implements IApprovalStepDto {
+    step!: number;
+    approverUserId!: number;
+    approverName!: string;
+    role!: string;
+    decision!: string;
+    decisionAt!: Date;
+
+    [key: string]: any;
+
+    constructor(data?: IApprovalStepDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.step = _data["step"];
+            this.approverUserId = _data["approverUserId"];
+            this.approverName = _data["approverName"];
+            this.role = _data["role"];
+            this.decision = _data["decision"];
+            this.decisionAt = _data["decisionAt"] ? new Date(_data["decisionAt"].toString()) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): ApprovalStepDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ApprovalStepDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["step"] = this.step;
+        data["approverUserId"] = this.approverUserId;
+        data["approverName"] = this.approverName;
+        data["role"] = this.role;
+        data["decision"] = this.decision;
+        data["decisionAt"] = this.decisionAt ? this.decisionAt.toISOString() : undefined as any;
+        return data;
+    }
+}
+
+export interface IApprovalStepDto {
+    step: number;
+    approverUserId: number;
+    approverName: string;
+    role: string;
+    decision: string;
+    decisionAt: Date;
+
+    [key: string]: any;
+}
+
+export class ApproveDepositSlipCommand implements IApproveDepositSlipCommand {
     id?: number;
     reason?: string | undefined;
     rowVersion?: string;
 
     [key: string]: any;
 
-    constructor(data?: IApproveAppropriationCommand) {
+    constructor(data?: IApproveDepositSlipCommand) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -17614,9 +21534,9 @@ export class ApproveAppropriationCommand implements IApproveAppropriationCommand
         }
     }
 
-    static fromJS(data: any): ApproveAppropriationCommand {
+    static fromJS(data: any): ApproveDepositSlipCommand {
         data = typeof data === 'object' ? data : {};
-        let result = new ApproveAppropriationCommand();
+        let result = new ApproveDepositSlipCommand();
         result.init(data);
         return result;
     }
@@ -17634,7 +21554,7 @@ export class ApproveAppropriationCommand implements IApproveAppropriationCommand
     }
 }
 
-export interface IApproveAppropriationCommand {
+export interface IApproveDepositSlipCommand {
     id?: number;
     reason?: string | undefined;
     rowVersion?: string;
@@ -17642,14 +21562,12 @@ export interface IApproveAppropriationCommand {
     [key: string]: any;
 }
 
-export class ApproveBudgetCommand implements IApproveBudgetCommand {
-    id?: number;
-    reason?: string | undefined;
-    rowVersion?: string;
+export class ApproveDisbursementRequestRequest implements IApproveDisbursementRequestRequest {
+    reason!: string | undefined;
 
     [key: string]: any;
 
-    constructor(data?: IApproveBudgetCommand) {
+    constructor(data?: IApproveDisbursementRequestRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -17664,15 +21582,13 @@ export class ApproveBudgetCommand implements IApproveBudgetCommand {
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.id = _data["id"];
             this.reason = _data["reason"];
-            this.rowVersion = _data["rowVersion"];
         }
     }
 
-    static fromJS(data: any): ApproveBudgetCommand {
+    static fromJS(data: any): ApproveDisbursementRequestRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new ApproveBudgetCommand();
+        let result = new ApproveDisbursementRequestRequest();
         result.init(data);
         return result;
     }
@@ -17683,84 +21599,24 @@ export class ApproveBudgetCommand implements IApproveBudgetCommand {
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["id"] = this.id;
         data["reason"] = this.reason;
-        data["rowVersion"] = this.rowVersion;
         return data;
     }
 }
 
-export interface IApproveBudgetCommand {
-    id?: number;
-    reason?: string | undefined;
-    rowVersion?: string;
+export interface IApproveDisbursementRequestRequest {
+    reason: string | undefined;
 
     [key: string]: any;
 }
 
-export class ApproveEncumbranceCommand implements IApproveEncumbranceCommand {
-    id?: number;
-    reason?: string | undefined;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: IApproveEncumbranceCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.reason = _data["reason"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): ApproveEncumbranceCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new ApproveEncumbranceCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["reason"] = this.reason;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface IApproveEncumbranceCommand {
-    id?: number;
-    reason?: string | undefined;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class ApproveMoveCommand implements IApproveMoveCommand {
+export class ApproveJournalEntryCommand implements IApproveJournalEntryCommand {
     id?: number;
     rowVersion?: string;
 
     [key: string]: any;
 
-    constructor(data?: IApproveMoveCommand) {
+    constructor(data?: IApproveJournalEntryCommand) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -17780,9 +21636,9 @@ export class ApproveMoveCommand implements IApproveMoveCommand {
         }
     }
 
-    static fromJS(data: any): ApproveMoveCommand {
+    static fromJS(data: any): ApproveJournalEntryCommand {
         data = typeof data === 'object' ? data : {};
-        let result = new ApproveMoveCommand();
+        let result = new ApproveJournalEntryCommand();
         result.init(data);
         return result;
     }
@@ -17799,7 +21655,7 @@ export class ApproveMoveCommand implements IApproveMoveCommand {
     }
 }
 
-export interface IApproveMoveCommand {
+export interface IApproveJournalEntryCommand {
     id?: number;
     rowVersion?: string;
 
@@ -17853,6 +21709,62 @@ export class ApprovePaymentOrderCommand implements IApprovePaymentOrderCommand {
 
 export interface IApprovePaymentOrderCommand {
     id?: number;
+    rowVersion?: string;
+
+    [key: string]: any;
+}
+
+export class ApproveReceiptVoucherCommand implements IApproveReceiptVoucherCommand {
+    id?: number;
+    reason?: string | undefined;
+    rowVersion?: string;
+
+    [key: string]: any;
+
+    constructor(data?: IApproveReceiptVoucherCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.reason = _data["reason"];
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): ApproveReceiptVoucherCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new ApproveReceiptVoucherCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["reason"] = this.reason;
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IApproveReceiptVoucherCommand {
+    id?: number;
+    reason?: string | undefined;
     rowVersion?: string;
 
     [key: string]: any;
@@ -18022,6 +21934,574 @@ export interface IAssignUserPermissionCommand {
     effectiveFrom?: Date | undefined;
     effectiveTo?: Date | undefined;
     reason?: string;
+
+    [key: string]: any;
+}
+
+export class AvailabilityBreakdownLineResponse implements IAvailabilityBreakdownLineResponse {
+    fundId!: number;
+    fundCode!: string;
+    fundName!: string;
+    programId!: number | undefined;
+    programCode!: string | undefined;
+    programName!: string | undefined;
+    projectId!: number | undefined;
+    projectCode!: string | undefined;
+    projectName!: string | undefined;
+    budgetItemId!: number;
+    itemCode!: string;
+    appropriationAmount!: number;
+    encumberedAmount!: number;
+    paidAmount!: number;
+    availableAmount!: number;
+
+    [key: string]: any;
+
+    constructor(data?: IAvailabilityBreakdownLineResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.fundId = _data["fundId"];
+            this.fundCode = _data["fundCode"];
+            this.fundName = _data["fundName"];
+            this.programId = _data["programId"];
+            this.programCode = _data["programCode"];
+            this.programName = _data["programName"];
+            this.projectId = _data["projectId"];
+            this.projectCode = _data["projectCode"];
+            this.projectName = _data["projectName"];
+            this.budgetItemId = _data["budgetItemId"];
+            this.itemCode = _data["itemCode"];
+            this.appropriationAmount = _data["appropriationAmount"];
+            this.encumberedAmount = _data["encumberedAmount"];
+            this.paidAmount = _data["paidAmount"];
+            this.availableAmount = _data["availableAmount"];
+        }
+    }
+
+    static fromJS(data: any): AvailabilityBreakdownLineResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new AvailabilityBreakdownLineResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["fundId"] = this.fundId;
+        data["fundCode"] = this.fundCode;
+        data["fundName"] = this.fundName;
+        data["programId"] = this.programId;
+        data["programCode"] = this.programCode;
+        data["programName"] = this.programName;
+        data["projectId"] = this.projectId;
+        data["projectCode"] = this.projectCode;
+        data["projectName"] = this.projectName;
+        data["budgetItemId"] = this.budgetItemId;
+        data["itemCode"] = this.itemCode;
+        data["appropriationAmount"] = this.appropriationAmount;
+        data["encumberedAmount"] = this.encumberedAmount;
+        data["paidAmount"] = this.paidAmount;
+        data["availableAmount"] = this.availableAmount;
+        return data;
+    }
+}
+
+export interface IAvailabilityBreakdownLineResponse {
+    fundId: number;
+    fundCode: string;
+    fundName: string;
+    programId: number | undefined;
+    programCode: string | undefined;
+    programName: string | undefined;
+    projectId: number | undefined;
+    projectCode: string | undefined;
+    projectName: string | undefined;
+    budgetItemId: number;
+    itemCode: string;
+    appropriationAmount: number;
+    encumberedAmount: number;
+    paidAmount: number;
+    availableAmount: number;
+
+    [key: string]: any;
+}
+
+export class AvailabilityBreakdownResponse implements IAvailabilityBreakdownResponse {
+    budgetItemId!: number;
+    budgetItemCode!: string;
+    fiscalYearId!: number;
+    fiscalYearName!: string;
+    breakdown!: AvailabilityBreakdownLineResponse[];
+    totals!: AvailabilityBreakdownTotalResponse;
+
+    [key: string]: any;
+
+    constructor(data?: IAvailabilityBreakdownResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.breakdown = [];
+            this.totals = new AvailabilityBreakdownTotalResponse();
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.budgetItemId = _data["budgetItemId"];
+            this.budgetItemCode = _data["budgetItemCode"];
+            this.fiscalYearId = _data["fiscalYearId"];
+            this.fiscalYearName = _data["fiscalYearName"];
+            if (Array.isArray(_data["breakdown"])) {
+                this.breakdown = [] as any;
+                for (let item of _data["breakdown"])
+                    this.breakdown!.push(AvailabilityBreakdownLineResponse.fromJS(item));
+            }
+            this.totals = _data["totals"] ? AvailabilityBreakdownTotalResponse.fromJS(_data["totals"]) : new AvailabilityBreakdownTotalResponse();
+        }
+    }
+
+    static fromJS(data: any): AvailabilityBreakdownResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new AvailabilityBreakdownResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["budgetItemId"] = this.budgetItemId;
+        data["budgetItemCode"] = this.budgetItemCode;
+        data["fiscalYearId"] = this.fiscalYearId;
+        data["fiscalYearName"] = this.fiscalYearName;
+        if (Array.isArray(this.breakdown)) {
+            data["breakdown"] = [];
+            for (let item of this.breakdown)
+                data["breakdown"].push(item ? item.toJSON() : undefined as any);
+        }
+        data["totals"] = this.totals ? this.totals.toJSON() : undefined as any;
+        return data;
+    }
+}
+
+export interface IAvailabilityBreakdownResponse {
+    budgetItemId: number;
+    budgetItemCode: string;
+    fiscalYearId: number;
+    fiscalYearName: string;
+    breakdown: AvailabilityBreakdownLineResponse[];
+    totals: AvailabilityBreakdownTotalResponse;
+
+    [key: string]: any;
+}
+
+export class AvailabilityBreakdownTotalResponse implements IAvailabilityBreakdownTotalResponse {
+    appropriationAmount!: number;
+    encumberedAmount!: number;
+    paidAmount!: number;
+    availableAmount!: number;
+
+    [key: string]: any;
+
+    constructor(data?: IAvailabilityBreakdownTotalResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.appropriationAmount = _data["appropriationAmount"];
+            this.encumberedAmount = _data["encumberedAmount"];
+            this.paidAmount = _data["paidAmount"];
+            this.availableAmount = _data["availableAmount"];
+        }
+    }
+
+    static fromJS(data: any): AvailabilityBreakdownTotalResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new AvailabilityBreakdownTotalResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["appropriationAmount"] = this.appropriationAmount;
+        data["encumberedAmount"] = this.encumberedAmount;
+        data["paidAmount"] = this.paidAmount;
+        data["availableAmount"] = this.availableAmount;
+        return data;
+    }
+}
+
+export interface IAvailabilityBreakdownTotalResponse {
+    appropriationAmount: number;
+    encumberedAmount: number;
+    paidAmount: number;
+    availableAmount: number;
+
+    [key: string]: any;
+}
+
+export class AvailabilitySnapshotDetailDto implements IAvailabilitySnapshotDetailDto {
+    budgetItemId?: number;
+    itemCode?: string;
+    itemName?: string;
+    appropriations?: AppropriationDetailDto[];
+    encumbrances?: EncumbranceDetailDto[];
+    payments?: PaymentDetailDto[];
+
+    [key: string]: any;
+
+    constructor(data?: IAvailabilitySnapshotDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.budgetItemId = _data["budgetItemId"];
+            this.itemCode = _data["itemCode"];
+            this.itemName = _data["itemName"];
+            if (Array.isArray(_data["appropriations"])) {
+                this.appropriations = [] as any;
+                for (let item of _data["appropriations"])
+                    this.appropriations!.push(AppropriationDetailDto.fromJS(item));
+            }
+            if (Array.isArray(_data["encumbrances"])) {
+                this.encumbrances = [] as any;
+                for (let item of _data["encumbrances"])
+                    this.encumbrances!.push(EncumbranceDetailDto.fromJS(item));
+            }
+            if (Array.isArray(_data["payments"])) {
+                this.payments = [] as any;
+                for (let item of _data["payments"])
+                    this.payments!.push(PaymentDetailDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): AvailabilitySnapshotDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AvailabilitySnapshotDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["budgetItemId"] = this.budgetItemId;
+        data["itemCode"] = this.itemCode;
+        data["itemName"] = this.itemName;
+        if (Array.isArray(this.appropriations)) {
+            data["appropriations"] = [];
+            for (let item of this.appropriations)
+                data["appropriations"].push(item ? item.toJSON() : undefined as any);
+        }
+        if (Array.isArray(this.encumbrances)) {
+            data["encumbrances"] = [];
+            for (let item of this.encumbrances)
+                data["encumbrances"].push(item ? item.toJSON() : undefined as any);
+        }
+        if (Array.isArray(this.payments)) {
+            data["payments"] = [];
+            for (let item of this.payments)
+                data["payments"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IAvailabilitySnapshotDetailDto {
+    budgetItemId?: number;
+    itemCode?: string;
+    itemName?: string;
+    appropriations?: AppropriationDetailDto[];
+    encumbrances?: EncumbranceDetailDto[];
+    payments?: PaymentDetailDto[];
+
+    [key: string]: any;
+}
+
+export class AvailabilitySnapshotDto implements IAvailabilitySnapshotDto {
+    budgetItemId?: number;
+    itemCode?: string;
+    itemName?: string;
+    fiscalYearId?: number;
+    fiscalYearName?: string;
+    controlState?: string;
+    breakdown?: AvailabilitySnapshotLineDto[];
+    totals?: AvailabilitySnapshotTotalDto;
+
+    [key: string]: any;
+
+    constructor(data?: IAvailabilitySnapshotDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.budgetItemId = _data["budgetItemId"];
+            this.itemCode = _data["itemCode"];
+            this.itemName = _data["itemName"];
+            this.fiscalYearId = _data["fiscalYearId"];
+            this.fiscalYearName = _data["fiscalYearName"];
+            this.controlState = _data["controlState"];
+            if (Array.isArray(_data["breakdown"])) {
+                this.breakdown = [] as any;
+                for (let item of _data["breakdown"])
+                    this.breakdown!.push(AvailabilitySnapshotLineDto.fromJS(item));
+            }
+            this.totals = _data["totals"] ? AvailabilitySnapshotTotalDto.fromJS(_data["totals"]) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): AvailabilitySnapshotDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AvailabilitySnapshotDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["budgetItemId"] = this.budgetItemId;
+        data["itemCode"] = this.itemCode;
+        data["itemName"] = this.itemName;
+        data["fiscalYearId"] = this.fiscalYearId;
+        data["fiscalYearName"] = this.fiscalYearName;
+        data["controlState"] = this.controlState;
+        if (Array.isArray(this.breakdown)) {
+            data["breakdown"] = [];
+            for (let item of this.breakdown)
+                data["breakdown"].push(item ? item.toJSON() : undefined as any);
+        }
+        data["totals"] = this.totals ? this.totals.toJSON() : undefined as any;
+        return data;
+    }
+}
+
+export interface IAvailabilitySnapshotDto {
+    budgetItemId?: number;
+    itemCode?: string;
+    itemName?: string;
+    fiscalYearId?: number;
+    fiscalYearName?: string;
+    controlState?: string;
+    breakdown?: AvailabilitySnapshotLineDto[];
+    totals?: AvailabilitySnapshotTotalDto;
+
+    [key: string]: any;
+}
+
+export class AvailabilitySnapshotLineDto implements IAvailabilitySnapshotLineDto {
+    fundId?: number;
+    fundCode?: string;
+    fundName?: string;
+    programId?: number | undefined;
+    programCode?: string | undefined;
+    projectId?: number | undefined;
+    projectCode?: string | undefined;
+    appropriationAmount?: number;
+    encumberedAmount?: number;
+    paidAmount?: number;
+    availableAmount?: number;
+
+    [key: string]: any;
+
+    constructor(data?: IAvailabilitySnapshotLineDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.fundId = _data["fundId"];
+            this.fundCode = _data["fundCode"];
+            this.fundName = _data["fundName"];
+            this.programId = _data["programId"];
+            this.programCode = _data["programCode"];
+            this.projectId = _data["projectId"];
+            this.projectCode = _data["projectCode"];
+            this.appropriationAmount = _data["appropriationAmount"];
+            this.encumberedAmount = _data["encumberedAmount"];
+            this.paidAmount = _data["paidAmount"];
+            this.availableAmount = _data["availableAmount"];
+        }
+    }
+
+    static fromJS(data: any): AvailabilitySnapshotLineDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AvailabilitySnapshotLineDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["fundId"] = this.fundId;
+        data["fundCode"] = this.fundCode;
+        data["fundName"] = this.fundName;
+        data["programId"] = this.programId;
+        data["programCode"] = this.programCode;
+        data["projectId"] = this.projectId;
+        data["projectCode"] = this.projectCode;
+        data["appropriationAmount"] = this.appropriationAmount;
+        data["encumberedAmount"] = this.encumberedAmount;
+        data["paidAmount"] = this.paidAmount;
+        data["availableAmount"] = this.availableAmount;
+        return data;
+    }
+}
+
+export interface IAvailabilitySnapshotLineDto {
+    fundId?: number;
+    fundCode?: string;
+    fundName?: string;
+    programId?: number | undefined;
+    programCode?: string | undefined;
+    projectId?: number | undefined;
+    projectCode?: string | undefined;
+    appropriationAmount?: number;
+    encumberedAmount?: number;
+    paidAmount?: number;
+    availableAmount?: number;
+
+    [key: string]: any;
+}
+
+export class AvailabilitySnapshotTotalDto implements IAvailabilitySnapshotTotalDto {
+    appropriationAmount?: number;
+    encumberedAmount?: number;
+    paidAmount?: number;
+    availableAmount?: number;
+
+    [key: string]: any;
+
+    constructor(data?: IAvailabilitySnapshotTotalDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.appropriationAmount = _data["appropriationAmount"];
+            this.encumberedAmount = _data["encumberedAmount"];
+            this.paidAmount = _data["paidAmount"];
+            this.availableAmount = _data["availableAmount"];
+        }
+    }
+
+    static fromJS(data: any): AvailabilitySnapshotTotalDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AvailabilitySnapshotTotalDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["appropriationAmount"] = this.appropriationAmount;
+        data["encumberedAmount"] = this.encumberedAmount;
+        data["paidAmount"] = this.paidAmount;
+        data["availableAmount"] = this.availableAmount;
+        return data;
+    }
+}
+
+export interface IAvailabilitySnapshotTotalDto {
+    appropriationAmount?: number;
+    encumberedAmount?: number;
+    paidAmount?: number;
+    availableAmount?: number;
 
     [key: string]: any;
 }
@@ -18683,7 +23163,7 @@ export class BankReconciliationLineDto implements IBankReconciliationLineDto {
     reconciliationId?: number;
     lineType?: string;
     bankStatementLineId?: number | undefined;
-    moveLineId?: number | undefined;
+    journalEntryLineId?: number | undefined;
     amount?: number;
     description?: string | undefined;
     status?: string;
@@ -18709,7 +23189,7 @@ export class BankReconciliationLineDto implements IBankReconciliationLineDto {
             this.reconciliationId = _data["reconciliationId"];
             this.lineType = _data["lineType"];
             this.bankStatementLineId = _data["bankStatementLineId"];
-            this.moveLineId = _data["moveLineId"];
+            this.journalEntryLineId = _data["journalEntryLineId"];
             this.amount = _data["amount"];
             this.description = _data["description"];
             this.status = _data["status"];
@@ -18733,7 +23213,7 @@ export class BankReconciliationLineDto implements IBankReconciliationLineDto {
         data["reconciliationId"] = this.reconciliationId;
         data["lineType"] = this.lineType;
         data["bankStatementLineId"] = this.bankStatementLineId;
-        data["moveLineId"] = this.moveLineId;
+        data["journalEntryLineId"] = this.journalEntryLineId;
         data["amount"] = this.amount;
         data["description"] = this.description;
         data["status"] = this.status;
@@ -18746,7 +23226,7 @@ export interface IBankReconciliationLineDto {
     reconciliationId?: number;
     lineType?: string;
     bankStatementLineId?: number | undefined;
-    moveLineId?: number | undefined;
+    journalEntryLineId?: number | undefined;
     amount?: number;
     description?: string | undefined;
     status?: string;
@@ -18853,7 +23333,7 @@ export class BankStatementLineDto implements IBankStatementLineDto {
     balance?: number | undefined;
     reference?: string | undefined;
     isReconciled?: boolean;
-    moveLineId?: number | undefined;
+    journalEntryLineId?: number | undefined;
 
     [key: string]: any;
 
@@ -18882,7 +23362,7 @@ export class BankStatementLineDto implements IBankStatementLineDto {
             this.balance = _data["balance"];
             this.reference = _data["reference"];
             this.isReconciled = _data["isReconciled"];
-            this.moveLineId = _data["moveLineId"];
+            this.journalEntryLineId = _data["journalEntryLineId"];
         }
     }
 
@@ -18909,7 +23389,7 @@ export class BankStatementLineDto implements IBankStatementLineDto {
         data["balance"] = this.balance;
         data["reference"] = this.reference;
         data["isReconciled"] = this.isReconciled;
-        data["moveLineId"] = this.moveLineId;
+        data["journalEntryLineId"] = this.journalEntryLineId;
         return data;
     }
 }
@@ -18925,7 +23405,183 @@ export interface IBankStatementLineDto {
     balance?: number | undefined;
     reference?: string | undefined;
     isReconciled?: boolean;
-    moveLineId?: number | undefined;
+    journalEntryLineId?: number | undefined;
+
+    [key: string]: any;
+}
+
+export class BounceCheckCommand implements IBounceCheckCommand {
+    id?: number;
+    bouncedAt?: Date;
+    reason?: string | undefined;
+    rowVersion?: string;
+
+    [key: string]: any;
+
+    constructor(data?: IBounceCheckCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.bouncedAt = _data["bouncedAt"] ? new Date(_data["bouncedAt"].toString()) : undefined as any;
+            this.reason = _data["reason"];
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): BounceCheckCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new BounceCheckCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["bouncedAt"] = this.bouncedAt ? this.bouncedAt.toISOString() : undefined as any;
+        data["reason"] = this.reason;
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IBounceCheckCommand {
+    id?: number;
+    bouncedAt?: Date;
+    reason?: string | undefined;
+    rowVersion?: string;
+
+    [key: string]: any;
+}
+
+export class BudgetActionRequest implements IBudgetActionRequest {
+    rowVersion!: string;
+
+    [key: string]: any;
+
+    constructor(data?: IBudgetActionRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): BudgetActionRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new BudgetActionRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IBudgetActionRequest {
+    rowVersion: string;
+
+    [key: string]: any;
+}
+
+export class BudgetAvailabilitySummary implements IBudgetAvailabilitySummary {
+    budgetItemId!: number;
+    netAppropriated!: number;
+    encumbered!: number;
+    available!: number;
+    effectiveAllowOverrun!: boolean;
+    budgetControlMethod!: BudgetControlMethod;
+
+    [key: string]: any;
+
+    constructor(data?: IBudgetAvailabilitySummary) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.budgetItemId = _data["budgetItemId"];
+            this.netAppropriated = _data["netAppropriated"];
+            this.encumbered = _data["encumbered"];
+            this.available = _data["available"];
+            this.effectiveAllowOverrun = _data["effectiveAllowOverrun"];
+            this.budgetControlMethod = _data["budgetControlMethod"];
+        }
+    }
+
+    static fromJS(data: any): BudgetAvailabilitySummary {
+        data = typeof data === 'object' ? data : {};
+        let result = new BudgetAvailabilitySummary();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["budgetItemId"] = this.budgetItemId;
+        data["netAppropriated"] = this.netAppropriated;
+        data["encumbered"] = this.encumbered;
+        data["available"] = this.available;
+        data["effectiveAllowOverrun"] = this.effectiveAllowOverrun;
+        data["budgetControlMethod"] = this.budgetControlMethod;
+        return data;
+    }
+}
+
+export interface IBudgetAvailabilitySummary {
+    budgetItemId: number;
+    netAppropriated: number;
+    encumbered: number;
+    available: number;
+    effectiveAllowOverrun: boolean;
+    budgetControlMethod: BudgetControlMethod;
 
     [key: string]: any;
 }
@@ -18944,6 +23600,8 @@ export class BudgetClassificationDto implements IBudgetClassificationDto {
     parentId?: number | undefined;
     level?: number;
     isActive?: boolean;
+    rowVersion?: string;
+    children?: BudgetClassificationDto[];
 
     [key: string]: any;
 
@@ -18968,6 +23626,12 @@ export class BudgetClassificationDto implements IBudgetClassificationDto {
             this.parentId = _data["parentId"];
             this.level = _data["level"];
             this.isActive = _data["isActive"];
+            this.rowVersion = _data["rowVersion"];
+            if (Array.isArray(_data["children"])) {
+                this.children = [] as any;
+                for (let item of _data["children"])
+                    this.children!.push(BudgetClassificationDto.fromJS(item));
+            }
         }
     }
 
@@ -18990,6 +23654,12 @@ export class BudgetClassificationDto implements IBudgetClassificationDto {
         data["parentId"] = this.parentId;
         data["level"] = this.level;
         data["isActive"] = this.isActive;
+        data["rowVersion"] = this.rowVersion;
+        if (Array.isArray(this.children)) {
+            data["children"] = [];
+            for (let item of this.children)
+                data["children"].push(item ? item.toJSON() : undefined as any);
+        }
         return data;
     }
 }
@@ -19001,22 +23671,18 @@ export interface IBudgetClassificationDto {
     parentId?: number | undefined;
     level?: number;
     isActive?: boolean;
+    rowVersion?: string;
+    children?: BudgetClassificationDto[];
 
     [key: string]: any;
 }
 
-export class BudgetClassificationTreeDto implements IBudgetClassificationTreeDto {
-    children?: BudgetClassificationTreeDto[];
-    id?: number;
-    code?: string;
-    name?: string;
-    parentId?: number | undefined;
-    level?: number;
-    isActive?: boolean;
+export class BudgetClassificationToggleActiveRequest implements IBudgetClassificationToggleActiveRequest {
+    rowVersion!: string;
 
     [key: string]: any;
 
-    constructor(data?: IBudgetClassificationTreeDto) {
+    constructor(data?: IBudgetClassificationToggleActiveRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -19031,23 +23697,13 @@ export class BudgetClassificationTreeDto implements IBudgetClassificationTreeDto
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            if (Array.isArray(_data["children"])) {
-                this.children = [] as any;
-                for (let item of _data["children"])
-                    this.children!.push(BudgetClassificationTreeDto.fromJS(item));
-            }
-            this.id = _data["id"];
-            this.code = _data["code"];
-            this.name = _data["name"];
-            this.parentId = _data["parentId"];
-            this.level = _data["level"];
-            this.isActive = _data["isActive"];
+            this.rowVersion = _data["rowVersion"];
         }
     }
 
-    static fromJS(data: any): BudgetClassificationTreeDto {
+    static fromJS(data: any): BudgetClassificationToggleActiveRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new BudgetClassificationTreeDto();
+        let result = new BudgetClassificationToggleActiveRequest();
         result.init(data);
         return result;
     }
@@ -19058,29 +23714,13 @@ export class BudgetClassificationTreeDto implements IBudgetClassificationTreeDto
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        if (Array.isArray(this.children)) {
-            data["children"] = [];
-            for (let item of this.children)
-                data["children"].push(item ? item.toJSON() : undefined as any);
-        }
-        data["id"] = this.id;
-        data["code"] = this.code;
-        data["name"] = this.name;
-        data["parentId"] = this.parentId;
-        data["level"] = this.level;
-        data["isActive"] = this.isActive;
+        data["rowVersion"] = this.rowVersion;
         return data;
     }
 }
 
-export interface IBudgetClassificationTreeDto {
-    children?: BudgetClassificationTreeDto[];
-    id?: number;
-    code?: string;
-    name?: string;
-    parentId?: number | undefined;
-    level?: number;
-    isActive?: boolean;
+export interface IBudgetClassificationToggleActiveRequest {
+    rowVersion: string;
 
     [key: string]: any;
 }
@@ -19095,19 +23735,17 @@ export class BudgetDto implements IBudgetDto {
     id?: number;
     budgetNumber?: string;
     budgetName?: string;
-    budgetTypeId?: number;
-    budgetTypeName?: string;
     fiscalYearId?: number;
     fundId?: number;
-    fundName?: string;
-    totalAmount?: number;
-    status?: string;
+    budgetTypeId?: number;
+    status?: BudgetStatus;
     allowOverrun?: boolean | undefined;
-    effectiveAllowOverrun?: boolean;
-    effectiveFrom?: Date;
-    effectiveTo?: Date | undefined;
     description?: string | undefined;
-    latestApproval?: ApprovalDecisionDto | undefined;
+    rowVersion?: string;
+    created?: Date;
+    createdBy?: string | undefined;
+    budgetTypeName?: string;
+    fundName?: string;
 
     [key: string]: any;
 
@@ -19129,19 +23767,17 @@ export class BudgetDto implements IBudgetDto {
             this.id = _data["id"];
             this.budgetNumber = _data["budgetNumber"];
             this.budgetName = _data["budgetName"];
-            this.budgetTypeId = _data["budgetTypeId"];
-            this.budgetTypeName = _data["budgetTypeName"];
             this.fiscalYearId = _data["fiscalYearId"];
             this.fundId = _data["fundId"];
-            this.fundName = _data["fundName"];
-            this.totalAmount = _data["totalAmount"];
+            this.budgetTypeId = _data["budgetTypeId"];
             this.status = _data["status"];
             this.allowOverrun = _data["allowOverrun"];
-            this.effectiveAllowOverrun = _data["effectiveAllowOverrun"];
-            this.effectiveFrom = _data["effectiveFrom"] ? new Date(_data["effectiveFrom"].toString()) : undefined as any;
-            this.effectiveTo = _data["effectiveTo"] ? new Date(_data["effectiveTo"].toString()) : undefined as any;
             this.description = _data["description"];
-            this.latestApproval = _data["latestApproval"] ? ApprovalDecisionDto.fromJS(_data["latestApproval"]) : undefined as any;
+            this.rowVersion = _data["rowVersion"];
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
+            this.createdBy = _data["createdBy"];
+            this.budgetTypeName = _data["budgetTypeName"];
+            this.fundName = _data["fundName"];
         }
     }
 
@@ -19161,19 +23797,17 @@ export class BudgetDto implements IBudgetDto {
         data["id"] = this.id;
         data["budgetNumber"] = this.budgetNumber;
         data["budgetName"] = this.budgetName;
-        data["budgetTypeId"] = this.budgetTypeId;
-        data["budgetTypeName"] = this.budgetTypeName;
         data["fiscalYearId"] = this.fiscalYearId;
         data["fundId"] = this.fundId;
-        data["fundName"] = this.fundName;
-        data["totalAmount"] = this.totalAmount;
+        data["budgetTypeId"] = this.budgetTypeId;
         data["status"] = this.status;
         data["allowOverrun"] = this.allowOverrun;
-        data["effectiveAllowOverrun"] = this.effectiveAllowOverrun;
-        data["effectiveFrom"] = this.effectiveFrom ? formatDate(this.effectiveFrom) : undefined as any;
-        data["effectiveTo"] = this.effectiveTo ? formatDate(this.effectiveTo) : undefined as any;
         data["description"] = this.description;
-        data["latestApproval"] = this.latestApproval ? this.latestApproval.toJSON() : undefined as any;
+        data["rowVersion"] = this.rowVersion;
+        data["created"] = this.created ? this.created.toISOString() : undefined as any;
+        data["createdBy"] = this.createdBy;
+        data["budgetTypeName"] = this.budgetTypeName;
+        data["fundName"] = this.fundName;
         return data;
     }
 }
@@ -19182,37 +23816,352 @@ export interface IBudgetDto {
     id?: number;
     budgetNumber?: string;
     budgetName?: string;
-    budgetTypeId?: number;
-    budgetTypeName?: string;
     fiscalYearId?: number;
     fundId?: number;
-    fundName?: string;
-    totalAmount?: number;
-    status?: string;
+    budgetTypeId?: number;
+    status?: BudgetStatus;
     allowOverrun?: boolean | undefined;
-    effectiveAllowOverrun?: boolean;
-    effectiveFrom?: Date;
-    effectiveTo?: Date | undefined;
     description?: string | undefined;
-    latestApproval?: ApprovalDecisionDto | undefined;
+    rowVersion?: string;
+    created?: Date;
+    createdBy?: string | undefined;
+    budgetTypeName?: string;
+    fundName?: string;
+
+    [key: string]: any;
+}
+
+export class BudgetExecutionDetailDto implements IBudgetExecutionDetailDto {
+    budgetItemId?: number;
+    itemCode?: string;
+    itemName?: string;
+    fundId?: number;
+    fundNumber?: string;
+    encumbrances?: EncumbranceDetailDto[];
+    payments?: PaymentDetailDto[];
+
+    [key: string]: any;
+
+    constructor(data?: IBudgetExecutionDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.budgetItemId = _data["budgetItemId"];
+            this.itemCode = _data["itemCode"];
+            this.itemName = _data["itemName"];
+            this.fundId = _data["fundId"];
+            this.fundNumber = _data["fundNumber"];
+            if (Array.isArray(_data["encumbrances"])) {
+                this.encumbrances = [] as any;
+                for (let item of _data["encumbrances"])
+                    this.encumbrances!.push(EncumbranceDetailDto.fromJS(item));
+            }
+            if (Array.isArray(_data["payments"])) {
+                this.payments = [] as any;
+                for (let item of _data["payments"])
+                    this.payments!.push(PaymentDetailDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): BudgetExecutionDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BudgetExecutionDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["budgetItemId"] = this.budgetItemId;
+        data["itemCode"] = this.itemCode;
+        data["itemName"] = this.itemName;
+        data["fundId"] = this.fundId;
+        data["fundNumber"] = this.fundNumber;
+        if (Array.isArray(this.encumbrances)) {
+            data["encumbrances"] = [];
+            for (let item of this.encumbrances)
+                data["encumbrances"].push(item ? item.toJSON() : undefined as any);
+        }
+        if (Array.isArray(this.payments)) {
+            data["payments"] = [];
+            for (let item of this.payments)
+                data["payments"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IBudgetExecutionDetailDto {
+    budgetItemId?: number;
+    itemCode?: string;
+    itemName?: string;
+    fundId?: number;
+    fundNumber?: string;
+    encumbrances?: EncumbranceDetailDto[];
+    payments?: PaymentDetailDto[];
+
+    [key: string]: any;
+}
+
+export class BudgetExecutionLineDto implements IBudgetExecutionLineDto {
+    budgetItemId?: number;
+    itemCode?: string;
+    itemName?: string;
+    fundId?: number;
+    fundNumber?: string;
+    fundName?: string;
+    programId?: number | undefined;
+    programCode?: string | undefined;
+    projectId?: number | undefined;
+    projectCode?: string | undefined;
+    appropriatedAmount?: number;
+    encumberedAmount?: number;
+    paidAmount?: number;
+    availableAmount?: number;
+
+    [key: string]: any;
+
+    constructor(data?: IBudgetExecutionLineDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.budgetItemId = _data["budgetItemId"];
+            this.itemCode = _data["itemCode"];
+            this.itemName = _data["itemName"];
+            this.fundId = _data["fundId"];
+            this.fundNumber = _data["fundNumber"];
+            this.fundName = _data["fundName"];
+            this.programId = _data["programId"];
+            this.programCode = _data["programCode"];
+            this.projectId = _data["projectId"];
+            this.projectCode = _data["projectCode"];
+            this.appropriatedAmount = _data["appropriatedAmount"];
+            this.encumberedAmount = _data["encumberedAmount"];
+            this.paidAmount = _data["paidAmount"];
+            this.availableAmount = _data["availableAmount"];
+        }
+    }
+
+    static fromJS(data: any): BudgetExecutionLineDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BudgetExecutionLineDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["budgetItemId"] = this.budgetItemId;
+        data["itemCode"] = this.itemCode;
+        data["itemName"] = this.itemName;
+        data["fundId"] = this.fundId;
+        data["fundNumber"] = this.fundNumber;
+        data["fundName"] = this.fundName;
+        data["programId"] = this.programId;
+        data["programCode"] = this.programCode;
+        data["projectId"] = this.projectId;
+        data["projectCode"] = this.projectCode;
+        data["appropriatedAmount"] = this.appropriatedAmount;
+        data["encumberedAmount"] = this.encumberedAmount;
+        data["paidAmount"] = this.paidAmount;
+        data["availableAmount"] = this.availableAmount;
+        return data;
+    }
+}
+
+export interface IBudgetExecutionLineDto {
+    budgetItemId?: number;
+    itemCode?: string;
+    itemName?: string;
+    fundId?: number;
+    fundNumber?: string;
+    fundName?: string;
+    programId?: number | undefined;
+    programCode?: string | undefined;
+    projectId?: number | undefined;
+    projectCode?: string | undefined;
+    appropriatedAmount?: number;
+    encumberedAmount?: number;
+    paidAmount?: number;
+    availableAmount?: number;
+
+    [key: string]: any;
+}
+
+export class BudgetExecutionReportDto implements IBudgetExecutionReportDto {
+    fiscalYearId?: number;
+    fiscalYearName?: string;
+    lines?: BudgetExecutionLineDto[];
+    totals?: BudgetExecutionTotalDto;
+
+    [key: string]: any;
+
+    constructor(data?: IBudgetExecutionReportDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.fiscalYearId = _data["fiscalYearId"];
+            this.fiscalYearName = _data["fiscalYearName"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(BudgetExecutionLineDto.fromJS(item));
+            }
+            this.totals = _data["totals"] ? BudgetExecutionTotalDto.fromJS(_data["totals"]) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): BudgetExecutionReportDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BudgetExecutionReportDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["fiscalYearId"] = this.fiscalYearId;
+        data["fiscalYearName"] = this.fiscalYearName;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        data["totals"] = this.totals ? this.totals.toJSON() : undefined as any;
+        return data;
+    }
+}
+
+export interface IBudgetExecutionReportDto {
+    fiscalYearId?: number;
+    fiscalYearName?: string;
+    lines?: BudgetExecutionLineDto[];
+    totals?: BudgetExecutionTotalDto;
+
+    [key: string]: any;
+}
+
+export class BudgetExecutionTotalDto implements IBudgetExecutionTotalDto {
+    appropriatedAmount?: number;
+    encumberedAmount?: number;
+    paidAmount?: number;
+    availableAmount?: number;
+
+    [key: string]: any;
+
+    constructor(data?: IBudgetExecutionTotalDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.appropriatedAmount = _data["appropriatedAmount"];
+            this.encumberedAmount = _data["encumberedAmount"];
+            this.paidAmount = _data["paidAmount"];
+            this.availableAmount = _data["availableAmount"];
+        }
+    }
+
+    static fromJS(data: any): BudgetExecutionTotalDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BudgetExecutionTotalDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["appropriatedAmount"] = this.appropriatedAmount;
+        data["encumberedAmount"] = this.encumberedAmount;
+        data["paidAmount"] = this.paidAmount;
+        data["availableAmount"] = this.availableAmount;
+        return data;
+    }
+}
+
+export interface IBudgetExecutionTotalDto {
+    appropriatedAmount?: number;
+    encumberedAmount?: number;
+    paidAmount?: number;
+    availableAmount?: number;
 
     [key: string]: any;
 }
 
 export class BudgetItemDto implements IBudgetItemDto {
     id?: number;
+    budgetId?: number;
     itemCode?: string;
     itemName?: string;
-    budgetId?: number;
     parentId?: number | undefined;
+    remarks?: string | undefined;
     level?: number;
-    accountId?: number | undefined;
-    fundId?: number | undefined;
-    costCenterId?: number | undefined;
-    budgetClassificationId?: number | undefined;
     allowOverrun?: boolean | undefined;
-    effectiveAllowOverrun?: boolean;
+    allowOverrunEffective?: boolean;
     isActive?: boolean;
+    rowVersion?: string;
+    created?: Date;
+    createdBy?: string | undefined;
+    children?: BudgetItemDto[];
 
     [key: string]: any;
 
@@ -19232,18 +24181,23 @@ export class BudgetItemDto implements IBudgetItemDto {
                     this[property] = _data[property];
             }
             this.id = _data["id"];
+            this.budgetId = _data["budgetId"];
             this.itemCode = _data["itemCode"];
             this.itemName = _data["itemName"];
-            this.budgetId = _data["budgetId"];
             this.parentId = _data["parentId"];
+            this.remarks = _data["remarks"];
             this.level = _data["level"];
-            this.accountId = _data["accountId"];
-            this.fundId = _data["fundId"];
-            this.costCenterId = _data["costCenterId"];
-            this.budgetClassificationId = _data["budgetClassificationId"];
             this.allowOverrun = _data["allowOverrun"];
-            this.effectiveAllowOverrun = _data["effectiveAllowOverrun"];
+            this.allowOverrunEffective = _data["allowOverrunEffective"];
             this.isActive = _data["isActive"];
+            this.rowVersion = _data["rowVersion"];
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
+            this.createdBy = _data["createdBy"];
+            if (Array.isArray(_data["children"])) {
+                this.children = [] as any;
+                for (let item of _data["children"])
+                    this.children!.push(BudgetItemDto.fromJS(item));
+            }
         }
     }
 
@@ -19261,144 +24215,42 @@ export class BudgetItemDto implements IBudgetItemDto {
                 data[property] = this[property];
         }
         data["id"] = this.id;
+        data["budgetId"] = this.budgetId;
         data["itemCode"] = this.itemCode;
         data["itemName"] = this.itemName;
-        data["budgetId"] = this.budgetId;
         data["parentId"] = this.parentId;
+        data["remarks"] = this.remarks;
         data["level"] = this.level;
-        data["accountId"] = this.accountId;
-        data["fundId"] = this.fundId;
-        data["costCenterId"] = this.costCenterId;
-        data["budgetClassificationId"] = this.budgetClassificationId;
         data["allowOverrun"] = this.allowOverrun;
-        data["effectiveAllowOverrun"] = this.effectiveAllowOverrun;
+        data["allowOverrunEffective"] = this.allowOverrunEffective;
         data["isActive"] = this.isActive;
+        data["rowVersion"] = this.rowVersion;
+        data["created"] = this.created ? this.created.toISOString() : undefined as any;
+        data["createdBy"] = this.createdBy;
+        if (Array.isArray(this.children)) {
+            data["children"] = [];
+            for (let item of this.children)
+                data["children"].push(item ? item.toJSON() : undefined as any);
+        }
         return data;
     }
 }
 
 export interface IBudgetItemDto {
     id?: number;
+    budgetId?: number;
     itemCode?: string;
     itemName?: string;
-    budgetId?: number;
     parentId?: number | undefined;
+    remarks?: string | undefined;
     level?: number;
-    accountId?: number | undefined;
-    fundId?: number | undefined;
-    costCenterId?: number | undefined;
-    budgetClassificationId?: number | undefined;
     allowOverrun?: boolean | undefined;
-    effectiveAllowOverrun?: boolean;
+    allowOverrunEffective?: boolean;
     isActive?: boolean;
-
-    [key: string]: any;
-}
-
-export class BudgetItemTreeDto implements IBudgetItemTreeDto {
-    children?: BudgetItemTreeDto[];
-    id?: number;
-    itemCode?: string;
-    itemName?: string;
-    budgetId?: number;
-    parentId?: number | undefined;
-    level?: number;
-    accountId?: number | undefined;
-    fundId?: number | undefined;
-    costCenterId?: number | undefined;
-    budgetClassificationId?: number | undefined;
-    allowOverrun?: boolean | undefined;
-    effectiveAllowOverrun?: boolean;
-    isActive?: boolean;
-
-    [key: string]: any;
-
-    constructor(data?: IBudgetItemTreeDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            if (Array.isArray(_data["children"])) {
-                this.children = [] as any;
-                for (let item of _data["children"])
-                    this.children!.push(BudgetItemTreeDto.fromJS(item));
-            }
-            this.id = _data["id"];
-            this.itemCode = _data["itemCode"];
-            this.itemName = _data["itemName"];
-            this.budgetId = _data["budgetId"];
-            this.parentId = _data["parentId"];
-            this.level = _data["level"];
-            this.accountId = _data["accountId"];
-            this.fundId = _data["fundId"];
-            this.costCenterId = _data["costCenterId"];
-            this.budgetClassificationId = _data["budgetClassificationId"];
-            this.allowOverrun = _data["allowOverrun"];
-            this.effectiveAllowOverrun = _data["effectiveAllowOverrun"];
-            this.isActive = _data["isActive"];
-        }
-    }
-
-    static fromJS(data: any): BudgetItemTreeDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new BudgetItemTreeDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        if (Array.isArray(this.children)) {
-            data["children"] = [];
-            for (let item of this.children)
-                data["children"].push(item ? item.toJSON() : undefined as any);
-        }
-        data["id"] = this.id;
-        data["itemCode"] = this.itemCode;
-        data["itemName"] = this.itemName;
-        data["budgetId"] = this.budgetId;
-        data["parentId"] = this.parentId;
-        data["level"] = this.level;
-        data["accountId"] = this.accountId;
-        data["fundId"] = this.fundId;
-        data["costCenterId"] = this.costCenterId;
-        data["budgetClassificationId"] = this.budgetClassificationId;
-        data["allowOverrun"] = this.allowOverrun;
-        data["effectiveAllowOverrun"] = this.effectiveAllowOverrun;
-        data["isActive"] = this.isActive;
-        return data;
-    }
-}
-
-export interface IBudgetItemTreeDto {
-    children?: BudgetItemTreeDto[];
-    id?: number;
-    itemCode?: string;
-    itemName?: string;
-    budgetId?: number;
-    parentId?: number | undefined;
-    level?: number;
-    accountId?: number | undefined;
-    fundId?: number | undefined;
-    costCenterId?: number | undefined;
-    budgetClassificationId?: number | undefined;
-    allowOverrun?: boolean | undefined;
-    effectiveAllowOverrun?: boolean;
-    isActive?: boolean;
+    rowVersion?: string;
+    created?: Date;
+    createdBy?: string | undefined;
+    children?: BudgetItemDto[];
 
     [key: string]: any;
 }
@@ -19418,9 +24270,12 @@ export class BudgetTypeDto implements IBudgetTypeDto {
     code?: string;
     name?: string;
     description?: string | undefined;
-    controlMethod?: string;
+    controlMethod?: BudgetControlMethod;
     allowOverrun?: boolean;
     isActive?: boolean;
+    rowVersion?: string;
+    created?: Date;
+    createdBy?: string | undefined;
 
     [key: string]: any;
 
@@ -19446,6 +24301,9 @@ export class BudgetTypeDto implements IBudgetTypeDto {
             this.controlMethod = _data["controlMethod"];
             this.allowOverrun = _data["allowOverrun"];
             this.isActive = _data["isActive"];
+            this.rowVersion = _data["rowVersion"];
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
+            this.createdBy = _data["createdBy"];
         }
     }
 
@@ -19469,6 +24327,9 @@ export class BudgetTypeDto implements IBudgetTypeDto {
         data["controlMethod"] = this.controlMethod;
         data["allowOverrun"] = this.allowOverrun;
         data["isActive"] = this.isActive;
+        data["rowVersion"] = this.rowVersion;
+        data["created"] = this.created ? this.created.toISOString() : undefined as any;
+        data["createdBy"] = this.createdBy;
         return data;
     }
 }
@@ -19478,9 +24339,60 @@ export interface IBudgetTypeDto {
     code?: string;
     name?: string;
     description?: string | undefined;
-    controlMethod?: string;
+    controlMethod?: BudgetControlMethod;
     allowOverrun?: boolean;
     isActive?: boolean;
+    rowVersion?: string;
+    created?: Date;
+    createdBy?: string | undefined;
+
+    [key: string]: any;
+}
+
+export class BudgetTypeToggleActiveRequest implements IBudgetTypeToggleActiveRequest {
+    rowVersion!: string;
+
+    [key: string]: any;
+
+    constructor(data?: IBudgetTypeToggleActiveRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): BudgetTypeToggleActiveRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new BudgetTypeToggleActiveRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IBudgetTypeToggleActiveRequest {
+    rowVersion: string;
 
     [key: string]: any;
 }
@@ -19529,58 +24441,6 @@ export class BulkGeneratePeriodsCommand implements IBulkGeneratePeriodsCommand {
 
 export interface IBulkGeneratePeriodsCommand {
     fiscalYearId?: number;
-
-    [key: string]: any;
-}
-
-export class CancelAppropriationCommand implements ICancelAppropriationCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: ICancelAppropriationCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): CancelAppropriationCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new CancelAppropriationCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface ICancelAppropriationCommand {
-    id?: number;
-    rowVersion?: string;
 
     [key: string]: any;
 }
@@ -19645,13 +24505,61 @@ export interface ICancelBackgroundJobResponse {
     [key: string]: any;
 }
 
-export class CancelBudgetCommand implements ICancelBudgetCommand {
+export class CancelDisbursementRequestRequest implements ICancelDisbursementRequestRequest {
+    reason!: string;
+
+    [key: string]: any;
+
+    constructor(data?: ICancelDisbursementRequestRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.reason = _data["reason"];
+        }
+    }
+
+    static fromJS(data: any): CancelDisbursementRequestRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new CancelDisbursementRequestRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["reason"] = this.reason;
+        return data;
+    }
+}
+
+export interface ICancelDisbursementRequestRequest {
+    reason: string;
+
+    [key: string]: any;
+}
+
+export class CancelJournalEntryCommand implements ICancelJournalEntryCommand {
     id?: number;
     rowVersion?: string;
 
     [key: string]: any;
 
-    constructor(data?: ICancelBudgetCommand) {
+    constructor(data?: ICancelJournalEntryCommand) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -19671,9 +24579,9 @@ export class CancelBudgetCommand implements ICancelBudgetCommand {
         }
     }
 
-    static fromJS(data: any): CancelBudgetCommand {
+    static fromJS(data: any): CancelJournalEntryCommand {
         data = typeof data === 'object' ? data : {};
-        let result = new CancelBudgetCommand();
+        let result = new CancelJournalEntryCommand();
         result.init(data);
         return result;
     }
@@ -19690,111 +24598,7 @@ export class CancelBudgetCommand implements ICancelBudgetCommand {
     }
 }
 
-export interface ICancelBudgetCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class CancelEncumbranceCommand implements ICancelEncumbranceCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: ICancelEncumbranceCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): CancelEncumbranceCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new CancelEncumbranceCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface ICancelEncumbranceCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class CancelMoveCommand implements ICancelMoveCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: ICancelMoveCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): CancelMoveCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new CancelMoveCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface ICancelMoveCommand {
+export interface ICancelJournalEntryCommand {
     id?: number;
     rowVersion?: string;
 
@@ -19803,7 +24607,6 @@ export interface ICancelMoveCommand {
 
 export class CancelPaymentOrderCommand implements ICancelPaymentOrderCommand {
     id?: number;
-    cancelledById?: number;
     cancellationReason?: string;
     rowVersion?: string;
 
@@ -19825,7 +24628,6 @@ export class CancelPaymentOrderCommand implements ICancelPaymentOrderCommand {
                     this[property] = _data[property];
             }
             this.id = _data["id"];
-            this.cancelledById = _data["cancelledById"];
             this.cancellationReason = _data["cancellationReason"];
             this.rowVersion = _data["rowVersion"];
         }
@@ -19845,7 +24647,6 @@ export class CancelPaymentOrderCommand implements ICancelPaymentOrderCommand {
                 data[property] = this[property];
         }
         data["id"] = this.id;
-        data["cancelledById"] = this.cancelledById;
         data["cancellationReason"] = this.cancellationReason;
         data["rowVersion"] = this.rowVersion;
         return data;
@@ -19854,8 +24655,63 @@ export class CancelPaymentOrderCommand implements ICancelPaymentOrderCommand {
 
 export interface ICancelPaymentOrderCommand {
     id?: number;
-    cancelledById?: number;
     cancellationReason?: string;
+    rowVersion?: string;
+
+    [key: string]: any;
+}
+
+export class CancelReceiptVoucherCommand implements ICancelReceiptVoucherCommand {
+    id?: number;
+    reason?: string;
+    rowVersion?: string;
+
+    [key: string]: any;
+
+    constructor(data?: ICancelReceiptVoucherCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.reason = _data["reason"];
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): CancelReceiptVoucherCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CancelReceiptVoucherCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["reason"] = this.reason;
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface ICancelReceiptVoucherCommand {
+    id?: number;
+    reason?: string;
     rowVersion?: string;
 
     [key: string]: any;
@@ -20229,13 +25085,155 @@ export interface ICashFlowStatementDto {
     [key: string]: any;
 }
 
-export class CloseAppropriationCommand implements ICloseAppropriationCommand {
-    id?: number;
-    rowVersion?: string;
+export class CheckClearingDto implements ICheckClearingDto {
+    checkNumber?: string;
+    bankName?: string;
+    clearedAt?: Date;
+    amount?: number;
 
     [key: string]: any;
 
-    constructor(data?: ICloseAppropriationCommand) {
+    constructor(data?: ICheckClearingDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.checkNumber = _data["checkNumber"];
+            this.bankName = _data["bankName"];
+            this.clearedAt = _data["clearedAt"] ? new Date(_data["clearedAt"].toString()) : undefined as any;
+            this.amount = _data["amount"];
+        }
+    }
+
+    static fromJS(data: any): CheckClearingDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CheckClearingDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["checkNumber"] = this.checkNumber;
+        data["bankName"] = this.bankName;
+        data["clearedAt"] = this.clearedAt ? this.clearedAt.toISOString() : undefined as any;
+        data["amount"] = this.amount;
+        return data;
+    }
+}
+
+export interface ICheckClearingDto {
+    checkNumber?: string;
+    bankName?: string;
+    clearedAt?: Date;
+    amount?: number;
+
+    [key: string]: any;
+}
+
+export class CheckDetailDto implements ICheckDetailDto {
+    checkId?: number;
+    bankName?: string;
+    checkNumber?: string;
+    checkDate?: Date;
+    amount?: number;
+    status?: string;
+    clearedAt?: Date | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: ICheckDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.checkId = _data["checkId"];
+            this.bankName = _data["bankName"];
+            this.checkNumber = _data["checkNumber"];
+            this.checkDate = _data["checkDate"] ? new Date(_data["checkDate"].toString()) : undefined as any;
+            this.amount = _data["amount"];
+            this.status = _data["status"];
+            this.clearedAt = _data["clearedAt"] ? new Date(_data["clearedAt"].toString()) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): CheckDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CheckDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["checkId"] = this.checkId;
+        data["bankName"] = this.bankName;
+        data["checkNumber"] = this.checkNumber;
+        data["checkDate"] = this.checkDate ? formatDate(this.checkDate) : undefined as any;
+        data["amount"] = this.amount;
+        data["status"] = this.status;
+        data["clearedAt"] = this.clearedAt ? this.clearedAt.toISOString() : undefined as any;
+        return data;
+    }
+}
+
+export interface ICheckDetailDto {
+    checkId?: number;
+    bankName?: string;
+    checkNumber?: string;
+    checkDate?: Date;
+    amount?: number;
+    status?: string;
+    clearedAt?: Date | undefined;
+
+    [key: string]: any;
+}
+
+export class CheckDto implements ICheckDto {
+    id?: number;
+    receiptVoucherId?: number;
+    bankName?: string;
+    checkNumber?: string;
+    checkDate?: Date;
+    amount?: number;
+    status?: CheckStatus;
+    statusName?: string;
+    clearedAt?: Date | undefined;
+    bouncedAt?: Date | undefined;
+    replacementVoucherId?: number | undefined;
+    created?: Date;
+
+    [key: string]: any;
+
+    constructor(data?: ICheckDto) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -20251,13 +25249,23 @@ export class CloseAppropriationCommand implements ICloseAppropriationCommand {
                     this[property] = _data[property];
             }
             this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
+            this.receiptVoucherId = _data["receiptVoucherId"];
+            this.bankName = _data["bankName"];
+            this.checkNumber = _data["checkNumber"];
+            this.checkDate = _data["checkDate"] ? new Date(_data["checkDate"].toString()) : undefined as any;
+            this.amount = _data["amount"];
+            this.status = _data["status"];
+            this.statusName = _data["statusName"];
+            this.clearedAt = _data["clearedAt"] ? new Date(_data["clearedAt"].toString()) : undefined as any;
+            this.bouncedAt = _data["bouncedAt"] ? new Date(_data["bouncedAt"].toString()) : undefined as any;
+            this.replacementVoucherId = _data["replacementVoucherId"];
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
         }
     }
 
-    static fromJS(data: any): CloseAppropriationCommand {
+    static fromJS(data: any): CheckDto {
         data = typeof data === 'object' ? data : {};
-        let result = new CloseAppropriationCommand();
+        let result = new CheckDto();
         result.init(data);
         return result;
     }
@@ -20269,25 +25277,52 @@ export class CloseAppropriationCommand implements ICloseAppropriationCommand {
                 data[property] = this[property];
         }
         data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
+        data["receiptVoucherId"] = this.receiptVoucherId;
+        data["bankName"] = this.bankName;
+        data["checkNumber"] = this.checkNumber;
+        data["checkDate"] = this.checkDate ? formatDate(this.checkDate) : undefined as any;
+        data["amount"] = this.amount;
+        data["status"] = this.status;
+        data["statusName"] = this.statusName;
+        data["clearedAt"] = this.clearedAt ? this.clearedAt.toISOString() : undefined as any;
+        data["bouncedAt"] = this.bouncedAt ? this.bouncedAt.toISOString() : undefined as any;
+        data["replacementVoucherId"] = this.replacementVoucherId;
+        data["created"] = this.created ? this.created.toISOString() : undefined as any;
         return data;
     }
 }
 
-export interface ICloseAppropriationCommand {
+export interface ICheckDto {
     id?: number;
-    rowVersion?: string;
+    receiptVoucherId?: number;
+    bankName?: string;
+    checkNumber?: string;
+    checkDate?: Date;
+    amount?: number;
+    status?: CheckStatus;
+    statusName?: string;
+    clearedAt?: Date | undefined;
+    bouncedAt?: Date | undefined;
+    replacementVoucherId?: number | undefined;
+    created?: Date;
 
     [key: string]: any;
 }
 
-export class CloseBudgetCommand implements ICloseBudgetCommand {
+export enum CheckStatus {
+    UnderCollection = "UnderCollection",
+    Cleared = "Cleared",
+    Bounced = "Bounced",
+}
+
+export class ClearCheckCommand implements IClearCheckCommand {
     id?: number;
+    clearedAt?: Date;
     rowVersion?: string;
 
     [key: string]: any;
 
-    constructor(data?: ICloseBudgetCommand) {
+    constructor(data?: IClearCheckCommand) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -20303,13 +25338,14 @@ export class CloseBudgetCommand implements ICloseBudgetCommand {
                     this[property] = _data[property];
             }
             this.id = _data["id"];
+            this.clearedAt = _data["clearedAt"] ? new Date(_data["clearedAt"].toString()) : undefined as any;
             this.rowVersion = _data["rowVersion"];
         }
     }
 
-    static fromJS(data: any): CloseBudgetCommand {
+    static fromJS(data: any): ClearCheckCommand {
         data = typeof data === 'object' ? data : {};
-        let result = new CloseBudgetCommand();
+        let result = new ClearCheckCommand();
         result.init(data);
         return result;
     }
@@ -20321,65 +25357,15 @@ export class CloseBudgetCommand implements ICloseBudgetCommand {
                 data[property] = this[property];
         }
         data["id"] = this.id;
+        data["clearedAt"] = this.clearedAt ? this.clearedAt.toISOString() : undefined as any;
         data["rowVersion"] = this.rowVersion;
         return data;
     }
 }
 
-export interface ICloseBudgetCommand {
+export interface IClearCheckCommand {
     id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class CloseEncumbranceCommand implements ICloseEncumbranceCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: ICloseEncumbranceCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): CloseEncumbranceCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new CloseEncumbranceCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface ICloseEncumbranceCommand {
-    id?: number;
+    clearedAt?: Date;
     rowVersion?: string;
 
     [key: string]: any;
@@ -20396,8 +25382,8 @@ export class ClosingEntryDto implements IClosingEntryDto {
     isReversal?: boolean;
     reversalOfId?: number | undefined;
     reversalOfNumber?: string | undefined;
-    moveId?: number | undefined;
-    moveEntryNumber?: string | undefined;
+    journalEntryId?: number | undefined;
+    journalEntryEntryNumber?: string | undefined;
     approvedById?: string | undefined;
     isActive?: boolean;
     rowVersion?: string | undefined;
@@ -20429,8 +25415,8 @@ export class ClosingEntryDto implements IClosingEntryDto {
             this.isReversal = _data["isReversal"];
             this.reversalOfId = _data["reversalOfId"];
             this.reversalOfNumber = _data["reversalOfNumber"];
-            this.moveId = _data["moveId"];
-            this.moveEntryNumber = _data["moveEntryNumber"];
+            this.journalEntryId = _data["journalEntryId"];
+            this.journalEntryEntryNumber = _data["journalEntryEntryNumber"];
             this.approvedById = _data["approvedById"];
             this.isActive = _data["isActive"];
             this.rowVersion = _data["rowVersion"];
@@ -20460,8 +25446,8 @@ export class ClosingEntryDto implements IClosingEntryDto {
         data["isReversal"] = this.isReversal;
         data["reversalOfId"] = this.reversalOfId;
         data["reversalOfNumber"] = this.reversalOfNumber;
-        data["moveId"] = this.moveId;
-        data["moveEntryNumber"] = this.moveEntryNumber;
+        data["journalEntryId"] = this.journalEntryId;
+        data["journalEntryEntryNumber"] = this.journalEntryEntryNumber;
         data["approvedById"] = this.approvedById;
         data["isActive"] = this.isActive;
         data["rowVersion"] = this.rowVersion;
@@ -20480,11 +25466,167 @@ export interface IClosingEntryDto {
     isReversal?: boolean;
     reversalOfId?: number | undefined;
     reversalOfNumber?: string | undefined;
-    moveId?: number | undefined;
-    moveEntryNumber?: string | undefined;
+    journalEntryId?: number | undefined;
+    journalEntryEntryNumber?: string | undefined;
     approvedById?: string | undefined;
     isActive?: boolean;
     rowVersion?: string | undefined;
+
+    [key: string]: any;
+}
+
+export class CollectionLineResponse implements ICollectionLineResponse {
+    fundCode!: string;
+    fundName!: string;
+    date!: Date;
+    amount!: number;
+    source!: string;
+
+    [key: string]: any;
+
+    constructor(data?: ICollectionLineResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.fundCode = _data["fundCode"];
+            this.fundName = _data["fundName"];
+            this.date = _data["date"] ? new Date(_data["date"].toString()) : undefined as any;
+            this.amount = _data["amount"];
+            this.source = _data["source"];
+        }
+    }
+
+    static fromJS(data: any): CollectionLineResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new CollectionLineResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["fundCode"] = this.fundCode;
+        data["fundName"] = this.fundName;
+        data["date"] = this.date ? formatDate(this.date) : undefined as any;
+        data["amount"] = this.amount;
+        data["source"] = this.source;
+        return data;
+    }
+}
+
+export interface ICollectionLineResponse {
+    fundCode: string;
+    fundName: string;
+    date: Date;
+    amount: number;
+    source: string;
+
+    [key: string]: any;
+}
+
+export class CollectionStatementResponse implements ICollectionStatementResponse {
+    fiscalYearId!: number;
+    fiscalYearName!: string;
+    collections!: CollectionLineResponse[];
+    subtotals!: { [key: string]: number; };
+    grandTotal!: number;
+    isClosed!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: ICollectionStatementResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.collections = [];
+            this.subtotals = {};
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.fiscalYearId = _data["fiscalYearId"];
+            this.fiscalYearName = _data["fiscalYearName"];
+            if (Array.isArray(_data["collections"])) {
+                this.collections = [] as any;
+                for (let item of _data["collections"])
+                    this.collections!.push(CollectionLineResponse.fromJS(item));
+            }
+            if (_data["subtotals"]) {
+                this.subtotals = {} as any;
+                for (let key in _data["subtotals"]) {
+                    if (_data["subtotals"].hasOwnProperty(key))
+                        (this.subtotals as any)![key] = _data["subtotals"][key];
+                }
+            }
+            this.grandTotal = _data["grandTotal"];
+            this.isClosed = _data["isClosed"];
+        }
+    }
+
+    static fromJS(data: any): CollectionStatementResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new CollectionStatementResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["fiscalYearId"] = this.fiscalYearId;
+        data["fiscalYearName"] = this.fiscalYearName;
+        if (Array.isArray(this.collections)) {
+            data["collections"] = [];
+            for (let item of this.collections)
+                data["collections"].push(item ? item.toJSON() : undefined as any);
+        }
+        if (this.subtotals) {
+            data["subtotals"] = {};
+            for (let key in this.subtotals) {
+                if (this.subtotals.hasOwnProperty(key))
+                    (data["subtotals"] as any)[key] = (this.subtotals as any)[key];
+            }
+        }
+        data["grandTotal"] = this.grandTotal;
+        data["isClosed"] = this.isClosed;
+        return data;
+    }
+}
+
+export interface ICollectionStatementResponse {
+    fiscalYearId: number;
+    fiscalYearName: string;
+    collections: CollectionLineResponse[];
+    subtotals: { [key: string]: number; };
+    grandTotal: number;
+    isClosed: boolean;
 
     [key: string]: any;
 }
@@ -21021,17 +26163,17 @@ export interface ICreateAccountGroupCommand {
     [key: string]: any;
 }
 
-export class CreateAppropriationCommand implements ICreateAppropriationCommand {
-    budgetId?: number;
-    budgetItemId?: number;
-    appropriationType?: AppropriationType;
-    documentType?: string;
-    documentId?: number;
-    amount?: number;
+export class CreateAppropriationRequest implements ICreateAppropriationRequest {
+    budgetId!: number;
+    budgetItemId!: number;
+    appropriationType!: AppropriationType;
+    documentType!: string;
+    documentId!: number;
+    amount!: number;
 
     [key: string]: any;
 
-    constructor(data?: ICreateAppropriationCommand) {
+    constructor(data?: ICreateAppropriationRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -21055,9 +26197,9 @@ export class CreateAppropriationCommand implements ICreateAppropriationCommand {
         }
     }
 
-    static fromJS(data: any): CreateAppropriationCommand {
+    static fromJS(data: any): CreateAppropriationRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new CreateAppropriationCommand();
+        let result = new CreateAppropriationRequest();
         result.init(data);
         return result;
     }
@@ -21078,13 +26220,13 @@ export class CreateAppropriationCommand implements ICreateAppropriationCommand {
     }
 }
 
-export interface ICreateAppropriationCommand {
-    budgetId?: number;
-    budgetItemId?: number;
-    appropriationType?: AppropriationType;
-    documentType?: string;
-    documentId?: number;
-    amount?: number;
+export interface ICreateAppropriationRequest {
+    budgetId: number;
+    budgetItemId: number;
+    appropriationType: AppropriationType;
+    documentType: string;
+    documentId: number;
+    amount: number;
 
     [key: string]: any;
 }
@@ -21405,7 +26547,7 @@ export class CreateBankReconciliationLineCommand implements ICreateBankReconcili
     reconciliationId?: number;
     lineType?: ReconciliationLineType;
     bankStatementLineId?: number | undefined;
-    moveLineId?: number | undefined;
+    journalEntryLineId?: number | undefined;
     amount?: number;
     description?: string | undefined;
 
@@ -21429,7 +26571,7 @@ export class CreateBankReconciliationLineCommand implements ICreateBankReconcili
             this.reconciliationId = _data["reconciliationId"];
             this.lineType = _data["lineType"];
             this.bankStatementLineId = _data["bankStatementLineId"];
-            this.moveLineId = _data["moveLineId"];
+            this.journalEntryLineId = _data["journalEntryLineId"];
             this.amount = _data["amount"];
             this.description = _data["description"];
         }
@@ -21451,7 +26593,7 @@ export class CreateBankReconciliationLineCommand implements ICreateBankReconcili
         data["reconciliationId"] = this.reconciliationId;
         data["lineType"] = this.lineType;
         data["bankStatementLineId"] = this.bankStatementLineId;
-        data["moveLineId"] = this.moveLineId;
+        data["journalEntryLineId"] = this.journalEntryLineId;
         data["amount"] = this.amount;
         data["description"] = this.description;
         return data;
@@ -21462,7 +26604,7 @@ export interface ICreateBankReconciliationLineCommand {
     reconciliationId?: number;
     lineType?: ReconciliationLineType;
     bankStatementLineId?: number | undefined;
-    moveLineId?: number | undefined;
+    journalEntryLineId?: number | undefined;
     amount?: number;
     description?: string | undefined;
 
@@ -21613,14 +26755,14 @@ export interface ICreateBankStatementLineCommand {
     [key: string]: any;
 }
 
-export class CreateBudgetClassificationCommand implements ICreateBudgetClassificationCommand {
-    code?: string;
-    name?: string;
-    parentId?: number | undefined;
+export class CreateBudgetClassificationRequest implements ICreateBudgetClassificationRequest {
+    code!: string;
+    name!: string;
+    parentId!: number | undefined;
 
     [key: string]: any;
 
-    constructor(data?: ICreateBudgetClassificationCommand) {
+    constructor(data?: ICreateBudgetClassificationRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -21641,9 +26783,9 @@ export class CreateBudgetClassificationCommand implements ICreateBudgetClassific
         }
     }
 
-    static fromJS(data: any): CreateBudgetClassificationCommand {
+    static fromJS(data: any): CreateBudgetClassificationRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new CreateBudgetClassificationCommand();
+        let result = new CreateBudgetClassificationRequest();
         result.init(data);
         return result;
     }
@@ -21661,28 +26803,83 @@ export class CreateBudgetClassificationCommand implements ICreateBudgetClassific
     }
 }
 
-export interface ICreateBudgetClassificationCommand {
-    code?: string;
-    name?: string;
-    parentId?: number | undefined;
+export interface ICreateBudgetClassificationRequest {
+    code: string;
+    name: string;
+    parentId: number | undefined;
 
     [key: string]: any;
 }
 
-export class CreateBudgetCommand implements ICreateBudgetCommand {
-    budgetName?: string;
-    budgetTypeId?: number;
-    fiscalYearId?: number;
-    fundId?: number;
-    totalAmount?: number;
-    allowOverrun?: boolean | undefined;
-    effectiveFrom?: Date;
-    effectiveTo?: Date | undefined;
-    description?: string | undefined;
+export class CreateBudgetItemRequest implements ICreateBudgetItemRequest {
+    itemCode!: string;
+    itemName!: string;
+    parentId!: number | undefined;
+    remarks!: string | undefined;
 
     [key: string]: any;
 
-    constructor(data?: ICreateBudgetCommand) {
+    constructor(data?: ICreateBudgetItemRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.itemCode = _data["itemCode"];
+            this.itemName = _data["itemName"];
+            this.parentId = _data["parentId"];
+            this.remarks = _data["remarks"];
+        }
+    }
+
+    static fromJS(data: any): CreateBudgetItemRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateBudgetItemRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["itemCode"] = this.itemCode;
+        data["itemName"] = this.itemName;
+        data["parentId"] = this.parentId;
+        data["remarks"] = this.remarks;
+        return data;
+    }
+}
+
+export interface ICreateBudgetItemRequest {
+    itemCode: string;
+    itemName: string;
+    parentId: number | undefined;
+    remarks: string | undefined;
+
+    [key: string]: any;
+}
+
+export class CreateBudgetRequest implements ICreateBudgetRequest {
+    budgetName!: string;
+    fiscalYearId!: number;
+    fundId!: number;
+    budgetTypeId!: number;
+
+    [key: string]: any;
+
+    constructor(data?: ICreateBudgetRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -21698,20 +26895,15 @@ export class CreateBudgetCommand implements ICreateBudgetCommand {
                     this[property] = _data[property];
             }
             this.budgetName = _data["budgetName"];
-            this.budgetTypeId = _data["budgetTypeId"];
             this.fiscalYearId = _data["fiscalYearId"];
             this.fundId = _data["fundId"];
-            this.totalAmount = _data["totalAmount"];
-            this.allowOverrun = _data["allowOverrun"];
-            this.effectiveFrom = _data["effectiveFrom"] ? new Date(_data["effectiveFrom"].toString()) : undefined as any;
-            this.effectiveTo = _data["effectiveTo"] ? new Date(_data["effectiveTo"].toString()) : undefined as any;
-            this.description = _data["description"];
+            this.budgetTypeId = _data["budgetTypeId"];
         }
     }
 
-    static fromJS(data: any): CreateBudgetCommand {
+    static fromJS(data: any): CreateBudgetRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new CreateBudgetCommand();
+        let result = new CreateBudgetRequest();
         result.init(data);
         return result;
     }
@@ -21723,122 +26915,32 @@ export class CreateBudgetCommand implements ICreateBudgetCommand {
                 data[property] = this[property];
         }
         data["budgetName"] = this.budgetName;
-        data["budgetTypeId"] = this.budgetTypeId;
         data["fiscalYearId"] = this.fiscalYearId;
         data["fundId"] = this.fundId;
-        data["totalAmount"] = this.totalAmount;
-        data["allowOverrun"] = this.allowOverrun;
-        data["effectiveFrom"] = this.effectiveFrom ? formatDate(this.effectiveFrom) : undefined as any;
-        data["effectiveTo"] = this.effectiveTo ? formatDate(this.effectiveTo) : undefined as any;
-        data["description"] = this.description;
+        data["budgetTypeId"] = this.budgetTypeId;
         return data;
     }
 }
 
-export interface ICreateBudgetCommand {
-    budgetName?: string;
-    budgetTypeId?: number;
-    fiscalYearId?: number;
-    fundId?: number;
-    totalAmount?: number;
-    allowOverrun?: boolean | undefined;
-    effectiveFrom?: Date;
-    effectiveTo?: Date | undefined;
-    description?: string | undefined;
+export interface ICreateBudgetRequest {
+    budgetName: string;
+    fiscalYearId: number;
+    fundId: number;
+    budgetTypeId: number;
 
     [key: string]: any;
 }
 
-export class CreateBudgetItemCommand implements ICreateBudgetItemCommand {
-    budgetId?: number;
-    itemCode?: string;
-    itemName?: string;
-    parentId?: number | undefined;
-    accountId?: number | undefined;
-    fundId?: number | undefined;
-    costCenterId?: number | undefined;
-    budgetClassificationId?: number | undefined;
-    allowOverrun?: boolean | undefined;
+export class CreateBudgetTypeRequest implements ICreateBudgetTypeRequest {
+    code!: string;
+    name!: string;
+    description!: string | undefined;
+    controlMethod!: BudgetControlMethod;
+    allowOverrun!: boolean;
 
     [key: string]: any;
 
-    constructor(data?: ICreateBudgetItemCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.budgetId = _data["budgetId"];
-            this.itemCode = _data["itemCode"];
-            this.itemName = _data["itemName"];
-            this.parentId = _data["parentId"];
-            this.accountId = _data["accountId"];
-            this.fundId = _data["fundId"];
-            this.costCenterId = _data["costCenterId"];
-            this.budgetClassificationId = _data["budgetClassificationId"];
-            this.allowOverrun = _data["allowOverrun"];
-        }
-    }
-
-    static fromJS(data: any): CreateBudgetItemCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new CreateBudgetItemCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["budgetId"] = this.budgetId;
-        data["itemCode"] = this.itemCode;
-        data["itemName"] = this.itemName;
-        data["parentId"] = this.parentId;
-        data["accountId"] = this.accountId;
-        data["fundId"] = this.fundId;
-        data["costCenterId"] = this.costCenterId;
-        data["budgetClassificationId"] = this.budgetClassificationId;
-        data["allowOverrun"] = this.allowOverrun;
-        return data;
-    }
-}
-
-export interface ICreateBudgetItemCommand {
-    budgetId?: number;
-    itemCode?: string;
-    itemName?: string;
-    parentId?: number | undefined;
-    accountId?: number | undefined;
-    fundId?: number | undefined;
-    costCenterId?: number | undefined;
-    budgetClassificationId?: number | undefined;
-    allowOverrun?: boolean | undefined;
-
-    [key: string]: any;
-}
-
-export class CreateBudgetTypeCommand implements ICreateBudgetTypeCommand {
-    code?: string;
-    name?: string;
-    description?: string | undefined;
-    controlMethod?: BudgetControlMethod;
-    allowOverrun?: boolean;
-
-    [key: string]: any;
-
-    constructor(data?: ICreateBudgetTypeCommand) {
+    constructor(data?: ICreateBudgetTypeRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -21861,9 +26963,9 @@ export class CreateBudgetTypeCommand implements ICreateBudgetTypeCommand {
         }
     }
 
-    static fromJS(data: any): CreateBudgetTypeCommand {
+    static fromJS(data: any): CreateBudgetTypeRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new CreateBudgetTypeCommand();
+        let result = new CreateBudgetTypeRequest();
         result.init(data);
         return result;
     }
@@ -21883,12 +26985,72 @@ export class CreateBudgetTypeCommand implements ICreateBudgetTypeCommand {
     }
 }
 
-export interface ICreateBudgetTypeCommand {
-    code?: string;
-    name?: string;
-    description?: string | undefined;
-    controlMethod?: BudgetControlMethod;
-    allowOverrun?: boolean;
+export interface ICreateBudgetTypeRequest {
+    code: string;
+    name: string;
+    description: string | undefined;
+    controlMethod: BudgetControlMethod;
+    allowOverrun: boolean;
+
+    [key: string]: any;
+}
+
+export class CreateCheckDto implements ICreateCheckDto {
+    bankName?: string;
+    checkNumber?: string;
+    checkDate?: Date;
+    amount?: number;
+
+    [key: string]: any;
+
+    constructor(data?: ICreateCheckDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.bankName = _data["bankName"];
+            this.checkNumber = _data["checkNumber"];
+            this.checkDate = _data["checkDate"] ? new Date(_data["checkDate"].toString()) : undefined as any;
+            this.amount = _data["amount"];
+        }
+    }
+
+    static fromJS(data: any): CreateCheckDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateCheckDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["bankName"] = this.bankName;
+        data["checkNumber"] = this.checkNumber;
+        data["checkDate"] = this.checkDate ? formatDate(this.checkDate) : undefined as any;
+        data["amount"] = this.amount;
+        return data;
+    }
+}
+
+export interface ICreateCheckDto {
+    bankName?: string;
+    checkNumber?: string;
+    checkDate?: Date;
+    amount?: number;
 
     [key: string]: any;
 }
@@ -22173,6 +27335,122 @@ export interface ICreateCurrencyCommand {
     [key: string]: any;
 }
 
+export class CreateDepositSlipCommand implements ICreateDepositSlipCommand {
+    slipDate?: Date;
+    formType?: FormType;
+    voucherIds?: number[];
+
+    [key: string]: any;
+
+    constructor(data?: ICreateDepositSlipCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.slipDate = _data["slipDate"] ? new Date(_data["slipDate"].toString()) : undefined as any;
+            this.formType = _data["formType"];
+            if (Array.isArray(_data["voucherIds"])) {
+                this.voucherIds = [] as any;
+                for (let item of _data["voucherIds"])
+                    this.voucherIds!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): CreateDepositSlipCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateDepositSlipCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["slipDate"] = this.slipDate ? formatDate(this.slipDate) : undefined as any;
+        data["formType"] = this.formType;
+        if (Array.isArray(this.voucherIds)) {
+            data["voucherIds"] = [];
+            for (let item of this.voucherIds)
+                data["voucherIds"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface ICreateDepositSlipCommand {
+    slipDate?: Date;
+    formType?: FormType;
+    voucherIds?: number[];
+
+    [key: string]: any;
+}
+
+export class CreateDisbursementRequestRequest implements ICreateDisbursementRequestRequest {
+    paymentOrderId!: number;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: ICreateDisbursementRequestRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.paymentOrderId = _data["paymentOrderId"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): CreateDisbursementRequestRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateDisbursementRequestRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["paymentOrderId"] = this.paymentOrderId;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface ICreateDisbursementRequestRequest {
+    paymentOrderId: number;
+    notes: string | undefined;
+
+    [key: string]: any;
+}
+
 export class CreateDocumentSequenceCommand implements ICreateDocumentSequenceCommand {
     name?: string;
     documentType?: string;
@@ -22305,20 +27583,20 @@ export interface ICreateEmployeeCommand {
     [key: string]: any;
 }
 
-export class CreateEncumbranceCommand implements ICreateEncumbranceCommand {
-    appropriationId?: number;
-    encumbranceType?: EncumbranceType;
-    vendorId?: number | undefined;
-    purchaseOrderId?: number | undefined;
-    documentType?: string;
-    documentId?: number;
-    description?: string | undefined;
-    encumbranceDate?: Date;
-    amount?: number;
+export class CreateEncumbranceRequest implements ICreateEncumbranceRequest {
+    appropriationId!: number;
+    encumbranceType!: EncumbranceType;
+    vendorId!: number | undefined;
+    purchaseOrderId!: number | undefined;
+    documentType!: string;
+    documentId!: number;
+    description!: string | undefined;
+    encumbranceDate!: Date;
+    amount!: number;
 
     [key: string]: any;
 
-    constructor(data?: ICreateEncumbranceCommand) {
+    constructor(data?: ICreateEncumbranceRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -22345,9 +27623,9 @@ export class CreateEncumbranceCommand implements ICreateEncumbranceCommand {
         }
     }
 
-    static fromJS(data: any): CreateEncumbranceCommand {
+    static fromJS(data: any): CreateEncumbranceRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new CreateEncumbranceCommand();
+        let result = new CreateEncumbranceRequest();
         result.init(data);
         return result;
     }
@@ -22371,16 +27649,16 @@ export class CreateEncumbranceCommand implements ICreateEncumbranceCommand {
     }
 }
 
-export interface ICreateEncumbranceCommand {
-    appropriationId?: number;
-    encumbranceType?: EncumbranceType;
-    vendorId?: number | undefined;
-    purchaseOrderId?: number | undefined;
-    documentType?: string;
-    documentId?: number;
-    description?: string | undefined;
-    encumbranceDate?: Date;
-    amount?: number;
+export interface ICreateEncumbranceRequest {
+    appropriationId: number;
+    encumbranceType: EncumbranceType;
+    vendorId: number | undefined;
+    purchaseOrderId: number | undefined;
+    documentType: string;
+    documentId: number;
+    description: string | undefined;
+    encumbranceDate: Date;
+    amount: number;
 
     [key: string]: any;
 }
@@ -22573,19 +27851,19 @@ export interface ICreateFiscalYearCommand {
     [key: string]: any;
 }
 
-export class CreateFundCommand implements ICreateFundCommand {
-    fundNumber?: string;
-    fundName?: string;
-    fundType?: FundType;
-    fundCategory?: FundCategory;
-    fiscalYearId?: number | undefined;
-    legalAuthority?: string;
-    description?: string | undefined;
-    defaultRevenueDebitAccountId?: number | undefined;
+export class CreateFundRequest implements ICreateFundRequest {
+    fundNumber!: string;
+    fundName!: string;
+    fundType!: FundType;
+    fundCategory!: FundCategory;
+    fiscalYearId!: number | undefined;
+    legalAuthority!: string;
+    description!: string | undefined;
+    defaultRevenueDebitAccountId!: number | undefined;
 
     [key: string]: any;
 
-    constructor(data?: ICreateFundCommand) {
+    constructor(data?: ICreateFundRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -22611,9 +27889,9 @@ export class CreateFundCommand implements ICreateFundCommand {
         }
     }
 
-    static fromJS(data: any): CreateFundCommand {
+    static fromJS(data: any): CreateFundRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new CreateFundCommand();
+        let result = new CreateFundRequest();
         result.init(data);
         return result;
     }
@@ -22636,15 +27914,15 @@ export class CreateFundCommand implements ICreateFundCommand {
     }
 }
 
-export interface ICreateFundCommand {
-    fundNumber?: string;
-    fundName?: string;
-    fundType?: FundType;
-    fundCategory?: FundCategory;
-    fiscalYearId?: number | undefined;
-    legalAuthority?: string;
-    description?: string | undefined;
-    defaultRevenueDebitAccountId?: number | undefined;
+export interface ICreateFundRequest {
+    fundNumber: string;
+    fundName: string;
+    fundType: FundType;
+    fundCategory: FundCategory;
+    fiscalYearId: number | undefined;
+    legalAuthority: string;
+    description: string | undefined;
+    defaultRevenueDebitAccountId: number | undefined;
 
     [key: string]: any;
 }
@@ -22725,7 +28003,7 @@ export interface ICreateJournalCommand {
     [key: string]: any;
 }
 
-export class CreateMoveCommand implements ICreateMoveCommand {
+export class CreateJournalEntryCommand implements ICreateJournalEntryCommand {
     ref?: string | undefined;
     documentDate?: Date;
     entryType?: EntryType | undefined;
@@ -22736,7 +28014,7 @@ export class CreateMoveCommand implements ICreateMoveCommand {
 
     [key: string]: any;
 
-    constructor(data?: ICreateMoveCommand) {
+    constructor(data?: ICreateJournalEntryCommand) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -22761,9 +28039,9 @@ export class CreateMoveCommand implements ICreateMoveCommand {
         }
     }
 
-    static fromJS(data: any): CreateMoveCommand {
+    static fromJS(data: any): CreateJournalEntryCommand {
         data = typeof data === 'object' ? data : {};
-        let result = new CreateMoveCommand();
+        let result = new CreateJournalEntryCommand();
         result.init(data);
         return result;
     }
@@ -22785,7 +28063,7 @@ export class CreateMoveCommand implements ICreateMoveCommand {
     }
 }
 
-export interface ICreateMoveCommand {
+export interface ICreateJournalEntryCommand {
     ref?: string | undefined;
     documentDate?: Date;
     entryType?: EntryType | undefined;
@@ -22797,8 +28075,8 @@ export interface ICreateMoveCommand {
     [key: string]: any;
 }
 
-export class CreateMoveLineCommand implements ICreateMoveLineCommand {
-    moveId?: number;
+export class CreateJournalEntryLineCommand implements ICreateJournalEntryLineCommand {
+    journalEntryId?: number;
     accountId?: number;
     description?: string | undefined;
     currencyId?: number;
@@ -22809,7 +28087,7 @@ export class CreateMoveLineCommand implements ICreateMoveLineCommand {
 
     [key: string]: any;
 
-    constructor(data?: ICreateMoveLineCommand) {
+    constructor(data?: ICreateJournalEntryLineCommand) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -22824,7 +28102,7 @@ export class CreateMoveLineCommand implements ICreateMoveLineCommand {
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.moveId = _data["moveId"];
+            this.journalEntryId = _data["journalEntryId"];
             this.accountId = _data["accountId"];
             this.description = _data["description"];
             this.currencyId = _data["currencyId"];
@@ -22835,9 +28113,9 @@ export class CreateMoveLineCommand implements ICreateMoveLineCommand {
         }
     }
 
-    static fromJS(data: any): CreateMoveLineCommand {
+    static fromJS(data: any): CreateJournalEntryLineCommand {
         data = typeof data === 'object' ? data : {};
-        let result = new CreateMoveLineCommand();
+        let result = new CreateJournalEntryLineCommand();
         result.init(data);
         return result;
     }
@@ -22848,7 +28126,7 @@ export class CreateMoveLineCommand implements ICreateMoveLineCommand {
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["moveId"] = this.moveId;
+        data["journalEntryId"] = this.journalEntryId;
         data["accountId"] = this.accountId;
         data["description"] = this.description;
         data["currencyId"] = this.currencyId;
@@ -22860,8 +28138,8 @@ export class CreateMoveLineCommand implements ICreateMoveLineCommand {
     }
 }
 
-export interface ICreateMoveLineCommand {
-    moveId?: number;
+export interface ICreateJournalEntryLineCommand {
+    journalEntryId?: number;
     accountId?: number;
     description?: string | undefined;
     currencyId?: number;
@@ -22925,6 +28203,86 @@ export interface ICreateOrganizationalUnitCommand {
     code?: string;
     name?: string;
     parentId?: number | undefined;
+
+    [key: string]: any;
+}
+
+export class CreatePartyRequest implements ICreatePartyRequest {
+    partyType!: PartyType;
+    nameAr!: string;
+    nameEn!: string | undefined;
+    taxNumber!: string | undefined;
+    nationalId!: string | undefined;
+    phone!: string | undefined;
+    email!: string | undefined;
+    address!: string | undefined;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: ICreatePartyRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.partyType = _data["partyType"];
+            this.nameAr = _data["nameAr"];
+            this.nameEn = _data["nameEn"];
+            this.taxNumber = _data["taxNumber"];
+            this.nationalId = _data["nationalId"];
+            this.phone = _data["phone"];
+            this.email = _data["email"];
+            this.address = _data["address"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): CreatePartyRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreatePartyRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["partyType"] = this.partyType;
+        data["nameAr"] = this.nameAr;
+        data["nameEn"] = this.nameEn;
+        data["taxNumber"] = this.taxNumber;
+        data["nationalId"] = this.nationalId;
+        data["phone"] = this.phone;
+        data["email"] = this.email;
+        data["address"] = this.address;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface ICreatePartyRequest {
+    partyType: PartyType;
+    nameAr: string;
+    nameEn: string | undefined;
+    taxNumber: string | undefined;
+    nationalId: string | undefined;
+    phone: string | undefined;
+    email: string | undefined;
+    address: string | undefined;
+    notes: string | undefined;
 
     [key: string]: any;
 }
@@ -23401,6 +28759,150 @@ export interface ICreateProjectCommand {
     [key: string]: any;
 }
 
+export class CreateReceiptVoucherCommand implements ICreateReceiptVoucherCommand {
+    voucherDate?: Date;
+    partyId?: number;
+    paymentMethod?: PaymentMethod;
+    receivedFrom?: string;
+    notes?: string | undefined;
+    lines?: CreateReceiptVoucherLineDto[];
+    checks?: CreateCheckDto[];
+
+    [key: string]: any;
+
+    constructor(data?: ICreateReceiptVoucherCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.voucherDate = _data["voucherDate"] ? new Date(_data["voucherDate"].toString()) : undefined as any;
+            this.partyId = _data["partyId"];
+            this.paymentMethod = _data["paymentMethod"];
+            this.receivedFrom = _data["receivedFrom"];
+            this.notes = _data["notes"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(CreateReceiptVoucherLineDto.fromJS(item));
+            }
+            if (Array.isArray(_data["checks"])) {
+                this.checks = [] as any;
+                for (let item of _data["checks"])
+                    this.checks!.push(CreateCheckDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): CreateReceiptVoucherCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateReceiptVoucherCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["voucherDate"] = this.voucherDate ? formatDate(this.voucherDate) : undefined as any;
+        data["partyId"] = this.partyId;
+        data["paymentMethod"] = this.paymentMethod;
+        data["receivedFrom"] = this.receivedFrom;
+        data["notes"] = this.notes;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        if (Array.isArray(this.checks)) {
+            data["checks"] = [];
+            for (let item of this.checks)
+                data["checks"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface ICreateReceiptVoucherCommand {
+    voucherDate?: Date;
+    partyId?: number;
+    paymentMethod?: PaymentMethod;
+    receivedFrom?: string;
+    notes?: string | undefined;
+    lines?: CreateReceiptVoucherLineDto[];
+    checks?: CreateCheckDto[];
+
+    [key: string]: any;
+}
+
+export class CreateReceiptVoucherLineDto implements ICreateReceiptVoucherLineDto {
+    revenueAccountId?: number;
+    amount?: number;
+    description?: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: ICreateReceiptVoucherLineDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.revenueAccountId = _data["revenueAccountId"];
+            this.amount = _data["amount"];
+            this.description = _data["description"];
+        }
+    }
+
+    static fromJS(data: any): CreateReceiptVoucherLineDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateReceiptVoucherLineDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["revenueAccountId"] = this.revenueAccountId;
+        data["amount"] = this.amount;
+        data["description"] = this.description;
+        return data;
+    }
+}
+
+export interface ICreateReceiptVoucherLineDto {
+    revenueAccountId?: number;
+    amount?: number;
+    description?: string | undefined;
+
+    [key: string]: any;
+}
+
 export class CreateRecurringEntryCommand implements ICreateRecurringEntryCommand {
     templateId?: number | undefined;
     journalId?: number;
@@ -23829,6 +29331,66 @@ export interface ICreateTemplateCommand {
     [key: string]: any;
 }
 
+export class CreateTransferRequest implements ICreateTransferRequest {
+    budgetId!: number;
+    sourceBudgetItemId!: number;
+    targetBudgetItemId!: number;
+    amount!: number;
+
+    [key: string]: any;
+
+    constructor(data?: ICreateTransferRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.budgetId = _data["budgetId"];
+            this.sourceBudgetItemId = _data["sourceBudgetItemId"];
+            this.targetBudgetItemId = _data["targetBudgetItemId"];
+            this.amount = _data["amount"];
+        }
+    }
+
+    static fromJS(data: any): CreateTransferRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateTransferRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["budgetId"] = this.budgetId;
+        data["sourceBudgetItemId"] = this.sourceBudgetItemId;
+        data["targetBudgetItemId"] = this.targetBudgetItemId;
+        data["amount"] = this.amount;
+        return data;
+    }
+}
+
+export interface ICreateTransferRequest {
+    budgetId: number;
+    sourceBudgetItemId: number;
+    targetBudgetItemId: number;
+    amount: number;
+
+    [key: string]: any;
+}
+
 export class CreateUserCommand implements ICreateUserCommand {
     login?: string;
     accountType?: AccountType | undefined;
@@ -24229,58 +29791,6 @@ export interface IDeactivateExchangeRateCommand {
     [key: string]: any;
 }
 
-export class DeactivateFundCommand implements IDeactivateFundCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: IDeactivateFundCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): DeactivateFundCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new DeactivateFundCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface IDeactivateFundCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
 export enum DeductionType {
     Tax = "Tax",
     WithholdingTax = "WithholdingTax",
@@ -24297,13 +29807,27 @@ export enum DelegationStatus {
     Revoked = "Revoked",
 }
 
-export class DeleteAppropriationCommand implements IDeleteAppropriationCommand {
+export class DepositSlipDto implements IDepositSlipDto {
     id?: number;
+    slipNumber?: string;
+    slipDate?: Date;
+    formType?: FormType;
+    formTypeName?: string;
+    status?: DepositSlipStatus;
+    statusName?: string;
+    totalAmount?: number;
+    approvedById?: number | undefined;
+    approvedAt?: Date | undefined;
+    receiptVouchers?: ReceiptVoucherDto[];
     rowVersion?: string;
+    created?: Date;
+    createdBy?: string | undefined;
+    lastModified?: Date;
+    lastModifiedBy?: string | undefined;
 
     [key: string]: any;
 
-    constructor(data?: IDeleteAppropriationCommand) {
+    constructor(data?: IDepositSlipDto) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -24319,13 +29843,31 @@ export class DeleteAppropriationCommand implements IDeleteAppropriationCommand {
                     this[property] = _data[property];
             }
             this.id = _data["id"];
+            this.slipNumber = _data["slipNumber"];
+            this.slipDate = _data["slipDate"] ? new Date(_data["slipDate"].toString()) : undefined as any;
+            this.formType = _data["formType"];
+            this.formTypeName = _data["formTypeName"];
+            this.status = _data["status"];
+            this.statusName = _data["statusName"];
+            this.totalAmount = _data["totalAmount"];
+            this.approvedById = _data["approvedById"];
+            this.approvedAt = _data["approvedAt"] ? new Date(_data["approvedAt"].toString()) : undefined as any;
+            if (Array.isArray(_data["receiptVouchers"])) {
+                this.receiptVouchers = [] as any;
+                for (let item of _data["receiptVouchers"])
+                    this.receiptVouchers!.push(ReceiptVoucherDto.fromJS(item));
+            }
             this.rowVersion = _data["rowVersion"];
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
+            this.createdBy = _data["createdBy"];
+            this.lastModified = _data["lastModified"] ? new Date(_data["lastModified"].toString()) : undefined as any;
+            this.lastModifiedBy = _data["lastModifiedBy"];
         }
     }
 
-    static fromJS(data: any): DeleteAppropriationCommand {
+    static fromJS(data: any): DepositSlipDto {
         data = typeof data === 'object' ? data : {};
-        let result = new DeleteAppropriationCommand();
+        let result = new DepositSlipDto();
         result.init(data);
         return result;
     }
@@ -24337,25 +29879,570 @@ export class DeleteAppropriationCommand implements IDeleteAppropriationCommand {
                 data[property] = this[property];
         }
         data["id"] = this.id;
+        data["slipNumber"] = this.slipNumber;
+        data["slipDate"] = this.slipDate ? formatDate(this.slipDate) : undefined as any;
+        data["formType"] = this.formType;
+        data["formTypeName"] = this.formTypeName;
+        data["status"] = this.status;
+        data["statusName"] = this.statusName;
+        data["totalAmount"] = this.totalAmount;
+        data["approvedById"] = this.approvedById;
+        data["approvedAt"] = this.approvedAt ? this.approvedAt.toISOString() : undefined as any;
+        if (Array.isArray(this.receiptVouchers)) {
+            data["receiptVouchers"] = [];
+            for (let item of this.receiptVouchers)
+                data["receiptVouchers"].push(item ? item.toJSON() : undefined as any);
+        }
         data["rowVersion"] = this.rowVersion;
+        data["created"] = this.created ? this.created.toISOString() : undefined as any;
+        data["createdBy"] = this.createdBy;
+        data["lastModified"] = this.lastModified ? this.lastModified.toISOString() : undefined as any;
+        data["lastModifiedBy"] = this.lastModifiedBy;
         return data;
     }
 }
 
-export interface IDeleteAppropriationCommand {
+export interface IDepositSlipDto {
     id?: number;
+    slipNumber?: string;
+    slipDate?: Date;
+    formType?: FormType;
+    formTypeName?: string;
+    status?: DepositSlipStatus;
+    statusName?: string;
+    totalAmount?: number;
+    approvedById?: number | undefined;
+    approvedAt?: Date | undefined;
+    receiptVouchers?: ReceiptVoucherDto[];
     rowVersion?: string;
+    created?: Date;
+    createdBy?: string | undefined;
+    lastModified?: Date;
+    lastModifiedBy?: string | undefined;
 
     [key: string]: any;
 }
 
-export class DeleteBudgetItemCommand implements IDeleteBudgetItemCommand {
-    id?: number;
-    rowVersion?: string;
+export enum DepositSlipStatus {
+    Draft = "Draft",
+    Approved = "Approved",
+}
+
+export class DisbursementLineResponse implements IDisbursementLineResponse {
+    fundCode!: string;
+    fundName!: string;
+    date!: Date;
+    amount!: number;
+    payee!: string;
 
     [key: string]: any;
 
-    constructor(data?: IDeleteBudgetItemCommand) {
+    constructor(data?: IDisbursementLineResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.fundCode = _data["fundCode"];
+            this.fundName = _data["fundName"];
+            this.date = _data["date"] ? new Date(_data["date"].toString()) : undefined as any;
+            this.amount = _data["amount"];
+            this.payee = _data["payee"];
+        }
+    }
+
+    static fromJS(data: any): DisbursementLineResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new DisbursementLineResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["fundCode"] = this.fundCode;
+        data["fundName"] = this.fundName;
+        data["date"] = this.date ? formatDate(this.date) : undefined as any;
+        data["amount"] = this.amount;
+        data["payee"] = this.payee;
+        return data;
+    }
+}
+
+export interface IDisbursementLineResponse {
+    fundCode: string;
+    fundName: string;
+    date: Date;
+    amount: number;
+    payee: string;
+
+    [key: string]: any;
+}
+
+export class DisbursementRegisterDetailDto implements IDisbursementRegisterDetailDto {
+    paymentOrderId?: number;
+    orderNumber?: string;
+    orderDate?: Date;
+    payeeName?: string;
+    amount?: number;
+    status?: string;
+    fundCode?: string;
+    approverName?: string | undefined;
+    paidAt?: Date | undefined;
+    payments?: PaymentDetailDto[];
+
+    [key: string]: any;
+
+    constructor(data?: IDisbursementRegisterDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.paymentOrderId = _data["paymentOrderId"];
+            this.orderNumber = _data["orderNumber"];
+            this.orderDate = _data["orderDate"] ? new Date(_data["orderDate"].toString()) : undefined as any;
+            this.payeeName = _data["payeeName"];
+            this.amount = _data["amount"];
+            this.status = _data["status"];
+            this.fundCode = _data["fundCode"];
+            this.approverName = _data["approverName"];
+            this.paidAt = _data["paidAt"] ? new Date(_data["paidAt"].toString()) : undefined as any;
+            if (Array.isArray(_data["payments"])) {
+                this.payments = [] as any;
+                for (let item of _data["payments"])
+                    this.payments!.push(PaymentDetailDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): DisbursementRegisterDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DisbursementRegisterDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["paymentOrderId"] = this.paymentOrderId;
+        data["orderNumber"] = this.orderNumber;
+        data["orderDate"] = this.orderDate ? formatDate(this.orderDate) : undefined as any;
+        data["payeeName"] = this.payeeName;
+        data["amount"] = this.amount;
+        data["status"] = this.status;
+        data["fundCode"] = this.fundCode;
+        data["approverName"] = this.approverName;
+        data["paidAt"] = this.paidAt ? formatDate(this.paidAt) : undefined as any;
+        if (Array.isArray(this.payments)) {
+            data["payments"] = [];
+            for (let item of this.payments)
+                data["payments"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IDisbursementRegisterDetailDto {
+    paymentOrderId?: number;
+    orderNumber?: string;
+    orderDate?: Date;
+    payeeName?: string;
+    amount?: number;
+    status?: string;
+    fundCode?: string;
+    approverName?: string | undefined;
+    paidAt?: Date | undefined;
+    payments?: PaymentDetailDto[];
+
+    [key: string]: any;
+}
+
+export class DisbursementRegisterDto implements IDisbursementRegisterDto {
+    fiscalYearId?: number;
+    fiscalYearName?: string;
+    lines?: DisbursementRegisterLineDto[];
+    totals?: DisbursementRegisterTotalDto;
+
+    [key: string]: any;
+
+    constructor(data?: IDisbursementRegisterDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.fiscalYearId = _data["fiscalYearId"];
+            this.fiscalYearName = _data["fiscalYearName"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(DisbursementRegisterLineDto.fromJS(item));
+            }
+            this.totals = _data["totals"] ? DisbursementRegisterTotalDto.fromJS(_data["totals"]) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): DisbursementRegisterDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DisbursementRegisterDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["fiscalYearId"] = this.fiscalYearId;
+        data["fiscalYearName"] = this.fiscalYearName;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        data["totals"] = this.totals ? this.totals.toJSON() : undefined as any;
+        return data;
+    }
+}
+
+export interface IDisbursementRegisterDto {
+    fiscalYearId?: number;
+    fiscalYearName?: string;
+    lines?: DisbursementRegisterLineDto[];
+    totals?: DisbursementRegisterTotalDto;
+
+    [key: string]: any;
+}
+
+export class DisbursementRegisterLineDto implements IDisbursementRegisterLineDto {
+    paymentOrderId?: number;
+    orderNumber?: string;
+    orderDate?: Date;
+    payeeName?: string;
+    amount?: number;
+    status?: string;
+    fundId?: number;
+    fundCode?: string;
+    fundName?: string;
+    approverId?: number | undefined;
+    approverName?: string | undefined;
+    paidAt?: Date | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IDisbursementRegisterLineDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.paymentOrderId = _data["paymentOrderId"];
+            this.orderNumber = _data["orderNumber"];
+            this.orderDate = _data["orderDate"] ? new Date(_data["orderDate"].toString()) : undefined as any;
+            this.payeeName = _data["payeeName"];
+            this.amount = _data["amount"];
+            this.status = _data["status"];
+            this.fundId = _data["fundId"];
+            this.fundCode = _data["fundCode"];
+            this.fundName = _data["fundName"];
+            this.approverId = _data["approverId"];
+            this.approverName = _data["approverName"];
+            this.paidAt = _data["paidAt"] ? new Date(_data["paidAt"].toString()) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): DisbursementRegisterLineDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DisbursementRegisterLineDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["paymentOrderId"] = this.paymentOrderId;
+        data["orderNumber"] = this.orderNumber;
+        data["orderDate"] = this.orderDate ? formatDate(this.orderDate) : undefined as any;
+        data["payeeName"] = this.payeeName;
+        data["amount"] = this.amount;
+        data["status"] = this.status;
+        data["fundId"] = this.fundId;
+        data["fundCode"] = this.fundCode;
+        data["fundName"] = this.fundName;
+        data["approverId"] = this.approverId;
+        data["approverName"] = this.approverName;
+        data["paidAt"] = this.paidAt ? formatDate(this.paidAt) : undefined as any;
+        return data;
+    }
+}
+
+export interface IDisbursementRegisterLineDto {
+    paymentOrderId?: number;
+    orderNumber?: string;
+    orderDate?: Date;
+    payeeName?: string;
+    amount?: number;
+    status?: string;
+    fundId?: number;
+    fundCode?: string;
+    fundName?: string;
+    approverId?: number | undefined;
+    approverName?: string | undefined;
+    paidAt?: Date | undefined;
+
+    [key: string]: any;
+}
+
+export class DisbursementRegisterTotalDto implements IDisbursementRegisterTotalDto {
+    totalRequests?: number;
+    draftCount?: number;
+    submittedCount?: number;
+    approvedCount?: number;
+    paidCount?: number;
+    rejectedCount?: number;
+    totalAmount?: number;
+    paidAmount?: number;
+
+    [key: string]: any;
+
+    constructor(data?: IDisbursementRegisterTotalDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.totalRequests = _data["totalRequests"];
+            this.draftCount = _data["draftCount"];
+            this.submittedCount = _data["submittedCount"];
+            this.approvedCount = _data["approvedCount"];
+            this.paidCount = _data["paidCount"];
+            this.rejectedCount = _data["rejectedCount"];
+            this.totalAmount = _data["totalAmount"];
+            this.paidAmount = _data["paidAmount"];
+        }
+    }
+
+    static fromJS(data: any): DisbursementRegisterTotalDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DisbursementRegisterTotalDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["totalRequests"] = this.totalRequests;
+        data["draftCount"] = this.draftCount;
+        data["submittedCount"] = this.submittedCount;
+        data["approvedCount"] = this.approvedCount;
+        data["paidCount"] = this.paidCount;
+        data["rejectedCount"] = this.rejectedCount;
+        data["totalAmount"] = this.totalAmount;
+        data["paidAmount"] = this.paidAmount;
+        return data;
+    }
+}
+
+export interface IDisbursementRegisterTotalDto {
+    totalRequests?: number;
+    draftCount?: number;
+    submittedCount?: number;
+    approvedCount?: number;
+    paidCount?: number;
+    rejectedCount?: number;
+    totalAmount?: number;
+    paidAmount?: number;
+
+    [key: string]: any;
+}
+
+export class DisbursementRequestDetailDto implements IDisbursementRequestDetailDto {
+    id!: number;
+    requestNumber!: string;
+    paymentOrderId!: number;
+    paymentOrderNumber!: string;
+    requestedById!: number;
+    requestedByName!: string;
+    requestDate!: Date;
+    status!: DisbursementRequestStatus;
+    hasWarning!: boolean;
+    notes!: string | undefined;
+    requestedAmount!: number;
+    approvals!: ApprovalStepDto[];
+
+    [key: string]: any;
+
+    constructor(data?: IDisbursementRequestDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.approvals = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.requestNumber = _data["requestNumber"];
+            this.paymentOrderId = _data["paymentOrderId"];
+            this.paymentOrderNumber = _data["paymentOrderNumber"];
+            this.requestedById = _data["requestedById"];
+            this.requestedByName = _data["requestedByName"];
+            this.requestDate = _data["requestDate"] ? new Date(_data["requestDate"].toString()) : undefined as any;
+            this.status = _data["status"];
+            this.hasWarning = _data["hasWarning"];
+            this.notes = _data["notes"];
+            this.requestedAmount = _data["requestedAmount"];
+            if (Array.isArray(_data["approvals"])) {
+                this.approvals = [] as any;
+                for (let item of _data["approvals"])
+                    this.approvals!.push(ApprovalStepDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): DisbursementRequestDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DisbursementRequestDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["requestNumber"] = this.requestNumber;
+        data["paymentOrderId"] = this.paymentOrderId;
+        data["paymentOrderNumber"] = this.paymentOrderNumber;
+        data["requestedById"] = this.requestedById;
+        data["requestedByName"] = this.requestedByName;
+        data["requestDate"] = this.requestDate ? formatDate(this.requestDate) : undefined as any;
+        data["status"] = this.status;
+        data["hasWarning"] = this.hasWarning;
+        data["notes"] = this.notes;
+        data["requestedAmount"] = this.requestedAmount;
+        if (Array.isArray(this.approvals)) {
+            data["approvals"] = [];
+            for (let item of this.approvals)
+                data["approvals"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IDisbursementRequestDetailDto {
+    id: number;
+    requestNumber: string;
+    paymentOrderId: number;
+    paymentOrderNumber: string;
+    requestedById: number;
+    requestedByName: string;
+    requestDate: Date;
+    status: DisbursementRequestStatus;
+    hasWarning: boolean;
+    notes: string | undefined;
+    requestedAmount: number;
+    approvals: ApprovalStepDto[];
+
+    [key: string]: any;
+}
+
+export class DisbursementRequestDto implements IDisbursementRequestDto {
+    id!: number;
+    requestNumber!: string;
+    paymentOrderId!: number;
+    paymentOrderNumber!: string;
+    requestedById!: number;
+    requestedByName!: string;
+    requestDate!: Date;
+    status!: DisbursementRequestStatus;
+    hasWarning!: boolean;
+    notes!: string | undefined;
+    requestedAmount!: number;
+    payeeName!: string | undefined;
+    fundName!: string | undefined;
+    approvalDate!: Date | undefined;
+    paymentDate!: Date | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IDisbursementRequestDto) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -24371,13 +30458,26 @@ export class DeleteBudgetItemCommand implements IDeleteBudgetItemCommand {
                     this[property] = _data[property];
             }
             this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
+            this.requestNumber = _data["requestNumber"];
+            this.paymentOrderId = _data["paymentOrderId"];
+            this.paymentOrderNumber = _data["paymentOrderNumber"];
+            this.requestedById = _data["requestedById"];
+            this.requestedByName = _data["requestedByName"];
+            this.requestDate = _data["requestDate"] ? new Date(_data["requestDate"].toString()) : undefined as any;
+            this.status = _data["status"];
+            this.hasWarning = _data["hasWarning"];
+            this.notes = _data["notes"];
+            this.requestedAmount = _data["requestedAmount"];
+            this.payeeName = _data["payeeName"];
+            this.fundName = _data["fundName"];
+            this.approvalDate = _data["approvalDate"] ? new Date(_data["approvalDate"].toString()) : undefined as any;
+            this.paymentDate = _data["paymentDate"] ? new Date(_data["paymentDate"].toString()) : undefined as any;
         }
     }
 
-    static fromJS(data: any): DeleteBudgetItemCommand {
+    static fromJS(data: any): DisbursementRequestDto {
         data = typeof data === 'object' ? data : {};
-        let result = new DeleteBudgetItemCommand();
+        let result = new DisbursementRequestDto();
         result.init(data);
         return result;
     }
@@ -24389,14 +30489,142 @@ export class DeleteBudgetItemCommand implements IDeleteBudgetItemCommand {
                 data[property] = this[property];
         }
         data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
+        data["requestNumber"] = this.requestNumber;
+        data["paymentOrderId"] = this.paymentOrderId;
+        data["paymentOrderNumber"] = this.paymentOrderNumber;
+        data["requestedById"] = this.requestedById;
+        data["requestedByName"] = this.requestedByName;
+        data["requestDate"] = this.requestDate ? formatDate(this.requestDate) : undefined as any;
+        data["status"] = this.status;
+        data["hasWarning"] = this.hasWarning;
+        data["notes"] = this.notes;
+        data["requestedAmount"] = this.requestedAmount;
+        data["payeeName"] = this.payeeName;
+        data["fundName"] = this.fundName;
+        data["approvalDate"] = this.approvalDate ? this.approvalDate.toISOString() : undefined as any;
+        data["paymentDate"] = this.paymentDate ? this.paymentDate.toISOString() : undefined as any;
         return data;
     }
 }
 
-export interface IDeleteBudgetItemCommand {
-    id?: number;
-    rowVersion?: string;
+export interface IDisbursementRequestDto {
+    id: number;
+    requestNumber: string;
+    paymentOrderId: number;
+    paymentOrderNumber: string;
+    requestedById: number;
+    requestedByName: string;
+    requestDate: Date;
+    status: DisbursementRequestStatus;
+    hasWarning: boolean;
+    notes: string | undefined;
+    requestedAmount: number;
+    payeeName: string | undefined;
+    fundName: string | undefined;
+    approvalDate: Date | undefined;
+    paymentDate: Date | undefined;
+
+    [key: string]: any;
+}
+
+export enum DisbursementRequestStatus {
+    Draft = "Draft",
+    PendingApproval = "PendingApproval",
+    Approved = "Approved",
+    Rejected = "Rejected",
+    Cancelled = "Cancelled",
+    Disbursed = "Disbursed",
+    Invalidated = "Invalidated",
+}
+
+export class DisbursementStatementResponse implements IDisbursementStatementResponse {
+    fiscalYearId!: number;
+    fiscalYearName!: string;
+    disbursements!: DisbursementLineResponse[];
+    subtotals!: { [key: string]: number; };
+    grandTotal!: number;
+    isClosed!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: IDisbursementStatementResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.disbursements = [];
+            this.subtotals = {};
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.fiscalYearId = _data["fiscalYearId"];
+            this.fiscalYearName = _data["fiscalYearName"];
+            if (Array.isArray(_data["disbursements"])) {
+                this.disbursements = [] as any;
+                for (let item of _data["disbursements"])
+                    this.disbursements!.push(DisbursementLineResponse.fromJS(item));
+            }
+            if (_data["subtotals"]) {
+                this.subtotals = {} as any;
+                for (let key in _data["subtotals"]) {
+                    if (_data["subtotals"].hasOwnProperty(key))
+                        (this.subtotals as any)![key] = _data["subtotals"][key];
+                }
+            }
+            this.grandTotal = _data["grandTotal"];
+            this.isClosed = _data["isClosed"];
+        }
+    }
+
+    static fromJS(data: any): DisbursementStatementResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new DisbursementStatementResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["fiscalYearId"] = this.fiscalYearId;
+        data["fiscalYearName"] = this.fiscalYearName;
+        if (Array.isArray(this.disbursements)) {
+            data["disbursements"] = [];
+            for (let item of this.disbursements)
+                data["disbursements"].push(item ? item.toJSON() : undefined as any);
+        }
+        if (this.subtotals) {
+            data["subtotals"] = {};
+            for (let key in this.subtotals) {
+                if (this.subtotals.hasOwnProperty(key))
+                    (data["subtotals"] as any)[key] = (this.subtotals as any)[key];
+            }
+        }
+        data["grandTotal"] = this.grandTotal;
+        data["isClosed"] = this.isClosed;
+        return data;
+    }
+}
+
+export interface IDisbursementStatementResponse {
+    fiscalYearId: number;
+    fiscalYearName: string;
+    disbursements: DisbursementLineResponse[];
+    subtotals: { [key: string]: number; };
+    grandTotal: number;
+    isClosed: boolean;
 
     [key: string]: any;
 }
@@ -24609,18 +30837,13 @@ export interface IEmployeeDto {
     [key: string]: any;
 }
 
-export class EncumbranceAvailabilityDto implements IEncumbranceAvailabilityDto {
-    appropriationId?: number;
-    budgetItemId?: number;
-    netAppropriated?: number;
-    totalEncumbered?: number;
-    available?: number;
-    controlMethod?: string;
-    effectiveAllowOverrun?: boolean;
+export class EncumbranceActionRequest implements IEncumbranceActionRequest {
+    rowVersion!: string;
+    reason?: string | undefined;
 
     [key: string]: any;
 
-    constructor(data?: IEncumbranceAvailabilityDto) {
+    constructor(data?: IEncumbranceActionRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -24635,19 +30858,14 @@ export class EncumbranceAvailabilityDto implements IEncumbranceAvailabilityDto {
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.appropriationId = _data["appropriationId"];
-            this.budgetItemId = _data["budgetItemId"];
-            this.netAppropriated = _data["netAppropriated"];
-            this.totalEncumbered = _data["totalEncumbered"];
-            this.available = _data["available"];
-            this.controlMethod = _data["controlMethod"];
-            this.effectiveAllowOverrun = _data["effectiveAllowOverrun"];
+            this.rowVersion = _data["rowVersion"];
+            this.reason = _data["reason"];
         }
     }
 
-    static fromJS(data: any): EncumbranceAvailabilityDto {
+    static fromJS(data: any): EncumbranceActionRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new EncumbranceAvailabilityDto();
+        let result = new EncumbranceActionRequest();
         result.init(data);
         return result;
     }
@@ -24658,60 +30876,160 @@ export class EncumbranceAvailabilityDto implements IEncumbranceAvailabilityDto {
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["appropriationId"] = this.appropriationId;
-        data["budgetItemId"] = this.budgetItemId;
-        data["netAppropriated"] = this.netAppropriated;
-        data["totalEncumbered"] = this.totalEncumbered;
-        data["available"] = this.available;
-        data["controlMethod"] = this.controlMethod;
-        data["effectiveAllowOverrun"] = this.effectiveAllowOverrun;
+        data["rowVersion"] = this.rowVersion;
+        data["reason"] = this.reason;
         return data;
     }
 }
 
-export interface IEncumbranceAvailabilityDto {
-    appropriationId?: number;
-    budgetItemId?: number;
-    netAppropriated?: number;
-    totalEncumbered?: number;
-    available?: number;
-    controlMethod?: string;
-    effectiveAllowOverrun?: boolean;
+export interface IEncumbranceActionRequest {
+    rowVersion: string;
+    reason?: string | undefined;
 
     [key: string]: any;
 }
 
-export class EncumbranceDto implements IEncumbranceDto {
-    id?: number;
-    encumbranceNumber?: string;
-    encumbranceType?: string;
-    appropriationId?: number;
-    appropriationNumber?: string;
-    budgetId?: number;
-    budgetNumber?: string;
-    budgetItemId?: number;
-    itemCode?: string;
-    fundId?: number;
-    fundName?: string;
-    fiscalYearId?: number;
+export class EncumbranceDetailDto implements IEncumbranceDetailDto {
     vendorId?: number | undefined;
     purchaseOrderId?: number | undefined;
     documentType?: string;
     documentId?: number;
+    reversalReason?: string | undefined;
+    appropriationNumber?: string;
+    itemCode?: string;
+    fundNumber?: string;
+    id?: number;
+    encumbranceNumber?: string;
+    appropriationId?: number;
+    encumbranceType?: EncumbranceType;
     description?: string | undefined;
     encumbranceDate?: Date;
     amount?: number;
-    status?: string;
+    status?: EncumbranceStatus;
     isReversed?: boolean;
     reversalOfId?: number | undefined;
-    reversalReason?: string | undefined;
-    availableForEncumbrance?: number;
-    latestApproval?: ApprovalDecisionDto | undefined;
-    createdBy?: string | undefined;
+    rowVersion?: string;
+    created?: Date;
 
     [key: string]: any;
 
-    constructor(data?: IEncumbranceDto) {
+    constructor(data?: IEncumbranceDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.vendorId = _data["vendorId"];
+            this.purchaseOrderId = _data["purchaseOrderId"];
+            this.documentType = _data["documentType"];
+            this.documentId = _data["documentId"];
+            this.reversalReason = _data["reversalReason"];
+            this.appropriationNumber = _data["appropriationNumber"];
+            this.itemCode = _data["itemCode"];
+            this.fundNumber = _data["fundNumber"];
+            this.id = _data["id"];
+            this.encumbranceNumber = _data["encumbranceNumber"];
+            this.appropriationId = _data["appropriationId"];
+            this.encumbranceType = _data["encumbranceType"];
+            this.description = _data["description"];
+            this.encumbranceDate = _data["encumbranceDate"] ? new Date(_data["encumbranceDate"].toString()) : undefined as any;
+            this.amount = _data["amount"];
+            this.status = _data["status"];
+            this.isReversed = _data["isReversed"];
+            this.reversalOfId = _data["reversalOfId"];
+            this.rowVersion = _data["rowVersion"];
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): EncumbranceDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new EncumbranceDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["vendorId"] = this.vendorId;
+        data["purchaseOrderId"] = this.purchaseOrderId;
+        data["documentType"] = this.documentType;
+        data["documentId"] = this.documentId;
+        data["reversalReason"] = this.reversalReason;
+        data["appropriationNumber"] = this.appropriationNumber;
+        data["itemCode"] = this.itemCode;
+        data["fundNumber"] = this.fundNumber;
+        data["id"] = this.id;
+        data["encumbranceNumber"] = this.encumbranceNumber;
+        data["appropriationId"] = this.appropriationId;
+        data["encumbranceType"] = this.encumbranceType;
+        data["description"] = this.description;
+        data["encumbranceDate"] = this.encumbranceDate ? formatDate(this.encumbranceDate) : undefined as any;
+        data["amount"] = this.amount;
+        data["status"] = this.status;
+        data["isReversed"] = this.isReversed;
+        data["reversalOfId"] = this.reversalOfId;
+        data["rowVersion"] = this.rowVersion;
+        data["created"] = this.created ? this.created.toISOString() : undefined as any;
+        return data;
+    }
+}
+
+export interface IEncumbranceDetailDto {
+    vendorId?: number | undefined;
+    purchaseOrderId?: number | undefined;
+    documentType?: string;
+    documentId?: number;
+    reversalReason?: string | undefined;
+    appropriationNumber?: string;
+    itemCode?: string;
+    fundNumber?: string;
+    id?: number;
+    encumbranceNumber?: string;
+    appropriationId?: number;
+    encumbranceType?: EncumbranceType;
+    description?: string | undefined;
+    encumbranceDate?: Date;
+    amount?: number;
+    status?: EncumbranceStatus;
+    isReversed?: boolean;
+    reversalOfId?: number | undefined;
+    rowVersion?: string;
+    created?: Date;
+
+    [key: string]: any;
+}
+
+export class EncumbranceListItemDto implements IEncumbranceListItemDto {
+    id?: number;
+    encumbranceNumber?: string;
+    appropriationId?: number;
+    encumbranceType?: EncumbranceType;
+    description?: string | undefined;
+    encumbranceDate?: Date;
+    amount?: number;
+    status?: EncumbranceStatus;
+    isReversed?: boolean;
+    reversalOfId?: number | undefined;
+    rowVersion?: string;
+    created?: Date;
+
+    [key: string]: any;
+
+    constructor(data?: IEncumbranceListItemDto) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -24728,36 +31046,22 @@ export class EncumbranceDto implements IEncumbranceDto {
             }
             this.id = _data["id"];
             this.encumbranceNumber = _data["encumbranceNumber"];
-            this.encumbranceType = _data["encumbranceType"];
             this.appropriationId = _data["appropriationId"];
-            this.appropriationNumber = _data["appropriationNumber"];
-            this.budgetId = _data["budgetId"];
-            this.budgetNumber = _data["budgetNumber"];
-            this.budgetItemId = _data["budgetItemId"];
-            this.itemCode = _data["itemCode"];
-            this.fundId = _data["fundId"];
-            this.fundName = _data["fundName"];
-            this.fiscalYearId = _data["fiscalYearId"];
-            this.vendorId = _data["vendorId"];
-            this.purchaseOrderId = _data["purchaseOrderId"];
-            this.documentType = _data["documentType"];
-            this.documentId = _data["documentId"];
+            this.encumbranceType = _data["encumbranceType"];
             this.description = _data["description"];
             this.encumbranceDate = _data["encumbranceDate"] ? new Date(_data["encumbranceDate"].toString()) : undefined as any;
             this.amount = _data["amount"];
             this.status = _data["status"];
             this.isReversed = _data["isReversed"];
             this.reversalOfId = _data["reversalOfId"];
-            this.reversalReason = _data["reversalReason"];
-            this.availableForEncumbrance = _data["availableForEncumbrance"];
-            this.latestApproval = _data["latestApproval"] ? ApprovalDecisionDto.fromJS(_data["latestApproval"]) : undefined as any;
-            this.createdBy = _data["createdBy"];
+            this.rowVersion = _data["rowVersion"];
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
         }
     }
 
-    static fromJS(data: any): EncumbranceDto {
+    static fromJS(data: any): EncumbranceListItemDto {
         data = typeof data === 'object' ? data : {};
-        let result = new EncumbranceDto();
+        let result = new EncumbranceListItemDto();
         result.init(data);
         return result;
     }
@@ -24770,61 +31074,33 @@ export class EncumbranceDto implements IEncumbranceDto {
         }
         data["id"] = this.id;
         data["encumbranceNumber"] = this.encumbranceNumber;
-        data["encumbranceType"] = this.encumbranceType;
         data["appropriationId"] = this.appropriationId;
-        data["appropriationNumber"] = this.appropriationNumber;
-        data["budgetId"] = this.budgetId;
-        data["budgetNumber"] = this.budgetNumber;
-        data["budgetItemId"] = this.budgetItemId;
-        data["itemCode"] = this.itemCode;
-        data["fundId"] = this.fundId;
-        data["fundName"] = this.fundName;
-        data["fiscalYearId"] = this.fiscalYearId;
-        data["vendorId"] = this.vendorId;
-        data["purchaseOrderId"] = this.purchaseOrderId;
-        data["documentType"] = this.documentType;
-        data["documentId"] = this.documentId;
+        data["encumbranceType"] = this.encumbranceType;
         data["description"] = this.description;
         data["encumbranceDate"] = this.encumbranceDate ? formatDate(this.encumbranceDate) : undefined as any;
         data["amount"] = this.amount;
         data["status"] = this.status;
         data["isReversed"] = this.isReversed;
         data["reversalOfId"] = this.reversalOfId;
-        data["reversalReason"] = this.reversalReason;
-        data["availableForEncumbrance"] = this.availableForEncumbrance;
-        data["latestApproval"] = this.latestApproval ? this.latestApproval.toJSON() : undefined as any;
-        data["createdBy"] = this.createdBy;
+        data["rowVersion"] = this.rowVersion;
+        data["created"] = this.created ? this.created.toISOString() : undefined as any;
         return data;
     }
 }
 
-export interface IEncumbranceDto {
+export interface IEncumbranceListItemDto {
     id?: number;
     encumbranceNumber?: string;
-    encumbranceType?: string;
     appropriationId?: number;
-    appropriationNumber?: string;
-    budgetId?: number;
-    budgetNumber?: string;
-    budgetItemId?: number;
-    itemCode?: string;
-    fundId?: number;
-    fundName?: string;
-    fiscalYearId?: number;
-    vendorId?: number | undefined;
-    purchaseOrderId?: number | undefined;
-    documentType?: string;
-    documentId?: number;
+    encumbranceType?: EncumbranceType;
     description?: string | undefined;
     encumbranceDate?: Date;
     amount?: number;
-    status?: string;
+    status?: EncumbranceStatus;
     isReversed?: boolean;
     reversalOfId?: number | undefined;
-    reversalReason?: string | undefined;
-    availableForEncumbrance?: number;
-    latestApproval?: ApprovalDecisionDto | undefined;
-    createdBy?: string | undefined;
+    rowVersion?: string;
+    created?: Date;
 
     [key: string]: any;
 }
@@ -24840,6 +31116,7 @@ export enum EncumbranceStatus {
     Closed = "Closed",
     Cancelled = "Cancelled",
     Reversed = "Reversed",
+    Suspended = "Suspended",
 }
 
 export enum EncumbranceType {
@@ -25135,6 +31412,169 @@ export interface IFailedOutboxMessageDto {
     [key: string]: any;
 }
 
+export enum FinalAccountLineDimension {
+    Fund = "Fund",
+    Program = "Program",
+    Project = "Project",
+    Item = "Item",
+}
+
+export class FinalAccountLineResponse implements IFinalAccountLineResponse {
+    dimension!: FinalAccountLineDimension;
+    dimensionId!: number;
+    dimensionCode!: string;
+    dimensionName!: string;
+    budgetedAmount!: number;
+    actualAmount!: number;
+    variance!: number;
+
+    [key: string]: any;
+
+    constructor(data?: IFinalAccountLineResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.dimension = _data["dimension"];
+            this.dimensionId = _data["dimensionId"];
+            this.dimensionCode = _data["dimensionCode"];
+            this.dimensionName = _data["dimensionName"];
+            this.budgetedAmount = _data["budgetedAmount"];
+            this.actualAmount = _data["actualAmount"];
+            this.variance = _data["variance"];
+        }
+    }
+
+    static fromJS(data: any): FinalAccountLineResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new FinalAccountLineResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["dimension"] = this.dimension;
+        data["dimensionId"] = this.dimensionId;
+        data["dimensionCode"] = this.dimensionCode;
+        data["dimensionName"] = this.dimensionName;
+        data["budgetedAmount"] = this.budgetedAmount;
+        data["actualAmount"] = this.actualAmount;
+        data["variance"] = this.variance;
+        return data;
+    }
+}
+
+export interface IFinalAccountLineResponse {
+    dimension: FinalAccountLineDimension;
+    dimensionId: number;
+    dimensionCode: string;
+    dimensionName: string;
+    budgetedAmount: number;
+    actualAmount: number;
+    variance: number;
+
+    [key: string]: any;
+}
+
+export class FinalAccountResponse implements IFinalAccountResponse {
+    id!: number;
+    fiscalYearId!: number;
+    status!: FinalAccountStatus;
+    generatedAt!: Date;
+    issuedAt!: Date | undefined;
+    lines!: FinalAccountLineResponse[];
+
+    [key: string]: any;
+
+    constructor(data?: IFinalAccountResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.lines = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.fiscalYearId = _data["fiscalYearId"];
+            this.status = _data["status"];
+            this.generatedAt = _data["generatedAt"] ? new Date(_data["generatedAt"].toString()) : undefined as any;
+            this.issuedAt = _data["issuedAt"] ? new Date(_data["issuedAt"].toString()) : undefined as any;
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(FinalAccountLineResponse.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): FinalAccountResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new FinalAccountResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["fiscalYearId"] = this.fiscalYearId;
+        data["status"] = this.status;
+        data["generatedAt"] = this.generatedAt ? this.generatedAt.toISOString() : undefined as any;
+        data["issuedAt"] = this.issuedAt ? this.issuedAt.toISOString() : undefined as any;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IFinalAccountResponse {
+    id: number;
+    fiscalYearId: number;
+    status: FinalAccountStatus;
+    generatedAt: Date;
+    issuedAt: Date | undefined;
+    lines: FinalAccountLineResponse[];
+
+    [key: string]: any;
+}
+
+export enum FinalAccountStatus {
+    Draft = "Draft",
+    Issued = "Issued",
+}
+
 export class FinalizePeriodCommand implements IFinalizePeriodCommand {
     fiscalYearId?: number;
     fiscalPeriodId?: number;
@@ -25339,6 +31779,11 @@ export interface IFiscalYearDto {
     [key: string]: any;
 }
 
+export enum FormType {
+    Form47 = "Form47",
+    Form48 = "Form48",
+}
+
 export enum FundCategory {
     Operating = "Operating",
     Capital = "Capital",
@@ -25348,13 +31793,16 @@ export class FundDto implements IFundDto {
     id?: number;
     fundNumber?: string;
     fundName?: string;
-    fundType?: string;
-    fundCategory?: string;
+    fundType?: FundType;
+    fundCategory?: FundCategory;
     fiscalYearId?: number | undefined;
     legalAuthority?: string;
     description?: string | undefined;
     defaultRevenueDebitAccountId?: number | undefined;
     isActive?: boolean;
+    rowVersion?: string;
+    created?: Date;
+    createdBy?: string | undefined;
 
     [key: string]: any;
 
@@ -25383,6 +31831,9 @@ export class FundDto implements IFundDto {
             this.description = _data["description"];
             this.defaultRevenueDebitAccountId = _data["defaultRevenueDebitAccountId"];
             this.isActive = _data["isActive"];
+            this.rowVersion = _data["rowVersion"];
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
+            this.createdBy = _data["createdBy"];
         }
     }
 
@@ -25409,6 +31860,9 @@ export class FundDto implements IFundDto {
         data["description"] = this.description;
         data["defaultRevenueDebitAccountId"] = this.defaultRevenueDebitAccountId;
         data["isActive"] = this.isActive;
+        data["rowVersion"] = this.rowVersion;
+        data["created"] = this.created ? this.created.toISOString() : undefined as any;
+        data["createdBy"] = this.createdBy;
         return data;
     }
 }
@@ -25417,13 +31871,64 @@ export interface IFundDto {
     id?: number;
     fundNumber?: string;
     fundName?: string;
-    fundType?: string;
-    fundCategory?: string;
+    fundType?: FundType;
+    fundCategory?: FundCategory;
     fiscalYearId?: number | undefined;
     legalAuthority?: string;
     description?: string | undefined;
     defaultRevenueDebitAccountId?: number | undefined;
     isActive?: boolean;
+    rowVersion?: string;
+    created?: Date;
+    createdBy?: string | undefined;
+
+    [key: string]: any;
+}
+
+export class FundToggleActiveRequest implements IFundToggleActiveRequest {
+    rowVersion!: string;
+
+    [key: string]: any;
+
+    constructor(data?: IFundToggleActiveRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): FundToggleActiveRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new FundToggleActiveRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IFundToggleActiveRequest {
+    rowVersion: string;
 
     [key: string]: any;
 }
@@ -25642,6 +32147,118 @@ export class GeneralLedgerTotals implements IGeneralLedgerTotals {
 export interface IGeneralLedgerTotals {
     debit?: number;
     credit?: number;
+
+    [key: string]: any;
+}
+
+export class GenerateFinalAccountRequest implements IGenerateFinalAccountRequest {
+    fiscalYearId!: number;
+
+    [key: string]: any;
+
+    constructor(data?: IGenerateFinalAccountRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.fiscalYearId = _data["fiscalYearId"];
+        }
+    }
+
+    static fromJS(data: any): GenerateFinalAccountRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new GenerateFinalAccountRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["fiscalYearId"] = this.fiscalYearId;
+        return data;
+    }
+}
+
+export interface IGenerateFinalAccountRequest {
+    fiscalYearId: number;
+
+    [key: string]: any;
+}
+
+export class GenerateFinalAccountResponse implements IGenerateFinalAccountResponse {
+    finalAccountId!: number;
+    fiscalYearId!: number;
+    fiscalYearName!: string;
+    status!: FinalAccountStatus;
+    lineCount!: number;
+
+    [key: string]: any;
+
+    constructor(data?: IGenerateFinalAccountResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.finalAccountId = _data["finalAccountId"];
+            this.fiscalYearId = _data["fiscalYearId"];
+            this.fiscalYearName = _data["fiscalYearName"];
+            this.status = _data["status"];
+            this.lineCount = _data["lineCount"];
+        }
+    }
+
+    static fromJS(data: any): GenerateFinalAccountResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new GenerateFinalAccountResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["finalAccountId"] = this.finalAccountId;
+        data["fiscalYearId"] = this.fiscalYearId;
+        data["fiscalYearName"] = this.fiscalYearName;
+        data["status"] = this.status;
+        data["lineCount"] = this.lineCount;
+        return data;
+    }
+}
+
+export interface IGenerateFinalAccountResponse {
+    finalAccountId: number;
+    fiscalYearId: number;
+    fiscalYearName: string;
+    status: FinalAccountStatus;
+    lineCount: number;
 
     [key: string]: any;
 }
@@ -25998,74 +32615,6 @@ export interface IIso4217CodeDto {
     [key: string]: any;
 }
 
-export class ItemAvailabilityDto implements IItemAvailabilityDto {
-    budgetItemId?: number;
-    netAppropriated?: number;
-    totalEncumbered?: number;
-    available?: number;
-    controlMethod?: string;
-    effectiveAllowOverrun?: boolean;
-
-    [key: string]: any;
-
-    constructor(data?: IItemAvailabilityDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.budgetItemId = _data["budgetItemId"];
-            this.netAppropriated = _data["netAppropriated"];
-            this.totalEncumbered = _data["totalEncumbered"];
-            this.available = _data["available"];
-            this.controlMethod = _data["controlMethod"];
-            this.effectiveAllowOverrun = _data["effectiveAllowOverrun"];
-        }
-    }
-
-    static fromJS(data: any): ItemAvailabilityDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new ItemAvailabilityDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["budgetItemId"] = this.budgetItemId;
-        data["netAppropriated"] = this.netAppropriated;
-        data["totalEncumbered"] = this.totalEncumbered;
-        data["available"] = this.available;
-        data["controlMethod"] = this.controlMethod;
-        data["effectiveAllowOverrun"] = this.effectiveAllowOverrun;
-        return data;
-    }
-}
-
-export interface IItemAvailabilityDto {
-    budgetItemId?: number;
-    netAppropriated?: number;
-    totalEncumbered?: number;
-    available?: number;
-    controlMethod?: string;
-    effectiveAllowOverrun?: boolean;
-
-    [key: string]: any;
-}
-
 export class JournalDto implements IJournalDto {
     id?: number;
     code?: string;
@@ -26146,6 +32695,278 @@ export interface IJournalDto {
     sequenceId?: number | undefined;
     requireApprovalBeforePosting?: boolean;
     isActive?: boolean;
+
+    [key: string]: any;
+}
+
+export class JournalEntryDto implements IJournalEntryDto {
+    id?: number;
+    entryNumber?: string;
+    ref?: string | undefined;
+    documentDate?: Date;
+    postingDate?: Date | undefined;
+    entryType?: EntryType2 | undefined;
+    entryStatus?: string;
+    journalId?: number | undefined;
+    journalName?: string | undefined;
+    periodId?: number;
+    fiscalYearId?: number;
+    narration?: string | undefined;
+    reversalOfId?: number | undefined;
+    reversalReason?: string | undefined;
+    postedById?: number | undefined;
+    postedByName?: string | undefined;
+    postedAt?: Date | undefined;
+    cancelledById?: number | undefined;
+    cancelledByName?: string | undefined;
+    cancelledAt?: Date | undefined;
+    isSystemGenerated?: boolean;
+    rowVersion?: string;
+    baseCurrencyId?: number | undefined;
+    totalBaseDebit?: number | undefined;
+    totalBaseCredit?: number | undefined;
+    lines?: JournalEntryLineDto[];
+
+    [key: string]: any;
+
+    constructor(data?: IJournalEntryDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.entryNumber = _data["entryNumber"];
+            this.ref = _data["ref"];
+            this.documentDate = _data["documentDate"] ? new Date(_data["documentDate"].toString()) : undefined as any;
+            this.postingDate = _data["postingDate"] ? new Date(_data["postingDate"].toString()) : undefined as any;
+            this.entryType = _data["entryType"];
+            this.entryStatus = _data["entryStatus"];
+            this.journalId = _data["journalId"];
+            this.journalName = _data["journalName"];
+            this.periodId = _data["periodId"];
+            this.fiscalYearId = _data["fiscalYearId"];
+            this.narration = _data["narration"];
+            this.reversalOfId = _data["reversalOfId"];
+            this.reversalReason = _data["reversalReason"];
+            this.postedById = _data["postedById"];
+            this.postedByName = _data["postedByName"];
+            this.postedAt = _data["postedAt"] ? new Date(_data["postedAt"].toString()) : undefined as any;
+            this.cancelledById = _data["cancelledById"];
+            this.cancelledByName = _data["cancelledByName"];
+            this.cancelledAt = _data["cancelledAt"] ? new Date(_data["cancelledAt"].toString()) : undefined as any;
+            this.isSystemGenerated = _data["isSystemGenerated"];
+            this.rowVersion = _data["rowVersion"];
+            this.baseCurrencyId = _data["baseCurrencyId"];
+            this.totalBaseDebit = _data["totalBaseDebit"];
+            this.totalBaseCredit = _data["totalBaseCredit"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(JournalEntryLineDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): JournalEntryDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new JournalEntryDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["entryNumber"] = this.entryNumber;
+        data["ref"] = this.ref;
+        data["documentDate"] = this.documentDate ? formatDate(this.documentDate) : undefined as any;
+        data["postingDate"] = this.postingDate ? formatDate(this.postingDate) : undefined as any;
+        data["entryType"] = this.entryType;
+        data["entryStatus"] = this.entryStatus;
+        data["journalId"] = this.journalId;
+        data["journalName"] = this.journalName;
+        data["periodId"] = this.periodId;
+        data["fiscalYearId"] = this.fiscalYearId;
+        data["narration"] = this.narration;
+        data["reversalOfId"] = this.reversalOfId;
+        data["reversalReason"] = this.reversalReason;
+        data["postedById"] = this.postedById;
+        data["postedByName"] = this.postedByName;
+        data["postedAt"] = this.postedAt ? this.postedAt.toISOString() : undefined as any;
+        data["cancelledById"] = this.cancelledById;
+        data["cancelledByName"] = this.cancelledByName;
+        data["cancelledAt"] = this.cancelledAt ? this.cancelledAt.toISOString() : undefined as any;
+        data["isSystemGenerated"] = this.isSystemGenerated;
+        data["rowVersion"] = this.rowVersion;
+        data["baseCurrencyId"] = this.baseCurrencyId;
+        data["totalBaseDebit"] = this.totalBaseDebit;
+        data["totalBaseCredit"] = this.totalBaseCredit;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IJournalEntryDto {
+    id?: number;
+    entryNumber?: string;
+    ref?: string | undefined;
+    documentDate?: Date;
+    postingDate?: Date | undefined;
+    entryType?: EntryType2 | undefined;
+    entryStatus?: string;
+    journalId?: number | undefined;
+    journalName?: string | undefined;
+    periodId?: number;
+    fiscalYearId?: number;
+    narration?: string | undefined;
+    reversalOfId?: number | undefined;
+    reversalReason?: string | undefined;
+    postedById?: number | undefined;
+    postedByName?: string | undefined;
+    postedAt?: Date | undefined;
+    cancelledById?: number | undefined;
+    cancelledByName?: string | undefined;
+    cancelledAt?: Date | undefined;
+    isSystemGenerated?: boolean;
+    rowVersion?: string;
+    baseCurrencyId?: number | undefined;
+    totalBaseDebit?: number | undefined;
+    totalBaseCredit?: number | undefined;
+    lines?: JournalEntryLineDto[];
+
+    [key: string]: any;
+}
+
+export class JournalEntryLineDto implements IJournalEntryLineDto {
+    id?: number;
+    journalEntryId?: number;
+    sequence?: number;
+    accountId?: number;
+    accountCode?: string;
+    accountName?: string;
+    description?: string | undefined;
+    currencyId?: number;
+    exchangeRate?: number;
+    debit?: number;
+    credit?: number;
+    costCenterId?: number | undefined;
+    costCenterName?: string | undefined;
+    rowVersion?: string;
+    baseDebit?: number | undefined;
+    baseCredit?: number | undefined;
+    resolvedRate?: number | undefined;
+    resolvedRateDate?: Date | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IJournalEntryLineDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.journalEntryId = _data["journalEntryId"];
+            this.sequence = _data["sequence"];
+            this.accountId = _data["accountId"];
+            this.accountCode = _data["accountCode"];
+            this.accountName = _data["accountName"];
+            this.description = _data["description"];
+            this.currencyId = _data["currencyId"];
+            this.exchangeRate = _data["exchangeRate"];
+            this.debit = _data["debit"];
+            this.credit = _data["credit"];
+            this.costCenterId = _data["costCenterId"];
+            this.costCenterName = _data["costCenterName"];
+            this.rowVersion = _data["rowVersion"];
+            this.baseDebit = _data["baseDebit"];
+            this.baseCredit = _data["baseCredit"];
+            this.resolvedRate = _data["resolvedRate"];
+            this.resolvedRateDate = _data["resolvedRateDate"] ? new Date(_data["resolvedRateDate"].toString()) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): JournalEntryLineDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new JournalEntryLineDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["journalEntryId"] = this.journalEntryId;
+        data["sequence"] = this.sequence;
+        data["accountId"] = this.accountId;
+        data["accountCode"] = this.accountCode;
+        data["accountName"] = this.accountName;
+        data["description"] = this.description;
+        data["currencyId"] = this.currencyId;
+        data["exchangeRate"] = this.exchangeRate;
+        data["debit"] = this.debit;
+        data["credit"] = this.credit;
+        data["costCenterId"] = this.costCenterId;
+        data["costCenterName"] = this.costCenterName;
+        data["rowVersion"] = this.rowVersion;
+        data["baseDebit"] = this.baseDebit;
+        data["baseCredit"] = this.baseCredit;
+        data["resolvedRate"] = this.resolvedRate;
+        data["resolvedRateDate"] = this.resolvedRateDate ? formatDate(this.resolvedRateDate) : undefined as any;
+        return data;
+    }
+}
+
+export interface IJournalEntryLineDto {
+    id?: number;
+    journalEntryId?: number;
+    sequence?: number;
+    accountId?: number;
+    accountCode?: string;
+    accountName?: string;
+    description?: string | undefined;
+    currencyId?: number;
+    exchangeRate?: number;
+    debit?: number;
+    credit?: number;
+    costCenterId?: number | undefined;
+    costCenterName?: string | undefined;
+    rowVersion?: string;
+    baseDebit?: number | undefined;
+    baseCredit?: number | undefined;
+    resolvedRate?: number | undefined;
+    resolvedRateDate?: Date | undefined;
 
     [key: string]: any;
 }
@@ -26242,6 +33063,318 @@ export enum JournalType {
     Closing = "Closing",
 }
 
+export class LapseFiscalYearRequest implements ILapseFiscalYearRequest {
+    fiscalYearId!: number;
+
+    [key: string]: any;
+
+    constructor(data?: ILapseFiscalYearRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.fiscalYearId = _data["fiscalYearId"];
+        }
+    }
+
+    static fromJS(data: any): LapseFiscalYearRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new LapseFiscalYearRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["fiscalYearId"] = this.fiscalYearId;
+        return data;
+    }
+}
+
+export interface ILapseFiscalYearRequest {
+    fiscalYearId: number;
+
+    [key: string]: any;
+}
+
+export class LapseFiscalYearResponse implements ILapseFiscalYearResponse {
+    yearClosingRunId!: number;
+    fiscalYearId!: number;
+    fiscalYearName!: string;
+    lapsedAppropriationTotal!: number;
+    lapsedEncumbranceTotal!: number;
+
+    [key: string]: any;
+
+    constructor(data?: ILapseFiscalYearResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.yearClosingRunId = _data["yearClosingRunId"];
+            this.fiscalYearId = _data["fiscalYearId"];
+            this.fiscalYearName = _data["fiscalYearName"];
+            this.lapsedAppropriationTotal = _data["lapsedAppropriationTotal"];
+            this.lapsedEncumbranceTotal = _data["lapsedEncumbranceTotal"];
+        }
+    }
+
+    static fromJS(data: any): LapseFiscalYearResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new LapseFiscalYearResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["yearClosingRunId"] = this.yearClosingRunId;
+        data["fiscalYearId"] = this.fiscalYearId;
+        data["fiscalYearName"] = this.fiscalYearName;
+        data["lapsedAppropriationTotal"] = this.lapsedAppropriationTotal;
+        data["lapsedEncumbranceTotal"] = this.lapsedEncumbranceTotal;
+        return data;
+    }
+}
+
+export interface ILapseFiscalYearResponse {
+    yearClosingRunId: number;
+    fiscalYearId: number;
+    fiscalYearName: string;
+    lapsedAppropriationTotal: number;
+    lapsedEncumbranceTotal: number;
+
+    [key: string]: any;
+}
+
+export class LedgerMovementDto implements ILedgerMovementDto {
+    accountId?: number;
+    accountCode?: string;
+    accountName?: string;
+    entries?: LedgerMovementLineDto[];
+    totals?: LedgerMovementTotalDto;
+
+    [key: string]: any;
+
+    constructor(data?: ILedgerMovementDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.accountId = _data["accountId"];
+            this.accountCode = _data["accountCode"];
+            this.accountName = _data["accountName"];
+            if (Array.isArray(_data["entries"])) {
+                this.entries = [] as any;
+                for (let item of _data["entries"])
+                    this.entries!.push(LedgerMovementLineDto.fromJS(item));
+            }
+            this.totals = _data["totals"] ? LedgerMovementTotalDto.fromJS(_data["totals"]) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): LedgerMovementDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new LedgerMovementDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["accountId"] = this.accountId;
+        data["accountCode"] = this.accountCode;
+        data["accountName"] = this.accountName;
+        if (Array.isArray(this.entries)) {
+            data["entries"] = [];
+            for (let item of this.entries)
+                data["entries"].push(item ? item.toJSON() : undefined as any);
+        }
+        data["totals"] = this.totals ? this.totals.toJSON() : undefined as any;
+        return data;
+    }
+}
+
+export interface ILedgerMovementDto {
+    accountId?: number;
+    accountCode?: string;
+    accountName?: string;
+    entries?: LedgerMovementLineDto[];
+    totals?: LedgerMovementTotalDto;
+
+    [key: string]: any;
+}
+
+export class LedgerMovementLineDto implements ILedgerMovementLineDto {
+    journalEntryId?: number;
+    entryNumber?: string;
+    entryDate?: Date;
+    description?: string | undefined;
+    debit?: number;
+    credit?: number;
+    runningBalance?: number;
+
+    [key: string]: any;
+
+    constructor(data?: ILedgerMovementLineDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.journalEntryId = _data["journalEntryId"];
+            this.entryNumber = _data["entryNumber"];
+            this.entryDate = _data["entryDate"] ? new Date(_data["entryDate"].toString()) : undefined as any;
+            this.description = _data["description"];
+            this.debit = _data["debit"];
+            this.credit = _data["credit"];
+            this.runningBalance = _data["runningBalance"];
+        }
+    }
+
+    static fromJS(data: any): LedgerMovementLineDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new LedgerMovementLineDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["journalEntryId"] = this.journalEntryId;
+        data["entryNumber"] = this.entryNumber;
+        data["entryDate"] = this.entryDate ? formatDate(this.entryDate) : undefined as any;
+        data["description"] = this.description;
+        data["debit"] = this.debit;
+        data["credit"] = this.credit;
+        data["runningBalance"] = this.runningBalance;
+        return data;
+    }
+}
+
+export interface ILedgerMovementLineDto {
+    journalEntryId?: number;
+    entryNumber?: string;
+    entryDate?: Date;
+    description?: string | undefined;
+    debit?: number;
+    credit?: number;
+    runningBalance?: number;
+
+    [key: string]: any;
+}
+
+export class LedgerMovementTotalDto implements ILedgerMovementTotalDto {
+    totalDebits?: number;
+    totalCredits?: number;
+    finalBalance?: number;
+
+    [key: string]: any;
+
+    constructor(data?: ILedgerMovementTotalDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.totalDebits = _data["totalDebits"];
+            this.totalCredits = _data["totalCredits"];
+            this.finalBalance = _data["finalBalance"];
+        }
+    }
+
+    static fromJS(data: any): LedgerMovementTotalDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new LedgerMovementTotalDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["totalDebits"] = this.totalDebits;
+        data["totalCredits"] = this.totalCredits;
+        data["finalBalance"] = this.finalBalance;
+        return data;
+    }
+}
+
+export interface ILedgerMovementTotalDto {
+    totalDebits?: number;
+    totalCredits?: number;
+    finalBalance?: number;
+
+    [key: string]: any;
+}
+
 export class LinkedAccountRefDto implements ILinkedAccountRefDto {
     id?: number;
     code?: string;
@@ -26306,110 +33439,6 @@ export interface ILinkedAccountRefDto {
     [key: string]: any;
 }
 
-export class LiquidateEncumbranceFullCommand implements ILiquidateEncumbranceFullCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: ILiquidateEncumbranceFullCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): LiquidateEncumbranceFullCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new LiquidateEncumbranceFullCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface ILiquidateEncumbranceFullCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class LiquidateEncumbrancePartialCommand implements ILiquidateEncumbrancePartialCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: ILiquidateEncumbrancePartialCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): LiquidateEncumbrancePartialCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new LiquidateEncumbrancePartialCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface ILiquidateEncumbrancePartialCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
 export class LoginRequest implements ILoginRequest {
     email!: string;
     password!: string;
@@ -26462,14 +33491,15 @@ export interface ILoginRequest {
     [key: string]: any;
 }
 
-export class MoveBudgetItemCommand implements IMoveBudgetItemCommand {
-    id?: number;
-    parentId?: number | undefined;
-    rowVersion?: string;
+export class MonthlyPlanDto implements IMonthlyPlanDto {
+    id!: number;
+    month!: number;
+    plannedAmount!: number;
+    rowVersion!: string;
 
     [key: string]: any;
 
-    constructor(data?: IMoveBudgetItemCommand) {
+    constructor(data?: IMonthlyPlanDto) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -26485,14 +33515,15 @@ export class MoveBudgetItemCommand implements IMoveBudgetItemCommand {
                     this[property] = _data[property];
             }
             this.id = _data["id"];
-            this.parentId = _data["parentId"];
+            this.month = _data["month"];
+            this.plannedAmount = _data["plannedAmount"];
             this.rowVersion = _data["rowVersion"];
         }
     }
 
-    static fromJS(data: any): MoveBudgetItemCommand {
+    static fromJS(data: any): MonthlyPlanDto {
         data = typeof data === 'object' ? data : {};
-        let result = new MoveBudgetItemCommand();
+        let result = new MonthlyPlanDto();
         result.init(data);
         return result;
     }
@@ -26504,51 +33535,29 @@ export class MoveBudgetItemCommand implements IMoveBudgetItemCommand {
                 data[property] = this[property];
         }
         data["id"] = this.id;
-        data["parentId"] = this.parentId;
+        data["month"] = this.month;
+        data["plannedAmount"] = this.plannedAmount;
         data["rowVersion"] = this.rowVersion;
         return data;
     }
 }
 
-export interface IMoveBudgetItemCommand {
-    id?: number;
-    parentId?: number | undefined;
-    rowVersion?: string;
+export interface IMonthlyPlanDto {
+    id: number;
+    month: number;
+    plannedAmount: number;
+    rowVersion: string;
 
     [key: string]: any;
 }
 
-export class MoveDto implements IMoveDto {
-    id?: number;
-    entryNumber?: string;
-    ref?: string | undefined;
-    documentDate?: Date;
-    postingDate?: Date | undefined;
-    entryType?: EntryType2 | undefined;
-    entryStatus?: string;
-    journalId?: number | undefined;
-    journalName?: string | undefined;
-    periodId?: number;
-    fiscalYearId?: number;
-    narration?: string | undefined;
-    reversalOfMoveId?: number | undefined;
-    reversalReason?: string | undefined;
-    postedById?: number | undefined;
-    postedByName?: string | undefined;
-    postedAt?: Date | undefined;
-    cancelledById?: number | undefined;
-    cancelledByName?: string | undefined;
-    cancelledAt?: Date | undefined;
-    isSystemGenerated?: boolean;
-    rowVersion?: string;
-    baseCurrencyId?: number | undefined;
-    totalBaseDebit?: number | undefined;
-    totalBaseCredit?: number | undefined;
-    lines?: MoveLineDto[];
+export class MonthlyPlanEntry implements IMonthlyPlanEntry {
+    month!: number;
+    plannedAmount!: number;
 
     [key: string]: any;
 
-    constructor(data?: IMoveDto) {
+    constructor(data?: IMonthlyPlanEntry) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -26563,42 +33572,14 @@ export class MoveDto implements IMoveDto {
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.id = _data["id"];
-            this.entryNumber = _data["entryNumber"];
-            this.ref = _data["ref"];
-            this.documentDate = _data["documentDate"] ? new Date(_data["documentDate"].toString()) : undefined as any;
-            this.postingDate = _data["postingDate"] ? new Date(_data["postingDate"].toString()) : undefined as any;
-            this.entryType = _data["entryType"];
-            this.entryStatus = _data["entryStatus"];
-            this.journalId = _data["journalId"];
-            this.journalName = _data["journalName"];
-            this.periodId = _data["periodId"];
-            this.fiscalYearId = _data["fiscalYearId"];
-            this.narration = _data["narration"];
-            this.reversalOfMoveId = _data["reversalOfMoveId"];
-            this.reversalReason = _data["reversalReason"];
-            this.postedById = _data["postedById"];
-            this.postedByName = _data["postedByName"];
-            this.postedAt = _data["postedAt"] ? new Date(_data["postedAt"].toString()) : undefined as any;
-            this.cancelledById = _data["cancelledById"];
-            this.cancelledByName = _data["cancelledByName"];
-            this.cancelledAt = _data["cancelledAt"] ? new Date(_data["cancelledAt"].toString()) : undefined as any;
-            this.isSystemGenerated = _data["isSystemGenerated"];
-            this.rowVersion = _data["rowVersion"];
-            this.baseCurrencyId = _data["baseCurrencyId"];
-            this.totalBaseDebit = _data["totalBaseDebit"];
-            this.totalBaseCredit = _data["totalBaseCredit"];
-            if (Array.isArray(_data["lines"])) {
-                this.lines = [] as any;
-                for (let item of _data["lines"])
-                    this.lines!.push(MoveLineDto.fromJS(item));
-            }
+            this.month = _data["month"];
+            this.plannedAmount = _data["plannedAmount"];
         }
     }
 
-    static fromJS(data: any): MoveDto {
+    static fromJS(data: any): MonthlyPlanEntry {
         data = typeof data === 'object' ? data : {};
-        let result = new MoveDto();
+        let result = new MonthlyPlanEntry();
         result.init(data);
         return result;
     }
@@ -26609,67 +33590,227 @@ export class MoveDto implements IMoveDto {
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["id"] = this.id;
-        data["entryNumber"] = this.entryNumber;
-        data["ref"] = this.ref;
-        data["documentDate"] = this.documentDate ? formatDate(this.documentDate) : undefined as any;
-        data["postingDate"] = this.postingDate ? formatDate(this.postingDate) : undefined as any;
-        data["entryType"] = this.entryType;
-        data["entryStatus"] = this.entryStatus;
-        data["journalId"] = this.journalId;
-        data["journalName"] = this.journalName;
-        data["periodId"] = this.periodId;
-        data["fiscalYearId"] = this.fiscalYearId;
-        data["narration"] = this.narration;
-        data["reversalOfMoveId"] = this.reversalOfMoveId;
-        data["reversalReason"] = this.reversalReason;
-        data["postedById"] = this.postedById;
-        data["postedByName"] = this.postedByName;
-        data["postedAt"] = this.postedAt ? this.postedAt.toISOString() : undefined as any;
-        data["cancelledById"] = this.cancelledById;
-        data["cancelledByName"] = this.cancelledByName;
-        data["cancelledAt"] = this.cancelledAt ? this.cancelledAt.toISOString() : undefined as any;
-        data["isSystemGenerated"] = this.isSystemGenerated;
-        data["rowVersion"] = this.rowVersion;
-        data["baseCurrencyId"] = this.baseCurrencyId;
-        data["totalBaseDebit"] = this.totalBaseDebit;
-        data["totalBaseCredit"] = this.totalBaseCredit;
-        if (Array.isArray(this.lines)) {
-            data["lines"] = [];
-            for (let item of this.lines)
-                data["lines"].push(item ? item.toJSON() : undefined as any);
+        data["month"] = this.month;
+        data["plannedAmount"] = this.plannedAmount;
+        return data;
+    }
+}
+
+export interface IMonthlyPlanEntry {
+    month: number;
+    plannedAmount: number;
+
+    [key: string]: any;
+}
+
+export class MonthlyStatementDto implements IMonthlyStatementDto {
+    year?: number;
+    month?: number;
+    fundId?: number;
+    fundName?: string;
+    generatedAt?: Date;
+    summary?: MonthlyStatementSummaryDto;
+    vouchers?: ReceiptVoucherDto[];
+    clearings?: CheckClearingDto[];
+
+    [key: string]: any;
+
+    constructor(data?: IMonthlyStatementDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.year = _data["year"];
+            this.month = _data["month"];
+            this.fundId = _data["fundId"];
+            this.fundName = _data["fundName"];
+            this.generatedAt = _data["generatedAt"] ? new Date(_data["generatedAt"].toString()) : undefined as any;
+            this.summary = _data["summary"] ? MonthlyStatementSummaryDto.fromJS(_data["summary"]) : undefined as any;
+            if (Array.isArray(_data["vouchers"])) {
+                this.vouchers = [] as any;
+                for (let item of _data["vouchers"])
+                    this.vouchers!.push(ReceiptVoucherDto.fromJS(item));
+            }
+            if (Array.isArray(_data["clearings"])) {
+                this.clearings = [] as any;
+                for (let item of _data["clearings"])
+                    this.clearings!.push(CheckClearingDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): MonthlyStatementDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new MonthlyStatementDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["year"] = this.year;
+        data["month"] = this.month;
+        data["fundId"] = this.fundId;
+        data["fundName"] = this.fundName;
+        data["generatedAt"] = this.generatedAt ? this.generatedAt.toISOString() : undefined as any;
+        data["summary"] = this.summary ? this.summary.toJSON() : undefined as any;
+        if (Array.isArray(this.vouchers)) {
+            data["vouchers"] = [];
+            for (let item of this.vouchers)
+                data["vouchers"].push(item ? item.toJSON() : undefined as any);
+        }
+        if (Array.isArray(this.clearings)) {
+            data["clearings"] = [];
+            for (let item of this.clearings)
+                data["clearings"].push(item ? item.toJSON() : undefined as any);
         }
         return data;
     }
 }
 
-export interface IMoveDto {
-    id?: number;
-    entryNumber?: string;
-    ref?: string | undefined;
-    documentDate?: Date;
-    postingDate?: Date | undefined;
-    entryType?: EntryType2 | undefined;
-    entryStatus?: string;
-    journalId?: number | undefined;
-    journalName?: string | undefined;
-    periodId?: number;
-    fiscalYearId?: number;
-    narration?: string | undefined;
-    reversalOfMoveId?: number | undefined;
-    reversalReason?: string | undefined;
-    postedById?: number | undefined;
-    postedByName?: string | undefined;
-    postedAt?: Date | undefined;
-    cancelledById?: number | undefined;
-    cancelledByName?: string | undefined;
-    cancelledAt?: Date | undefined;
-    isSystemGenerated?: boolean;
-    rowVersion?: string;
-    baseCurrencyId?: number | undefined;
-    totalBaseDebit?: number | undefined;
-    totalBaseCredit?: number | undefined;
-    lines?: MoveLineDto[];
+export interface IMonthlyStatementDto {
+    year?: number;
+    month?: number;
+    fundId?: number;
+    fundName?: string;
+    generatedAt?: Date;
+    summary?: MonthlyStatementSummaryDto;
+    vouchers?: ReceiptVoucherDto[];
+    clearings?: CheckClearingDto[];
+
+    [key: string]: any;
+}
+
+export class MonthlyStatementSummaryDto implements IMonthlyStatementSummaryDto {
+    totalCashCollections?: number;
+    totalCheckCollections?: number;
+    totalDeposited?: number;
+    totalUnderCollection?: number;
+    totalCleared?: number;
+    totalBounced?: number;
+
+    [key: string]: any;
+
+    constructor(data?: IMonthlyStatementSummaryDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.totalCashCollections = _data["totalCashCollections"];
+            this.totalCheckCollections = _data["totalCheckCollections"];
+            this.totalDeposited = _data["totalDeposited"];
+            this.totalUnderCollection = _data["totalUnderCollection"];
+            this.totalCleared = _data["totalCleared"];
+            this.totalBounced = _data["totalBounced"];
+        }
+    }
+
+    static fromJS(data: any): MonthlyStatementSummaryDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new MonthlyStatementSummaryDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["totalCashCollections"] = this.totalCashCollections;
+        data["totalCheckCollections"] = this.totalCheckCollections;
+        data["totalDeposited"] = this.totalDeposited;
+        data["totalUnderCollection"] = this.totalUnderCollection;
+        data["totalCleared"] = this.totalCleared;
+        data["totalBounced"] = this.totalBounced;
+        return data;
+    }
+}
+
+export interface IMonthlyStatementSummaryDto {
+    totalCashCollections?: number;
+    totalCheckCollections?: number;
+    totalDeposited?: number;
+    totalUnderCollection?: number;
+    totalCleared?: number;
+    totalBounced?: number;
+
+    [key: string]: any;
+}
+
+export class MoveBudgetItemRequest implements IMoveBudgetItemRequest {
+    newParentId!: number | undefined;
+    rowVersion!: string;
+
+    [key: string]: any;
+
+    constructor(data?: IMoveBudgetItemRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.newParentId = _data["newParentId"];
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): MoveBudgetItemRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new MoveBudgetItemRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["newParentId"] = this.newParentId;
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IMoveBudgetItemRequest {
+    newParentId: number | undefined;
+    rowVersion: string;
 
     [key: string]: any;
 }
@@ -26681,122 +33822,6 @@ export enum MoveEntryType {
     Closing = "Closing",
     Opening = "Opening",
     SystemGenerated = "SystemGenerated",
-}
-
-export class MoveLineDto implements IMoveLineDto {
-    id?: number;
-    moveId?: number;
-    sequence?: number;
-    accountId?: number;
-    accountCode?: string;
-    accountName?: string;
-    description?: string | undefined;
-    currencyId?: number;
-    exchangeRate?: number;
-    debit?: number;
-    credit?: number;
-    costCenterId?: number | undefined;
-    costCenterName?: string | undefined;
-    rowVersion?: string;
-    baseDebit?: number | undefined;
-    baseCredit?: number | undefined;
-    resolvedRate?: number | undefined;
-    resolvedRateDate?: Date | undefined;
-
-    [key: string]: any;
-
-    constructor(data?: IMoveLineDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.moveId = _data["moveId"];
-            this.sequence = _data["sequence"];
-            this.accountId = _data["accountId"];
-            this.accountCode = _data["accountCode"];
-            this.accountName = _data["accountName"];
-            this.description = _data["description"];
-            this.currencyId = _data["currencyId"];
-            this.exchangeRate = _data["exchangeRate"];
-            this.debit = _data["debit"];
-            this.credit = _data["credit"];
-            this.costCenterId = _data["costCenterId"];
-            this.costCenterName = _data["costCenterName"];
-            this.rowVersion = _data["rowVersion"];
-            this.baseDebit = _data["baseDebit"];
-            this.baseCredit = _data["baseCredit"];
-            this.resolvedRate = _data["resolvedRate"];
-            this.resolvedRateDate = _data["resolvedRateDate"] ? new Date(_data["resolvedRateDate"].toString()) : undefined as any;
-        }
-    }
-
-    static fromJS(data: any): MoveLineDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new MoveLineDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["moveId"] = this.moveId;
-        data["sequence"] = this.sequence;
-        data["accountId"] = this.accountId;
-        data["accountCode"] = this.accountCode;
-        data["accountName"] = this.accountName;
-        data["description"] = this.description;
-        data["currencyId"] = this.currencyId;
-        data["exchangeRate"] = this.exchangeRate;
-        data["debit"] = this.debit;
-        data["credit"] = this.credit;
-        data["costCenterId"] = this.costCenterId;
-        data["costCenterName"] = this.costCenterName;
-        data["rowVersion"] = this.rowVersion;
-        data["baseDebit"] = this.baseDebit;
-        data["baseCredit"] = this.baseCredit;
-        data["resolvedRate"] = this.resolvedRate;
-        data["resolvedRateDate"] = this.resolvedRateDate ? formatDate(this.resolvedRateDate) : undefined as any;
-        return data;
-    }
-}
-
-export interface IMoveLineDto {
-    id?: number;
-    moveId?: number;
-    sequence?: number;
-    accountId?: number;
-    accountCode?: string;
-    accountName?: string;
-    description?: string | undefined;
-    currencyId?: number;
-    exchangeRate?: number;
-    debit?: number;
-    credit?: number;
-    costCenterId?: number | undefined;
-    costCenterName?: string | undefined;
-    rowVersion?: string;
-    baseDebit?: number | undefined;
-    baseCredit?: number | undefined;
-    resolvedRate?: number | undefined;
-    resolvedRateDate?: Date | undefined;
-
-    [key: string]: any;
 }
 
 export enum NormalBalanceType {
@@ -27172,6 +34197,106 @@ export interface IPaginatedResultOfNotificationDto {
     [key: string]: any;
 }
 
+export class PartyResponse implements IPartyResponse {
+    id!: number;
+    partyCode!: string;
+    partyType!: PartyType;
+    nameAr!: string;
+    nameEn!: string | undefined;
+    taxNumber!: string | undefined;
+    nationalId!: string | undefined;
+    phone!: string | undefined;
+    email!: string | undefined;
+    address!: string | undefined;
+    notes!: string | undefined;
+    isActive!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: IPartyResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.partyCode = _data["partyCode"];
+            this.partyType = _data["partyType"];
+            this.nameAr = _data["nameAr"];
+            this.nameEn = _data["nameEn"];
+            this.taxNumber = _data["taxNumber"];
+            this.nationalId = _data["nationalId"];
+            this.phone = _data["phone"];
+            this.email = _data["email"];
+            this.address = _data["address"];
+            this.notes = _data["notes"];
+            this.isActive = _data["isActive"];
+        }
+    }
+
+    static fromJS(data: any): PartyResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new PartyResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["partyCode"] = this.partyCode;
+        data["partyType"] = this.partyType;
+        data["nameAr"] = this.nameAr;
+        data["nameEn"] = this.nameEn;
+        data["taxNumber"] = this.taxNumber;
+        data["nationalId"] = this.nationalId;
+        data["phone"] = this.phone;
+        data["email"] = this.email;
+        data["address"] = this.address;
+        data["notes"] = this.notes;
+        data["isActive"] = this.isActive;
+        return data;
+    }
+}
+
+export interface IPartyResponse {
+    id: number;
+    partyCode: string;
+    partyType: PartyType;
+    nameAr: string;
+    nameEn: string | undefined;
+    taxNumber: string | undefined;
+    nationalId: string | undefined;
+    phone: string | undefined;
+    email: string | undefined;
+    address: string | undefined;
+    notes: string | undefined;
+    isActive: boolean;
+
+    [key: string]: any;
+}
+
+export enum PartyType {
+    Supplier = "Supplier",
+    Customer = "Customer",
+    GovEntity = "GovEntity",
+    TaxAuthority = "TaxAuthority",
+    Other = "Other",
+}
+
 export class PauseRecurringEntryCommand implements IPauseRecurringEntryCommand {
     id?: number;
     reason?: string | undefined;
@@ -27228,13 +34353,173 @@ export interface IPauseRecurringEntryCommand {
     [key: string]: any;
 }
 
+export class PaymentDetailDto implements IPaymentDetailDto {
+    paymentOrderId?: number;
+    orderNumber?: string;
+    amount?: number;
+    status?: string;
+
+    [key: string]: any;
+
+    constructor(data?: IPaymentDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.paymentOrderId = _data["paymentOrderId"];
+            this.orderNumber = _data["orderNumber"];
+            this.amount = _data["amount"];
+            this.status = _data["status"];
+        }
+    }
+
+    static fromJS(data: any): PaymentDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PaymentDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["paymentOrderId"] = this.paymentOrderId;
+        data["orderNumber"] = this.orderNumber;
+        data["amount"] = this.amount;
+        data["status"] = this.status;
+        return data;
+    }
+}
+
+export interface IPaymentDetailDto {
+    paymentOrderId?: number;
+    orderNumber?: string;
+    amount?: number;
+    status?: string;
+
+    [key: string]: any;
+}
+
+export class PaymentDto implements IPaymentDto {
+    id!: number;
+    paymentNumber!: string;
+    disbursementRequestId!: number;
+    disbursementRequestNumber!: string;
+    paymentOrderId!: number;
+    paymentOrderNumber!: string;
+    paymentMethod!: PaymentMethod;
+    amount!: number;
+    paidById!: number;
+    paidByName!: string;
+    paidAt!: Date;
+    referenceNumber!: string | undefined;
+    notes!: string | undefined;
+    status!: PaymentStatus;
+    payeeName!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IPaymentDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.paymentNumber = _data["paymentNumber"];
+            this.disbursementRequestId = _data["disbursementRequestId"];
+            this.disbursementRequestNumber = _data["disbursementRequestNumber"];
+            this.paymentOrderId = _data["paymentOrderId"];
+            this.paymentOrderNumber = _data["paymentOrderNumber"];
+            this.paymentMethod = _data["paymentMethod"];
+            this.amount = _data["amount"];
+            this.paidById = _data["paidById"];
+            this.paidByName = _data["paidByName"];
+            this.paidAt = _data["paidAt"] ? new Date(_data["paidAt"].toString()) : undefined as any;
+            this.referenceNumber = _data["referenceNumber"];
+            this.notes = _data["notes"];
+            this.status = _data["status"];
+            this.payeeName = _data["payeeName"];
+        }
+    }
+
+    static fromJS(data: any): PaymentDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PaymentDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["paymentNumber"] = this.paymentNumber;
+        data["disbursementRequestId"] = this.disbursementRequestId;
+        data["disbursementRequestNumber"] = this.disbursementRequestNumber;
+        data["paymentOrderId"] = this.paymentOrderId;
+        data["paymentOrderNumber"] = this.paymentOrderNumber;
+        data["paymentMethod"] = this.paymentMethod;
+        data["amount"] = this.amount;
+        data["paidById"] = this.paidById;
+        data["paidByName"] = this.paidByName;
+        data["paidAt"] = this.paidAt ? this.paidAt.toISOString() : undefined as any;
+        data["referenceNumber"] = this.referenceNumber;
+        data["notes"] = this.notes;
+        data["status"] = this.status;
+        data["payeeName"] = this.payeeName;
+        return data;
+    }
+}
+
+export interface IPaymentDto {
+    id: number;
+    paymentNumber: string;
+    disbursementRequestId: number;
+    disbursementRequestNumber: string;
+    paymentOrderId: number;
+    paymentOrderNumber: string;
+    paymentMethod: PaymentMethod;
+    amount: number;
+    paidById: number;
+    paidByName: string;
+    paidAt: Date;
+    referenceNumber: string | undefined;
+    notes: string | undefined;
+    status: PaymentStatus;
+    payeeName: string | undefined;
+
+    [key: string]: any;
+}
+
 export enum PaymentMethod {
     Cash = "Cash",
-    BankTransfer = "BankTransfer",
     Check = "Check",
-    CreditCard = "CreditCard",
-    WireTransfer = "WireTransfer",
-    Other = "Other",
 }
 
 export class PaymentOrderDeductionDto implements IPaymentOrderDeductionDto {
@@ -27348,11 +34633,6 @@ export class PaymentOrderDto implements IPaymentOrderDto {
     exchangeRate?: number | undefined;
     amountGross?: number;
     deductionAmount?: number;
-    amountNet?: number;
-    baseAmountNet?: number;
-    totalPaidAmount?: number | undefined;
-    totalRemainingAmount?: number | undefined;
-    isFullyPaid?: boolean;
     paymentMethod?: PaymentMethod;
     paymentMethodName?: string;
     bankAccountId?: number | undefined;
@@ -27366,19 +34646,8 @@ export class PaymentOrderDto implements IPaymentOrderDto {
     treasuryReference?: string | undefined;
     treasurySentAt?: Date | undefined;
     paidAt?: Date | undefined;
-    moveId?: number | undefined;
+    journalEntryId?: number | undefined;
     notes?: string | undefined;
-    approvedById?: number | undefined;
-    approvedAt?: Date | undefined;
-    rejectedById?: number | undefined;
-    rejectedAt?: Date | undefined;
-    rejectionReason?: string | undefined;
-    cancelledById?: number | undefined;
-    cancelledAt?: Date | undefined;
-    cancellationReason?: string | undefined;
-    voidedById?: number | undefined;
-    voidedAt?: Date | undefined;
-    voidReason?: string | undefined;
     lines?: PaymentOrderLineDto[];
     deductions?: PaymentOrderDeductionDto[];
 
@@ -27417,11 +34686,6 @@ export class PaymentOrderDto implements IPaymentOrderDto {
             this.exchangeRate = _data["exchangeRate"];
             this.amountGross = _data["amountGross"];
             this.deductionAmount = _data["deductionAmount"];
-            this.amountNet = _data["amountNet"];
-            this.baseAmountNet = _data["baseAmountNet"];
-            this.totalPaidAmount = _data["totalPaidAmount"];
-            this.totalRemainingAmount = _data["totalRemainingAmount"];
-            this.isFullyPaid = _data["isFullyPaid"];
             this.paymentMethod = _data["paymentMethod"];
             this.paymentMethodName = _data["paymentMethodName"];
             this.bankAccountId = _data["bankAccountId"];
@@ -27435,19 +34699,8 @@ export class PaymentOrderDto implements IPaymentOrderDto {
             this.treasuryReference = _data["treasuryReference"];
             this.treasurySentAt = _data["treasurySentAt"] ? new Date(_data["treasurySentAt"].toString()) : undefined as any;
             this.paidAt = _data["paidAt"] ? new Date(_data["paidAt"].toString()) : undefined as any;
-            this.moveId = _data["moveId"];
+            this.journalEntryId = _data["journalEntryId"];
             this.notes = _data["notes"];
-            this.approvedById = _data["approvedById"];
-            this.approvedAt = _data["approvedAt"] ? new Date(_data["approvedAt"].toString()) : undefined as any;
-            this.rejectedById = _data["rejectedById"];
-            this.rejectedAt = _data["rejectedAt"] ? new Date(_data["rejectedAt"].toString()) : undefined as any;
-            this.rejectionReason = _data["rejectionReason"];
-            this.cancelledById = _data["cancelledById"];
-            this.cancelledAt = _data["cancelledAt"] ? new Date(_data["cancelledAt"].toString()) : undefined as any;
-            this.cancellationReason = _data["cancellationReason"];
-            this.voidedById = _data["voidedById"];
-            this.voidedAt = _data["voidedAt"] ? new Date(_data["voidedAt"].toString()) : undefined as any;
-            this.voidReason = _data["voidReason"];
             if (Array.isArray(_data["lines"])) {
                 this.lines = [] as any;
                 for (let item of _data["lines"])
@@ -27492,11 +34745,6 @@ export class PaymentOrderDto implements IPaymentOrderDto {
         data["exchangeRate"] = this.exchangeRate;
         data["amountGross"] = this.amountGross;
         data["deductionAmount"] = this.deductionAmount;
-        data["amountNet"] = this.amountNet;
-        data["baseAmountNet"] = this.baseAmountNet;
-        data["totalPaidAmount"] = this.totalPaidAmount;
-        data["totalRemainingAmount"] = this.totalRemainingAmount;
-        data["isFullyPaid"] = this.isFullyPaid;
         data["paymentMethod"] = this.paymentMethod;
         data["paymentMethodName"] = this.paymentMethodName;
         data["bankAccountId"] = this.bankAccountId;
@@ -27510,19 +34758,8 @@ export class PaymentOrderDto implements IPaymentOrderDto {
         data["treasuryReference"] = this.treasuryReference;
         data["treasurySentAt"] = this.treasurySentAt ? this.treasurySentAt.toISOString() : undefined as any;
         data["paidAt"] = this.paidAt ? this.paidAt.toISOString() : undefined as any;
-        data["moveId"] = this.moveId;
+        data["journalEntryId"] = this.journalEntryId;
         data["notes"] = this.notes;
-        data["approvedById"] = this.approvedById;
-        data["approvedAt"] = this.approvedAt ? this.approvedAt.toISOString() : undefined as any;
-        data["rejectedById"] = this.rejectedById;
-        data["rejectedAt"] = this.rejectedAt ? this.rejectedAt.toISOString() : undefined as any;
-        data["rejectionReason"] = this.rejectionReason;
-        data["cancelledById"] = this.cancelledById;
-        data["cancelledAt"] = this.cancelledAt ? this.cancelledAt.toISOString() : undefined as any;
-        data["cancellationReason"] = this.cancellationReason;
-        data["voidedById"] = this.voidedById;
-        data["voidedAt"] = this.voidedAt ? this.voidedAt.toISOString() : undefined as any;
-        data["voidReason"] = this.voidReason;
         if (Array.isArray(this.lines)) {
             data["lines"] = [];
             for (let item of this.lines)
@@ -27556,11 +34793,6 @@ export interface IPaymentOrderDto {
     exchangeRate?: number | undefined;
     amountGross?: number;
     deductionAmount?: number;
-    amountNet?: number;
-    baseAmountNet?: number;
-    totalPaidAmount?: number | undefined;
-    totalRemainingAmount?: number | undefined;
-    isFullyPaid?: boolean;
     paymentMethod?: PaymentMethod;
     paymentMethodName?: string;
     bankAccountId?: number | undefined;
@@ -27574,19 +34806,8 @@ export interface IPaymentOrderDto {
     treasuryReference?: string | undefined;
     treasurySentAt?: Date | undefined;
     paidAt?: Date | undefined;
-    moveId?: number | undefined;
+    journalEntryId?: number | undefined;
     notes?: string | undefined;
-    approvedById?: number | undefined;
-    approvedAt?: Date | undefined;
-    rejectedById?: number | undefined;
-    rejectedAt?: Date | undefined;
-    rejectionReason?: string | undefined;
-    cancelledById?: number | undefined;
-    cancelledAt?: Date | undefined;
-    cancellationReason?: string | undefined;
-    voidedById?: number | undefined;
-    voidedAt?: Date | undefined;
-    voidReason?: string | undefined;
     lines?: PaymentOrderLineDto[];
     deductions?: PaymentOrderDeductionDto[];
 
@@ -27601,7 +34822,6 @@ export class PaymentOrderLineDto implements IPaymentOrderLineDto {
     accountId?: number;
     amount?: number;
     taxAmount?: number | undefined;
-    netAmount?: number | undefined;
     fundId?: number | undefined;
     appropriationId?: number | undefined;
     organizationUnitId?: number | undefined;
@@ -27632,7 +34852,6 @@ export class PaymentOrderLineDto implements IPaymentOrderLineDto {
             this.accountId = _data["accountId"];
             this.amount = _data["amount"];
             this.taxAmount = _data["taxAmount"];
-            this.netAmount = _data["netAmount"];
             this.fundId = _data["fundId"];
             this.appropriationId = _data["appropriationId"];
             this.organizationUnitId = _data["organizationUnitId"];
@@ -27661,7 +34880,6 @@ export class PaymentOrderLineDto implements IPaymentOrderLineDto {
         data["accountId"] = this.accountId;
         data["amount"] = this.amount;
         data["taxAmount"] = this.taxAmount;
-        data["netAmount"] = this.netAmount;
         data["fundId"] = this.fundId;
         data["appropriationId"] = this.appropriationId;
         data["organizationUnitId"] = this.organizationUnitId;
@@ -27679,7 +34897,6 @@ export interface IPaymentOrderLineDto {
     accountId?: number;
     amount?: number;
     taxAmount?: number | undefined;
-    netAmount?: number | undefined;
     fundId?: number | undefined;
     appropriationId?: number | undefined;
     organizationUnitId?: number | undefined;
@@ -27707,6 +34924,87 @@ export enum PaymentOrderStatus {
     Cancelled = "Cancelled",
     Rejected = "Rejected",
     Voided = "Voided",
+}
+
+export class PaymentOrderTotalsDto implements IPaymentOrderTotalsDto {
+    id?: number;
+    amountGross?: number;
+    totalDeductions?: number;
+    netAmount?: number;
+    paidAmount?: number;
+    remainingAmount?: number;
+    isFullyPaid?: boolean;
+    status?: PaymentOrderStatus;
+
+    [key: string]: any;
+
+    constructor(data?: IPaymentOrderTotalsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.amountGross = _data["amountGross"];
+            this.totalDeductions = _data["totalDeductions"];
+            this.netAmount = _data["netAmount"];
+            this.paidAmount = _data["paidAmount"];
+            this.remainingAmount = _data["remainingAmount"];
+            this.isFullyPaid = _data["isFullyPaid"];
+            this.status = _data["status"];
+        }
+    }
+
+    static fromJS(data: any): PaymentOrderTotalsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PaymentOrderTotalsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["amountGross"] = this.amountGross;
+        data["totalDeductions"] = this.totalDeductions;
+        data["netAmount"] = this.netAmount;
+        data["paidAmount"] = this.paidAmount;
+        data["remainingAmount"] = this.remainingAmount;
+        data["isFullyPaid"] = this.isFullyPaid;
+        data["status"] = this.status;
+        return data;
+    }
+}
+
+export interface IPaymentOrderTotalsDto {
+    id?: number;
+    amountGross?: number;
+    totalDeductions?: number;
+    netAmount?: number;
+    paidAmount?: number;
+    remainingAmount?: number;
+    isFullyPaid?: boolean;
+    status?: PaymentOrderStatus;
+
+    [key: string]: any;
+}
+
+export enum PaymentStatus {
+    Completed = "Completed",
+    Failed = "Failed",
 }
 
 export class PendingApprovalDto implements IPendingApprovalDto {
@@ -27925,13 +35223,13 @@ export interface IPostingRuleLineDto {
     [key: string]: any;
 }
 
-export class PostMoveCommand implements IPostMoveCommand {
+export class PostJournalEntryCommand implements IPostJournalEntryCommand {
     id?: number;
     rowVersion?: string;
 
     [key: string]: any;
 
-    constructor(data?: IPostMoveCommand) {
+    constructor(data?: IPostJournalEntryCommand) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -27951,9 +35249,9 @@ export class PostMoveCommand implements IPostMoveCommand {
         }
     }
 
-    static fromJS(data: any): PostMoveCommand {
+    static fromJS(data: any): PostJournalEntryCommand {
         data = typeof data === 'object' ? data : {};
-        let result = new PostMoveCommand();
+        let result = new PostJournalEntryCommand();
         result.init(data);
         return result;
     }
@@ -27970,7 +35268,7 @@ export class PostMoveCommand implements IPostMoveCommand {
     }
 }
 
-export interface IPostMoveCommand {
+export interface IPostJournalEntryCommand {
     id?: number;
     rowVersion?: string;
 
@@ -28165,6 +35463,241 @@ export interface IRebuildAccountBalancesCommand {
     [key: string]: any;
 }
 
+export class ReceiptVoucherDto implements IReceiptVoucherDto {
+    id?: number;
+    voucherNumber?: string;
+    voucherDate?: Date;
+    partyId?: number;
+    partyName?: string;
+    paymentMethod?: PaymentMethod;
+    paymentMethodName?: string;
+    receivedFrom?: string;
+    notes?: string | undefined;
+    depositSlipId?: number | undefined;
+    depositSlipNumber?: string | undefined;
+    status?: ReceiptVoucherStatus;
+    statusName?: string;
+    totalAmount?: number;
+    submittedById?: number | undefined;
+    submittedAt?: Date | undefined;
+    reviewedById?: number | undefined;
+    reviewedAt?: Date | undefined;
+    cancellationReason?: string | undefined;
+    lines?: ReceiptVoucherLineDto[];
+    checks?: CheckDto[];
+    rowVersion?: string;
+    created?: Date;
+    createdBy?: string | undefined;
+    lastModified?: Date;
+    lastModifiedBy?: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IReceiptVoucherDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.voucherNumber = _data["voucherNumber"];
+            this.voucherDate = _data["voucherDate"] ? new Date(_data["voucherDate"].toString()) : undefined as any;
+            this.partyId = _data["partyId"];
+            this.partyName = _data["partyName"];
+            this.paymentMethod = _data["paymentMethod"];
+            this.paymentMethodName = _data["paymentMethodName"];
+            this.receivedFrom = _data["receivedFrom"];
+            this.notes = _data["notes"];
+            this.depositSlipId = _data["depositSlipId"];
+            this.depositSlipNumber = _data["depositSlipNumber"];
+            this.status = _data["status"];
+            this.statusName = _data["statusName"];
+            this.totalAmount = _data["totalAmount"];
+            this.submittedById = _data["submittedById"];
+            this.submittedAt = _data["submittedAt"] ? new Date(_data["submittedAt"].toString()) : undefined as any;
+            this.reviewedById = _data["reviewedById"];
+            this.reviewedAt = _data["reviewedAt"] ? new Date(_data["reviewedAt"].toString()) : undefined as any;
+            this.cancellationReason = _data["cancellationReason"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(ReceiptVoucherLineDto.fromJS(item));
+            }
+            if (Array.isArray(_data["checks"])) {
+                this.checks = [] as any;
+                for (let item of _data["checks"])
+                    this.checks!.push(CheckDto.fromJS(item));
+            }
+            this.rowVersion = _data["rowVersion"];
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
+            this.createdBy = _data["createdBy"];
+            this.lastModified = _data["lastModified"] ? new Date(_data["lastModified"].toString()) : undefined as any;
+            this.lastModifiedBy = _data["lastModifiedBy"];
+        }
+    }
+
+    static fromJS(data: any): ReceiptVoucherDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ReceiptVoucherDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["voucherNumber"] = this.voucherNumber;
+        data["voucherDate"] = this.voucherDate ? formatDate(this.voucherDate) : undefined as any;
+        data["partyId"] = this.partyId;
+        data["partyName"] = this.partyName;
+        data["paymentMethod"] = this.paymentMethod;
+        data["paymentMethodName"] = this.paymentMethodName;
+        data["receivedFrom"] = this.receivedFrom;
+        data["notes"] = this.notes;
+        data["depositSlipId"] = this.depositSlipId;
+        data["depositSlipNumber"] = this.depositSlipNumber;
+        data["status"] = this.status;
+        data["statusName"] = this.statusName;
+        data["totalAmount"] = this.totalAmount;
+        data["submittedById"] = this.submittedById;
+        data["submittedAt"] = this.submittedAt ? this.submittedAt.toISOString() : undefined as any;
+        data["reviewedById"] = this.reviewedById;
+        data["reviewedAt"] = this.reviewedAt ? this.reviewedAt.toISOString() : undefined as any;
+        data["cancellationReason"] = this.cancellationReason;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        if (Array.isArray(this.checks)) {
+            data["checks"] = [];
+            for (let item of this.checks)
+                data["checks"].push(item ? item.toJSON() : undefined as any);
+        }
+        data["rowVersion"] = this.rowVersion;
+        data["created"] = this.created ? this.created.toISOString() : undefined as any;
+        data["createdBy"] = this.createdBy;
+        data["lastModified"] = this.lastModified ? this.lastModified.toISOString() : undefined as any;
+        data["lastModifiedBy"] = this.lastModifiedBy;
+        return data;
+    }
+}
+
+export interface IReceiptVoucherDto {
+    id?: number;
+    voucherNumber?: string;
+    voucherDate?: Date;
+    partyId?: number;
+    partyName?: string;
+    paymentMethod?: PaymentMethod;
+    paymentMethodName?: string;
+    receivedFrom?: string;
+    notes?: string | undefined;
+    depositSlipId?: number | undefined;
+    depositSlipNumber?: string | undefined;
+    status?: ReceiptVoucherStatus;
+    statusName?: string;
+    totalAmount?: number;
+    submittedById?: number | undefined;
+    submittedAt?: Date | undefined;
+    reviewedById?: number | undefined;
+    reviewedAt?: Date | undefined;
+    cancellationReason?: string | undefined;
+    lines?: ReceiptVoucherLineDto[];
+    checks?: CheckDto[];
+    rowVersion?: string;
+    created?: Date;
+    createdBy?: string | undefined;
+    lastModified?: Date;
+    lastModifiedBy?: string | undefined;
+
+    [key: string]: any;
+}
+
+export class ReceiptVoucherLineDto implements IReceiptVoucherLineDto {
+    id?: number;
+    receiptVoucherId?: number;
+    revenueAccountId?: number;
+    amount?: number;
+    description?: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IReceiptVoucherLineDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.receiptVoucherId = _data["receiptVoucherId"];
+            this.revenueAccountId = _data["revenueAccountId"];
+            this.amount = _data["amount"];
+            this.description = _data["description"];
+        }
+    }
+
+    static fromJS(data: any): ReceiptVoucherLineDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ReceiptVoucherLineDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["receiptVoucherId"] = this.receiptVoucherId;
+        data["revenueAccountId"] = this.revenueAccountId;
+        data["amount"] = this.amount;
+        data["description"] = this.description;
+        return data;
+    }
+}
+
+export interface IReceiptVoucherLineDto {
+    id?: number;
+    receiptVoucherId?: number;
+    revenueAccountId?: number;
+    amount?: number;
+    description?: string | undefined;
+
+    [key: string]: any;
+}
+
+export enum ReceiptVoucherStatus {
+    Draft = "Draft",
+    PendingReview = "PendingReview",
+    Approved = "Approved",
+    Cancelled = "Cancelled",
+}
+
 export class ReconciliationDiscrepancyDto implements IReconciliationDiscrepancyDto {
     accountId?: number;
     accountCode?: string;
@@ -28338,6 +35871,66 @@ export interface IReconciliationResultDto {
     [key: string]: any;
 }
 
+export class RecordPaymentRequest implements IRecordPaymentRequest {
+    disbursementRequestId!: number;
+    paymentMethod!: PaymentMethod;
+    referenceNumber!: string | undefined;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IRecordPaymentRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.disbursementRequestId = _data["disbursementRequestId"];
+            this.paymentMethod = _data["paymentMethod"];
+            this.referenceNumber = _data["referenceNumber"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): RecordPaymentRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new RecordPaymentRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["disbursementRequestId"] = this.disbursementRequestId;
+        data["paymentMethod"] = this.paymentMethod;
+        data["referenceNumber"] = this.referenceNumber;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface IRecordPaymentRequest {
+    disbursementRequestId: number;
+    paymentMethod: PaymentMethod;
+    referenceNumber: string | undefined;
+    notes: string | undefined;
+
+    [key: string]: any;
+}
+
 export class RecordSignatureCommand implements IRecordSignatureCommand {
     id?: number;
 
@@ -28406,7 +35999,7 @@ export class RecurringEntryDto implements IRecurringEntryDto {
     projectId?: number | undefined;
     descriptionTemplate?: string | undefined;
     status?: string;
-    generatedMoveId?: number | undefined;
+    generatedJournalEntryId?: number | undefined;
     isActive?: boolean;
 
     [key: string]: any;
@@ -28445,7 +36038,7 @@ export class RecurringEntryDto implements IRecurringEntryDto {
             this.projectId = _data["projectId"];
             this.descriptionTemplate = _data["descriptionTemplate"];
             this.status = _data["status"];
-            this.generatedMoveId = _data["generatedMoveId"];
+            this.generatedJournalEntryId = _data["generatedJournalEntryId"];
             this.isActive = _data["isActive"];
         }
     }
@@ -28482,7 +36075,7 @@ export class RecurringEntryDto implements IRecurringEntryDto {
         data["projectId"] = this.projectId;
         data["descriptionTemplate"] = this.descriptionTemplate;
         data["status"] = this.status;
-        data["generatedMoveId"] = this.generatedMoveId;
+        data["generatedJournalEntryId"] = this.generatedJournalEntryId;
         data["isActive"] = this.isActive;
         return data;
     }
@@ -28508,7 +36101,7 @@ export interface IRecurringEntryDto {
     projectId?: number | undefined;
     descriptionTemplate?: string | undefined;
     status?: string;
-    generatedMoveId?: number | undefined;
+    generatedJournalEntryId?: number | undefined;
     isActive?: boolean;
 
     [key: string]: any;
@@ -28579,9 +36172,56 @@ export interface IRejectBankReconciliationCommand {
     [key: string]: any;
 }
 
+export class RejectDisbursementRequestRequest implements IRejectDisbursementRequestRequest {
+    reason!: string;
+
+    [key: string]: any;
+
+    constructor(data?: IRejectDisbursementRequestRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.reason = _data["reason"];
+        }
+    }
+
+    static fromJS(data: any): RejectDisbursementRequestRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new RejectDisbursementRequestRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["reason"] = this.reason;
+        return data;
+    }
+}
+
+export interface IRejectDisbursementRequestRequest {
+    reason: string;
+
+    [key: string]: any;
+}
+
 export class RejectPaymentOrderCommand implements IRejectPaymentOrderCommand {
     id?: number;
-    rejectedById?: number;
     rejectionReason?: string;
     rowVersion?: string;
 
@@ -28603,7 +36243,6 @@ export class RejectPaymentOrderCommand implements IRejectPaymentOrderCommand {
                     this[property] = _data[property];
             }
             this.id = _data["id"];
-            this.rejectedById = _data["rejectedById"];
             this.rejectionReason = _data["rejectionReason"];
             this.rowVersion = _data["rowVersion"];
         }
@@ -28623,7 +36262,6 @@ export class RejectPaymentOrderCommand implements IRejectPaymentOrderCommand {
                 data[property] = this[property];
         }
         data["id"] = this.id;
-        data["rejectedById"] = this.rejectedById;
         data["rejectionReason"] = this.rejectionReason;
         data["rowVersion"] = this.rowVersion;
         return data;
@@ -28632,64 +36270,7 @@ export class RejectPaymentOrderCommand implements IRejectPaymentOrderCommand {
 
 export interface IRejectPaymentOrderCommand {
     id?: number;
-    rejectedById?: number;
     rejectionReason?: string;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class ReleaseEncumbranceCommand implements IReleaseEncumbranceCommand {
-    id?: number;
-    releaseAmount?: number | undefined;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: IReleaseEncumbranceCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.releaseAmount = _data["releaseAmount"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): ReleaseEncumbranceCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new ReleaseEncumbranceCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["releaseAmount"] = this.releaseAmount;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface IReleaseEncumbranceCommand {
-    id?: number;
-    releaseAmount?: number | undefined;
     rowVersion?: string;
 
     [key: string]: any;
@@ -28739,6 +36320,234 @@ export class RemoveCommitteeMemberCommand implements IRemoveCommitteeMemberComma
 
 export interface IRemoveCommitteeMemberCommand {
     id?: number;
+
+    [key: string]: any;
+}
+
+export class RemoveVoucherFromSlipCommand implements IRemoveVoucherFromSlipCommand {
+    slipId?: number;
+    voucherId?: number;
+    reason?: string | undefined;
+    rowVersion?: string;
+
+    [key: string]: any;
+
+    constructor(data?: IRemoveVoucherFromSlipCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.slipId = _data["slipId"];
+            this.voucherId = _data["voucherId"];
+            this.reason = _data["reason"];
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): RemoveVoucherFromSlipCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new RemoveVoucherFromSlipCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["slipId"] = this.slipId;
+        data["voucherId"] = this.voucherId;
+        data["reason"] = this.reason;
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IRemoveVoucherFromSlipCommand {
+    slipId?: number;
+    voucherId?: number;
+    reason?: string | undefined;
+    rowVersion?: string;
+
+    [key: string]: any;
+}
+
+export class ReopenFiscalYearRequest implements IReopenFiscalYearRequest {
+    fiscalYearId!: number;
+
+    [key: string]: any;
+
+    constructor(data?: IReopenFiscalYearRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.fiscalYearId = _data["fiscalYearId"];
+        }
+    }
+
+    static fromJS(data: any): ReopenFiscalYearRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new ReopenFiscalYearRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["fiscalYearId"] = this.fiscalYearId;
+        return data;
+    }
+}
+
+export interface IReopenFiscalYearRequest {
+    fiscalYearId: number;
+
+    [key: string]: any;
+}
+
+export class ReopenFiscalYearResponse implements IReopenFiscalYearResponse {
+    yearClosingRunId!: number;
+    fiscalYearId!: number;
+    restoredAppropriationTotal!: number;
+    restoredEncumbranceTotal!: number;
+
+    [key: string]: any;
+
+    constructor(data?: IReopenFiscalYearResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.yearClosingRunId = _data["yearClosingRunId"];
+            this.fiscalYearId = _data["fiscalYearId"];
+            this.restoredAppropriationTotal = _data["restoredAppropriationTotal"];
+            this.restoredEncumbranceTotal = _data["restoredEncumbranceTotal"];
+        }
+    }
+
+    static fromJS(data: any): ReopenFiscalYearResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new ReopenFiscalYearResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["yearClosingRunId"] = this.yearClosingRunId;
+        data["fiscalYearId"] = this.fiscalYearId;
+        data["restoredAppropriationTotal"] = this.restoredAppropriationTotal;
+        data["restoredEncumbranceTotal"] = this.restoredEncumbranceTotal;
+        return data;
+    }
+}
+
+export interface IReopenFiscalYearResponse {
+    yearClosingRunId: number;
+    fiscalYearId: number;
+    restoredAppropriationTotal: number;
+    restoredEncumbranceTotal: number;
+
+    [key: string]: any;
+}
+
+export class ReplaceCheckCommand implements IReplaceCheckCommand {
+    checkId?: number;
+    paymentMethod?: PaymentMethod;
+    checkDetails?: CreateCheckDto | undefined;
+    rowVersion?: string;
+
+    [key: string]: any;
+
+    constructor(data?: IReplaceCheckCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.checkId = _data["checkId"];
+            this.paymentMethod = _data["paymentMethod"];
+            this.checkDetails = _data["checkDetails"] ? CreateCheckDto.fromJS(_data["checkDetails"]) : undefined as any;
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): ReplaceCheckCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new ReplaceCheckCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["checkId"] = this.checkId;
+        data["paymentMethod"] = this.paymentMethod;
+        data["checkDetails"] = this.checkDetails ? this.checkDetails.toJSON() : undefined as any;
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IReplaceCheckCommand {
+    checkId?: number;
+    paymentMethod?: PaymentMethod;
+    checkDetails?: CreateCheckDto | undefined;
+    rowVersion?: string;
 
     [key: string]: any;
 }
@@ -28880,6 +36689,66 @@ export enum ResetPolicy {
     Never = "Never",
 }
 
+export class Result implements IResult {
+    succeeded?: boolean;
+    errors?: string[];
+
+    [key: string]: any;
+
+    constructor(data?: IResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): Result {
+        data = typeof data === 'object' ? data : {};
+        let result = new Result();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface IResult {
+    succeeded?: boolean;
+    errors?: string[];
+
+    [key: string]: any;
+}
+
 export class ResumeRecurringEntryCommand implements IResumeRecurringEntryCommand {
     id?: number;
     rowVersion?: string;
@@ -28932,6 +36801,402 @@ export interface IResumeRecurringEntryCommand {
     [key: string]: any;
 }
 
+export class RevenueCollectionsDetailDto implements IRevenueCollectionsDetailDto {
+    receiptVoucherId?: number;
+    voucherNumber?: string;
+    voucherDate?: Date;
+    partyName?: string;
+    totalAmount?: number;
+    paymentMethod?: string;
+    depositSlipNumber?: string | undefined;
+    depositSlipStatus?: string | undefined;
+    lines?: RevenueCollectionsLineDetailDto[];
+    checks?: CheckDetailDto[];
+
+    [key: string]: any;
+
+    constructor(data?: IRevenueCollectionsDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.receiptVoucherId = _data["receiptVoucherId"];
+            this.voucherNumber = _data["voucherNumber"];
+            this.voucherDate = _data["voucherDate"] ? new Date(_data["voucherDate"].toString()) : undefined as any;
+            this.partyName = _data["partyName"];
+            this.totalAmount = _data["totalAmount"];
+            this.paymentMethod = _data["paymentMethod"];
+            this.depositSlipNumber = _data["depositSlipNumber"];
+            this.depositSlipStatus = _data["depositSlipStatus"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(RevenueCollectionsLineDetailDto.fromJS(item));
+            }
+            if (Array.isArray(_data["checks"])) {
+                this.checks = [] as any;
+                for (let item of _data["checks"])
+                    this.checks!.push(CheckDetailDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): RevenueCollectionsDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new RevenueCollectionsDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["receiptVoucherId"] = this.receiptVoucherId;
+        data["voucherNumber"] = this.voucherNumber;
+        data["voucherDate"] = this.voucherDate ? formatDate(this.voucherDate) : undefined as any;
+        data["partyName"] = this.partyName;
+        data["totalAmount"] = this.totalAmount;
+        data["paymentMethod"] = this.paymentMethod;
+        data["depositSlipNumber"] = this.depositSlipNumber;
+        data["depositSlipStatus"] = this.depositSlipStatus;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        if (Array.isArray(this.checks)) {
+            data["checks"] = [];
+            for (let item of this.checks)
+                data["checks"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IRevenueCollectionsDetailDto {
+    receiptVoucherId?: number;
+    voucherNumber?: string;
+    voucherDate?: Date;
+    partyName?: string;
+    totalAmount?: number;
+    paymentMethod?: string;
+    depositSlipNumber?: string | undefined;
+    depositSlipStatus?: string | undefined;
+    lines?: RevenueCollectionsLineDetailDto[];
+    checks?: CheckDetailDto[];
+
+    [key: string]: any;
+}
+
+export class RevenueCollectionsLineDetailDto implements IRevenueCollectionsLineDetailDto {
+    revenueAccountId?: number;
+    accountCode?: string;
+    accountName?: string;
+    amount?: number;
+
+    [key: string]: any;
+
+    constructor(data?: IRevenueCollectionsLineDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.revenueAccountId = _data["revenueAccountId"];
+            this.accountCode = _data["accountCode"];
+            this.accountName = _data["accountName"];
+            this.amount = _data["amount"];
+        }
+    }
+
+    static fromJS(data: any): RevenueCollectionsLineDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new RevenueCollectionsLineDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["revenueAccountId"] = this.revenueAccountId;
+        data["accountCode"] = this.accountCode;
+        data["accountName"] = this.accountName;
+        data["amount"] = this.amount;
+        return data;
+    }
+}
+
+export interface IRevenueCollectionsLineDetailDto {
+    revenueAccountId?: number;
+    accountCode?: string;
+    accountName?: string;
+    amount?: number;
+
+    [key: string]: any;
+}
+
+export class RevenueCollectionsLineDto implements IRevenueCollectionsLineDto {
+    receiptVoucherId?: number;
+    voucherNumber?: string;
+    voucherDate?: Date;
+    revenueAccountId?: number;
+    accountCode?: string;
+    accountName?: string;
+    partyId?: number;
+    partyName?: string;
+    amount?: number;
+    paymentMethod?: string;
+    depositSlipId?: number | undefined;
+    depositSlipNumber?: string | undefined;
+    depositSlipStatus?: string | undefined;
+    checkClearingStatus?: string;
+
+    [key: string]: any;
+
+    constructor(data?: IRevenueCollectionsLineDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.receiptVoucherId = _data["receiptVoucherId"];
+            this.voucherNumber = _data["voucherNumber"];
+            this.voucherDate = _data["voucherDate"] ? new Date(_data["voucherDate"].toString()) : undefined as any;
+            this.revenueAccountId = _data["revenueAccountId"];
+            this.accountCode = _data["accountCode"];
+            this.accountName = _data["accountName"];
+            this.partyId = _data["partyId"];
+            this.partyName = _data["partyName"];
+            this.amount = _data["amount"];
+            this.paymentMethod = _data["paymentMethod"];
+            this.depositSlipId = _data["depositSlipId"];
+            this.depositSlipNumber = _data["depositSlipNumber"];
+            this.depositSlipStatus = _data["depositSlipStatus"];
+            this.checkClearingStatus = _data["checkClearingStatus"];
+        }
+    }
+
+    static fromJS(data: any): RevenueCollectionsLineDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new RevenueCollectionsLineDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["receiptVoucherId"] = this.receiptVoucherId;
+        data["voucherNumber"] = this.voucherNumber;
+        data["voucherDate"] = this.voucherDate ? formatDate(this.voucherDate) : undefined as any;
+        data["revenueAccountId"] = this.revenueAccountId;
+        data["accountCode"] = this.accountCode;
+        data["accountName"] = this.accountName;
+        data["partyId"] = this.partyId;
+        data["partyName"] = this.partyName;
+        data["amount"] = this.amount;
+        data["paymentMethod"] = this.paymentMethod;
+        data["depositSlipId"] = this.depositSlipId;
+        data["depositSlipNumber"] = this.depositSlipNumber;
+        data["depositSlipStatus"] = this.depositSlipStatus;
+        data["checkClearingStatus"] = this.checkClearingStatus;
+        return data;
+    }
+}
+
+export interface IRevenueCollectionsLineDto {
+    receiptVoucherId?: number;
+    voucherNumber?: string;
+    voucherDate?: Date;
+    revenueAccountId?: number;
+    accountCode?: string;
+    accountName?: string;
+    partyId?: number;
+    partyName?: string;
+    amount?: number;
+    paymentMethod?: string;
+    depositSlipId?: number | undefined;
+    depositSlipNumber?: string | undefined;
+    depositSlipStatus?: string | undefined;
+    checkClearingStatus?: string;
+
+    [key: string]: any;
+}
+
+export class RevenueCollectionsReportDto implements IRevenueCollectionsReportDto {
+    fiscalYearId?: number;
+    fiscalYearName?: string;
+    lines?: RevenueCollectionsLineDto[];
+    totals?: RevenueCollectionsTotalDto;
+
+    [key: string]: any;
+
+    constructor(data?: IRevenueCollectionsReportDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.fiscalYearId = _data["fiscalYearId"];
+            this.fiscalYearName = _data["fiscalYearName"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(RevenueCollectionsLineDto.fromJS(item));
+            }
+            this.totals = _data["totals"] ? RevenueCollectionsTotalDto.fromJS(_data["totals"]) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): RevenueCollectionsReportDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new RevenueCollectionsReportDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["fiscalYearId"] = this.fiscalYearId;
+        data["fiscalYearName"] = this.fiscalYearName;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        data["totals"] = this.totals ? this.totals.toJSON() : undefined as any;
+        return data;
+    }
+}
+
+export interface IRevenueCollectionsReportDto {
+    fiscalYearId?: number;
+    fiscalYearName?: string;
+    lines?: RevenueCollectionsLineDto[];
+    totals?: RevenueCollectionsTotalDto;
+
+    [key: string]: any;
+}
+
+export class RevenueCollectionsTotalDto implements IRevenueCollectionsTotalDto {
+    totalAmount?: number;
+    totalCash?: number;
+    totalChecks?: number;
+    pendingDeposits?: number;
+    clearedChecks?: number;
+    bouncedChecks?: number;
+
+    [key: string]: any;
+
+    constructor(data?: IRevenueCollectionsTotalDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.totalAmount = _data["totalAmount"];
+            this.totalCash = _data["totalCash"];
+            this.totalChecks = _data["totalChecks"];
+            this.pendingDeposits = _data["pendingDeposits"];
+            this.clearedChecks = _data["clearedChecks"];
+            this.bouncedChecks = _data["bouncedChecks"];
+        }
+    }
+
+    static fromJS(data: any): RevenueCollectionsTotalDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new RevenueCollectionsTotalDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["totalAmount"] = this.totalAmount;
+        data["totalCash"] = this.totalCash;
+        data["totalChecks"] = this.totalChecks;
+        data["pendingDeposits"] = this.pendingDeposits;
+        data["clearedChecks"] = this.clearedChecks;
+        data["bouncedChecks"] = this.bouncedChecks;
+        return data;
+    }
+}
+
+export interface IRevenueCollectionsTotalDto {
+    totalAmount?: number;
+    totalCash?: number;
+    totalChecks?: number;
+    pendingDeposits?: number;
+    clearedChecks?: number;
+    bouncedChecks?: number;
+
+    [key: string]: any;
+}
+
 export class RevenueReceiptDto implements IRevenueReceiptDto {
     id?: number;
     receiptNumber?: string;
@@ -28946,7 +37211,7 @@ export class RevenueReceiptDto implements IRevenueReceiptDto {
     paymentMethod?: PaymentMethod;
     paymentMethodName?: string;
     externalTransactionRef?: string | undefined;
-    moveId?: number | undefined;
+    journalEntryId?: number | undefined;
     status?: RevenueReceiptStatus;
     created?: Date;
     createdBy?: string | undefined;
@@ -28984,7 +37249,7 @@ export class RevenueReceiptDto implements IRevenueReceiptDto {
             this.paymentMethod = _data["paymentMethod"];
             this.paymentMethodName = _data["paymentMethodName"];
             this.externalTransactionRef = _data["externalTransactionRef"];
-            this.moveId = _data["moveId"];
+            this.journalEntryId = _data["journalEntryId"];
             this.status = _data["status"];
             this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
             this.createdBy = _data["createdBy"];
@@ -29024,7 +37289,7 @@ export class RevenueReceiptDto implements IRevenueReceiptDto {
         data["paymentMethod"] = this.paymentMethod;
         data["paymentMethodName"] = this.paymentMethodName;
         data["externalTransactionRef"] = this.externalTransactionRef;
-        data["moveId"] = this.moveId;
+        data["journalEntryId"] = this.journalEntryId;
         data["status"] = this.status;
         data["created"] = this.created ? this.created.toISOString() : undefined as any;
         data["createdBy"] = this.createdBy;
@@ -29053,7 +37318,7 @@ export interface IRevenueReceiptDto {
     paymentMethod?: PaymentMethod;
     paymentMethodName?: string;
     externalTransactionRef?: string | undefined;
-    moveId?: number | undefined;
+    journalEntryId?: number | undefined;
     status?: RevenueReceiptStatus;
     created?: Date;
     createdBy?: string | undefined;
@@ -29193,14 +37458,66 @@ export interface IReverseClosingEntryCommand {
     [key: string]: any;
 }
 
-export class ReverseEncumbranceCommand implements IReverseEncumbranceCommand {
+export class ReverseEncumbranceRequest implements IReverseEncumbranceRequest {
+    rowVersion!: string;
+    reason!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IReverseEncumbranceRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.rowVersion = _data["rowVersion"];
+            this.reason = _data["reason"];
+        }
+    }
+
+    static fromJS(data: any): ReverseEncumbranceRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new ReverseEncumbranceRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["rowVersion"] = this.rowVersion;
+        data["reason"] = this.reason;
+        return data;
+    }
+}
+
+export interface IReverseEncumbranceRequest {
+    rowVersion: string;
+    reason: string | undefined;
+
+    [key: string]: any;
+}
+
+export class ReverseJournalEntryCommand implements IReverseJournalEntryCommand {
     id?: number;
     reversalReason?: string;
     rowVersion?: string;
 
     [key: string]: any;
 
-    constructor(data?: IReverseEncumbranceCommand) {
+    constructor(data?: IReverseJournalEntryCommand) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -29221,9 +37538,9 @@ export class ReverseEncumbranceCommand implements IReverseEncumbranceCommand {
         }
     }
 
-    static fromJS(data: any): ReverseEncumbranceCommand {
+    static fromJS(data: any): ReverseJournalEntryCommand {
         data = typeof data === 'object' ? data : {};
-        let result = new ReverseEncumbranceCommand();
+        let result = new ReverseJournalEntryCommand();
         result.init(data);
         return result;
     }
@@ -29241,63 +37558,7 @@ export class ReverseEncumbranceCommand implements IReverseEncumbranceCommand {
     }
 }
 
-export interface IReverseEncumbranceCommand {
-    id?: number;
-    reversalReason?: string;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class ReverseMoveCommand implements IReverseMoveCommand {
-    id?: number;
-    reversalReason?: string;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: IReverseMoveCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.reversalReason = _data["reversalReason"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): ReverseMoveCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new ReverseMoveCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["reversalReason"] = this.reversalReason;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface IReverseMoveCommand {
+export interface IReverseJournalEntryCommand {
     id?: number;
     reversalReason?: string;
     rowVersion?: string;
@@ -29368,6 +37629,65 @@ export interface IRolePermissionDto {
     permissionId?: number;
     permissionCode?: string;
     permissionName?: string;
+
+    [key: string]: any;
+}
+
+export class SaveMonthlyPlanRequest implements ISaveMonthlyPlanRequest {
+    entries!: MonthlyPlanEntry[];
+
+    [key: string]: any;
+
+    constructor(data?: ISaveMonthlyPlanRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.entries = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            if (Array.isArray(_data["entries"])) {
+                this.entries = [] as any;
+                for (let item of _data["entries"])
+                    this.entries!.push(MonthlyPlanEntry.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): SaveMonthlyPlanRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new SaveMonthlyPlanRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        if (Array.isArray(this.entries)) {
+            data["entries"] = [];
+            for (let item of this.entries)
+                data["entries"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface ISaveMonthlyPlanRequest {
+    entries: MonthlyPlanEntry[];
 
     [key: string]: any;
 }
@@ -29756,13 +38076,13 @@ export interface IStepDecisionRequest {
     [key: string]: any;
 }
 
-export class SubmitAppropriationCommand implements ISubmitAppropriationCommand {
+export class SubmitJournalEntryCommand implements ISubmitJournalEntryCommand {
     id?: number;
     rowVersion?: string;
 
     [key: string]: any;
 
-    constructor(data?: ISubmitAppropriationCommand) {
+    constructor(data?: ISubmitJournalEntryCommand) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -29782,9 +38102,9 @@ export class SubmitAppropriationCommand implements ISubmitAppropriationCommand {
         }
     }
 
-    static fromJS(data: any): SubmitAppropriationCommand {
+    static fromJS(data: any): SubmitJournalEntryCommand {
         data = typeof data === 'object' ? data : {};
-        let result = new SubmitAppropriationCommand();
+        let result = new SubmitJournalEntryCommand();
         result.init(data);
         return result;
     }
@@ -29801,163 +38121,7 @@ export class SubmitAppropriationCommand implements ISubmitAppropriationCommand {
     }
 }
 
-export interface ISubmitAppropriationCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class SubmitBudgetCommand implements ISubmitBudgetCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: ISubmitBudgetCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): SubmitBudgetCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new SubmitBudgetCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface ISubmitBudgetCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class SubmitEncumbranceCommand implements ISubmitEncumbranceCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: ISubmitEncumbranceCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): SubmitEncumbranceCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new SubmitEncumbranceCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface ISubmitEncumbranceCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class SubmitMoveCommand implements ISubmitMoveCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: ISubmitMoveCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): SubmitMoveCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new SubmitMoveCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface ISubmitMoveCommand {
+export interface ISubmitJournalEntryCommand {
     id?: number;
     rowVersion?: string;
 
@@ -30016,13 +38180,13 @@ export interface ISubmitPaymentOrderCommand {
     [key: string]: any;
 }
 
-export class SuspendAppropriationCommand implements ISuspendAppropriationCommand {
+export class SubmitReceiptVoucherCommand implements ISubmitReceiptVoucherCommand {
     id?: number;
     rowVersion?: string;
 
     [key: string]: any;
 
-    constructor(data?: ISuspendAppropriationCommand) {
+    constructor(data?: ISubmitReceiptVoucherCommand) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -30042,9 +38206,9 @@ export class SuspendAppropriationCommand implements ISuspendAppropriationCommand
         }
     }
 
-    static fromJS(data: any): SuspendAppropriationCommand {
+    static fromJS(data: any): SubmitReceiptVoucherCommand {
         data = typeof data === 'object' ? data : {};
-        let result = new SuspendAppropriationCommand();
+        let result = new SubmitReceiptVoucherCommand();
         result.init(data);
         return result;
     }
@@ -30061,59 +38225,7 @@ export class SuspendAppropriationCommand implements ISuspendAppropriationCommand
     }
 }
 
-export interface ISuspendAppropriationCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class SuspendBudgetCommand implements ISuspendBudgetCommand {
-    id?: number;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: ISuspendBudgetCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): SuspendBudgetCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new SuspendBudgetCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface ISuspendBudgetCommand {
+export interface ISubmitReceiptVoucherCommand {
     id?: number;
     rowVersion?: string;
 
@@ -30176,14 +38288,13 @@ export interface IToggleAccountGroupActiveCommand {
     [key: string]: any;
 }
 
-export class ToggleBudgetClassificationActiveCommand implements IToggleBudgetClassificationActiveCommand {
-    id?: number;
-    isActive?: boolean;
-    rowVersion?: string;
+export class TransferPairResult implements ITransferPairResult {
+    sourceId!: number;
+    targetId!: number;
 
     [key: string]: any;
 
-    constructor(data?: IToggleBudgetClassificationActiveCommand) {
+    constructor(data?: ITransferPairResult) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -30198,15 +38309,14 @@ export class ToggleBudgetClassificationActiveCommand implements IToggleBudgetCla
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.id = _data["id"];
-            this.isActive = _data["isActive"];
-            this.rowVersion = _data["rowVersion"];
+            this.sourceId = _data["sourceId"];
+            this.targetId = _data["targetId"];
         }
     }
 
-    static fromJS(data: any): ToggleBudgetClassificationActiveCommand {
+    static fromJS(data: any): TransferPairResult {
         data = typeof data === 'object' ? data : {};
-        let result = new ToggleBudgetClassificationActiveCommand();
+        let result = new TransferPairResult();
         result.init(data);
         return result;
     }
@@ -30217,73 +38327,15 @@ export class ToggleBudgetClassificationActiveCommand implements IToggleBudgetCla
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["id"] = this.id;
-        data["isActive"] = this.isActive;
-        data["rowVersion"] = this.rowVersion;
+        data["sourceId"] = this.sourceId;
+        data["targetId"] = this.targetId;
         return data;
     }
 }
 
-export interface IToggleBudgetClassificationActiveCommand {
-    id?: number;
-    isActive?: boolean;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class ToggleBudgetTypeActiveCommand implements IToggleBudgetTypeActiveCommand {
-    id?: number;
-    isActive?: boolean;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: IToggleBudgetTypeActiveCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.isActive = _data["isActive"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): ToggleBudgetTypeActiveCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new ToggleBudgetTypeActiveCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["isActive"] = this.isActive;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface IToggleBudgetTypeActiveCommand {
-    id?: number;
-    isActive?: boolean;
-    rowVersion?: string;
+export interface ITransferPairResult {
+    sourceId: number;
+    targetId: number;
 
     [key: string]: any;
 }
@@ -30376,6 +38428,218 @@ export interface ITrialBalanceDto {
     isBalanced?: boolean;
     currency?: string;
     generatedAt?: Date;
+
+    [key: string]: any;
+}
+
+export class TrialBalanceLineDto implements ITrialBalanceLineDto {
+    accountId?: number;
+    accountCode?: string;
+    accountName?: string;
+    accountType?: string;
+    openingBalance?: number;
+    debitTotal?: number;
+    creditTotal?: number;
+    closingBalance?: number;
+
+    [key: string]: any;
+
+    constructor(data?: ITrialBalanceLineDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.accountId = _data["accountId"];
+            this.accountCode = _data["accountCode"];
+            this.accountName = _data["accountName"];
+            this.accountType = _data["accountType"];
+            this.openingBalance = _data["openingBalance"];
+            this.debitTotal = _data["debitTotal"];
+            this.creditTotal = _data["creditTotal"];
+            this.closingBalance = _data["closingBalance"];
+        }
+    }
+
+    static fromJS(data: any): TrialBalanceLineDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new TrialBalanceLineDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["accountId"] = this.accountId;
+        data["accountCode"] = this.accountCode;
+        data["accountName"] = this.accountName;
+        data["accountType"] = this.accountType;
+        data["openingBalance"] = this.openingBalance;
+        data["debitTotal"] = this.debitTotal;
+        data["creditTotal"] = this.creditTotal;
+        data["closingBalance"] = this.closingBalance;
+        return data;
+    }
+}
+
+export interface ITrialBalanceLineDto {
+    accountId?: number;
+    accountCode?: string;
+    accountName?: string;
+    accountType?: string;
+    openingBalance?: number;
+    debitTotal?: number;
+    creditTotal?: number;
+    closingBalance?: number;
+
+    [key: string]: any;
+}
+
+export class TrialBalanceReportDto implements ITrialBalanceReportDto {
+    fiscalYearId?: number;
+    fiscalYearName?: string;
+    fiscalPeriodId?: number | undefined;
+    fiscalPeriodName?: string | undefined;
+    lines?: TrialBalanceLineDto[];
+    totals?: TrialBalanceTotalDto;
+
+    [key: string]: any;
+
+    constructor(data?: ITrialBalanceReportDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.fiscalYearId = _data["fiscalYearId"];
+            this.fiscalYearName = _data["fiscalYearName"];
+            this.fiscalPeriodId = _data["fiscalPeriodId"];
+            this.fiscalPeriodName = _data["fiscalPeriodName"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(TrialBalanceLineDto.fromJS(item));
+            }
+            this.totals = _data["totals"] ? TrialBalanceTotalDto.fromJS(_data["totals"]) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): TrialBalanceReportDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new TrialBalanceReportDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["fiscalYearId"] = this.fiscalYearId;
+        data["fiscalYearName"] = this.fiscalYearName;
+        data["fiscalPeriodId"] = this.fiscalPeriodId;
+        data["fiscalPeriodName"] = this.fiscalPeriodName;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        data["totals"] = this.totals ? this.totals.toJSON() : undefined as any;
+        return data;
+    }
+}
+
+export interface ITrialBalanceReportDto {
+    fiscalYearId?: number;
+    fiscalYearName?: string;
+    fiscalPeriodId?: number | undefined;
+    fiscalPeriodName?: string | undefined;
+    lines?: TrialBalanceLineDto[];
+    totals?: TrialBalanceTotalDto;
+
+    [key: string]: any;
+}
+
+export class TrialBalanceTotalDto implements ITrialBalanceTotalDto {
+    totalDebits?: number;
+    totalCredits?: number;
+    totalOpeningBalance?: number;
+    totalClosingBalance?: number;
+
+    [key: string]: any;
+
+    constructor(data?: ITrialBalanceTotalDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.totalDebits = _data["totalDebits"];
+            this.totalCredits = _data["totalCredits"];
+            this.totalOpeningBalance = _data["totalOpeningBalance"];
+            this.totalClosingBalance = _data["totalClosingBalance"];
+        }
+    }
+
+    static fromJS(data: any): TrialBalanceTotalDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new TrialBalanceTotalDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["totalDebits"] = this.totalDebits;
+        data["totalCredits"] = this.totalCredits;
+        data["totalOpeningBalance"] = this.totalOpeningBalance;
+        data["totalClosingBalance"] = this.totalClosingBalance;
+        return data;
+    }
+}
+
+export interface ITrialBalanceTotalDto {
+    totalDebits?: number;
+    totalCredits?: number;
+    totalOpeningBalance?: number;
+    totalClosingBalance?: number;
 
     [key: string]: any;
 }
@@ -30628,17 +38892,16 @@ export interface IUpdateAccountGroupCommand {
     [key: string]: any;
 }
 
-export class UpdateAppropriationCommand implements IUpdateAppropriationCommand {
-    id?: number;
-    appropriationType?: AppropriationType;
-    documentType?: string;
-    documentId?: number;
-    amount?: number;
-    rowVersion?: string;
+export class UpdateAppropriationRequest implements IUpdateAppropriationRequest {
+    appropriationType!: AppropriationType;
+    documentType!: string;
+    documentId!: number;
+    amount!: number;
+    rowVersion!: string;
 
     [key: string]: any;
 
-    constructor(data?: IUpdateAppropriationCommand) {
+    constructor(data?: IUpdateAppropriationRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -30653,7 +38916,6 @@ export class UpdateAppropriationCommand implements IUpdateAppropriationCommand {
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.id = _data["id"];
             this.appropriationType = _data["appropriationType"];
             this.documentType = _data["documentType"];
             this.documentId = _data["documentId"];
@@ -30662,9 +38924,9 @@ export class UpdateAppropriationCommand implements IUpdateAppropriationCommand {
         }
     }
 
-    static fromJS(data: any): UpdateAppropriationCommand {
+    static fromJS(data: any): UpdateAppropriationRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new UpdateAppropriationCommand();
+        let result = new UpdateAppropriationRequest();
         result.init(data);
         return result;
     }
@@ -30675,7 +38937,6 @@ export class UpdateAppropriationCommand implements IUpdateAppropriationCommand {
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["id"] = this.id;
         data["appropriationType"] = this.appropriationType;
         data["documentType"] = this.documentType;
         data["documentId"] = this.documentId;
@@ -30685,13 +38946,12 @@ export class UpdateAppropriationCommand implements IUpdateAppropriationCommand {
     }
 }
 
-export interface IUpdateAppropriationCommand {
-    id?: number;
-    appropriationType?: AppropriationType;
-    documentType?: string;
-    documentId?: number;
-    amount?: number;
-    rowVersion?: string;
+export interface IUpdateAppropriationRequest {
+    appropriationType: AppropriationType;
+    documentType: string;
+    documentId: number;
+    amount: number;
+    rowVersion: string;
 
     [key: string]: any;
 }
@@ -30940,15 +39200,15 @@ export interface IUpdateBankAccountCommand {
     [key: string]: any;
 }
 
-export class UpdateBudgetClassificationCommand implements IUpdateBudgetClassificationCommand {
-    id?: number;
-    name?: string;
-    parentId?: number | undefined;
-    rowVersion?: string;
+export class UpdateBudgetClassificationRequest implements IUpdateBudgetClassificationRequest {
+    code!: string;
+    name!: string;
+    parentId!: number | undefined;
+    rowVersion!: string;
 
     [key: string]: any;
 
-    constructor(data?: IUpdateBudgetClassificationCommand) {
+    constructor(data?: IUpdateBudgetClassificationRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -30963,16 +39223,16 @@ export class UpdateBudgetClassificationCommand implements IUpdateBudgetClassific
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.id = _data["id"];
+            this.code = _data["code"];
             this.name = _data["name"];
             this.parentId = _data["parentId"];
             this.rowVersion = _data["rowVersion"];
         }
     }
 
-    static fromJS(data: any): UpdateBudgetClassificationCommand {
+    static fromJS(data: any): UpdateBudgetClassificationRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new UpdateBudgetClassificationCommand();
+        let result = new UpdateBudgetClassificationRequest();
         result.init(data);
         return result;
     }
@@ -30983,7 +39243,7 @@ export class UpdateBudgetClassificationCommand implements IUpdateBudgetClassific
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["id"] = this.id;
+        data["code"] = this.code;
         data["name"] = this.name;
         data["parentId"] = this.parentId;
         data["rowVersion"] = this.rowVersion;
@@ -30991,28 +39251,23 @@ export class UpdateBudgetClassificationCommand implements IUpdateBudgetClassific
     }
 }
 
-export interface IUpdateBudgetClassificationCommand {
-    id?: number;
-    name?: string;
-    parentId?: number | undefined;
-    rowVersion?: string;
+export interface IUpdateBudgetClassificationRequest {
+    code: string;
+    name: string;
+    parentId: number | undefined;
+    rowVersion: string;
 
     [key: string]: any;
 }
 
-export class UpdateBudgetCommand implements IUpdateBudgetCommand {
-    id?: number;
-    budgetName?: string;
-    totalAmount?: number;
-    allowOverrun?: boolean | undefined;
-    effectiveFrom?: Date;
-    effectiveTo?: Date | undefined;
-    description?: string | undefined;
-    rowVersion?: string;
+export class UpdateBudgetItemRequest implements IUpdateBudgetItemRequest {
+    itemName!: string;
+    remarks!: string | undefined;
+    rowVersion!: string;
 
     [key: string]: any;
 
-    constructor(data?: IUpdateBudgetCommand) {
+    constructor(data?: IUpdateBudgetItemRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -31027,96 +39282,15 @@ export class UpdateBudgetCommand implements IUpdateBudgetCommand {
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.id = _data["id"];
-            this.budgetName = _data["budgetName"];
-            this.totalAmount = _data["totalAmount"];
-            this.allowOverrun = _data["allowOverrun"];
-            this.effectiveFrom = _data["effectiveFrom"] ? new Date(_data["effectiveFrom"].toString()) : undefined as any;
-            this.effectiveTo = _data["effectiveTo"] ? new Date(_data["effectiveTo"].toString()) : undefined as any;
-            this.description = _data["description"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): UpdateBudgetCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new UpdateBudgetCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["budgetName"] = this.budgetName;
-        data["totalAmount"] = this.totalAmount;
-        data["allowOverrun"] = this.allowOverrun;
-        data["effectiveFrom"] = this.effectiveFrom ? formatDate(this.effectiveFrom) : undefined as any;
-        data["effectiveTo"] = this.effectiveTo ? formatDate(this.effectiveTo) : undefined as any;
-        data["description"] = this.description;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface IUpdateBudgetCommand {
-    id?: number;
-    budgetName?: string;
-    totalAmount?: number;
-    allowOverrun?: boolean | undefined;
-    effectiveFrom?: Date;
-    effectiveTo?: Date | undefined;
-    description?: string | undefined;
-    rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class UpdateBudgetItemCommand implements IUpdateBudgetItemCommand {
-    id?: number;
-    itemName?: string;
-    accountId?: number | undefined;
-    fundId?: number | undefined;
-    costCenterId?: number | undefined;
-    budgetClassificationId?: number | undefined;
-    allowOverrun?: boolean | undefined;
-    rowVersion?: string;
-
-    [key: string]: any;
-
-    constructor(data?: IUpdateBudgetItemCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
             this.itemName = _data["itemName"];
-            this.accountId = _data["accountId"];
-            this.fundId = _data["fundId"];
-            this.costCenterId = _data["costCenterId"];
-            this.budgetClassificationId = _data["budgetClassificationId"];
-            this.allowOverrun = _data["allowOverrun"];
+            this.remarks = _data["remarks"];
             this.rowVersion = _data["rowVersion"];
         }
     }
 
-    static fromJS(data: any): UpdateBudgetItemCommand {
+    static fromJS(data: any): UpdateBudgetItemRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new UpdateBudgetItemCommand();
+        let result = new UpdateBudgetItemRequest();
         result.init(data);
         return result;
     }
@@ -31127,42 +39301,32 @@ export class UpdateBudgetItemCommand implements IUpdateBudgetItemCommand {
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["id"] = this.id;
         data["itemName"] = this.itemName;
-        data["accountId"] = this.accountId;
-        data["fundId"] = this.fundId;
-        data["costCenterId"] = this.costCenterId;
-        data["budgetClassificationId"] = this.budgetClassificationId;
-        data["allowOverrun"] = this.allowOverrun;
+        data["remarks"] = this.remarks;
         data["rowVersion"] = this.rowVersion;
         return data;
     }
 }
 
-export interface IUpdateBudgetItemCommand {
-    id?: number;
-    itemName?: string;
-    accountId?: number | undefined;
-    fundId?: number | undefined;
-    costCenterId?: number | undefined;
-    budgetClassificationId?: number | undefined;
-    allowOverrun?: boolean | undefined;
-    rowVersion?: string;
+export interface IUpdateBudgetItemRequest {
+    itemName: string;
+    remarks: string | undefined;
+    rowVersion: string;
 
     [key: string]: any;
 }
 
-export class UpdateBudgetTypeCommand implements IUpdateBudgetTypeCommand {
-    id?: number;
-    name?: string;
-    description?: string | undefined;
-    controlMethod?: BudgetControlMethod;
-    allowOverrun?: boolean;
-    rowVersion?: string;
+export class UpdateBudgetRequest implements IUpdateBudgetRequest {
+    budgetNumber!: string;
+    budgetName!: string;
+    fiscalYearId!: number;
+    fundId!: number;
+    budgetTypeId!: number;
+    rowVersion!: string;
 
     [key: string]: any;
 
-    constructor(data?: IUpdateBudgetTypeCommand) {
+    constructor(data?: IUpdateBudgetRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -31177,7 +39341,75 @@ export class UpdateBudgetTypeCommand implements IUpdateBudgetTypeCommand {
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.id = _data["id"];
+            this.budgetNumber = _data["budgetNumber"];
+            this.budgetName = _data["budgetName"];
+            this.fiscalYearId = _data["fiscalYearId"];
+            this.fundId = _data["fundId"];
+            this.budgetTypeId = _data["budgetTypeId"];
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): UpdateBudgetRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateBudgetRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["budgetNumber"] = this.budgetNumber;
+        data["budgetName"] = this.budgetName;
+        data["fiscalYearId"] = this.fiscalYearId;
+        data["fundId"] = this.fundId;
+        data["budgetTypeId"] = this.budgetTypeId;
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IUpdateBudgetRequest {
+    budgetNumber: string;
+    budgetName: string;
+    fiscalYearId: number;
+    fundId: number;
+    budgetTypeId: number;
+    rowVersion: string;
+
+    [key: string]: any;
+}
+
+export class UpdateBudgetTypeRequest implements IUpdateBudgetTypeRequest {
+    code!: string;
+    name!: string;
+    description!: string | undefined;
+    controlMethod!: BudgetControlMethod;
+    allowOverrun!: boolean;
+    rowVersion!: string;
+
+    [key: string]: any;
+
+    constructor(data?: IUpdateBudgetTypeRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.code = _data["code"];
             this.name = _data["name"];
             this.description = _data["description"];
             this.controlMethod = _data["controlMethod"];
@@ -31186,9 +39418,9 @@ export class UpdateBudgetTypeCommand implements IUpdateBudgetTypeCommand {
         }
     }
 
-    static fromJS(data: any): UpdateBudgetTypeCommand {
+    static fromJS(data: any): UpdateBudgetTypeRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new UpdateBudgetTypeCommand();
+        let result = new UpdateBudgetTypeRequest();
         result.init(data);
         return result;
     }
@@ -31199,7 +39431,7 @@ export class UpdateBudgetTypeCommand implements IUpdateBudgetTypeCommand {
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["id"] = this.id;
+        data["code"] = this.code;
         data["name"] = this.name;
         data["description"] = this.description;
         data["controlMethod"] = this.controlMethod;
@@ -31209,13 +39441,13 @@ export class UpdateBudgetTypeCommand implements IUpdateBudgetTypeCommand {
     }
 }
 
-export interface IUpdateBudgetTypeCommand {
-    id?: number;
-    name?: string;
-    description?: string | undefined;
-    controlMethod?: BudgetControlMethod;
-    allowOverrun?: boolean;
-    rowVersion?: string;
+export interface IUpdateBudgetTypeRequest {
+    code: string;
+    name: string;
+    description: string | undefined;
+    controlMethod: BudgetControlMethod;
+    allowOverrun: boolean;
+    rowVersion: string;
 
     [key: string]: any;
 }
@@ -31636,6 +39868,74 @@ export interface IUpdateEmployeeRequest {
     [key: string]: any;
 }
 
+export class UpdateEncumbranceRequest implements IUpdateEncumbranceRequest {
+    description!: string | undefined;
+    encumbranceDate!: Date | undefined;
+    amount!: number | undefined;
+    vendorId!: number | undefined;
+    purchaseOrderId!: number | undefined;
+    rowVersion!: string;
+
+    [key: string]: any;
+
+    constructor(data?: IUpdateEncumbranceRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.description = _data["description"];
+            this.encumbranceDate = _data["encumbranceDate"] ? new Date(_data["encumbranceDate"].toString()) : undefined as any;
+            this.amount = _data["amount"];
+            this.vendorId = _data["vendorId"];
+            this.purchaseOrderId = _data["purchaseOrderId"];
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): UpdateEncumbranceRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateEncumbranceRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["description"] = this.description;
+        data["encumbranceDate"] = this.encumbranceDate ? formatDate(this.encumbranceDate) : undefined as any;
+        data["amount"] = this.amount;
+        data["vendorId"] = this.vendorId;
+        data["purchaseOrderId"] = this.purchaseOrderId;
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IUpdateEncumbranceRequest {
+    description: string | undefined;
+    encumbranceDate: Date | undefined;
+    amount: number | undefined;
+    vendorId: number | undefined;
+    purchaseOrderId: number | undefined;
+    rowVersion: string;
+
+    [key: string]: any;
+}
+
 export class UpdateExchangeRateCommand implements IUpdateExchangeRateCommand {
     id?: number;
     rate?: number;
@@ -31820,20 +40120,20 @@ export interface IUpdateFiscalYearCommand {
     [key: string]: any;
 }
 
-export class UpdateFundCommand implements IUpdateFundCommand {
-    id?: number;
-    fundName?: string;
-    fundType?: FundType;
-    fundCategory?: FundCategory;
-    fiscalYearId?: number | undefined;
-    legalAuthority?: string;
-    description?: string | undefined;
-    defaultRevenueDebitAccountId?: number | undefined;
-    rowVersion?: string;
+export class UpdateFundRequest implements IUpdateFundRequest {
+    fundNumber!: string;
+    fundName!: string;
+    fundType!: FundType;
+    fundCategory!: FundCategory;
+    fiscalYearId!: number | undefined;
+    legalAuthority!: string;
+    description!: string | undefined;
+    defaultRevenueDebitAccountId!: number | undefined;
+    rowVersion!: string;
 
     [key: string]: any;
 
-    constructor(data?: IUpdateFundCommand) {
+    constructor(data?: IUpdateFundRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -31848,7 +40148,7 @@ export class UpdateFundCommand implements IUpdateFundCommand {
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.id = _data["id"];
+            this.fundNumber = _data["fundNumber"];
             this.fundName = _data["fundName"];
             this.fundType = _data["fundType"];
             this.fundCategory = _data["fundCategory"];
@@ -31860,9 +40160,9 @@ export class UpdateFundCommand implements IUpdateFundCommand {
         }
     }
 
-    static fromJS(data: any): UpdateFundCommand {
+    static fromJS(data: any): UpdateFundRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new UpdateFundCommand();
+        let result = new UpdateFundRequest();
         result.init(data);
         return result;
     }
@@ -31873,7 +40173,7 @@ export class UpdateFundCommand implements IUpdateFundCommand {
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["id"] = this.id;
+        data["fundNumber"] = this.fundNumber;
         data["fundName"] = this.fundName;
         data["fundType"] = this.fundType;
         data["fundCategory"] = this.fundCategory;
@@ -31886,16 +40186,16 @@ export class UpdateFundCommand implements IUpdateFundCommand {
     }
 }
 
-export interface IUpdateFundCommand {
-    id?: number;
-    fundName?: string;
-    fundType?: FundType;
-    fundCategory?: FundCategory;
-    fiscalYearId?: number | undefined;
-    legalAuthority?: string;
-    description?: string | undefined;
-    defaultRevenueDebitAccountId?: number | undefined;
-    rowVersion?: string;
+export interface IUpdateFundRequest {
+    fundNumber: string;
+    fundName: string;
+    fundType: FundType;
+    fundCategory: FundCategory;
+    fiscalYearId: number | undefined;
+    legalAuthority: string;
+    description: string | undefined;
+    defaultRevenueDebitAccountId: number | undefined;
+    rowVersion: string;
 
     [key: string]: any;
 }
@@ -31976,7 +40276,7 @@ export interface IUpdateJournalCommand {
     [key: string]: any;
 }
 
-export class UpdateMoveCommand implements IUpdateMoveCommand {
+export class UpdateJournalEntryCommand implements IUpdateJournalEntryCommand {
     id?: number;
     narration?: string | undefined;
     ref?: string | undefined;
@@ -31984,7 +40284,7 @@ export class UpdateMoveCommand implements IUpdateMoveCommand {
 
     [key: string]: any;
 
-    constructor(data?: IUpdateMoveCommand) {
+    constructor(data?: IUpdateJournalEntryCommand) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -32006,9 +40306,9 @@ export class UpdateMoveCommand implements IUpdateMoveCommand {
         }
     }
 
-    static fromJS(data: any): UpdateMoveCommand {
+    static fromJS(data: any): UpdateJournalEntryCommand {
         data = typeof data === 'object' ? data : {};
-        let result = new UpdateMoveCommand();
+        let result = new UpdateJournalEntryCommand();
         result.init(data);
         return result;
     }
@@ -32027,7 +40327,7 @@ export class UpdateMoveCommand implements IUpdateMoveCommand {
     }
 }
 
-export interface IUpdateMoveCommand {
+export interface IUpdateJournalEntryCommand {
     id?: number;
     narration?: string | undefined;
     ref?: string | undefined;
@@ -32036,9 +40336,9 @@ export interface IUpdateMoveCommand {
     [key: string]: any;
 }
 
-export class UpdateMoveLineCommand implements IUpdateMoveLineCommand {
+export class UpdateJournalEntryLineCommand implements IUpdateJournalEntryLineCommand {
     id?: number;
-    moveId?: number;
+    journalEntryId?: number;
     accountId?: number;
     description?: string | undefined;
     currencyId?: number;
@@ -32050,7 +40350,7 @@ export class UpdateMoveLineCommand implements IUpdateMoveLineCommand {
 
     [key: string]: any;
 
-    constructor(data?: IUpdateMoveLineCommand) {
+    constructor(data?: IUpdateJournalEntryLineCommand) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -32066,7 +40366,7 @@ export class UpdateMoveLineCommand implements IUpdateMoveLineCommand {
                     this[property] = _data[property];
             }
             this.id = _data["id"];
-            this.moveId = _data["moveId"];
+            this.journalEntryId = _data["journalEntryId"];
             this.accountId = _data["accountId"];
             this.description = _data["description"];
             this.currencyId = _data["currencyId"];
@@ -32078,9 +40378,9 @@ export class UpdateMoveLineCommand implements IUpdateMoveLineCommand {
         }
     }
 
-    static fromJS(data: any): UpdateMoveLineCommand {
+    static fromJS(data: any): UpdateJournalEntryLineCommand {
         data = typeof data === 'object' ? data : {};
-        let result = new UpdateMoveLineCommand();
+        let result = new UpdateJournalEntryLineCommand();
         result.init(data);
         return result;
     }
@@ -32092,7 +40392,7 @@ export class UpdateMoveLineCommand implements IUpdateMoveLineCommand {
                 data[property] = this[property];
         }
         data["id"] = this.id;
-        data["moveId"] = this.moveId;
+        data["journalEntryId"] = this.journalEntryId;
         data["accountId"] = this.accountId;
         data["description"] = this.description;
         data["currencyId"] = this.currencyId;
@@ -32105,9 +40405,9 @@ export class UpdateMoveLineCommand implements IUpdateMoveLineCommand {
     }
 }
 
-export interface IUpdateMoveLineCommand {
+export interface IUpdateJournalEntryLineCommand {
     id?: number;
-    moveId?: number;
+    journalEntryId?: number;
     accountId?: number;
     description?: string | undefined;
     currencyId?: number;
@@ -32176,6 +40476,86 @@ export interface IUpdateOrganizationalUnitRequest {
     name: string;
     parentId: number | undefined;
     isActive: boolean;
+
+    [key: string]: any;
+}
+
+export class UpdatePartyRequest implements IUpdatePartyRequest {
+    partyType!: PartyType;
+    nameAr!: string;
+    nameEn!: string | undefined;
+    taxNumber!: string | undefined;
+    nationalId!: string | undefined;
+    phone!: string | undefined;
+    email!: string | undefined;
+    address!: string | undefined;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IUpdatePartyRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.partyType = _data["partyType"];
+            this.nameAr = _data["nameAr"];
+            this.nameEn = _data["nameEn"];
+            this.taxNumber = _data["taxNumber"];
+            this.nationalId = _data["nationalId"];
+            this.phone = _data["phone"];
+            this.email = _data["email"];
+            this.address = _data["address"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): UpdatePartyRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdatePartyRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["partyType"] = this.partyType;
+        data["nameAr"] = this.nameAr;
+        data["nameEn"] = this.nameEn;
+        data["taxNumber"] = this.taxNumber;
+        data["nationalId"] = this.nationalId;
+        data["phone"] = this.phone;
+        data["email"] = this.email;
+        data["address"] = this.address;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface IUpdatePartyRequest {
+    partyType: PartyType;
+    nameAr: string;
+    nameEn: string | undefined;
+    taxNumber: string | undefined;
+    nationalId: string | undefined;
+    phone: string | undefined;
+    email: string | undefined;
+    address: string | undefined;
+    notes: string | undefined;
 
     [key: string]: any;
 }
@@ -33042,7 +41422,6 @@ export interface IUserSessionDto {
 
 export class VoidPaymentOrderCommand implements IVoidPaymentOrderCommand {
     id?: number;
-    voidedById?: number;
     voidReason?: string;
     rowVersion?: string;
 
@@ -33064,7 +41443,6 @@ export class VoidPaymentOrderCommand implements IVoidPaymentOrderCommand {
                     this[property] = _data[property];
             }
             this.id = _data["id"];
-            this.voidedById = _data["voidedById"];
             this.voidReason = _data["voidReason"];
             this.rowVersion = _data["rowVersion"];
         }
@@ -33084,7 +41462,6 @@ export class VoidPaymentOrderCommand implements IVoidPaymentOrderCommand {
                 data[property] = this[property];
         }
         data["id"] = this.id;
-        data["voidedById"] = this.voidedById;
         data["voidReason"] = this.voidReason;
         data["rowVersion"] = this.rowVersion;
         return data;
@@ -33093,7 +41470,6 @@ export class VoidPaymentOrderCommand implements IVoidPaymentOrderCommand {
 
 export interface IVoidPaymentOrderCommand {
     id?: number;
-    voidedById?: number;
     voidReason?: string;
     rowVersion?: string;
 

@@ -39,7 +39,7 @@ hooks:
     condition: null
   - extension: tdd
     command: speckit.tdd.plan
-    enabled: true
+    enabled: false
     optional: true
     priority: 10
     prompt: Derive the TDD test list and make the test tasks in tasks.md mandatory?
@@ -56,8 +56,8 @@ hooks:
   before_implement:
   - extension: tdd
     command: speckit.tdd.run
-    enabled: true
-    optional: false
+    enabled: false
+    optional: true
     priority: 10
     prompt: Drive the behavioral tasks through the red-green-refactor loop first?
     description: Run TDD loop over every behavior on test-list.md
@@ -81,7 +81,7 @@ hooks:
     condition: null
   - extension: tdd
     command: speckit.tdd.verify
-    enabled: true
+    enabled: false
     optional: true
     priority: 10
     prompt: Audit TDD discipline and test strength for this feature?
@@ -89,7 +89,7 @@ hooks:
     condition: null
   - extension: verify
     command: speckit.verify.run
-    enabled: true
+    enabled: false
     optional: true
     priority: 10
     prompt: Run verify to validate implementation against specification?

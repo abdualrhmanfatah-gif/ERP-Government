@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/Button';
 import type { MoveLineDto } from '../types';
 import { useCreateMoveLine, useUpdateMoveLine, useRemoveMoveLine } from '../hooks/useMoveLines';
 import { useAccountsList } from '../hooks/useAccountsList';
-import { useCurrenciesList } from '../../financial/hooks/useCurrenciesList';
+import { useCurrenciesList } from '../hooks/useCurrenciesList';
 import { useCostCenters } from '../../organization/hooks/useCostCenters';
 import { BalanceIndicator } from './BalanceIndicator';
 

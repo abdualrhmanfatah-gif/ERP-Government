@@ -88,7 +88,7 @@ public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRe
                     bool authorized;
                     try
                     {
-                        authorized = await _identityService.AuthorizeAsync(_user.Id ?? 0, policy);
+                        authorized = await _identityService.AuthorizeAsync(_user.Id.Value, policy);
                     }
                     catch (Exception ex)
                     {

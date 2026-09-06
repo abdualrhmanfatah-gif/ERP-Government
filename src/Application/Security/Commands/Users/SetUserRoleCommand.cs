@@ -26,6 +26,9 @@ public class SetUserRoleCommandHandler(
         SetUserRoleCommand request,
         CancellationToken cancellationToken)
     {
+        if (currentUser.Id is not int userId)
+            return Result.Failure(new[] { "User identity is required for this operation." });
+
         var user = await context.Users
             .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
 
@@ -50,7 +53,7 @@ public class SetUserRoleCommandHandler(
         {
             EventCategory = "RoleChange",
             Action = "SetUserRole",
-            UserId = currentUser.Id ?? 0,
+            UserId = userId,
             EntityName = "User",
             EntityId = request.UserId,
             Success = true,

@@ -24,11 +24,14 @@ public class ReportAuditService
         string? failureReason = null,
         CancellationToken cancellationToken = default)
     {
+        if (_user.Id is not int userId)
+            throw new UnauthorizedAccessException();
+
         var auditLog = new SecurityAuditLog
         {
             EventCategory = "Report",
             Action = format == "Screen" ? "ReportGenerate" : format == "Print" ? "ReportPrint" : "ReportExport",
-            UserId = _user.Id ?? 0,
+            UserId = userId,
             EntityName = reportName,
             EntityId = 0,
             Success = success,

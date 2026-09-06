@@ -9,13 +9,7 @@ import { AccountEditPage } from '../features/accounting/pages/AccountEditPage';
 import { MovesListPage } from '../features/accounting/pages/MovesListPage';
 import { MoveCreatePage } from '../features/accounting/pages/MoveCreatePage';
 import { MoveDetailPage } from '../features/accounting/pages/MoveDetailPage';
-import { CurrenciesListPage } from '../features/financial/pages/CurrenciesListPage';
-import { ExchangeRatesListPage } from '../features/financial/exchange-rates/pages/ExchangeRatesListPage';
-import { FiscalYearsListPage } from '../features/financial/fiscal-years/pages/FiscalYearsListPage';
-import { FiscalYearDetailPage } from '../features/financial/fiscal-years/pages/FiscalYearDetailPage';
-import { DocumentSequencesListPage } from '../features/financial/document-sequences/pages/DocumentSequencesListPage';
-import { DocumentSequenceCreatePage } from '../features/financial/document-sequences/pages/DocumentSequenceCreatePage';
-import { DocumentSequenceEditPage } from '../features/financial/document-sequences/pages/DocumentSequenceEditPage';
+
 import { RolesListPage } from '../features/security/rbac/pages/RolesListPage';
 import { RoleCreatePage } from '../features/security/rbac/pages/RoleCreatePage';
 import { RoleEditPage } from '../features/security/rbac/pages/RoleEditPage';
@@ -36,15 +30,10 @@ import { ProjectEditPage } from '../features/organization/pages/ProjectCreatePag
 
 import { AccountGroupsListPage } from '../features/accounting/account-groups/pages/AccountGroupsListPage';
 import { AccountGroupDetailPage } from '../features/accounting/account-groups/pages/AccountGroupDetailPage';
-import { BalanceSheetPage } from '../features/reports/pages/BalanceSheetPage';
 import BudgetTypesListPage from '../features/budgeting/budget-types/pages/BudgetTypesListPage';
 import FundsListPage from '../features/budgeting/funds/pages/FundsListPage';
 import FundDetailPage from '../features/budgeting/funds/pages/FundDetailPage';
 import ClassificationsListPage from '../features/budgeting/classifications/pages/ClassificationsListPage';
-import { IncomeStatementPage } from '../features/reports/pages/IncomeStatementPage';
-import { GeneralLedgerPage } from '../features/reports/pages/GeneralLedgerPage';
-import { CashFlowStatementPage } from '../features/reports/pages/CashFlowStatementPage';
-import { TrialBalancePage } from '../features/reports/pages/TrialBalancePage';
 
 export interface RouteConfig {
   path: string;
@@ -113,48 +102,6 @@ export const AppRoutes: RouteConfig[] = [
     path: '/accounting/journal-entries/:id',
     element: <MoveDetailPage />,
     label: 'تفاصيل القيد',
-    protected: true,
-  },
-  {
-    path: '/financial/currencies',
-    element: <CurrenciesListPage />,
-    label: 'العملات',
-    protected: true,
-  },
-  {
-    path: '/financial/exchange-rates',
-    element: <ExchangeRatesListPage />,
-    label: 'أسعار الصرف',
-    protected: true,
-  },
-  {
-    path: '/financial/fiscal-years',
-    element: <FiscalYearsListPage />,
-    label: 'السنوات المالية',
-    protected: true,
-  },
-  {
-    path: '/financial/fiscal-years/:id',
-    element: <FiscalYearDetailPage />,
-    label: 'تفاصيل السنة المالية',
-    protected: true,
-  },
-  {
-    path: '/financial/document-sequences',
-    element: <DocumentSequencesListPage />,
-    label: 'تسلسل المستندات',
-    protected: true,
-  },
-  {
-    path: '/financial/document-sequences/create',
-    element: <DocumentSequenceCreatePage />,
-    label: 'تسلسل جديد',
-    protected: true,
-  },
-  {
-    path: '/financial/document-sequences/:id/edit',
-    element: <DocumentSequenceEditPage />,
-    label: 'تعديل التسلسل',
     protected: true,
   },
   {
@@ -272,37 +219,6 @@ export const AppRoutes: RouteConfig[] = [
     path: '/accounting/account-groups/:id',
     element: <AccountGroupDetailPage />,
     label: 'تفاصيل المجموعة',
-    protected: true,
-  },
-  // Reports
-  {
-    path: '/reports/balance-sheet',
-    element: <BalanceSheetPage />,
-    label: 'الميزانية العمومية',
-    protected: true,
-  },
-  {
-    path: '/reports/income-statement',
-    element: <IncomeStatementPage />,
-    label: 'قائمة الدخل',
-    protected: true,
-  },
-  {
-    path: '/reports/general-ledger',
-    element: <GeneralLedgerPage />,
-    label: 'دفتر الأستاذ',
-    protected: true,
-  },
-  {
-    path: '/reports/cash-flow',
-    element: <CashFlowStatementPage />,
-    label: 'قائمة التدفقات النقدية',
-    protected: true,
-  },
-  {
-    path: '/reports/trial-balance',
-    element: <TrialBalancePage />,
-    label: 'ميزان المراجعة',
     protected: true,
   },
   // Budgeting —_budget-types & Funds (Foundation spec #011)

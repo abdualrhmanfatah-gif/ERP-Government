@@ -39,6 +39,9 @@ public class StartWorkflowInstanceCommandHandler(
         StartWorkflowInstanceCommand request,
         CancellationToken cancellationToken)
     {
+        if (user.Id is not int userId)
+            throw new InvalidOperationException("User identity is required for this operation.");
+
         // Get active definition
         var definition = await context.WorkflowDefinitions
             .Include(d => d.Steps.Where(s => s.IsActive))
@@ -81,7 +84,6 @@ public class StartWorkflowInstanceCommandHandler(
         await context.SaveChangesAsync(cancellationToken);
 
         // Create history entry
-        var userId = user.Id ?? 0;
         context.WorkflowHistory.Add(new Domain.Workflow.Entities.WorkflowHistory
         {
             WorkflowInstanceId = instance.Id,

@@ -264,19 +264,24 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<string>("EventCategory")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("EventType")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("JournalEntryId")
+                        .HasColumnType("int");
 
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("MoveId")
-                        .HasColumnType("int");
 
                     b.Property<DateTimeOffset?>("ProcessedAt")
                         .HasColumnType("datetimeoffset");
@@ -290,26 +295,28 @@ namespace ERP_Government.Infrastructure.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
-                    b.Property<int>("SourceId")
+                    b.Property<int>("SourceDocumentId")
                         .HasColumnType("int");
 
-                    b.Property<string>("SourceTable")
+                    b.Property<string>("SourceDocumentType")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("Status")
+                    b.Property<string>("Status")
+                        .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("int");
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MoveId")
+                    b.HasIndex("JournalEntryId")
                         .IsUnique()
-                        .HasFilter("[MoveId] IS NOT NULL");
+                        .HasFilter("[JournalEntryId] IS NOT NULL");
 
-                    b.HasIndex("SourceTable", "SourceId", "EventType")
-                        .IsUnique();
+                    b.HasIndex("EventType", "SourceDocumentType", "SourceDocumentId", "Status")
+                        .IsUnique()
+                        .HasFilter("[Status] = 'Posted'");
 
                     b.ToTable("AccountingEvents", (string)null);
                 });
@@ -430,6 +437,217 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.HasIndex("SuspenseAccountId");
 
                     b.ToTable("Journals", (string)null);
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.JournalEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("CancelledAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CancelledById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("DocumentDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("EntryNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("EntryStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int?>("EntryType")
+                        .HasMaxLength(20)
+                        .HasColumnType("int");
+
+                    b.Property<int>("FiscalYearId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsSystemGenerated")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("JournalId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Narration")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("PeriodId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("PostedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("PostedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly?>("PostingDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Ref")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("ReversalOfId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReversalReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int?>("SourceEventId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CancelledById");
+
+                    b.HasIndex("EntryNumber")
+                        .IsUnique();
+
+                    b.HasIndex("FiscalYearId");
+
+                    b.HasIndex("JournalId");
+
+                    b.HasIndex("PeriodId");
+
+                    b.HasIndex("PostedById");
+
+                    b.HasIndex("ReversalOfId");
+
+                    b.HasIndex("SourceEventId");
+
+                    b.HasIndex("EntryStatus", "DocumentDate")
+                        .HasDatabaseName("IX_JournalEntries_EntryStatus_DocumentDate");
+
+                    b.ToTable("JournalEntries", (string)null);
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.JournalEntryLine", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("BudgetItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CostCenterId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Credit")
+                        .HasColumnType("decimal(23,2)");
+
+                    b.Property<int>("CurrencyId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Debit")
+                        .HasColumnType("decimal(23,2)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("EncumbranceId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("ExchangeRate")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<int?>("FundId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("JournalEntryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PaymentOrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Sequence")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("BudgetItemId");
+
+                    b.HasIndex("CostCenterId");
+
+                    b.HasIndex("CurrencyId");
+
+                    b.HasIndex("EncumbranceId");
+
+                    b.HasIndex("FundId");
+
+                    b.HasIndex("JournalEntryId");
+
+                    b.HasIndex("PaymentOrderId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("AccountId", "JournalEntryId")
+                        .HasDatabaseName("IX_JournalEntryLines_AccountId_JournalEntryId");
+
+                    b.ToTable("JournalEntryLines", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_JournalEntryLines_DebitCreditXOR", "([Debit] > 0) != ([Credit] > 0)");
+                        });
                 });
 
             modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.JournalEntryTemplate", b =>
@@ -566,189 +784,6 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.HasIndex("TemplateId");
 
                     b.ToTable("JournalEntryTemplateLines", (string)null);
-                });
-
-            modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.Move", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset?>("CancelledAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int?>("CancelledById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset>("Created")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateOnly>("DocumentDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("EntryNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("EntryStatus")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int?>("EntryType")
-                        .HasMaxLength(20)
-                        .HasColumnType("int");
-
-                    b.Property<int>("FiscalYearId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsSystemGenerated")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("JournalId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset>("LastModified")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Narration")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("PeriodId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("PostedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int?>("PostedById")
-                        .HasColumnType("int");
-
-                    b.Property<DateOnly?>("PostingDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Ref")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<int?>("ReversalOfMoveId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ReversalReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int?>("SourceEventId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CancelledById");
-
-                    b.HasIndex("EntryNumber")
-                        .IsUnique();
-
-                    b.HasIndex("FiscalYearId");
-
-                    b.HasIndex("JournalId");
-
-                    b.HasIndex("PeriodId");
-
-                    b.HasIndex("PostedById");
-
-                    b.HasIndex("ReversalOfMoveId");
-
-                    b.HasIndex("SourceEventId");
-
-                    b.HasIndex("EntryStatus", "DocumentDate")
-                        .HasDatabaseName("IX_Moves_EntryStatus_DocumentDate");
-
-                    b.ToTable("Moves", (string)null);
-                });
-
-            modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.MoveLine", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CostCenterId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset>("Created")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Credit")
-                        .HasColumnType("decimal(23,2)");
-
-                    b.Property<int>("CurrencyId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Debit")
-                        .HasColumnType("decimal(23,2)");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<decimal>("ExchangeRate")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<DateTimeOffset>("LastModified")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("MoveId")
-                        .HasColumnType("int");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int>("Sequence")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.HasIndex("CostCenterId");
-
-                    b.HasIndex("CurrencyId");
-
-                    b.HasIndex("MoveId");
-
-                    b.HasIndex("AccountId", "MoveId")
-                        .HasDatabaseName("IX_MoveLines_AccountId_MoveId");
-
-                    b.ToTable("MoveLines", (string)null);
                 });
 
             modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.PostingRule", b =>
@@ -913,7 +948,7 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int?>("FundId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("GeneratedMoveId")
+                    b.Property<int?>("GeneratedJournalEntryId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
@@ -968,7 +1003,7 @@ namespace ERP_Government.Infrastructure.Migrations
 
                     b.HasIndex("FundId");
 
-                    b.HasIndex("GeneratedMoveId");
+                    b.HasIndex("GeneratedJournalEntryId");
 
                     b.HasIndex("JournalId");
 
@@ -1002,7 +1037,7 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<DateOnly>("ExecutionDate")
                         .HasColumnType("date");
 
-                    b.Property<int?>("GeneratedMoveId")
+                    b.Property<int?>("GeneratedJournalEntryId")
                         .HasColumnType("int");
 
                     b.Property<DateTimeOffset>("LastModified")
@@ -1035,7 +1070,7 @@ namespace ERP_Government.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GeneratedMoveId");
+                    b.HasIndex("GeneratedJournalEntryId");
 
                     b.HasIndex("RecurringEntryId");
 
@@ -1254,14 +1289,14 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<bool>("IsPosted")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("JournalEntryId")
+                        .HasColumnType("int");
+
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("MoveId")
-                        .HasColumnType("int");
 
                     b.Property<decimal?>("NetProceeds")
                         .HasColumnType("decimal(23,2)");
@@ -1450,14 +1485,14 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<bool>("IsReversed")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("JournalEntryId")
+                        .HasColumnType("int");
+
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("MoveId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(2000)
@@ -1529,14 +1564,14 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int?>("FromLocationId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("JournalEntryId")
+                        .HasColumnType("int");
+
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("MoveId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("MovementDate")
                         .HasColumnType("datetime2");
@@ -1787,14 +1822,14 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<bool>("IsPosted")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("JournalEntryId")
+                        .HasColumnType("int");
+
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("MoveId")
-                        .HasColumnType("int");
 
                     b.Property<decimal>("NewBookValue")
                         .HasColumnType("decimal(23,2)");
@@ -1888,14 +1923,14 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<bool>("IsReversed")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("JournalEntryId")
+                        .HasColumnType("int");
+
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("MoveId")
-                        .HasColumnType("int");
 
                     b.Property<decimal>("NetBookValue")
                         .HasColumnType("decimal(23,6)");
@@ -2230,6 +2265,9 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<long?>("JournalEntryLineId")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("datetimeoffset");
 
@@ -2239,9 +2277,6 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int>("LineType")
                         .HasMaxLength(20)
                         .HasColumnType("int");
-
-                    b.Property<long?>("MoveLineId")
-                        .HasColumnType("bigint");
 
                     b.Property<int>("ReconciliationId")
                         .HasColumnType("int");
@@ -2260,7 +2295,7 @@ namespace ERP_Government.Infrastructure.Migrations
 
                     b.HasIndex("BankStatementLineId");
 
-                    b.HasIndex("MoveLineId");
+                    b.HasIndex("JournalEntryLineId");
 
                     b.HasIndex("ReconciliationId");
 
@@ -2363,6 +2398,9 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<bool>("IsReconciled")
                         .HasColumnType("bit");
 
+                    b.Property<long?>("JournalEntryLineId")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("datetimeoffset");
 
@@ -2371,9 +2409,6 @@ namespace ERP_Government.Infrastructure.Migrations
 
                     b.Property<int>("LineNumber")
                         .HasColumnType("int");
-
-                    b.Property<long?>("MoveLineId")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Reference")
                         .HasMaxLength(100)
@@ -2393,7 +2428,7 @@ namespace ERP_Government.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MoveLineId");
+                    b.HasIndex("JournalEntryLineId");
 
                     b.HasIndex("StatementId");
 
@@ -2457,6 +2492,9 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<int?>("TargetBudgetItemId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AppropriationNumber")
@@ -2465,6 +2503,8 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.HasIndex("BudgetId");
 
                     b.HasIndex("BudgetItemId");
+
+                    b.HasIndex("TargetBudgetItemId");
 
                     b.ToTable("Appropriations", (string)null);
                 });
@@ -2500,8 +2540,8 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateOnly>("EffectiveFrom")
                         .HasColumnType("date");
@@ -2653,6 +2693,9 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int?>("ParentId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Remarks")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
@@ -2677,6 +2720,51 @@ namespace ERP_Government.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("BudgetItems", (string)null);
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Budgeting.Entities.BudgetItemMonthlyPlan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BudgetItemId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Month")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PlannedAmount")
+                        .HasColumnType("decimal(23,2)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BudgetItemId");
+
+                    b.HasIndex("BudgetItemId", "Month")
+                        .IsUnique();
+
+                    b.ToTable("BudgetItemMonthlyPlans", (string)null);
                 });
 
             modelBuilder.Entity("ERP_Government.Domain.Budgeting.Entities.BudgetType", b =>
@@ -2757,8 +2845,8 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("DocumentId")
                         .HasColumnType("int");
@@ -2807,6 +2895,9 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int?>("VendorId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("VendorPartyId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AppropriationId");
@@ -2821,6 +2912,110 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.HasIndex("VendorId");
 
                     b.ToTable("Encumbrances", (string)null);
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Budgeting.Entities.FinalAccount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FiscalYearId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("GeneratedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("GeneratedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("IssuedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("IssuedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FiscalYearId")
+                        .IsUnique();
+
+                    b.ToTable("FinalAccounts", (string)null);
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Budgeting.Entities.FinalAccountLine", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("ActualAmount")
+                        .HasColumnType("decimal(23,2)");
+
+                    b.Property<decimal>("BudgetedAmount")
+                        .HasColumnType("decimal(23,2)");
+
+                    b.Property<int>("Dimension")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DimensionCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("DimensionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DimensionName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("FinalAccountId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<decimal>("Variance")
+                        .HasColumnType("decimal(23,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FinalAccountId");
+
+                    b.HasIndex("FinalAccountId", "Dimension", "DimensionId")
+                        .IsUnique();
+
+                    b.ToTable("FinalAccountLines", (string)null);
                 });
 
             modelBuilder.Entity("ERP_Government.Domain.Budgeting.Entities.Fund", b =>
@@ -2841,14 +3036,13 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int?>("FiscalYearId")
                         .HasColumnType("int");
 
                     b.Property<int>("FundCategory")
-                        .HasMaxLength(20)
                         .HasColumnType("int");
 
                     b.Property<string>("FundName")
@@ -2858,11 +3052,10 @@ namespace ERP_Government.Infrastructure.Migrations
 
                     b.Property<string>("FundNumber")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("FundType")
-                        .HasMaxLength(20)
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
@@ -2876,8 +3069,8 @@ namespace ERP_Government.Infrastructure.Migrations
 
                     b.Property<string>("LegalAuthority")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -2895,6 +3088,70 @@ namespace ERP_Government.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Funds", (string)null);
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Budgeting.Entities.YearClosingRun", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FiscalYearId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("LapsedAppropriationTotal")
+                        .HasColumnType("decimal(23,2)");
+
+                    b.Property<decimal>("LapsedEncumbranceTotal")
+                        .HasColumnType("decimal(23,2)");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("ReversedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("ReversedById")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTimeOffset>("RunAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("RunById")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RunType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FiscalYearId");
+
+                    b.HasIndex("FiscalYearId", "Status")
+                        .IsUnique()
+                        .HasFilter("[Status] = 0");
+
+                    b.ToTable("YearClosingRuns", (string)null);
                 });
 
             modelBuilder.Entity("ERP_Government.Domain.Committees.Entities.Committee", b =>
@@ -3415,7 +3672,7 @@ namespace ERP_Government.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ClosingMoveId")
+                    b.Property<int?>("ClosingJournalEntryId")
                         .HasColumnType("int");
 
                     b.Property<DateTimeOffset>("Created")
@@ -3514,14 +3771,14 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
+                    b.Property<int?>("JournalEntryId")
+                        .HasColumnType("int");
+
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("MoveId")
-                        .HasColumnType("int");
 
                     b.Property<int?>("ReversalOfId")
                         .HasColumnType("int");
@@ -4707,6 +4964,90 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.ToTable("Projects", (string)null);
                 });
 
+            modelBuilder.Entity("ERP_Government.Domain.Parties.Entities.Party", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("NameEn")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("NationalId")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("PartyCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("PartyType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("TaxNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NameAr");
+
+                    b.HasIndex("PartyCode")
+                        .IsUnique();
+
+                    b.HasIndex("TaxNumber");
+
+                    b.HasIndex("PartyType", "IsActive");
+
+                    b.ToTable("Parties", (string)null);
+                });
+
             modelBuilder.Entity("ERP_Government.Domain.Payments.Entities.BankAccount", b =>
                 {
                     b.Property<int>("Id")
@@ -4812,6 +5153,148 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.ToTable("BankAccounts", (string)null);
                 });
 
+            modelBuilder.Entity("ERP_Government.Domain.Payments.Entities.DisbursementRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("HasWarning")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("PaymentOrderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("RequestDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("RequestNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("RequestedById")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaymentOrderId")
+                        .IsUnique();
+
+                    b.HasIndex("RequestNumber")
+                        .IsUnique();
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("DisbursementRequests", (string)null);
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Payments.Entities.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(23,2)");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DisbursementRequestId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTimeOffset>("PaidAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("PaidById")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PaymentMethod")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("PaymentOrderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReferenceNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DisbursementRequestId")
+                        .IsUnique();
+
+                    b.HasIndex("PaymentNumber")
+                        .IsUnique();
+
+                    b.HasIndex("PaymentOrderId");
+
+                    b.ToTable("Payments", (string)null);
+                });
+
             modelBuilder.Entity("ERP_Government.Domain.Payments.Entities.PaymentOrder", b =>
                 {
                     b.Property<int>("Id")
@@ -4826,23 +5309,11 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<decimal>("AmountGross")
                         .HasColumnType("decimal(23,2)");
 
-                    b.Property<decimal>("AmountNet")
-                        .HasColumnType("decimal(23,2)");
-
                     b.Property<int>("AppropriationId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("ApprovedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int?>("ApprovedById")
                         .HasColumnType("int");
 
                     b.Property<int?>("BankAccountId")
                         .HasColumnType("int");
-
-                    b.Property<decimal>("BaseAmountNet")
-                        .HasColumnType("decimal(23,2)");
 
                     b.Property<string>("BeneficiaryAccountNumber")
                         .HasMaxLength(100)
@@ -4866,16 +5337,6 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<int?>("BudgetClassificationId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CancellationReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTimeOffset?>("CancelledAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int?>("CancelledById")
                         .HasColumnType("int");
 
                     b.Property<int?>("CostCenterId")
@@ -4908,17 +5369,14 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int>("FundId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsFullyPaid")
-                        .HasColumnType("bit");
+                    b.Property<int?>("JournalEntryId")
+                        .HasColumnType("int");
 
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("MoveId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(1000)
@@ -4930,7 +5388,7 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int>("PaymentMethod")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasDefaultValue(5);
+                        .HasDefaultValue(6);
 
                     b.Property<DateOnly>("PaymentOrderDate")
                         .HasColumnType("date");
@@ -4951,16 +5409,6 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int?>("PurchaseOrderId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("RejectedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int?>("RejectedById")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RejectionReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
@@ -4970,18 +5418,6 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasMaxLength(20)
                         .HasColumnType("int");
-
-                    b.Property<decimal?>("TotalDeductionAmount")
-                        .HasColumnType("decimal(23,2)");
-
-                    b.Property<decimal?>("TotalNetAmount")
-                        .HasColumnType("decimal(23,2)");
-
-                    b.Property<decimal?>("TotalPaidAmount")
-                        .HasColumnType("decimal(23,2)");
-
-                    b.Property<decimal?>("TotalRemainingAmount")
-                        .HasColumnType("decimal(23,2)");
 
                     b.Property<string>("TreasuryReference")
                         .HasMaxLength(100)
@@ -4997,14 +5433,7 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int>("VendorId")
                         .HasColumnType("int");
 
-                    b.Property<string>("VoidReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTimeOffset?>("VoidedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int?>("VoidedById")
+                    b.Property<int?>("VendorPartyId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -5027,7 +5456,7 @@ namespace ERP_Government.Infrastructure.Migrations
 
                     b.HasIndex("FundId");
 
-                    b.HasIndex("MoveId");
+                    b.HasIndex("JournalEntryId");
 
                     b.HasIndex("PaymentOrderNumber")
                         .IsUnique();
@@ -5053,9 +5482,6 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(23,2)");
-
-                    b.Property<decimal?>("BaseAmount")
                         .HasColumnType("decimal(23,2)");
 
                     b.Property<DateTimeOffset>("Created")
@@ -5133,9 +5559,6 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int>("AccountId")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("AllocatedAmount")
-                        .HasColumnType("decimal(23,2)");
-
                     b.Property<string>("AllocationStatus")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
@@ -5145,9 +5568,6 @@ namespace ERP_Government.Infrastructure.Migrations
 
                     b.Property<int?>("AppropriationId")
                         .HasColumnType("int");
-
-                    b.Property<decimal?>("BaseAmount")
-                        .HasColumnType("decimal(23,2)");
 
                     b.Property<int?>("CostCenterId")
                         .HasColumnType("int");
@@ -5184,9 +5604,6 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("NetAmount")
-                        .HasColumnType("decimal(23,2)");
-
                     b.Property<int?>("OrganizationUnitId")
                         .HasColumnType("int");
 
@@ -5195,9 +5612,6 @@ namespace ERP_Government.Infrastructure.Migrations
 
                     b.Property<int?>("ProjectId")
                         .HasColumnType("int");
-
-                    b.Property<decimal?>("RemainingAmount")
-                        .HasColumnType("decimal(23,2)");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -5336,6 +5750,9 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("SupplierPartyId")
+                        .HasColumnType("int");
+
                     b.Property<decimal?>("TaxAmount")
                         .HasColumnType("decimal(23,6)");
 
@@ -5356,6 +5773,8 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.HasIndex("Status");
 
                     b.HasIndex("SupplierId");
+
+                    b.HasIndex("SupplierPartyId");
 
                     b.ToTable("PurchaseOrders", (string)null);
                 });
@@ -5689,6 +6108,9 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<decimal?>("OtherCharges")
                         .HasColumnType("decimal(23,6)");
 
+                    b.Property<int?>("PartyId")
+                        .HasColumnType("int");
+
                     b.Property<string>("PaymentTerms")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -5866,6 +6288,9 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
+                    b.Property<int?>("PartyId")
+                        .HasColumnType("int");
+
                     b.Property<int>("RFQId")
                         .HasColumnType("int");
 
@@ -5966,6 +6391,272 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.ToTable("RequestForQuotations", (string)null);
                 });
 
+            modelBuilder.Entity("ERP_Government.Domain.Revenue.Entities.Check", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(23,2)");
+
+                    b.Property<string>("BankName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTimeOffset?>("BouncedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateOnly>("CheckDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("CheckNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTimeOffset?>("ClearedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ReceiptVoucherId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReplacementVoucherId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiptVoucherId");
+
+                    b.HasIndex("ReplacementVoucherId");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("Checks", (string)null);
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Revenue.Entities.DepositSlip", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("ApprovedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("ApprovedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FormType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateOnly>("SlipDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("SlipNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(23,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FormType");
+
+                    b.HasIndex("SlipDate");
+
+                    b.HasIndex("SlipNumber")
+                        .IsUnique();
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("DepositSlips", (string)null);
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Revenue.Entities.ReceiptVoucher", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("DepositSlipId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("PartyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PaymentMethod")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReceivedFrom")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTimeOffset?>("ReviewedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("ReviewedById")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("SubmittedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("SubmittedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("VoucherDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("VoucherNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepositSlipId");
+
+                    b.HasIndex("PartyId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("VoucherDate");
+
+                    b.HasIndex("VoucherNumber")
+                        .IsUnique();
+
+                    b.ToTable("ReceiptVouchers", (string)null);
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Revenue.Entities.ReceiptVoucherLine", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(23,2)");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ReceiptVoucherId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RevenueAccountId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiptVoucherId");
+
+                    b.HasIndex("RevenueAccountId");
+
+                    b.ToTable("ReceiptVoucherLines", (string)null);
+                });
+
             modelBuilder.Entity("ERP_Government.Domain.Revenue.Entities.RevenueReceipt", b =>
                 {
                     b.Property<int>("Id")
@@ -6000,14 +6691,14 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int>("FundId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("JournalEntryId")
+                        .HasColumnType("int");
+
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("MoveId")
-                        .HasColumnType("int");
 
                     b.Property<string>("PayerName")
                         .IsRequired()
@@ -6021,7 +6712,7 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int>("PaymentMethod")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasDefaultValue(5);
+                        .HasDefaultValue(6);
 
                     b.Property<DateOnly>("ReceiptDate")
                         .HasColumnType("date");
@@ -6053,7 +6744,7 @@ namespace ERP_Government.Infrastructure.Migrations
 
                     b.HasIndex("FundId");
 
-                    b.HasIndex("MoveId");
+                    b.HasIndex("JournalEntryId");
 
                     b.HasIndex("ReceiptNumber")
                         .IsUnique();
@@ -6178,6 +6869,12 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Action")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ApprovalStep")
+                        .HasColumnType("int");
 
                     b.Property<int>("ApproverUserId")
                         .HasColumnType("int");
@@ -6311,11 +7008,19 @@ namespace ERP_Government.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AttachmentTypeCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<int>("DocumentId")
                         .HasColumnType("int");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EntityName")
                         .IsRequired()
@@ -6330,6 +7035,9 @@ namespace ERP_Government.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("bit");
 
                     b.Property<string>("MimeType")
                         .IsRequired()
@@ -6433,6 +7141,108 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.HasIndex("DocumentType", "DocumentId");
 
                     b.ToTable("AuditTrails", (string)null);
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Security.Entities.DocumentAttachmentRequirement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AttachmentTypeCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsMandatory")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("TitleAr")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentType");
+
+                    b.HasIndex("DocumentType", "AttachmentTypeCode")
+                        .IsUnique();
+
+                    b.ToTable("DocumentAttachmentRequirements", (string)null);
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Security.Entities.DocumentStatusLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("ChangedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("ChangedById")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EntityName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("FromStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ToStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChangedAt");
+
+                    b.HasIndex("EntityName", "DocumentId");
+
+                    b.ToTable("DocumentStatusLogs", (string)null);
                 });
 
             modelBuilder.Entity("ERP_Government.Domain.Security.Entities.FieldSecurityPolicy", b =>
@@ -7162,107 +7972,6 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.ToTable("UserSessions", (string)null);
                 });
 
-            modelBuilder.Entity("ERP_Government.Domain.Suppliers.Entities.Supplier", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("City")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("CommercialRegistrationNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("ContactEmail")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("ContactPerson")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("ContactPhone")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTimeOffset>("Created")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CurrencyCode")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("IndustryClassification")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset>("LastModified")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("SupplierCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("SupplierName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("SupplierNameEn")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("SupplierType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("Status");
-
-                    b.HasIndex("SupplierCode")
-                        .IsUnique();
-
-                    b.ToTable("Suppliers", (string)null);
-                });
-
             modelBuilder.Entity("ERP_Government.Domain.Workflow.Entities.WorkflowDefinition", b =>
                 {
                     b.Property<int>("Id")
@@ -7543,12 +8252,12 @@ namespace ERP_Government.Infrastructure.Migrations
 
             modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.AccountingEvent", b =>
                 {
-                    b.HasOne("ERP_Government.Domain.Accounting.Entities.Move", "Move")
+                    b.HasOne("ERP_Government.Domain.Accounting.Entities.JournalEntry", "JournalEntry")
                         .WithMany()
-                        .HasForeignKey("MoveId")
+                        .HasForeignKey("JournalEntryId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("Move");
+                    b.Navigation("JournalEntry");
                 });
 
             modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.CashFlowMappingRule", b =>
@@ -7577,6 +8286,86 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("SuspenseAccount");
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.JournalEntry", b =>
+                {
+                    b.HasOne("ERP_Government.Domain.Security.Entities.User", "CancelledBy")
+                        .WithMany()
+                        .HasForeignKey("CancelledById")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ERP_Government.Domain.FinancialSettings.Entities.FiscalYear", "FiscalYear")
+                        .WithMany()
+                        .HasForeignKey("FiscalYearId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ERP_Government.Domain.Accounting.Entities.Journal", "Journal")
+                        .WithMany()
+                        .HasForeignKey("JournalId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ERP_Government.Domain.FinancialSettings.Entities.FiscalPeriod", "Period")
+                        .WithMany()
+                        .HasForeignKey("PeriodId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ERP_Government.Domain.Security.Entities.User", "PostedBy")
+                        .WithMany()
+                        .HasForeignKey("PostedById")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ERP_Government.Domain.Accounting.Entities.JournalEntry", "ReversalOf")
+                        .WithMany()
+                        .HasForeignKey("ReversalOfId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ERP_Government.Domain.Accounting.Entities.AccountingEvent", "SourceEvent")
+                        .WithMany()
+                        .HasForeignKey("SourceEventId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CancelledBy");
+
+                    b.Navigation("FiscalYear");
+
+                    b.Navigation("Journal");
+
+                    b.Navigation("Period");
+
+                    b.Navigation("PostedBy");
+
+                    b.Navigation("ReversalOf");
+
+                    b.Navigation("SourceEvent");
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.JournalEntryLine", b =>
+                {
+                    b.HasOne("ERP_Government.Domain.Accounting.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ERP_Government.Domain.Organization.Entities.CostCenter", "CostCenter")
+                        .WithMany()
+                        .HasForeignKey("CostCenterId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ERP_Government.Domain.Accounting.Entities.JournalEntry", "JournalEntry")
+                        .WithMany()
+                        .HasForeignKey("JournalEntryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("CostCenter");
+
+                    b.Navigation("JournalEntry");
                 });
 
             modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.JournalEntryTemplate", b =>
@@ -7630,86 +8419,6 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Navigation("Template");
                 });
 
-            modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.Move", b =>
-                {
-                    b.HasOne("ERP_Government.Domain.Security.Entities.User", "CancelledBy")
-                        .WithMany()
-                        .HasForeignKey("CancelledById")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("ERP_Government.Domain.FinancialSettings.Entities.FiscalYear", "FiscalYear")
-                        .WithMany()
-                        .HasForeignKey("FiscalYearId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ERP_Government.Domain.Accounting.Entities.Journal", "Journal")
-                        .WithMany()
-                        .HasForeignKey("JournalId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("ERP_Government.Domain.FinancialSettings.Entities.FiscalPeriod", "Period")
-                        .WithMany()
-                        .HasForeignKey("PeriodId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ERP_Government.Domain.Security.Entities.User", "PostedBy")
-                        .WithMany()
-                        .HasForeignKey("PostedById")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("ERP_Government.Domain.Accounting.Entities.Move", "ReversalOfMove")
-                        .WithMany()
-                        .HasForeignKey("ReversalOfMoveId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("ERP_Government.Domain.Accounting.Entities.AccountingEvent", "SourceEvent")
-                        .WithMany()
-                        .HasForeignKey("SourceEventId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("CancelledBy");
-
-                    b.Navigation("FiscalYear");
-
-                    b.Navigation("Journal");
-
-                    b.Navigation("Period");
-
-                    b.Navigation("PostedBy");
-
-                    b.Navigation("ReversalOfMove");
-
-                    b.Navigation("SourceEvent");
-                });
-
-            modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.MoveLine", b =>
-                {
-                    b.HasOne("ERP_Government.Domain.Accounting.Entities.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ERP_Government.Domain.Organization.Entities.CostCenter", "CostCenter")
-                        .WithMany()
-                        .HasForeignKey("CostCenterId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("ERP_Government.Domain.Accounting.Entities.Move", "Move")
-                        .WithMany()
-                        .HasForeignKey("MoveId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Account");
-
-                    b.Navigation("CostCenter");
-
-                    b.Navigation("Move");
-                });
-
             modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.PostingRule", b =>
                 {
                     b.HasOne("ERP_Government.Domain.Accounting.Entities.Journal", "Journal")
@@ -7746,9 +8455,9 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasForeignKey("CostCenterId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("ERP_Government.Domain.Accounting.Entities.Move", "GeneratedMove")
+                    b.HasOne("ERP_Government.Domain.Accounting.Entities.JournalEntry", "GeneratedJournalEntry")
                         .WithMany()
-                        .HasForeignKey("GeneratedMoveId")
+                        .HasForeignKey("GeneratedJournalEntryId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("ERP_Government.Domain.Accounting.Entities.Journal", "Journal")
@@ -7769,7 +8478,7 @@ namespace ERP_Government.Infrastructure.Migrations
 
                     b.Navigation("CostCenter");
 
-                    b.Navigation("GeneratedMove");
+                    b.Navigation("GeneratedJournalEntry");
 
                     b.Navigation("Journal");
 
@@ -7780,9 +8489,9 @@ namespace ERP_Government.Infrastructure.Migrations
 
             modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.RecurringEntryExecutionLog", b =>
                 {
-                    b.HasOne("ERP_Government.Domain.Accounting.Entities.Move", "GeneratedMove")
+                    b.HasOne("ERP_Government.Domain.Accounting.Entities.JournalEntry", "GeneratedJournalEntry")
                         .WithMany()
-                        .HasForeignKey("GeneratedMoveId")
+                        .HasForeignKey("GeneratedJournalEntryId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("ERP_Government.Domain.Accounting.Entities.RecurringEntry", "RecurringEntry")
@@ -7791,7 +8500,7 @@ namespace ERP_Government.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("GeneratedMove");
+                    b.Navigation("GeneratedJournalEntry");
 
                     b.Navigation("RecurringEntry");
                 });
@@ -7972,13 +8681,13 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.HasOne("ERP_Government.Domain.Budgeting.Entities.Budget", "Budget")
                         .WithMany()
                         .HasForeignKey("BudgetId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ERP_Government.Domain.Budgeting.Entities.BudgetItem", "BudgetItem")
                         .WithMany()
                         .HasForeignKey("BudgetItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Budget");
@@ -7991,19 +8700,19 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.HasOne("ERP_Government.Domain.Budgeting.Entities.BudgetType", "BudgetType")
                         .WithMany()
                         .HasForeignKey("BudgetTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ERP_Government.Domain.FinancialSettings.Entities.FiscalYear", "FiscalYear")
                         .WithMany()
                         .HasForeignKey("FiscalYearId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ERP_Government.Domain.Budgeting.Entities.Fund", "Fund")
                         .WithMany()
                         .HasForeignKey("FundId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("BudgetType");
@@ -8013,60 +8722,26 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Navigation("Fund");
                 });
 
-            modelBuilder.Entity("ERP_Government.Domain.Budgeting.Entities.BudgetClassification", b =>
-                {
-                    b.HasOne("ERP_Government.Domain.Budgeting.Entities.BudgetClassification", "Parent")
-                        .WithMany()
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Parent");
-                });
-
             modelBuilder.Entity("ERP_Government.Domain.Budgeting.Entities.BudgetItem", b =>
                 {
-                    b.HasOne("ERP_Government.Domain.Accounting.Entities.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("ERP_Government.Domain.Budgeting.Entities.BudgetClassification", "BudgetClassification")
-                        .WithMany()
-                        .HasForeignKey("BudgetClassificationId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("ERP_Government.Domain.Budgeting.Entities.Budget", "Budget")
                         .WithMany()
                         .HasForeignKey("BudgetId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ERP_Government.Domain.Organization.Entities.CostCenter", "CostCenter")
-                        .WithMany()
-                        .HasForeignKey("CostCenterId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("ERP_Government.Domain.Budgeting.Entities.Fund", "Fund")
-                        .WithMany()
-                        .HasForeignKey("FundId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("ERP_Government.Domain.Budgeting.Entities.BudgetItem", "Parent")
-                        .WithMany()
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Account");
-
                     b.Navigation("Budget");
+                });
 
-                    b.Navigation("BudgetClassification");
+            modelBuilder.Entity("ERP_Government.Domain.Budgeting.Entities.BudgetItemMonthlyPlan", b =>
+                {
+                    b.HasOne("ERP_Government.Domain.Budgeting.Entities.BudgetItem", "BudgetItem")
+                        .WithMany()
+                        .HasForeignKey("BudgetItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("CostCenter");
-
-                    b.Navigation("Fund");
-
-                    b.Navigation("Parent");
+                    b.Navigation("BudgetItem");
                 });
 
             modelBuilder.Entity("ERP_Government.Domain.Budgeting.Entities.Encumbrance", b =>
@@ -8074,42 +8749,41 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.HasOne("ERP_Government.Domain.Budgeting.Entities.Appropriation", "Appropriation")
                         .WithMany()
                         .HasForeignKey("AppropriationId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ERP_Government.Domain.Procurement.Entities.PurchaseOrder", null)
-                        .WithMany()
-                        .HasForeignKey("PurchaseOrderId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("ERP_Government.Domain.Budgeting.Entities.Encumbrance", "ReversalOf")
-                        .WithMany()
-                        .HasForeignKey("ReversalOfId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("ERP_Government.Domain.Suppliers.Entities.Supplier", null)
-                        .WithMany()
-                        .HasForeignKey("VendorId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("Appropriation");
-
-                    b.Navigation("ReversalOf");
                 });
 
-            modelBuilder.Entity("ERP_Government.Domain.Budgeting.Entities.Fund", b =>
+            modelBuilder.Entity("ERP_Government.Domain.Budgeting.Entities.FinalAccount", b =>
                 {
-                    b.HasOne("ERP_Government.Domain.Accounting.Entities.Account", "DefaultRevenueDebitAccount")
-                        .WithMany()
-                        .HasForeignKey("DefaultRevenueDebitAccountId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("ERP_Government.Domain.FinancialSettings.Entities.FiscalYear", "FiscalYear")
                         .WithMany()
                         .HasForeignKey("FiscalYearId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Navigation("DefaultRevenueDebitAccount");
+                    b.Navigation("FiscalYear");
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Budgeting.Entities.FinalAccountLine", b =>
+                {
+                    b.HasOne("ERP_Government.Domain.Budgeting.Entities.FinalAccount", "FinalAccount")
+                        .WithMany("Lines")
+                        .HasForeignKey("FinalAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FinalAccount");
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Budgeting.Entities.YearClosingRun", b =>
+                {
+                    b.HasOne("ERP_Government.Domain.FinancialSettings.Entities.FiscalYear", "FiscalYear")
+                        .WithMany()
+                        .HasForeignKey("FiscalYearId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("FiscalYear");
                 });
@@ -8437,6 +9111,36 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Navigation("CostCenter");
                 });
 
+            modelBuilder.Entity("ERP_Government.Domain.Payments.Entities.DisbursementRequest", b =>
+                {
+                    b.HasOne("ERP_Government.Domain.Payments.Entities.PaymentOrder", "PaymentOrder")
+                        .WithMany()
+                        .HasForeignKey("PaymentOrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PaymentOrder");
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Payments.Entities.Payment", b =>
+                {
+                    b.HasOne("ERP_Government.Domain.Payments.Entities.DisbursementRequest", "DisbursementRequest")
+                        .WithMany()
+                        .HasForeignKey("DisbursementRequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ERP_Government.Domain.Payments.Entities.PaymentOrder", "PaymentOrder")
+                        .WithMany()
+                        .HasForeignKey("PaymentOrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DisbursementRequest");
+
+                    b.Navigation("PaymentOrder");
+                });
+
             modelBuilder.Entity("ERP_Government.Domain.Payments.Entities.PaymentOrderDeduction", b =>
                 {
                     b.HasOne("ERP_Government.Domain.Payments.Entities.PaymentOrder", "PaymentOrder")
@@ -8457,17 +9161,6 @@ namespace ERP_Government.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("PaymentOrder");
-                });
-
-            modelBuilder.Entity("ERP_Government.Domain.Procurement.Entities.PurchaseOrder", b =>
-                {
-                    b.HasOne("ERP_Government.Domain.Suppliers.Entities.Supplier", "Supplier")
-                        .WithMany()
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("ERP_Government.Domain.Procurement.Entities.PurchaseOrderDetail", b =>
@@ -8521,6 +9214,53 @@ namespace ERP_Government.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("RequestForQuotation");
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Revenue.Entities.Check", b =>
+                {
+                    b.HasOne("ERP_Government.Domain.Revenue.Entities.ReceiptVoucher", "ReceiptVoucher")
+                        .WithMany("Checks")
+                        .HasForeignKey("ReceiptVoucherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ERP_Government.Domain.Revenue.Entities.ReceiptVoucher", "ReplacementVoucher")
+                        .WithMany()
+                        .HasForeignKey("ReplacementVoucherId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ReceiptVoucher");
+
+                    b.Navigation("ReplacementVoucher");
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Revenue.Entities.ReceiptVoucher", b =>
+                {
+                    b.HasOne("ERP_Government.Domain.Revenue.Entities.DepositSlip", "DepositSlip")
+                        .WithMany("ReceiptVouchers")
+                        .HasForeignKey("DepositSlipId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ERP_Government.Domain.Parties.Entities.Party", "Party")
+                        .WithMany()
+                        .HasForeignKey("PartyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DepositSlip");
+
+                    b.Navigation("Party");
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Revenue.Entities.ReceiptVoucherLine", b =>
+                {
+                    b.HasOne("ERP_Government.Domain.Revenue.Entities.ReceiptVoucher", "ReceiptVoucher")
+                        .WithMany("Lines")
+                        .HasForeignKey("ReceiptVoucherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ReceiptVoucher");
                 });
 
             modelBuilder.Entity("ERP_Government.Domain.Revenue.Entities.RevenueReceiptLine", b =>
@@ -8799,9 +9539,26 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Navigation("ExecutionLogs");
                 });
 
+            modelBuilder.Entity("ERP_Government.Domain.Budgeting.Entities.FinalAccount", b =>
+                {
+                    b.Navigation("Lines");
+                });
+
             modelBuilder.Entity("ERP_Government.Domain.FinancialSettings.Entities.FiscalYear", b =>
                 {
                     b.Navigation("Periods");
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Revenue.Entities.DepositSlip", b =>
+                {
+                    b.Navigation("ReceiptVouchers");
+                });
+
+            modelBuilder.Entity("ERP_Government.Domain.Revenue.Entities.ReceiptVoucher", b =>
+                {
+                    b.Navigation("Checks");
+
+                    b.Navigation("Lines");
                 });
 
             modelBuilder.Entity("ERP_Government.Domain.Workflow.Entities.WorkflowDefinition", b =>

@@ -30,6 +30,9 @@ public class AssignUserPermissionCommandHandler(
         AssignUserPermissionCommand request,
         CancellationToken cancellationToken)
     {
+        if (currentUser.Id is not int userId)
+            return Result.Failure(new[] { "User identity is required for this operation." });
+
         var userExists = await context.Users.AnyAsync(u => u.Id == request.UserId, cancellationToken);
         if (!userExists)
             return Result.Failure(["User not found."]);
@@ -79,7 +82,7 @@ public class AssignUserPermissionCommandHandler(
         {
             EventCategory = "PermissionOverride",
             Action = action,
-            UserId = currentUser.Id ?? 0,
+            UserId = userId,
             EntityName = "UserPermission",
             EntityId = request.UserId,
             Success = true,

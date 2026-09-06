@@ -86,6 +86,9 @@ public interface IApplicationDbContext
     DbSet<Appropriation> Appropriations { get; }
     DbSet<Encumbrance> Encumbrances { get; }
     DbSet<BudgetItemMonthlyPlan> BudgetItemMonthlyPlans { get; }
+    DbSet<YearClosingRun> YearClosingRuns { get; }
+    DbSet<FinalAccount> FinalAccounts { get; }
+    DbSet<FinalAccountLine> FinalAccountLines { get; }
 
     // Module 6: Procurement
     DbSet<PurchaseRequest> PurchaseRequests { get; }
@@ -105,6 +108,8 @@ public interface IApplicationDbContext
     DbSet<PaymentOrder> PaymentOrders { get; }
     DbSet<PaymentOrderLine> PaymentOrderLines { get; }
     DbSet<PaymentOrderDeduction> PaymentOrderDeductions { get; }
+    DbSet<DisbursementRequest> DisbursementRequests { get; }
+    DbSet<Payment> Payments { get; }
 
     // Module 9: Committees
     DbSet<Committee> Committees { get; }
@@ -114,6 +119,10 @@ public interface IApplicationDbContext
     // Module 10: Revenue
     DbSet<RevenueReceipt> RevenueReceipts { get; }
     DbSet<RevenueReceiptLine> RevenueReceiptLines { get; }
+    DbSet<ReceiptVoucher> ReceiptVouchers { get; }
+    DbSet<ReceiptVoucherLine> ReceiptVoucherLines { get; }
+    DbSet<Check> Checks { get; }
+    DbSet<DepositSlip> DepositSlips { get; }
 
     // Module 11: Assets
     DbSet<AssetGroup> AssetGroups { get; }

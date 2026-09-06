@@ -20,6 +20,9 @@ public class GetWorkflowHistoryQueryHandler(
         GetWorkflowHistoryQuery request,
         CancellationToken cancellationToken)
     {
+        if (user.Id is not int userId)
+            throw new InvalidOperationException("User identity is required for this operation.");
+
         var results = await context.WorkflowHistory
             .Where(h => h.WorkflowInstanceId == request.InstanceId)
             .OrderBy(h => h.Timestamp)
@@ -37,7 +40,6 @@ public class GetWorkflowHistoryQueryHandler(
             .ToListAsync(cancellationToken);
 
         // Audit log for history access
-        var userId = user.Id ?? 0;
         context.SecurityAuditLogs.Add(new SecurityAuditLog
         {
             EventCategory = "Workflow",

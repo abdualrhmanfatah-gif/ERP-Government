@@ -27,6 +27,9 @@ public class PostJournalEntryCommandHandler(
         PostJournalEntryCommand request,
         CancellationToken cancellationToken)
     {
+        if (user.Id is not int userId)
+            return Result.Failure(["User identity is required for this operation."]);
+
         var entity = await context.JournalEntries
             .FindAsync(request.Id, cancellationToken);
 
@@ -99,7 +102,7 @@ public class PostJournalEntryCommandHandler(
             if (!conv.IsBaseCurrency && conv.Rate is null)
             {
                 var errorMsg = $"No exchange rate found for currency {line.CurrencyId} on {effectiveDate:yyyy-MM-dd}. Posting blocked until a rate is provided.";
-                await WriteAuditLogAsync(entity, journalEntryLines, baseCurrencyId, conversionResults, errorMsg, false, cancellationToken);
+                await WriteAuditLogAsync(entity, journalEntryLines, baseCurrencyId, conversionResults, errorMsg, false, userId, cancellationToken);
                 return Result.Failure([errorMsg]);
             }
 
@@ -111,7 +114,7 @@ public class PostJournalEntryCommandHandler(
         if (totalBaseDebit != totalBaseCredit)
         {
             var imbalanceMsg = "Base double-entry imbalance: TotalBaseDebit != TotalBaseCredit.";
-            await WriteAuditLogAsync(entity, journalEntryLines, baseCurrencyId, conversionResults, imbalanceMsg, false, cancellationToken);
+            await WriteAuditLogAsync(entity, journalEntryLines, baseCurrencyId, conversionResults, imbalanceMsg, false, userId, cancellationToken);
             return Result.Failure([imbalanceMsg]);
         }
 
@@ -184,7 +187,7 @@ public class PostJournalEntryCommandHandler(
         await context.SaveChangesAsync(cancellationToken);
 
         // AR-001: Write audit log for successful multi-currency posting
-        await WriteAuditLogAsync(entity, journalEntryLines, baseCurrencyId, conversionResults, null, true, cancellationToken);
+        await WriteAuditLogAsync(entity, journalEntryLines, baseCurrencyId, conversionResults, null, true, userId, cancellationToken);
 
         return Result.Success();
     }
@@ -196,9 +199,9 @@ public class PostJournalEntryCommandHandler(
         List<JournalEntryLineConversion> conversionResults,
         string? failureReason,
         bool success,
+        int userId,
         CancellationToken cancellationToken)
     {
-        var userId = user.Id ?? 0;
 
         // Resolve currency codes for audit trail — fetch all active currencies, filter in memory
         var allCurrencies = await context.Currencies

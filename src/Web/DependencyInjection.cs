@@ -209,6 +209,18 @@ public static class DependencyInjection
             options.AddPolicy(PermissionCodes.PaymentOrdersSendToTreasury, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PaymentOrdersVoid, p => p.RequireAssertion(_ => true));
 
+            // ─── Disbursements ────────────────────────────────────────
+            options.AddPolicy(PermissionCodes.DisbursementRequestsView, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DisbursementRequestsCreate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DisbursementRequestsSubmit, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DisbursementRequestsApprove, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DisbursementRequestsReject, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DisbursementRequestsCancel, p => p.RequireAssertion(_ => true));
+
+            // ─── Payments ─────────────────────────────────────────────
+            options.AddPolicy(PermissionCodes.PaymentsView, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.PaymentsCreate, p => p.RequireAssertion(_ => true));
+
             // ─── Committees ───────────────────────────────────────────
             options.AddPolicy(PermissionCodes.CommitteesView, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.CommitteesCreate, p => p.RequireAssertion(_ => true));
@@ -352,6 +364,18 @@ public static class DependencyInjection
             options.AddPolicy(PermissionCodes.NotificationsMarkRead, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.NotificationsDelete, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.NotificationsCreate, p => p.RequireAssertion(_ => true));
+
+            // ─── FinancialControl ──────────────────────────────────────
+            options.AddPolicy(PermissionCodes.FinancialControlLapseYear, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.FinancialControlApproveFinalAccount, p => p.RequireAssertion(_ => true));
+
+            // ─── Reporting ────────────────────────────────────────────
+            options.AddPolicy(PermissionCodes.ReportingViewBudgetExecution, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ReportingViewRevenueCollections, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ReportingViewDisbursementRegister, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ReportingViewAvailabilitySnapshot, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ReportingViewTrialBalanceReport, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ReportingExportReports, p => p.RequireAssertion(_ => true));
         });
     }
 

@@ -88,6 +88,9 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Appropriation> Appropriations => Set<Appropriation>();
     public DbSet<Encumbrance> Encumbrances => Set<Encumbrance>();
     public DbSet<BudgetItemMonthlyPlan> BudgetItemMonthlyPlans => Set<BudgetItemMonthlyPlan>();
+    public DbSet<YearClosingRun> YearClosingRuns => Set<YearClosingRun>();
+    public DbSet<FinalAccount> FinalAccounts => Set<FinalAccount>();
+    public DbSet<FinalAccountLine> FinalAccountLines => Set<FinalAccountLine>();
 
     // Module 6: Procurement (Target)
     public DbSet<PurchaseRequest> PurchaseRequests => Set<PurchaseRequest>();
@@ -107,6 +110,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<PaymentOrder> PaymentOrders => Set<PaymentOrder>();
     public DbSet<PaymentOrderLine> PaymentOrderLines => Set<PaymentOrderLine>();
     public DbSet<PaymentOrderDeduction> PaymentOrderDeductions => Set<PaymentOrderDeduction>();
+    public DbSet<DisbursementRequest> DisbursementRequests => Set<DisbursementRequest>();
+    public DbSet<Payment> Payments => Set<Payment>();
 
     // Module 8: Committees
     public DbSet<Committee> Committees => Set<Committee>();
@@ -116,6 +121,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     // Module 9: Revenue
     public DbSet<RevenueReceipt> RevenueReceipts => Set<RevenueReceipt>();
     public DbSet<RevenueReceiptLine> RevenueReceiptLines => Set<RevenueReceiptLine>();
+    public DbSet<ReceiptVoucher> ReceiptVouchers => Set<ReceiptVoucher>();
+    public DbSet<ReceiptVoucherLine> ReceiptVoucherLines => Set<ReceiptVoucherLine>();
+    public DbSet<Check> Checks => Set<Check>();
+    public DbSet<DepositSlip> DepositSlips => Set<DepositSlip>();
 
     // Module 10: Assets (Target)
     public DbSet<AssetGroup> AssetGroups => Set<AssetGroup>();

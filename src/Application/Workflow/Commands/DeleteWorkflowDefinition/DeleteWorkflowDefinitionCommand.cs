@@ -29,6 +29,9 @@ public class DeleteWorkflowDefinitionCommandHandler(
         DeleteWorkflowDefinitionCommand request,
         CancellationToken cancellationToken)
     {
+        if (user.Id is not int userId)
+            throw new InvalidOperationException("User identity is required for this operation.");
+
         var definition = await context.WorkflowDefinitions
             .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
 
@@ -54,7 +57,6 @@ public class DeleteWorkflowDefinitionCommandHandler(
         await context.SaveChangesAsync(cancellationToken);
 
         // Audit log
-        var userId = user.Id ?? 0;
         var auditPayload = new
         {
             WorkflowDefinitionId = definition.Id,

@@ -180,6 +180,18 @@ public static class PermissionCodes
     public const string PaymentOrdersSendToTreasury = "PaymentOrders.SendToTreasury";
     public const string PaymentOrdersVoid = "PaymentOrders.Void";
 
+    // ─── Disbursements ────────────────────────────────────────────────
+    public const string DisbursementRequestsView = "DisbursementRequests.View";
+    public const string DisbursementRequestsCreate = "DisbursementRequests.Create";
+    public const string DisbursementRequestsSubmit = "DisbursementRequests.Submit";
+    public const string DisbursementRequestsApprove = "DisbursementRequests.Approve";
+    public const string DisbursementRequestsReject = "DisbursementRequests.Reject";
+    public const string DisbursementRequestsCancel = "DisbursementRequests.Cancel";
+
+    // ─── Payments ─────────────────────────────────────────────────────
+    public const string PaymentsView = "Payments.View";
+    public const string PaymentsCreate = "Payments.Create";
+
     // ─── Committees ───────────────────────────────────────────────────
     public const string CommitteesView = "Committees.View";
     public const string CommitteesCreate = "Committees.Create";
@@ -202,6 +214,24 @@ public static class PermissionCodes
     public const string RevenueReceiptsApprove = "RevenueReceipts.Approve";
     public const string RevenueReceiptsPost = "RevenueReceipts.Post";
     public const string RevenueReceiptsCancel = "RevenueReceipts.Cancel";
+
+    // ─── ReceiptVouchers ─────────────────────────────────────────────
+    public const string ReceiptVouchersView = "ReceiptVouchers.View";
+    public const string ReceiptVouchersCreate = "ReceiptVouchers.Create";
+    public const string ReceiptVouchersSubmit = "ReceiptVouchers.Submit";
+    public const string ReceiptVouchersApprove = "ReceiptVouchers.Approve";
+    public const string ReceiptVouchersCancel = "ReceiptVouchers.Cancel";
+
+    // ─── DepositSlips ────────────────────────────────────────────────
+    public const string DepositSlipsView = "DepositSlips.View";
+    public const string DepositSlipsCreate = "DepositSlips.Create";
+    public const string DepositSlipsManage = "DepositSlips.Manage";
+    public const string DepositSlipsApprove = "DepositSlips.Approve";
+
+    // ─── Checks ──────────────────────────────────────────────────────
+    public const string ChecksView = "Checks.View";
+    public const string ChecksClear = "Checks.Clear";
+    public const string ChecksBounce = "Checks.Bounce";
 
     // ─── Assets ───────────────────────────────────────────────────────
     public const string AssetsView = "Assets.View";
@@ -351,4 +381,16 @@ public static class PermissionCodes
     public const string NotificationsMarkRead = "Notifications.MarkRead";
     public const string NotificationsDelete = "Notifications.Delete";
     public const string NotificationsCreate = "Notifications.Create";
+
+    // ─── FinancialControl ────────────────────────────────────────────
+    public const string FinancialControlLapseYear = "FinancialControl.LapseYear";
+    public const string FinancialControlApproveFinalAccount = "FinancialControl.ApproveFinalAccount";
+
+    // ─── Reporting ──────────────────────────────────────────────────
+    public const string ReportingViewBudgetExecution = "Reporting.ViewBudgetExecution";
+    public const string ReportingViewRevenueCollections = "Reporting.ViewRevenueCollections";
+    public const string ReportingViewDisbursementRegister = "Reporting.ViewDisbursementRegister";
+    public const string ReportingViewAvailabilitySnapshot = "Reporting.ViewAvailabilitySnapshot";
+    public const string ReportingViewTrialBalanceReport = "Reporting.ViewTrialBalanceReport";
+    public const string ReportingExportReports = "Reporting.ExportReports";
 }
