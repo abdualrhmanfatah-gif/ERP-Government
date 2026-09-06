@@ -14,16 +14,21 @@ public record UploadAttachmentCommand(
 
 public class UploadAttachmentCommandHandler(
     IApplicationDbContext context,
-    IFileStorageService fileStorageService) : IRequestHandler<UploadAttachmentCommand, Result<int>>
+    IFileStorageService fileStorageService,
+    IUser user) : IRequestHandler<UploadAttachmentCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(
         UploadAttachmentCommand request,
         CancellationToken cancellationToken)
     {
+        if (user.Id is not int userId)
+            return Result<int>.Failure(new[] { "User identity is required for this operation." });
+
         var filePath = await fileStorageService.SaveStreamAsync(request.FileName, request.Content, cancellationToken);
 
         var entity = new Attachment
         {
+            EntityName = request.DocumentType,
             DocumentType = request.DocumentType,
             DocumentId = request.DocumentId,
             FileName = request.FileName,
@@ -32,6 +37,7 @@ public class UploadAttachmentCommandHandler(
             SizeBytes = (int)request.Content.Length,
             AttachmentTypeCode = request.AttachmentTypeCode,
             IsRequired = false,
+            UploadedById = userId,
             CreatedAt = DateTimeOffset.UtcNow
         };
 

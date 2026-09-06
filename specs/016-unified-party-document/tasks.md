@@ -111,8 +111,8 @@
 
 ### Tests for User Story 3
 
-- [ ] T039 [P] [US3] Write DocumentStatusLog append-only test in tests/Application.FunctionalTests/Documents/DocumentStatusLogTests.cs — verify no PUT/PATCH/DELETE endpoints exist for status log
-- [ ] T040 [P] [US3] Write DocumentStatusLog creation test — verify LogAsync creates row with correct EntityName, DocumentId, FromStatus, ToStatus, ChangedById, ChangedAt
+- [x] T039 [P] [US3] Write DocumentStatusLog append-only test in tests/Application.FunctionalTests/Documents/DocumentStatusLogTests.cs — verify no PUT/PATCH/DELETE endpoints exist for status log
+- [x] T040 [P] [US3] Write DocumentStatusLog creation test — verify LogAsync creates row with correct EntityName, DocumentId, FromStatus, ToStatus, ChangedById, ChangedAt
 
 ### Implementation for User Story 3
 
@@ -151,9 +151,9 @@
 
 ### Tests for User Story 4
 
-- [ ] T063 [P] [US4] Write attachment gate blocking test in tests/Application.FunctionalTests/Documents/AttachmentGateTests.cs — verify approval blocked when mandatory attachment missing
-- [ ] T064 [P] [US4] Write attachment gate passing test — verify approval proceeds when mandatory attachment present
-- [ ] T065 [P] [US4] Write attachment gate backward compatibility test — verify no check when no requirements exist for document type
+- [x] T063 [P] [US4] Write attachment gate blocking test in tests/Application.FunctionalTests/Documents/AttachmentGateTests.cs — verify approval blocked when mandatory attachment missing
+- [x] T064 [P] [US4] Write attachment gate passing test — verify approval proceeds when mandatory attachment present
+- [x] T065 [P] [US4] Write attachment gate backward compatibility test — verify no check when no requirements exist for document type
 
 ### Implementation for User Story 4
 
@@ -178,9 +178,9 @@
 
 ### Tests for User Story 5
 
-- [ ] T074 [P] [US5] Write Party CRUD test in tests/Application.FunctionalTests/Parties/PartyTests.cs — verify create returns PTY code, get by id, update, toggle-active
-- [ ] T075 [P] [US5] Write Party filtering test — verify GET with PartyType and IsActive filters returns correct subset
-- [ ] T076 [P] [US5] Write Party search test — verify search by NameAr and TaxNumber returns matching parties
+- [x] T074 [P] [US5] Write Party CRUD test in tests/Application.FunctionalTests/Parties/PartyTests.cs — verify create returns PTY code, get by id, update, toggle-active
+- [x] T075 [P] [US5] Write Party filtering test — verify GET with PartyType and IsActive filters returns correct subset
+- [x] T076 [P] [US5] Write Party search test — verify search by NameAr and TaxNumber returns matching parties
 
 ### Implementation for User Story 5
 
@@ -204,10 +204,10 @@
 
 ### Tests for User Story 6
 
-- [ ] T084 [P] [US6] Write document approvals endpoint test in tests/Application.FunctionalTests/Documents/DocumentEndpointTests.cs — verify GET returns ApprovalHistory for entity+id
-- [ ] T085 [P] [US6] Write document status-log endpoint test — verify GET returns DocumentStatusLog ordered by ChangedAt
-- [ ] T086 [P] [US6] Write attachment upload endpoint test — verify POST with file creates Attachment row and stores file
-- [ ] T087 [P] [US6] Write attachment delete endpoint test — verify DELETE removes row and file
+- [x] T084 [P] [US6] Write document approvals endpoint test in tests/Application.FunctionalTests/Documents/DocumentEndpointTests.cs — verify GET returns ApprovalHistory for entity+id
+- [x] T085 [P] [US6] Write document status-log endpoint test — verify GET returns DocumentStatusLog ordered by ChangedAt
+- [x] T086 [P] [US6] Write attachment upload endpoint test — verify POST with file creates Attachment row and stores file
+- [x] T087 [P] [US6] Write attachment delete endpoint test — verify DELETE removes row and file
 
 ### Implementation for User Story 6
 
