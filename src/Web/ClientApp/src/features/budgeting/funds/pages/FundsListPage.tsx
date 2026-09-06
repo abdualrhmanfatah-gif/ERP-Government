@@ -8,7 +8,7 @@ import { Plus, Pencil, Eye } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { fundTypeLabels, fundCategoryLabels, FundType, FundCategory } from '../../shared/types';
 import type { FundDto } from '../../shared/types';
-import { useFundsList, useCreateFund, useUpdateFund, useActivateFund, useDeactivateFund } from '../hooks/useFunds';
+import { useFundsList, useCreateFund, useUpdateFund, useToggleFundActive } from '../hooks/useFunds';
 
 const fundTypeOptions = Object.entries(fundTypeLabels).map(([value, label]) => ({
   value,
@@ -39,8 +39,7 @@ export default function FundsListPage() {
   const { data: items = [], isLoading } = useFundsList();
   const createMutation = useCreateFund();
   const updateMutation = useUpdateFund();
-  const activateMutation = useActivateFund();
-  const deactivateMutation = useDeactivateFund();
+  const toggleMutation = useToggleFundActive();
 
   const filtered = useMemo(() => {
     return items.filter((item) => {
@@ -80,15 +79,14 @@ export default function FundsListPage() {
 
   function confirmToggleAction() {
     if (!confirmToggle) return;
-    const mutation = confirmToggle.isActive ? deactivateMutation : activateMutation;
-    mutation.mutate(
+    toggleMutation.mutate(
       { id: confirmToggle.id, rowVersion: confirmToggle.rowVersion },
       {
         onSuccess: () => {
           notify({ type: 'success', title: confirmToggle.isActive ? 'تم التعطيل بنجاح' : 'تم التنشيط بنجاح' });
           setConfirmToggle(null);
         },
-        onError: () => notify({ type: 'error', title: 'حدث خطأ أثناء التبديل' }),
+        onError: (err) => notify({ type: 'error', title: err instanceof Error ? err.message : 'حدث خطأ أثناء التبديل' }),
       },
     );
   }
@@ -166,10 +164,7 @@ export default function FundsListPage() {
         <FilterSelect value={isActiveFilter} onChange={setIsActiveFilter} options={isActiveOptions} placeholder="الحالة" label="الحالة" />
       </FilterBar>
 
-      <div className="flex items-center gap-2 text-sm">
-        <span className="inline-flex items-center rounded-full bg-[var(--color-surface-container)] px-3 py-1 font-medium text-[var(--color-on-surface)] border border-[var(--color-border-container)]">{filtered.length} نتيجة</span>
-        {items.length > 0 && <span className="text-[var(--color-on-surface-variant)]">من أصل {items.length} إجمالي</span>}
-      </div>
+ 
 
       <DataGrid
         columns={columns}
@@ -233,7 +228,7 @@ export default function FundsListPage() {
         onConfirm={confirmToggleAction}
         message={confirmToggle?.isActive ? 'هل تريد تعطيل هذا الصندوق؟' : 'هل تريد تنشيط هذا الصندوق؟'}
         title={confirmToggle?.isActive ? 'تعطيل الصندوق' : 'تنشيط الصندوق'}
-        loading={activateMutation.isPending || deactivateMutation.isPending}
+        loading={toggleMutation.isPending}
       />
     </div>
   );

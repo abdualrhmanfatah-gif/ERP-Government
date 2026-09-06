@@ -41,7 +41,7 @@ export default function CurrencyCreatePage() {
           notify({ type: 'success', title: 'تم إنشاء العملة بنجاح' });
           navigate('/financial-settings/currencies');
         },
-        onError: () => notify({ type: 'error', title: 'حدث خطأ أثناء الإنشاء' }),
+        onError: (err) => notify({ type: 'error', title: err instanceof Error ? err.message : 'حدث خطأ أثناء الإنشاء' }),
       },
     );
   }

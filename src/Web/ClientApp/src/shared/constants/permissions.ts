@@ -227,8 +227,7 @@ export const BUDGET_PERMISSIONS = {
     View: 'Funds.View',
     Create: 'Funds.Create',
     Update: 'Funds.Update',
-    Activate: 'Funds.Activate',
-    Deactivate: 'Funds.Deactivate',
+    ToggleActive: 'Funds.ToggleActive',
   },
   BudgetClassifications: {
     View: 'BudgetClassifications.View',

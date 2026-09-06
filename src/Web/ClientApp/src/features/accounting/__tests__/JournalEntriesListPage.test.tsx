@@ -38,7 +38,10 @@ describe('JournalEntriesListPage', () => {
 
   it('renders all 7 status filter chips', () => {
     render(<JournalEntriesListPage />);
-    const filterButtons = screen.getAllByRole('button', { name: /الكل|مسودة|مقدم|موافق عليه|مسجل|معكوس|ملغى/ });
+    const filterContainer = screen.getByText('الكل').closest('div');
+    const filterButtons = filterContainer ? Array.from(filterContainer.children).filter(
+      (el) => el.tagName === 'BUTTON',
+    ) : [];
     expect(filterButtons.length).toBe(7);
   });
 

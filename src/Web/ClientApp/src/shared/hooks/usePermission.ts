@@ -34,7 +34,7 @@ type PolicyString =
   | 'StockTakes.View' | 'StockTakes.Create' | 'StockTakes.Start' | 'StockTakes.Complete' | 'StockTakes.Approve'
   | 'StockTransactions.View'
   | 'BudgetTypes.View' | 'BudgetTypes.Create' | 'BudgetTypes.Update'
-  | 'Funds.View' | 'Funds.Create' | 'Funds.Update' | 'Funds.Activate' | 'Funds.Deactivate'
+  | 'Funds.View' | 'Funds.Create' | 'Funds.Update' | 'Funds.ToggleActive'
   | 'BudgetClassifications.View' | 'BudgetClassifications.Create' | 'BudgetClassifications.Update'
   | 'Budgets.View' | 'Budgets.Create' | 'Budgets.Update' | 'Budgets.Submit' | 'Budgets.Approve'
   | 'Budgets.Activate' | 'Budgets.Suspend' | 'Budgets.Close' | 'Budgets.Cancel'

@@ -175,22 +175,12 @@ export const fundsClient = {
     );
   },
 
-  async activate(id: number, rowVersion: string): Promise<void> {
+  async toggleActive(id: number, rowVersion: string): Promise<void> {
     return handleResponse(
-      await fetch(`/api/Funds/${id}/activate`, {
-        method: 'POST',
+      await fetch(`/api/Funds/${id}/toggle-active`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, rowVersion }),
-      }),
-    );
-  },
-
-  async deactivate(id: number, rowVersion: string): Promise<void> {
-    return handleResponse(
-      await fetch(`/api/Funds/${id}/deactivate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, rowVersion }),
+        body: JSON.stringify({ rowVersion }),
       }),
     );
   },

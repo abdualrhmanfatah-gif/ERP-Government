@@ -122,8 +122,7 @@ public static class DependencyInjection
             options.AddPolicy(PermissionCodes.FundsView, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.FundsCreate, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.FundsUpdate, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.FundsActivate, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.FundsDeactivate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.FundsToggleActive, p => p.RequireAssertion(_ => true));
 
             options.AddPolicy(PermissionCodes.BudgetsView, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.BudgetsCreate, p => p.RequireAssertion(_ => true));

@@ -33,20 +33,11 @@ export function useUpdateFund() {
   });
 }
 
-export function useActivateFund() {
+export function useToggleFundActive() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, rowVersion }: { id: number; rowVersion: string }) =>
-      fundsClient.activate(id, rowVersion),
-    onSuccess: () => qc.invalidateQueries({ queryKey: budgetingKeys.funds.all }),
-  });
-}
-
-export function useDeactivateFund() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, rowVersion }: { id: number; rowVersion: string }) =>
-      fundsClient.deactivate(id, rowVersion),
+      fundsClient.toggleActive(id, rowVersion),
     onSuccess: () => qc.invalidateQueries({ queryKey: budgetingKeys.funds.all }),
   });
 }

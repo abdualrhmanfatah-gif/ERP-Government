@@ -51,7 +51,7 @@ export function useToggleClassificationActive() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...data }: Record<string, unknown> & { id: number }) =>
-      client.toggleActive(id, ToggleBudgetClassificationActiveCommand.fromJS({ id, ...data })),
+      client.toggleActivePATCH(id, BudgetClassificationToggleActiveRequest.fromJS({ id, ...data })),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['budget-classifications-tree'] });
       qc.invalidateQueries({ queryKey: ['budget-classifications'] });

@@ -42,7 +42,7 @@ export default function CurrenciesListPage() {
           notify({ type: 'success', title: confirmToggle.isActive ? 'تم التعطيل بنجاح' : 'تم التنشيط بنجاح' });
           setConfirmToggle(null);
         },
-        onError: () => notify({ type: 'error', title: 'حدث خطأ' }),
+        onError: (err) => notify({ type: 'error', title: err instanceof Error ? err.message : 'حدث خطأ' }),
       },
     );
   }
