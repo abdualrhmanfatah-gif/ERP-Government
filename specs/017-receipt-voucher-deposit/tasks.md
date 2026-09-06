@@ -190,7 +190,7 @@
 - [ ] T061 [P] Run quickstart.md validation scenarios
 - [x] T062 [P] Update OpenAPI documentation for new endpoints
 - [x] T063 Code cleanup and remove old RevenueReceipt code
-- [ ] T064 Verify all tests pass and mark any stub tests as debt
+- [x] T064 Verify all tests pass and mark any stub tests as debt
 
 ---
 
