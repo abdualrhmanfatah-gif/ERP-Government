@@ -8,7 +8,9 @@ import { useDocumentSequencesList, useUpdateDocumentSequence, useDeactivateDocum
 import { resetPolicyLabels, ResetPolicy } from '../../shared/types';
 
 export default function DocumentSequencesListPage() {
-  const canManage = usePermission(PERMISSIONS.DocumentSequences.Create);
+  const canUpdate = usePermission(PERMISSIONS.DocumentSequences.Update);
+  const canDeactivate = usePermission(PERMISSIONS.DocumentSequences.Deactivate);
+  const canManage = canUpdate || canDeactivate;
   const { data: items = [], isLoading } = useDocumentSequencesList();
   const updateMutation = useUpdateDocumentSequence();
   const deactivateMutation = useDeactivateDocumentSequence();

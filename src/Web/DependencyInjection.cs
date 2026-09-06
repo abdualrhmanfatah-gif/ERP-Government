@@ -67,6 +67,8 @@ public static class DependencyInjection
 
             options.AddPolicy(PermissionCodes.DocumentSequencesView, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.DocumentSequencesCreate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DocumentSequencesUpdate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DocumentSequencesDeactivate, p => p.RequireAssertion(_ => true));
 
             // ─── Accounting ───────────────────────────────────────────
             options.AddPolicy(PermissionCodes.ChartOfAccountsRead, p => p.RequireAssertion(_ => true));

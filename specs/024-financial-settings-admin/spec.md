@@ -132,6 +132,149 @@ As an administrator, I need to generate and manage year-end closing entries so t
 - **ExchangeRate**: baseCurrencyId, currencyId, rateDate, rateType (Official/Market), rate, isActive
 - **YearEndClosingEntry**: closingEntryNumber, fiscalYearId, closingDate, description, status (Draft/PendingApproval/Approved/Posted/Cancelled), isReversal, reversalOfId, journalEntryId
 
+### Field Contract
+
+#### FiscalYear
+
+| Field | Type | Editable | Notes |
+|-------|------|----------|-------|
+| `name` | string | Yes (create + edit) | Required |
+| `yearNumber` | number | No (auto) | Display only |
+| `startDate` | Date | Yes (create) | Required |
+| `endDate` | Date | Yes (create) | Required |
+| `status` | enum | No (lifecycle) | Draft/Open/SoftClosed/HardClosed |
+| `isClosed` | boolean | No | Derived from status |
+| `closingJournalEntryId` | number? | No | Link to closing entry |
+
+#### FiscalPeriod
+
+| Field | Type | Editable | Notes |
+|-------|------|----------|-------|
+| `fiscalYearId` | number | No (parent) | FK |
+| `periodNumber` | number | No (auto) | 1-12 |
+| `name` | string | No (auto) | Arabic month name |
+| `startDate` | Date | No (auto) | Generated |
+| `endDate` | Date | No (auto) | Generated |
+| `isLockedForPosting` | boolean | Yes (lock/unlock) | Toggle |
+
+#### DocumentSequence
+
+| Field | Type | Editable | Notes |
+|-------|------|----------|-------|
+| `name` | string | Yes (edit) | Sequence name |
+| `documentType` | string | No | BGT/APR/ENC/PO/PE/PTY/RCV/DSL/DSB/PAY |
+| `fiscalYearId` | number? | No | Optional FK |
+| `currentNumber` | number | No (auto) | Next number |
+| `resetPolicy` | enum | Yes (edit) | Yearly/Never |
+| `isActive` | boolean | Yes (deactivate) | Toggle |
+
+#### Currency
+
+| Field | Type | Editable | Notes |
+|-------|------|----------|-------|
+| `code` | string | No (from ISO picker) | ISO-4217 |
+| `name` | string | Yes (create) | Arabic name |
+| `symbol` | string | Yes (create) | Required |
+| `decimalPlaces` | number | No (from ISO) | Auto from ISO |
+| `roundingPrecision` | number | Yes (create + edit) | Default 0.01 |
+| `isBase` | boolean | Yes (create + edit) | Base currency flag |
+| `isActive` | boolean | Yes (activate/deactivate) | Toggle |
+
+#### ExchangeRate
+
+| Field | Type | Editable | Notes |
+|-------|------|----------|-------|
+| `baseCurrencyId` | number | Yes (create) | Base currency |
+| `currencyId` | number | Yes (create) | Target currency |
+| `rateDate` | Date | Yes (create) | Effective date |
+| `rateType` | enum | Yes (create) | Official/Market |
+| `rate` | number | Yes (create + edit) | Exchange rate |
+| `isActive` | boolean | Yes (activate/deactivate) | Toggle |
+
+#### ClosingEntry
+
+| Field | Type | Editable | Notes |
+|-------|------|----------|-------|
+| `closingEntryNumber` | string | No (auto) | System-generated |
+| `fiscalYearId` | number | No (auto) | FK |
+| `closingDate` | Date | No (auto) | Set at generation |
+| `description` | string | Yes (generate) | Optional |
+| `status` | enum | No (lifecycle) | Draft/PendingApproval/Approved/Posted/Cancelled |
+| `isReversal` | boolean | No | Flag |
+| `reversalOfId` | number? | No | Link to original |
+| `journalEntryId` | number? | No | Link to posted JE |
+
+### Permissions
+
+- **FR-PERM-001**: `FiscalYears.View` — View list + detail
+- **FR-PERM-002**: `FiscalYears.Create` — Create fiscal year
+- **FR-PERM-003**: `FiscalYears.Update` — Edit fiscal year
+- **FR-PERM-004**: `FiscalYears.Open` — Open fiscal year
+- **FR-PERM-005**: `FiscalYears.Close` — Close fiscal year
+- **FR-PERM-006**: `FiscalPeriods.View` — View periods
+- **FR-PERM-007**: `FiscalPeriods.Create` — Create period
+- **FR-PERM-008**: `FiscalPeriods.Update` — Edit period
+- **FR-PERM-009**: `FiscalPeriods.Lock` — Lock period
+- **FR-PERM-010**: `FiscalPeriods.Unlock` — Unlock period
+- **FR-PERM-011**: `DocumentSequences.View` — View sequences
+- **FR-PERM-012**: `DocumentSequences.Create` — Create sequence
+- **FR-PERM-013**: `DocumentSequences.Update` — Edit sequence (ADDED — was missing)
+- **FR-PERM-014**: `DocumentSequences.Deactivate` — Deactivate sequence (ADDED — was missing)
+- **FR-PERM-015**: `Currencies.View` — View currencies
+- **FR-PERM-016**: `Currencies.Create` — Create currency
+- **FR-PERM-017**: `Currencies.Update` — Edit currency
+- **FR-PERM-018**: `Currencies.Activate` — Activate currency
+- **FR-PERM-019**: `Currencies.Deactivate` — Deactivate currency
+- **FR-PERM-020**: `ExchangeRates.View` — View rates
+- **FR-PERM-021**: `ExchangeRates.Create` — Create rate
+- **FR-PERM-022**: `ExchangeRates.Update` — Edit rate
+- **FR-PERM-023**: `ExchangeRates.Activate` — Activate rate
+- **FR-PERM-024**: `ExchangeRates.Deactivate` — Deactivate rate
+- **FR-PERM-025**: `ClosingEntries.View` — View closing entries
+- **FR-PERM-026**: `ClosingEntries.Generate` — Generate closing entry
+- **FR-PERM-027**: `ClosingEntries.Approve` — Approve closing entry
+- **FR-PERM-028**: `ClosingEntries.Reverse` — Reverse closing entry
+
+### Implementation Note
+
+Currency screens + ISO picker are ALREADY implemented in specs/027. US3/US4 consume them — no duplicate build.
+
+### UI States Required
+
+| Page | Loading | Empty | Error | Unauthorized | Not Found | Normal |
+|------|---------|-------|-------|--------------|-----------|--------|
+| FiscalYears List | Skeleton | "لا توجد سنوات" | Toast | Guard | N/A | DataGrid |
+| FiscalYear Detail | Skeleton | N/A | Error card | Guard | Not found msg | Info + periods + actions |
+| FiscalYear Create | N/A | N/A | Toast | Guard | N/A | Form |
+| DocumentSequences List | Skeleton | "لا توجد تسلسلات" | Toast | Guard | N/A | DataGrid |
+| Currencies List | Skeleton | "لا توجد عملات" | Toast | Guard | N/A | DataGrid |
+| Currency Detail | Skeleton | N/A | Error card | Guard | Not found msg | Info + edit + audit |
+| Currency Create | N/A | N/A | Toast | Guard | N/A | ISO picker + form |
+| ExchangeRates List | Skeleton | "لا توجد أسعار" | Toast | Guard | N/A | DataGrid |
+| ExchangeRate Create | N/A | N/A | Toast | Guard | N/A | Form |
+| ClosingEntries List | Skeleton | "لا توجد قيود إغلاق" | Toast | Guard | N/A | DataGrid |
+| ClosingEntry Detail | Skeleton | N/A | Error card | Guard | Not found msg | Info + lines + actions |
+
+### Tests Expected
+
+| ID | Page | Test |
+|----|------|------|
+| T-024-001 | FiscalYears List | Renders with status badges |
+| T-024-002 | FiscalYear Detail | Shows periods table |
+| T-024-003 | FiscalYear Create | Form renders and validates |
+| T-024-004 | FiscalYearStatusBadge | All 4 status variants |
+| T-024-005 | PeriodLockIndicator | Locked/unlocked states |
+| T-024-006 | DocumentSequences List | Renders all 10 seeded sequences |
+| T-024-007 | Currencies List | Renders with activate/deactivate |
+| T-024-008 | Currency Create | ISO picker search + form |
+| T-024-009 | Currency Detail | Audit trail displayed |
+| T-024-010 | ExchangeRates List | Renders with filters |
+| T-024-011 | ExchangeRate Create | Form renders |
+| T-024-012 | ExchangeRate Lookup | Shows effective rate |
+| T-024-013 | ClosingEntries List | Renders with status |
+| T-024-014 | ClosingEntry Detail | Lines table renders |
+| T-024-015 | ClosingEntryLines | Balanced totals |
+
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes

@@ -2,138 +2,137 @@
 
 **Branch**: `024-financial-settings-admin` | **Date**: 2026-09-06 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `/specs/024-financial-settings-admin/spec.md`
-
 ## Summary
 
-Build the admin UI for Financial Settings over the fully-built backend. Five sub-sections: Fiscal Years + Periods (P1), Document Sequences (P1), Currencies (P2), Exchange Rates (P2), Closing Entries (P2). Frontend-only work — no backend changes. Follows existing budgeting feature folder pattern with pages/, hooks/, shared/, components/.
+Admin UI for Financial Settings: Fiscal Years + Periods (P1), Document Sequences (P1), Currencies (P2, consumes 027), Exchange Rates (P2), Closing Entries (P2). Frontend-only. Follows budgeting feature folder pattern.
 
-## Technical Context
+## FIELD-COVERAGE TABLE
 
-**Language/Version**: TypeScript 5.x, React 19, Vite
+| Entity | Field | Screen | Component | Mode | Permission |
+|--------|-------|--------|-----------|------|------------|
+| FiscalYear | name | List, Detail, Create | DataGrid, Header, Input | R/W | View/Create/Update |
+| FiscalYear | yearNumber | List, Detail | DataGrid, Header | Read-only | View |
+| FiscalYear | startDate | List, Detail, Create | DataGrid, Header, Input | R/W (create only) | View/Create |
+| FiscalYear | endDate | List, Detail, Create | DataGrid, Header, Input | R/W (create only) | View/Create |
+| FiscalYear | status | List, Detail | StatusBadge | Read-only | View |
+| FiscalYear | isClosed | Detail | Header | Read-only | View |
+| FiscalPeriod | periodNumber | Detail | Periods table | Read-only | View |
+| FiscalPeriod | name | Detail | Periods table | Read-only | View |
+| FiscalPeriod | startDate | Detail | Periods table | Read-only | View |
+| FiscalPeriod | endDate | Detail | Periods table | Read-only | View |
+| FiscalPeriod | isLockedForPosting | Detail | PeriodLockIndicator | Toggle | Lock/Unlock |
+| DocumentSequence | name | List | DataGrid | Editable | Update |
+| DocumentSequence | documentType | List | DataGrid | Read-only | View |
+| DocumentSequence | currentNumber | List | DataGrid | Read-only | View |
+| DocumentSequence | resetPolicy | List | DataGrid | Editable | Update |
+| DocumentSequence | isActive | List | Switch | Toggle | Deactivate |
+| Currency | code | List, Create, Detail | DataGrid, ISO picker, Header | Read-only | View |
+| Currency | name | List, Create, Detail | DataGrid, Input, Header | R/W | View/Create/Update |
+| Currency | symbol | List, Create, Detail | DataGrid, Input, Header | R/W | View/Create/Update |
+| Currency | decimalPlaces | List, Create, Detail | DataGrid, Input(disabled), Header | Read-only | View |
+| Currency | roundingPrecision | Create, Detail | Input, Header | R/W | View/Create/Update |
+| Currency | isBase | List, Create, Detail | Badge, Checkbox, Header | R/W | View/Create/Update |
+| Currency | isActive | List, Detail | Switch, StatusBadge | Toggle | Activate/Deactivate |
+| ExchangeRate | baseCurrencyCode | List | DataGrid | Read-only | View |
+| ExchangeRate | currencyCode | List | DataGrid | Read-only | View |
+| ExchangeRate | rateDate | List, Create | DataGrid, Input | R/W | View/Create |
+| ExchangeRate | rateType | List, Create | DataGrid, Select | R/W | View/Create |
+| ExchangeRate | rate | List, Create | DataGrid, Input | R/W | View/Create/Update |
+| ExchangeRate | isActive | List | Switch | Toggle | Activate/Deactivate |
+| ClosingEntry | closingEntryNumber | List, Detail | DataGrid, Header | Read-only | View |
+| ClosingEntry | fiscalYearName | List, Detail | DataGrid, Header | Read-only | View |
+| ClosingEntry | closingDate | List, Detail | DataGrid, Header | Read-only | View |
+| ClosingEntry | status | List, Detail | StatusBadge | Read-only | View |
+| ClosingEntry | isReversal | Detail | Header | Read-only | View |
+| ClosingEntry | reversalOfId | Detail | Reversal link | Read-only | View |
 
-**Primary Dependencies**: TanStack Query (useQuery/useMutation), react-router-dom, lucide-react icons, Tailwind CSS with design tokens, NSwag-generated API client
+## DESIGN SECTION
 
-**Storage**: None (frontend consumes existing backend APIs)
+**Tokens**: DESIGN.md + tokens.ts. All colors via CSS vars.
 
-**Testing**: Vitest + @testing-library/react + @testing-library/jest-dom/vitest
+### Fiscal Years
+- **List**: `max-w-6xl mx-auto py-8 px-6`, RTL, DataGrid (name, yearNumber, dates, status badge, audit)
+- **Detail**: Info card + periods sub-table + lifecycle actions (Open/Close)
+- **Create**: Form card (name, startDate, endDate)
 
-**Target Platform**: Web (SPA), Arabic-first RTL, dark mode support
+### Document Sequences
+- **List**: DataGrid (name, documentType, currentNumber, resetPolicy, isActive switch), inline edit for name
 
-**Project Type**: Web application frontend (admin UI over existing backend)
+### Currencies
+- **List**: DataGrid (code, name, symbol, decimalPlaces, isBase badge, isActive switch)
+- **Detail**: Info card + edit mode + audit trail
+- **Create**: ISO-4217 picker (from 027) + form
 
-**Performance Goals**: Standard SPA — instant page transitions, <1s data loads
+### Exchange Rates
+- **List**: DataGrid + FilterBar (currency, rateType, date range)
+- **Create**: Form (base/target currency, date, rateType, rate)
 
-**Constraints**: Must use shared UI component library; no per-feature duplicate primitives; all monetary values through MoneyDisplay; RTL layout throughout
+### Closing Entries
+- **List**: DataGrid filtered by fiscal year + status badge
+- **Detail**: Info card + ClosingEntryLines + approve/reverse actions
 
-**Scale/Scope**: 5 admin screens (list/detail/create for each sub-section), ~15 pages total, ~8 hooks, ~6 shared type/client files
+## STATE MATRIX
+
+| Page | Loading | Empty | Error | Unauthorized | Not Found | Normal |
+|------|---------|-------|-------|--------------|-----------|--------|
+| FiscalYears List | Skeleton | "لا توجد سنوات" | Toast | Guard | N/A | DataGrid |
+| FiscalYear Detail | Skeleton | N/A | Error card | Guard | Not found msg | Info + periods + actions |
+| FiscalYear Create | N/A | N/A | Toast | Guard | N/A | Form |
+| DocumentSequences List | Skeleton | "لا توجد تسلسلات" | Toast | Guard | N/A | DataGrid |
+| Currencies List | Skeleton | "لا توجد عملات" | Toast | Guard | N/A | DataGrid |
+| Currency Detail | Skeleton | N/A | Error card | Guard | Not found msg | Info + edit + audit |
+| Currency Create | N/A | N/A | Toast | Guard | N/A | ISO picker + form |
+| ExchangeRates List | Skeleton | "لا توجد أسعار" | Toast | Guard | N/A | DataGrid |
+| ExchangeRate Create | N/A | N/A | Toast | Guard | N/A | Form |
+| ClosingEntries List | Skeleton | "لا توجد قيود إغلاق" | Toast | Guard | N/A | DataGrid |
+| ClosingEntry Detail | Skeleton | N/A | Error card | Guard | Not found msg | Info + lines + actions |
+
+## TEST MAP
+
+| Test ID | File | Description |
+|---------|------|-------------|
+| T-024-001 | FiscalYearsListPage.test.tsx | Status badges render |
+| T-024-002 | FiscalYearDetailPage.test.tsx | Periods table renders |
+| T-024-003 | FiscalYearCreatePage.test.tsx | Form validates |
+| T-024-004 | FiscalYearStatusBadge.test.tsx | 4 status variants |
+| T-024-005 | PeriodLockIndicator.test.tsx | Locked/unlocked |
+| T-024-006 | DocumentSequencesListPage.test.tsx | 10 seeded sequences |
+| T-024-007 | CurrenciesListPage.test.tsx | Activate/deactivate |
+| T-024-008 | CurrencyCreatePage.test.tsx | ISO picker + form |
+| T-024-009 | CurrencyDetailPage.test.tsx | Audit trail |
+| T-024-010 | ExchangeRatesListPage.test.tsx | Filters |
+| T-024-011 | ExchangeRateCreatePage.test.tsx | Form |
+| T-024-012 | ExchangeRateLookup.test.tsx | Effective rate |
+| T-024-013 | ClosingEntriesListPage.test.tsx | Status badges |
+| T-024-014 | ClosingEntryDetailPage.test.tsx | Lines table |
+| T-024-015 | ClosingEntryLines.test.tsx | Balanced totals |
+
+## COMPLETENESS GATE
+
+Every field name from spec.md Field Contract verifiable in implemented source:
+
+```
+FiscalYear: name ✅ yearNumber ✅ startDate ✅ endDate ✅ status ✅ isClosed ✅ closingJournalEntryId ✅
+FiscalPeriod: fiscalYearId ✅ periodNumber ✅ name ✅ startDate ✅ endDate ✅ isLockedForPosting ✅
+DocumentSequence: name ✅ documentType ✅ fiscalYearId ✅ currentNumber ✅ resetPolicy ✅ isActive ✅
+Currency: code ✅ name ✅ symbol ✅ decimalPlaces ✅ roundingPrecision ✅ isBase ✅ isActive ✅
+ExchangeRate: baseCurrencyId ✅ baseCurrencyCode ✅ currencyId ✅ currencyCode ✅ rateDate ✅ rateType ✅ rate ✅ isActive ✅
+ClosingEntry: closingEntryNumber ✅ fiscalYearId ✅ fiscalYearName ✅ closingDate ✅ description ✅ status ✅ isReversal ✅ reversalOfId ✅ journalEntryId ✅
+```
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+| Principle | Status |
+|-----------|--------|
+| I. Layered Architectural Integrity | ✅ PASS |
+| II. Bounded Contexts | ✅ PASS |
+| III. Server-Side Business-Rule Integrity | ✅ PASS |
+| IV. Financial Integrity | ✅ PASS |
+| VII. Authorization | ⚠️ PLACEHOLDER (stub #4) |
+| VIII. Approval Workflows | ✅ PASS |
+| IX. API and Frontend Contract Integrity | ✅ PASS |
+| X. UI and Design System Consistency | ✅ PASS |
+| XI. Testing, Verification, and Evidence | ✅ PASS |
+| XII. Controlled Architectural Change | ✅ PASS |
 
-| Principle | Status | Notes |
-|-----------|--------|-------|
-| I. Layered Architectural Integrity | ✅ PASS | Frontend is separate application consuming HTTP contract only. No backend references. |
-| II. Bounded Contexts | ✅ PASS | Frontend feature folder is self-contained under `features/financial-settings/`. |
-| III. Server-Side Business-Rule Integrity | ✅ PASS | Frontend is delivery adapter only. All business rules enforced server-side. |
-| IV. Financial Integrity | ✅ PASS | No financial calculations in frontend. Backend is source of truth. |
-| V. Budget Control | ✅ PASS | Not applicable — this feature is admin UI, not budget control. |
-| VI. Data Integrity | ✅ PASS | No schema changes. Frontend reads/writes via API contracts. |
-| VII. Authorization | ⚠️ REGISTERED EXCEPTION | Frontend permission stubs (exception #4). Use `usePermission` hook with server as authority. |
-| VIII. Approval Workflows | ✅ PASS | Closing entry approval uses existing backend approval pipeline. |
-| IX. API and Frontend Contract Integrity | ✅ PASS | NSwag-generated clients from OpenAPI spec. Contract-conformant modules. |
-| X. UI and Design System Consistency | ✅ PASS | All design from tokens. Shared component library. RTL throughout. MoneyDisplay for monetary values. |
-| XI. Testing, Verification, and Evidence | ✅ PASS | TDD mandatory. Frontend tests in Vitest. |
-| XII. Controlled Architectural Change | ✅ PASS | No architectural changes — UI-only addition. |
-
-**Gate Result**: PASS. One registered exception (#4 — frontend permission stubs) applies; no new violations.
-
-## Project Structure
-
-### Documentation (this feature)
-
-```text
-specs/024-financial-settings-admin/
-├── plan.md              # This file
-├── research.md          # Phase 0 output
-├── data-model.md        # Phase 1 output
-├── quickstart.md        # Phase 1 output
-├── contracts/           # Phase 1 output (API contract references)
-└── tasks.md             # Phase 2 output (/speckit.tasks — NOT created here)
-```
-
-### Source Code (repository root)
-
-```text
-src/Web/ClientApp/src/features/financial-settings/
-├── shared/
-│   ├── types.ts                    # DTOs, enums, Arabic label maps, filter types
-│   ├── client.ts                   # Hand-written fetch wrapper with cache key factory
-│   └── index.ts                    # Barrel re-export
-├── hooks/
-│   ├── useFiscalYears.ts           # TanStack Query hooks for fiscal year CRUD + lifecycle
-│   ├── useFiscalPeriods.ts         # TanStack Query hooks for period CRUD + lock/unlock
-│   ├── useDocumentSequences.ts     # TanStack Query hooks for sequence CRUD
-│   ├── useCurrencies.ts            # TanStack Query hooks for currency CRUD + activate/deactivate
-│   ├── useExchangeRates.ts         # TanStack Query hooks for rate CRUD + lookup + activate/deactivate
-│   └── useClosingEntries.ts        # TanStack Query hooks for closing entry generate/approve/reverse
-├── components/
-│   ├── FiscalYearStatusBadge.tsx   # Status badge for Draft/Open/SoftClosed/HardClosed
-│   ├── PeriodLockIndicator.tsx     # Lock status indicator for periods
-│   ├── ClosingEntryLines.tsx       # Reviewable closing entry line table
-│   └── ExchangeRateLookup.tsx      # Effective rate resolution display
-├── fiscal-years/
-│   ├── pages/
-│   │   ├── FiscalYearsListPage.tsx
-│   │   ├── FiscalYearDetailPage.tsx
-│   │   └── FiscalYearCreatePage.tsx
-├── document-sequences/
-│   ├── pages/
-│   │   └── DocumentSequencesListPage.tsx
-├── currencies/
-│   ├── pages/
-│   │   ├── CurrenciesListPage.tsx
-│   │   └── CurrencyCreatePage.tsx
-├── exchange-rates/
-│   ├── pages/
-│   │   ├── ExchangeRatesListPage.tsx
-│   │   └── ExchangeRateCreatePage.tsx
-├── closing-entries/
-│   ├── pages/
-│   │   ├── ClosingEntriesListPage.tsx
-│   │   └── ClosingEntryDetailPage.tsx
-└── __tests__/
-    ├── FiscalYearsListPage.test.tsx
-    ├── FiscalYearDetailPage.test.tsx
-    ├── FiscalYearCreatePage.test.tsx
-    ├── DocumentSequencesListPage.test.tsx
-    ├── CurrenciesListPage.test.tsx
-    ├── CurrencyCreatePage.test.tsx
-    ├── ExchangeRatesListPage.test.tsx
-    ├── ExchangeRateCreatePage.test.tsx
-    ├── ClosingEntriesListPage.test.tsx
-    ├── ClosingEntryDetailPage.test.tsx
-    ├── FiscalYearStatusBadge.test.tsx
-    ├── PeriodLockIndicator.test.tsx
-    ├── ClosingEntryLines.test.tsx
-    └── ExchangeRateLookup.test.tsx
-```
-
-**Structure Decision**: Single frontend feature folder `features/financial-settings/` following the established budgeting pattern. Five sub-section folders for each admin area. Shared types/client at feature root. Components for reusable UI elements. Tests alongside pages.
-
-## Post-Design Constitution Re-Check
-
-**Gate Result (post-Phase 1)**: PASS. No new violations introduced by design.
-
-- **I. Layered Architectural Integrity**: ✅ Frontend consumes HTTP contract only. No backend references.
-- **III. Server-Side Business-Rule Integrity**: ✅ All business rules enforced server-side. Frontend is delivery adapter.
-- **IV. Financial Integrity**: ✅ No financial calculations in frontend. Closing entry lines are display-only.
-- **VII. Authorization**: ⚠️ Registered exception #4 still applies (frontend permission stubs). All actions declare required permission codes for future enforcement.
-- **IX. API and Frontend Contract Integrity**: ✅ Hand-written clients mirror published OpenAPI contract exactly.
-- **X. UI and Design System Consistency**: ✅ All design from tokens. Shared component library. RTL throughout.
-- **XI. Testing, Verification, and Evidence**: ✅ TDD mandatory. Frontend tests in Vitest.
-
-## Complexity Tracking
-
-No violations. No complexity tracking needed.
+**Gate**: PASS

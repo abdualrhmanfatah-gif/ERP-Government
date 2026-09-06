@@ -35,6 +35,8 @@ export const PERMISSIONS = {
   DocumentSequences: {
     View: 'DocumentSequences.View',
     Create: 'DocumentSequences.Create',
+    Update: 'DocumentSequences.Update',
+    Deactivate: 'DocumentSequences.Deactivate',
   },
   ClosingEntries: {
     View: 'ClosingEntries.View',

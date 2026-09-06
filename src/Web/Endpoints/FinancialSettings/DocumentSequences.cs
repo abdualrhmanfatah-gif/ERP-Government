@@ -29,12 +29,12 @@ public class DocumentSequences : IEndpointGroup
         groupBuilder.MapPut("/{id:int}", UpdateDocumentSequence)
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
-            .RequireAuthorization(PermissionCodes.DocumentSequencesCreate);
+            .RequireAuthorization(PermissionCodes.DocumentSequencesUpdate);
 
         groupBuilder.MapPost("/{id:int}/deactivate", DeactivateDocumentSequence)
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
-            .RequireAuthorization(PermissionCodes.DocumentSequencesCreate);
+            .RequireAuthorization(PermissionCodes.DocumentSequencesDeactivate);
     }
 
     [EndpointSummary("Get all document sequences")]
