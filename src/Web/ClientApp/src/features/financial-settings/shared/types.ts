@@ -116,6 +116,10 @@ export interface CurrencyDto {
   isBase: boolean;
   isActive: boolean;
   rowVersion: string;
+  createdAt?: string;
+  createdBy?: string;
+  modifiedAt?: string;
+  modifiedBy?: string;
 }
 
 export interface Iso4217CodeDto {
