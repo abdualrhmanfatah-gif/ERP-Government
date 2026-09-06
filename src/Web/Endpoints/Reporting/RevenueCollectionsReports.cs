@@ -1,6 +1,7 @@
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Reporting.RevenueCollections.GetRevenueCollectionsDetail;
 using ERP_Government.Application.Reporting.RevenueCollections.GetRevenueCollectionsReport;
+using ERP_Government.Application.Reporting.Common;
 using ERP_Government.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -52,27 +53,7 @@ public class RevenueCollectionsReports : IEndpointGroup
             ? (ERP_Government.Application.Accounting.Reports.Common.IReportExporter)new ERP_Government.Infrastructure.Services.PdfReportExporter()
             : new ERP_Government.Infrastructure.Services.ExcelReportExporter();
 
-        var reportResult = new ERP_Government.Application.Accounting.Reports.Common.ReportResult
-        {
-            Currency = "SAR",
-            GeneratedAt = DateTimeOffset.UtcNow,
-            Sections =
-            [
-                new ERP_Government.Application.Accounting.Reports.Common.ReportSection
-                {
-                    Title = "Revenue Collections",
-                    Lines = result.Lines.Select(l => new ERP_Government.Application.Accounting.Reports.Common.ReportLine
-                    {
-                        AccountCode = l.AccountCode,
-                        AccountName = $"{l.AccountName} - {l.PartyName}",
-                        Debit = l.Amount,
-                        Credit = 0,
-                        Balance = l.Amount
-                    }).ToList(),
-                    Total = result.Totals.TotalAmount
-                }
-            ]
-        };
+        var reportResult = result.ToReportResult();
 
         await exporter.ExportExcelAsync(reportResult, "Revenue Collections", stream);
         stream.Position = 0;

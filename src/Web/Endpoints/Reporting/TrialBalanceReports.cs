@@ -1,6 +1,7 @@
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Reporting.TrialBalance.GetLedgerMovement;
 using ERP_Government.Application.Reporting.TrialBalance.GetTrialBalanceReport;
+using ERP_Government.Application.Reporting.Common;
 using ERP_Government.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -52,27 +53,7 @@ public class TrialBalanceReports : IEndpointGroup
             ? (ERP_Government.Application.Accounting.Reports.Common.IReportExporter)new ERP_Government.Infrastructure.Services.PdfReportExporter()
             : new ERP_Government.Infrastructure.Services.ExcelReportExporter();
 
-        var reportResult = new ERP_Government.Application.Accounting.Reports.Common.ReportResult
-        {
-            Currency = "SAR",
-            GeneratedAt = DateTimeOffset.UtcNow,
-            Sections =
-            [
-                new ERP_Government.Application.Accounting.Reports.Common.ReportSection
-                {
-                    Title = $"Trial Balance — {result.FiscalYearName}",
-                    Lines = result.Lines.Select(l => new ERP_Government.Application.Accounting.Reports.Common.ReportLine
-                    {
-                        AccountCode = l.AccountCode,
-                        AccountName = $"{l.AccountName} [{l.AccountType}]",
-                        Debit = l.DebitTotal,
-                        Credit = l.CreditTotal,
-                        Balance = l.ClosingBalance
-                    }).ToList(),
-                    Total = result.Totals.TotalClosingBalance
-                }
-            ]
-        };
+        var reportResult = result.ToReportResult();
 
         await exporter.ExportExcelAsync(reportResult, "Trial Balance", stream);
         stream.Position = 0;

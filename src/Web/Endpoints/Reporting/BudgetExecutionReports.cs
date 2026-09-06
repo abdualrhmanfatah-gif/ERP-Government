@@ -1,6 +1,7 @@
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Reporting.BudgetExecution.GetBudgetExecutionDetail;
 using ERP_Government.Application.Reporting.BudgetExecution.GetBudgetExecutionReport;
+using ERP_Government.Application.Reporting.Common;
 using ERP_Government.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -52,27 +53,7 @@ public class BudgetExecutionReports : IEndpointGroup
             ? (ERP_Government.Application.Accounting.Reports.Common.IReportExporter)new ERP_Government.Infrastructure.Services.PdfReportExporter()
             : new ERP_Government.Infrastructure.Services.ExcelReportExporter();
 
-        var reportResult = new ERP_Government.Application.Accounting.Reports.Common.ReportResult
-        {
-            Currency = "SAR",
-            GeneratedAt = DateTimeOffset.UtcNow,
-            Sections =
-            [
-                new ERP_Government.Application.Accounting.Reports.Common.ReportSection
-                {
-                    Title = "Budget Execution",
-                    Lines = result.Lines.Select(l => new ERP_Government.Application.Accounting.Reports.Common.ReportLine
-                    {
-                        AccountCode = l.ItemCode,
-                        AccountName = $"{l.ItemName} - {l.FundNumber}",
-                        Debit = l.PaidAmount,
-                        Credit = 0,
-                        Balance = l.AvailableAmount
-                    }).ToList(),
-                    Total = result.Totals.AvailableAmount
-                }
-            ]
-        };
+        var reportResult = result.ToReportResult();
 
         await exporter.ExportExcelAsync(reportResult, "Budget Execution", stream);
         stream.Position = 0;
