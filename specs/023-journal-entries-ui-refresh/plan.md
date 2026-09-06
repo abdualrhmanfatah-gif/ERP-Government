@@ -6,98 +6,196 @@
 
 ## Summary
 
-Replace the broken Move-based accounting screens (MovesListPage/MoveCreatePage/MoveDetailPage) with JournalEntry-based pages using the renamed `/api/JournalEntries` NSwag client. Three pages: list (status badges, filters), create (line editor + dimension pickers + balance guard), detail (lines + lifecycle + reversal link). Reuse shared LifecycleActions, ApprovalsPanel, StatusLogPanel from budgeting/documents features.
+Replace the broken Move-based accounting screens (MovesListPage/MoveCreatePage/MoveDetailPage) with JournalEntry-based pages using the renamed `/api/JournalEntries` NSwag client. Three pages: list (status badges, filters), create (line editor + dimension pickers + balance guard), detail (lines + lifecycle + reversal link). Reuse shared ApprovalsPanel, StatusLogPanel from documents feature.
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x (React 19, Vite)
 
-**Primary Dependencies**: React 19, react-router-dom, react-hook-form, zod, TanStack Query (React Query), NSwag-generated `JournalEntriesClient`
+**Primary Dependencies**: React 19, react-router-dom, react-hook-form, zod, TanStack Query, NSwag-generated `JournalEntriesClient`
 
-**Storage**: N/A (frontend only — consumes backend API)
-
-**Testing**: Vitest + React Testing Library (per `npm run test` in ClientApp)
+**Testing**: Vitest + React Testing Library
 
 **Target Platform**: Web (SPA), Arabic-first RTL, dark mode
 
-**Project Type**: Web application (frontend feature replacement)
+## FIELD-COVERAGE TABLE
 
-**Performance Goals**: List load < 2s (SC-001), entry creation < 3 min for 5 lines (SC-002)
+Every field name from spec.md → screen → component → editable/read-only → formatter → permission.
 
-**Constraints**: Must reuse existing shared components; no new design tokens; RTL/dark mode compliant; zero Move/MoveLine references post-implementation
+### JournalEntry Header
 
-**Scale/Scope**: 3 pages, ~12 components, ~8 hooks, ~4 test files
+| Field | Screen | Component | Mode | Formatter | Permission |
+|-------|--------|-----------|------|-----------|------------|
+| `entryNumber` | List, Detail | DataGrid col, Header card | Read-only | Plain text + isSystemGenerated badge | Read |
+| `ref` | List (search), Create, Detail | Input, Header card | Read/Write | Plain text | Read |
+| `documentDate` | List, Create, Detail | DataGrid col, Input, Header card | Read/Write | `toLocaleDateString('ar-YE')` | Read |
+| `postingDate` | Detail | Header card | Read-only | `toLocaleDateString('ar-YE')` | Read |
+| `entryType` | Create, Detail | Select, Header card | Read/Write (create only) | Arabic label map | Read |
+| `journalId` | List (filter), Create, Detail | Select, DataGrid col, Header card | Read/Write (create only) | journalName display | Read |
+| `periodId` | List (filter), Detail | Header card | Read-only (auto-resolved) | periodName display | Read |
+| `fiscalYearId` | List (filter), Detail | Header card | Read-only (auto-resolved) | fiscalYearName display | Read |
+| `narration` | Create, Detail | Textarea, Header card | Read/Write | Plain text | Read |
+| `sourceEventId` | Detail | Source badge | Read-only | Badge + link | Read |
+| `isSystemGenerated` | List, Detail | Badge, Header card | Read-only | "نظام" badge | Read |
+| `rowVersion` | Create, Detail | Hidden (optimistic) | Read-only | Conflict toast + refetch | Read |
+| `reversalOfId` | Detail | Reversal link | Read-only | Link to original | Read |
+| `reversalReason` | Detail | Reversal card | Read-only | Plain text | Read |
+
+### JournalEntryLine
+
+| Field | Screen | Component | Mode | Formatter | Permission |
+|-------|--------|-----------|------|-----------|------------|
+| `sequence` | Create (table), Detail (table) | Table col # | Auto-order | Integer | Read |
+| `accountId` | Create (editor), Detail (table) | Select, Table col | Read/Write (create only) | accountCode + accountName | Read |
+| `description` | Create (editor), Detail (table) | Input, Table col | Read/Write (create only) | Plain text | Read |
+| `currencyId` | Create (editor) | Select | Read/Write (create only) | code display | Read |
+| `exchangeRate` | Create (editor) | Input | Read/Write (create only) | Number | Read |
+| `debit` | Create (editor), Detail (table), List (aggregated) | Input, Table col | Read/Write (create only) | `toLocaleString('ar-YE')` | Read |
+| `credit` | Create (editor), Detail (table), List (aggregated) | Input, Table col | Read/Write (create only) | `toLocaleString('ar-YE')` | Read |
+| `costCenterId` | Create (editor), Detail (table) | DimensionPickers | Read/Write (create only) | costCenterName | Read |
+| `fundId` | Create (editor), Detail (table) | DimensionPickers | Read/Write (create only) | fundName | Read |
+| `projectId` | Create (editor), Detail (table) | DimensionPickers | Read/Write (create only) | projectName | Read |
+| `budgetItemId` | Create (editor), Detail (table) | DimensionPickers | Read/Write (create only) | budgetItemCode | Read |
+| `encumbranceId` | Create (editor), Detail (table) | DimensionPickers | Read/Write (create only) | encumbranceNumber | Read |
+| `paymentOrderId` | Create (editor), Detail (table) | DimensionPickers | Read/Write (create only) | paymentOrderNumber | Read |
+| `id` (lineId) | Create (remove), Detail | Hidden | Read-only | Long identifier | UpdateLines |
+
+### List Aggregates
+
+| Field | Screen | Component | Mode | Formatter | Permission |
+|-------|--------|-----------|------|-----------|------------|
+| `totalDebit` | List, Detail | DataGrid col, BalanceIndicator | Read-only (computed) | `toLocaleString('ar-YE')` | Read |
+| `totalCredit` | List, Detail | DataGrid col, BalanceIndicator | Read-only (computed) | `toLocaleString('ar-YE')` | Read |
+
+## DESIGN SECTION
+
+**Design tokens source**: DESIGN.md + tokens.ts (read before any UI work).
+
+### List Page (`JournalEntriesListPage.tsx`)
+
+- **Layout**: `max-w-6xl mx-auto py-8 px-6`, RTL `dir="rtl"`
+- **Header**: Title + subtitle + "New Entry" button
+- **Filter bar**: Status chips (pill buttons with color toggle), search input
+- **DataGrid**: Columns — entryNumber (mono font + isSystemGenerated badge), documentDate (locale date), entryStatus (StatusBadge), journalName, totalDebit, totalCredit
+- **Tokens**: `var(--color-surface)`, `var(--color-primary)`, `var(--color-on-primary)`, `var(--color-outlineVariant)`, `var(--color-focus-ring)`
+- **RTL**: All text naturally RTL via dir="rtl"; table headers use `text-right`/`text-left` for number alignment
+- **Dark mode**: All via CSS vars — no hardcoded colors
+- **Components reused**: DataGrid, StatusBadge, FilterBar (pattern)
+
+### Create Page (`JournalEntryCreatePage.tsx`)
+
+- **Layout**: `max-w-6xl mx-auto py-8 px-6`, RTL
+- **Header form card**: documentDate, journalId, entryType, baseCurrencyId, ref, narration
+- **Line editor card**: Table of lines + "Add Line" button + inline editing form
+- **Balance card**: BalanceIndicator component
+- **Dimension pickers**: DimensionPickers component (fund, project, budgetItem, encumbrance, paymentOrder)
+- **Submit**: Bottom action bar with save + cancel buttons
+- **Tokens**: Same as list; `var(--color-secondary-container)` for add line button
+- **RTL**: Form labels above inputs, grid layout
+
+### Detail Page (`JournalEntryDetailPage.tsx`)
+
+- **Layout**: `max-w-6xl mx-auto py-8 px-6`, RTL
+- **Header card**: entryNumber + isSystemGenerated badge + documentDate + StatusBadge
+- **Info grid**: periodName, fiscalYearName, journalName, narration, ref, postedBy, cancelledBy
+- **Lines table**: Same columns as create view
+- **Actions card**: Lifecycle buttons (submit/approve/post/reverse/cancel) contextual to status
+- **Reversal card**: Bidirectional link when applicable
+- **Status log**: StatusLogPanel (from documents)
+- **Approvals**: ApprovalsPanel (from documents, shown for Submitted/Approved)
+- **Conflict toast**: 409 handling with refetch
+
+### Components (existing/reused)
+
+- `StatusBadge` — EntryStatus → colored badge (new, in accounting/components)
+- `BalanceIndicator` — Running debit/credit totals (existing)
+- `ReverseDialog` — Reverse confirmation with reason (existing, updated types)
+- `DimensionPickers` — Fund/project/budgetItem/encumbrance/paymentOrder (new, in accounting/components)
+- `ApprovalsPanel` — From documents feature (reused)
+- `StatusLogPanel` — From documents feature (reused)
+
+## STATE MATRIX
+
+| Page | Loading | Empty | Error | Unauthorized | Not Found | Normal |
+|------|---------|-------|-------|--------------|-----------|--------|
+| List | Skeleton rows | "لا توجد قيود" empty state | Error toast | Permission guard hides page | N/A | DataGrid with status chips, search, filters |
+| Create | N/A | N/A | Toast on submit error | Permission guard hides "New Entry" button | N/A | Header form + line editor + balance indicator |
+| Detail | Spinner "جاري تحميل القيد..." | N/A | Error card "خطأ في تحميل القيد" + back link | Permission guard hides action buttons | "القيد غير موجودة" + back link | Header card + lines table + actions + status log + approvals |
+
+## TEST MAP
+
+One Vitest behavior test per expected test item.
+
+| Spec Test ID | File | Test Description | Asserts |
+|-------------|------|-----------------|---------|
+| T-023-001 | JournalEntriesListPage.test.tsx | Renders entries with status badges | StatusBadge rendered for each entry |
+| T-023-002 | JournalEntriesListPage.test.tsx | Status filter returns matching entries | Filtered entries match status |
+| T-023-003 | JournalEntriesListPage.test.tsx | Number search filters by entryNumber/ref | Search matches entryNumber |
+| T-023-004 | JournalEntriesListPage.test.tsx | Empty state shows message | "لا توجد قيود" text present |
+| T-023-005 | JournalEntriesListPage.test.tsx | Zero Move/MoveLine references | No "Move" or "MoveLine" in DOM |
+| T-023-006 | JournalEntryCreatePage.test.tsx | Form renders header fields and line editor | Form fields present |
+| T-023-007 | JournalEntryLinesEditor.test.tsx | Debit XOR credit validation | Both-set and both-zero blocked |
+| T-023-008 | JournalEntryCreatePage.test.tsx | Balanced lines enable submit | Submit enabled when balanced |
+| T-023-009 | JournalEntryCreatePage.test.tsx | Unbalanced lines block submit | Submit disabled when unbalanced |
+| T-023-010 | DimensionPickers.test.tsx | Dimension pickers load reference data | Pickers render with data |
+| T-023-011 | JournalEntryDetailPage.test.tsx | Header shows entry number/date/status/totals | Values rendered correctly |
+| T-023-012 | JournalEntryDetailPage.test.tsx | Lines table renders with dimensions | Lines rows present |
+| T-023-013 | JournalEntryDetailPage.test.tsx | Lifecycle buttons appear based on status | Correct buttons per status |
+| T-023-014 | JournalEntryDetailPage.test.tsx | Posted entries show no edit/delete | No edit/delete buttons |
+| T-023-015 | JournalEntryDetailPage.test.tsx | Status log panel shows transitions | StatusLogPanel rendered |
+| T-023-016 | JournalEntryDetailPage.test.tsx | Reversed entry shows link to reversal | Reversal link present |
+| T-023-017 | JournalEntryDetailPage.test.tsx | Reversal entry shows link to original | Original link present |
+| T-023-018 | StatusBadge.test.tsx | Renders correct color per status | CSS class per status |
+
+## COMPLETENESS GATE
+
+Every field name from spec.md Field Contract must appear in implemented source. Converge verifies each:
+
+```
+entryNumber → JournalEntriesListPage.tsx (col), JournalEntryDetailPage.tsx (header)
+ref → JournalEntriesListPage.tsx (search), JournalEntryCreatePage.tsx (input), JournalEntryDetailPage.tsx (display)
+documentDate → JournalEntriesListPage.tsx (col), JournalEntryCreatePage.tsx (input), JournalEntryDetailPage.tsx (display)
+postingDate → JournalEntryDetailPage.tsx (display)
+entryType → JournalEntryCreatePage.tsx (select), JournalEntryDetailPage.tsx (display via entryType)
+journalId → JournalEntryCreatePage.tsx (select), JournalEntriesListPage.tsx (filter + col)
+periodId → JournalEntryCreatePage.tsx (auto-resolve), JournalEntryDetailPage.tsx (display)
+fiscalYearId → JournalEntryCreatePage.tsx (auto-resolve), JournalEntryDetailPage.tsx (display)
+narration → JournalEntryCreatePage.tsx (textarea), JournalEntryDetailPage.tsx (display)
+sourceEventId → (badge + link in detail, if present)
+isSystemGenerated → JournalEntriesListPage.tsx (badge), JournalEntryDetailPage.tsx (badge)
+rowVersion → useJournalEntries.ts (optimistic concurrency)
+reversalOfId → JournalEntryDetailPage.tsx (reversal link)
+reversalReason → JournalEntryDetailPage.tsx (reversal card)
+sequence → JournalEntryCreatePage.tsx (line table), JournalEntryDetailPage.tsx (line table)
+accountId → JournalEntryCreatePage.tsx (line editor), JournalEntryDetailPage.tsx (line table)
+description → JournalEntryCreatePage.tsx (line editor), JournalEntryDetailPage.tsx (line table)
+currencyId → JournalEntryCreatePage.tsx (line editor)
+exchangeRate → JournalEntryCreatePage.tsx (line editor)
+debit → JournalEntryCreatePage.tsx (line editor), JournalEntryDetailPage.tsx (line table), JournalEntriesListPage.tsx (totalDebit)
+credit → JournalEntryCreatePage.tsx (line editor), JournalEntryDetailPage.tsx (line table), JournalEntriesListPage.tsx (totalCredit)
+costCenterId → JournalEntryCreatePage.tsx (DimensionPickers)
+fundId → JournalEntryCreatePage.tsx (DimensionPickers), JournalEntryDetailPage.tsx (dimension display)
+projectId → JournalEntryCreatePage.tsx (DimensionPickers), JournalEntryDetailPage.tsx (dimension display)
+budgetItemId → JournalEntryCreatePage.tsx (DimensionPickers), JournalEntryDetailPage.tsx (dimension display)
+encumbranceId → JournalEntryCreatePage.tsx (DimensionPickers), JournalEntryDetailPage.tsx (dimension display)
+paymentOrderId → JournalEntryCreatePage.tsx (DimensionPickers), JournalEntryDetailPage.tsx (dimension display)
+lineId (id) → JournalEntryCreatePage.tsx (remove by index), JournalEntryDetailPage.tsx (key)
+```
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-
 | Principle | Status | Notes |
 |---|---|---|
-| I. Layered Architectural Integrity | ✅ PASS | Frontend consumes HTTP contract only; no business logic in UI |
-| II. Bounded Contexts | ✅ PASS | Accounting feature is self-contained; reuses shared components from documents/budgeting |
-| III. Server-Side Business-Rule Integrity | ✅ PASS | Balance validation, lifecycle transitions enforced server-side; frontend shows errors |
-| IV. Financial Integrity | ✅ PASS | Balance guard in UI is UX only; server enforces at post time |
-| V. Budget Control | ✅ PASS | N/A for this feature (no budget operations) |
-| VI. Data Integrity | ✅ PASS | Optimistic concurrency via RowVersion round-trip (FR-016) |
-| VII. Authorization and SoD | ⚠️ PLACEHOLDER | Frontend permission checks are UX only (Registered Exception #1); server is authority |
-| VIII. Approval Workflows | ✅ PASS | Reuses ApprovalsPanel/StatusLogPanel from documents feature |
-| IX. API and Frontend Contract Integrity | ✅ PASS | Uses NSwag-generated JournalEntriesClient; no hand-written client needed |
-| X. UI and Design System Consistency | ✅ PASS | Reuses shared UI components; design tokens from central source; RTL compliant |
-| XI. Testing, Verification, and Evidence | ✅ PASS | TDD mandatory; frontend tests required |
-| XII. Controlled Architectural Change | ✅ PASS | No layer/module boundary changes |
+| I. Layered Architectural Integrity | ✅ PASS | Frontend consumes HTTP contract only |
+| II. Bounded Contexts | ✅ PASS | Accounting feature self-contained |
+| III. Server-Side Business-Rule Integrity | ✅ PASS | Balance/lifecycle enforced server-side |
+| IV. Financial Integrity | ✅ PASS | Balance guard is UX only |
+| VI. Data Integrity | ✅ PASS | Optimistic concurrency via RowVersion |
+| VII. Authorization and SoD | ⚠️ PLACEHOLDER | Permission checks are UX only |
+| VIII. Approval Workflows | ✅ PASS | Reuses ApprovalsPanel/StatusLogPanel |
+| IX. API and Frontend Contract Integrity | ✅ PASS | Uses NSwag JournalEntriesClient |
+| X. UI and Design System Consistency | ✅ PASS | Design tokens from central source |
+| XI. Testing, Verification, and Evidence | ✅ PASS | TDD mandatory |
+| XII. Controlled Architectural Change | ✅ PASS | No boundary changes |
 
-**Gate result**: PASS — no violations to justify.
-
-## Project Structure
-
-### Documentation (this feature)
-
-```text
-specs/023-journal-entries-ui-refresh/
-├── plan.md              # This file
-├── research.md          # Phase 0 output
-├── data-model.md        # Phase 1 output
-├── quickstart.md        # Phase 1 output
-├── contracts/           # Phase 1 output
-└── tasks.md             # Phase 2 output (/speckit.tasks)
-```
-
-### Source Code (repository root)
-
-```text
-src/Web/ClientApp/src/
-├── features/accounting/
-│   ├── pages/
-│   │   ├── JournalEntriesListPage.tsx       # REPLACE MovesListPage
-│   │   ├── JournalEntryCreatePage.tsx       # REPLACE MoveCreatePage
-│   │   ├── JournalEntryDetailPage.tsx       # REPLACE MoveDetailPage
-│   │   ├── AccountsListPage.tsx             # KEEP (unchanged)
-│   │   ├── AccountCreatePage.tsx            # KEEP (unchanged)
-│   │   ├── AccountDetailPage.tsx            # KEEP (unchanged)
-│   │   └── AccountEditPage.tsx              # KEEP (unchanged)
-│   ├── components/
-│   │   ├── JournalEntriesGrid.tsx           # NEW (replaces MovesGrid)
-│   │   ├── JournalEntryHeaderForm.tsx       # NEW (replaces MoveForm)
-│   │   ├── JournalEntryLinesEditor.tsx      # NEW (replaces MoveLinesEditor)
-│   │   ├── JournalEntryDetail.tsx           # NEW (replaces MoveDetail)
-│   │   ├── StatusBadge.tsx                  # NEW (EntryStatus → colored badge)
-│   │   ├── BalanceIndicator.tsx             # KEEP (existing, minor updates)
-│   │   ├── ReverseDialog.tsx                # KEEP (existing, update types)
-│   │   ├── FiscalYearIndicator.tsx          # KEEP (existing)
-│   │   └── DimensionPickers.tsx             # NEW (fund/project/budgetItem/encumbrance/paymentOrder)
-│   ├── hooks/
-│   │   ├── useJournalEntries.ts             # NEW (replaces useMoves.ts)
-│   │   ├── useJournalEntryLines.ts          # NEW (replaces useMoveLines.ts)
-│   │   └── [existing hooks unchanged]
-│   ├── types.ts                             # UPDATE (replace MoveDto → JournalEntryDto types)
-│   └── index.ts                             # UPDATE (export new pages)
-├── app/routes.tsx                           # UPDATE (swap component imports)
-└── web-api-client.ts                        # NO CHANGE (NSwag-generated, already has JournalEntriesClient)
-```
-
-**Structure Decision**: Frontend feature replacement within existing `features/accounting/` folder. No new directories; replaces Move-based files with JournalEntry-based equivalents.
-
-## Complexity Tracking
-
-> No violations — section empty.
+**Gate result**: PASS

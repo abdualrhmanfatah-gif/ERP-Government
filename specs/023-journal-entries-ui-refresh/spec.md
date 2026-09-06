@@ -116,6 +116,48 @@ An accountant viewing a reversed journal entry can see a link to its reversal en
 - **FR-018**: System MUST display lifecycle action buttons contextual to valid transitions — only actions permitted from the current status are shown
 - **FR-019**: System MUST display a journal entry detail view containing: header (entry number, date, status badge, total debits, total credits), lines table (account, debit/credit, amount, description, analytic dimensions), status history panel, approval history panel, lifecycle action buttons, and a reversal link when applicable
 
+### Permissions
+
+- **FR-PERM-001**: `Accounting.JournalEntries.Read` — View list + detail; required for all journal entry pages
+- **FR-PERM-002**: `Accounting.JournalEntries.Create` — Create new journal entry; controls "New Entry" button visibility
+- **FR-PERM-003**: `Accounting.JournalEntries.UpdateLines` — Add/edit/remove lines on Draft entries; controls line editor visibility
+- **FR-PERM-004**: `Accounting.JournalEntries.Submit` — Submit Draft→Submitted; controls Submit button
+- **FR-PERM-005**: `Accounting.JournalEntries.Approve` — Approve Submitted→Approved; controls Approve button
+- **FR-PERM-006**: `Accounting.JournalEntries.Post` — Post Approved→Posted; controls Post button
+- **FR-PERM-007**: `Accounting.JournalEntries.Reverse` — Reverse Posted→Reversed; controls Reverse button + dialog
+- **FR-PERM-008**: `Accounting.JournalEntries.Cancel` — Cancel Draft/Submitted→Cancelled; controls Cancel button
+
+### UI States Required
+
+| Page | Loading | Empty | Error | Unauthorized | Not Found | Normal |
+|------|---------|-------|-------|--------------|-----------|--------|
+| List | Skeleton rows | "لا توجد قيود" message | Error toast | Permission guard hides page | N/A | DataGrid with status chips |
+| Create | N/A | N/A | Toast on submit error | Permission guard hides "New Entry" | N/A | Form with header + line editor + balance indicator |
+| Detail | Spinner + "جاري تحميل القيد..." | N/A | Error card + back link | Permission guard hides actions | "القيد غير موجودة" + back link | Header card + lines table + actions + status log + approvals |
+
+### Tests Expected
+
+| ID | Page | Test Description |
+|----|------|-----------------|
+| T-023-001 | List | Renders entries with correct status badges |
+| T-023-002 | List | Status filter returns matching entries |
+| T-023-003 | List | Number search filters by entryNumber/ref |
+| T-023-004 | List | Empty state shows message when no results |
+| T-023-005 | List | Zero Move/MoveLine references in DOM |
+| T-023-006 | Create | Form renders header fields and line editor |
+| T-023-007 | Create | Debit XOR credit validation on lines |
+| T-023-008 | Create | Balanced lines enable submit |
+| T-023-009 | Create | Unbalanced lines block submit with error |
+| T-023-010 | Create | Dimension pickers load reference data |
+| T-023-011 | Detail | Header shows entry number/date/status/totals |
+| T-023-012 | Detail | Lines table renders with dimensions |
+| T-023-013 | Detail | Lifecycle buttons appear based on status |
+| T-023-014 | Detail | Posted entries show no edit/delete |
+| T-023-015 | Detail | Status log panel shows transitions |
+| T-023-016 | Detail | Reversed entry shows link to reversal |
+| T-023-017 | Detail | Reversal entry shows link to original |
+| T-023-018 | Shared | StatusBadge renders correct color per status |
+
 ### Key Entities
 
 - **JournalEntry**: An accounting journal entry with status lifecycle (Draft → Submitted → Approved → Posted → Reversed, with Cancel from Draft/Submitted), linked to optional reversal entries, carrying analytic dimensions context
@@ -123,6 +165,63 @@ An accountant viewing a reversed journal entry can see a link to its reversal en
 - **EntryStatus**: Lifecycle status enum — Draft, Submitted, Approved, Posted, Reversed, Cancelled
 - **ApprovalHistory**: Record of each lifecycle decision with actor, decision, timestamp, reason, and rule evaluation snapshot
 - **DocumentStatusLog**: Append-only log of every status transition for audit trail
+
+### Field Contract
+
+#### JournalEntry Header Fields
+
+| Field | Type | Editable | Notes |
+|-------|------|----------|-------|
+| `entryNumber` | string | No (issued at creation) | System-generated, displayed in list + detail |
+| `ref` | string? | Yes (create + edit) | Optional reference |
+| `documentDate` | Date | Yes (create + edit) | Required |
+| `postingDate` | Date? | No (set at post) | Read-only |
+| `entryType` | string | Yes (create) | Standard/Reversing/Adjusting |
+| `journalId` | number? | Yes (create) | Journal picker |
+| `periodId` | number | No (auto-resolved) | Resolved from documentDate |
+| `fiscalYearId` | number | No (auto-resolved) | Resolved from documentDate |
+| `narration` | string? | Yes (create + edit) | Optional description |
+| `sourceEventId` | number? | No | Source badge + link (read-only) |
+| `isSystemGenerated` | boolean | No | Read-only lock badge |
+| `rowVersion` | string | No (optimistic concurrency) | Conflict detection |
+| `reversalOfId` | number? | No | Bidirectional reversal link |
+| `reversalReason` | string? | No (set at reverse) | Required on reverse |
+| `postedById` / `postedByName` | number? / string? | No | Audit (set at post) |
+| `postedAt` | Date? | No | Audit (set at post) |
+| `cancelledById` / `cancelledByName` | number? / string? | No | Audit (set at cancel) |
+| `cancelledAt` | Date? | No | Audit (set at cancel) |
+
+#### JournalEntryLine Fields
+
+| Field | Type | Editable | Notes |
+|-------|------|----------|-------|
+| `sequence` | number | Yes (auto-order) | Line sequence number |
+| `accountId` | number | Yes (required) | Account picker |
+| `description` | string? | Yes | Line description |
+| `currencyId` | number | Yes | Currency picker |
+| `exchangeRate` | number | Yes | Exchange rate |
+| `debit` | number | Yes (XOR credit) | Debit amount |
+| `credit` | number | Yes (XOR debit) | Credit amount |
+| `costCenterId` | number? | Yes (optional) | Dimension picker |
+| `fundId` | number? | Yes (optional) | Dimension picker |
+| `projectId` | number? | Yes (optional) | Dimension picker |
+| `budgetItemId` | number? | Yes (optional) | Dimension picker |
+| `encumbranceId` | number? | Yes (optional) | Dimension picker |
+| `paymentOrderId` | number? | Yes (optional) | Dimension picker |
+| `id` (lineId) | long | No (server-assigned) | Line identifier for update/remove |
+
+#### Line Constraints
+
+- **Debit XOR Credit**: A line MUST have exactly one of debit or credit set. Both-zero invalid. Both-set invalid. Exact client messages: "يجب أن يكون السطر مدين أو دائن فقط" (both set) / "يجب إدخال مبلغ مدين أو دائن" (both zero).
+- **Line Operations (Draft only)**: create line, update line, remove line (by long lineId). Lines are immutable after submit.
+
+#### List View Columns
+
+Entry number, documentDate, status badge (StatusBadge component), journalName, totalDebit, totalCredit. Sorted newest first (entryNumber descending).
+
+#### List Filters
+
+status chips (Draft/Submitted/Approved/Posted/Reversed/Cancelled/All), number search (by entryNumber/ref), period filter, fund filter. AND logic when multiple active.
 
 ## Success Criteria *(mandatory)*
 
