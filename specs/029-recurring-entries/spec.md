@@ -66,8 +66,8 @@ As an accountant, I want to view schedule details including the last generated e
 - End date before start date → reject with validation error.
 - Schedule execution falls in a closed fiscal period → server-side rejection.
 - Schedule reaches its endDate → transition to Completed automatically.
-- Cancel on a Completed schedule → reject (schedule already terminal).
-- Schedule with no template and no amount → generation source unclear, flag for user.
+- Cancel on a Completed or Cancelled schedule → reject (schedule already terminal).
+- Schedule with no template and no amount → reject creation.
 
 ## Requirements
 
@@ -85,26 +85,29 @@ As an accountant, I want to view schedule details including the last generated e
 - **FR-010**: System MUST reject schedule execution in a closed fiscal period server-side.
 - **FR-011**: System MUST support template-based schedule creation (templateId optional) — no manual line items.
 - **FR-012**: System MUST persist the full set of dimensional fields: currency, fund, cost center, project (all optional per schedule).
-- **FR-013**: System MUST reject duplicate control actions (pause on Paused, resume on Active).
+- **FR-013**: System MUST reject duplicate control actions (pause on Paused, resume on Active, pause/resume/cancel on Cancelled or Completed).
 - **FR-014**: System MUST record the lastExecutedAt timestamp when a schedule generates an entry.
 - **FR-015**: System MUST display an explicit empty state when no entries have been generated yet.
+- **FR-016**: System MUST transition a schedule to Cancelled when a cancel action is performed; Cancelled is a terminal state.
+- **FR-017**: System MUST reject schedule creation if neither the schedule's amount nor the referenced template's amount is provided.
 
 ### Key Entities
 
 - **RecurringEntry**: A schedule defining when and how journal entries are automatically generated from a template. Carries dimensional attributes (fund, cost center, project, currency), a frequency, date range, and status. Tracks the last generated entry and next execution date.
-  - Statuses: Active, Paused, Completed (no Cancelled status — cancel is a terminal action resulting in Completed or a separate inactive state).
+  - Statuses: Active, Paused, Completed, Cancelled.
   - Frequency enum (RecurringFrequency): Weekly, Monthly, Quarterly, Yearly.
-  - Status enum (RecurringEntryStatus): Active, Paused, Completed.
-  - Key relationships: optionally linked to a JournalTemplate; linked to a JournalDefinition for the generated entry structure; optionally linked to a generated JournalEntry after execution.
+  - Status enum (RecurringEntryStatus): Active, Paused, Completed, Cancelled.
+  - Key relationships: `journalId` references the target journal definition (account structure for the generated entry); `templateId` optionally references a JournalTemplate that provides line details and amounts. Both are independent — journalId is always required, templateId is optional.
 
 ## Success Criteria
 
 ### Measurable Outcomes
 
 - **SC-001**: Users can create a recurring entry schedule for any of the four frequencies (Weekly, Monthly, Quarterly, Yearly) in under 1 minute.
-- **SC-002**: 100% of control actions (pause, resume, cancel) are blocked when attempted against an invalid status.
+- **SC-002**: 100% of control actions (pause, resume, cancel) are blocked when attempted against an invalid status, including Cancelled and Completed.
 - **SC-003**: Every pause and cancel action is recorded with its reason in the audit trail.
 - **SC-004**: Schedule details always display the nextExecutionDate, regardless of generation history.
+- **SC-005**: 100% of schedules created without an amount (from either schedule or template) are rejected at creation time.
 
 ## Assumptions
 
@@ -112,11 +115,19 @@ As an accountant, I want to view schedule details including the last generated e
 - The background job engine (SYS-03) will consume RecurringEntry records and produce JournalEntry instances — this spec covers the schedule CRUD and lifecycle, not the generation engine.
 - The system has an active fiscal period calendar; schedule execution checks fiscal period openness server-side.
 - Document numbering follows the existing DocumentSequenceService pattern (PREFIX-D6).
-- Cancel results in a terminal state (isActive = false, status remains a distinct value from Completed — pending clarification on exact enum value).
-- "No amount on template" edge case: when both schedule amount and template amount are absent, generation is not possible and should be flagged.
+- Cancel results in a terminal state with status `Cancelled` (4th enum value added to RecurringEntryStatus).
+- "No amount on template" edge case: when both schedule amount and template amount are absent, creation is rejected (FR-017).
 
 ## Open Questions
 
 - **OQ1**: What is the exact status value after cancel? Options: (A) a new enum value `Cancelled` in RecurringEntryStatus, (B) set `isActive = false` with status remaining at its last value, (C) status becomes `Completed` with a cancelReason field. Recommendation: add `Cancelled` as a fourth enum value for clarity.
 - **OQ2**: Does the background job engine (SYS-03) need to be implemented as part of this spec, or is it a dependency tracked separately? Recommendation: out of scope per Out of Scope section — track separately.
 - **OQ3**: When both schedule.amount and template.amount are null, how is the generated entry's amount determined? Recommendation: require amount at schedule level; reject creation if neither schedule nor template provides one.
+
+## Clarifications
+
+### Session 2026-09-07
+
+- Q: What status value should a recurring entry have after being cancelled? → A: Add `Cancelled` as a 4th value in RecurringEntryStatus enum.
+- Q: When both the schedule's amount and its referenced template's amount are null, how should the system handle creation? → A: Reject creation — require amount at schedule level if template has none.
+- Q: What does the `journalId` field on the schedule represent, given `templateId` is optional? → A: `journalId` = target journal definition (account structure); `templateId` = line template source. Both are independent references.

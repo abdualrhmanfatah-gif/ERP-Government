@@ -31,6 +31,6 @@
 
 ## Notes
 
-- Validation passed on first iteration.
-- 3 Open Questions (OQ1–OQ3) documented — require user input before `/speckit.plan`.
-- No [NEEDS CLARIFICATION] markers in spec — all gaps captured as Open Questions for the planning phase.
+- Validation passed. All 16/16 items passing.
+- OQ1 (cancel status), OQ2 (background engine scope), OQ3 (missing amount) — all resolved via clarifications or documented as out-of-scope.
+- Spec ready for `/speckit.plan`.
