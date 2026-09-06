@@ -22,6 +22,8 @@ public class AppropriationDto
     public string FundNumber { get; init; } = string.Empty;
     public string FundName { get; init; } = string.Empty;
     public string FiscalYearName { get; init; } = string.Empty;
+    public string BudgetNumber { get; init; } = string.Empty;
+    public string BudgetName { get; init; } = string.Empty;
     public string ItemCode { get; init; } = string.Empty;
     public string ItemName { get; init; } = string.Empty;
 
@@ -33,6 +35,8 @@ public class AppropriationDto
                 .ForMember(d => d.FundNumber, opt => opt.MapFrom(s => s.Budget != null && s.Budget.Fund != null ? s.Budget.Fund.FundNumber : string.Empty))
                 .ForMember(d => d.FundName, opt => opt.MapFrom(s => s.Budget != null && s.Budget.Fund != null ? s.Budget.Fund.FundName : string.Empty))
                 .ForMember(d => d.FiscalYearName, opt => opt.MapFrom(s => s.Budget != null && s.Budget.FiscalYear != null ? s.Budget.FiscalYear.Name : string.Empty))
+                .ForMember(d => d.BudgetNumber, opt => opt.MapFrom(s => s.Budget != null ? s.Budget.BudgetNumber : string.Empty))
+                .ForMember(d => d.BudgetName, opt => opt.MapFrom(s => s.Budget != null ? s.Budget.BudgetName : string.Empty))
                 .ForMember(d => d.ItemCode, opt => opt.MapFrom(s => s.BudgetItem != null ? s.BudgetItem.ItemCode : string.Empty))
                 .ForMember(d => d.ItemName, opt => opt.MapFrom(s => s.BudgetItem != null ? s.BudgetItem.ItemName : string.Empty));
         }

@@ -1,4 +1,4 @@
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import { AlertTriangle } from 'lucide-react';
 import { Dialog } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
@@ -17,14 +17,14 @@ export function DeactivateUserDialog({ open, onClose, userId, userName }: Deacti
   async function handleDeactivate() {
     try {
       await deactivate.mutateAsync(userId);
-      toast.success('تم تعطيل المستخدم بنجاح');
+      notify({ type: 'success', title: 'تم تعطيل المستخدم بنجاح' });
       onClose();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ';
       if (message.includes('self') || message.includes('own account')) {
-        toast.error('لا يمكن تعطيل حسابك الخاص');
+        notify({ type: 'error', title: 'لا يمكن تعطيل حسابك الخاص' });
       } else {
-        toast.error(message);
+        notify({ type: 'error', title: message });
       }
     }
   }

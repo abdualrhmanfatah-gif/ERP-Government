@@ -22,7 +22,7 @@ public class PaymentOrder : BaseAuditableEntity
     public decimal? ExchangeRate { get; set; }
     public decimal AmountGross { get; set; }
     public decimal DeductionAmount { get; set; }
-    public Enums.PaymentMethod PaymentMethod { get; set; }
+    public Enums.PaymentMethod? PaymentMethod { get; set; }
     public int? BankAccountId { get; set; }
     public string BeneficiaryName { get; set; } = string.Empty;
     public string? BeneficiaryIban { get; set; }

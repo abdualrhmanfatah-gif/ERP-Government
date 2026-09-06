@@ -29,8 +29,18 @@ As a registrar, I manage parties (suppliers, customers, government entities, tax
 7. **Given** an active party, **When** the registrar clicks "Toggle Active", **Then** the party's status changes to inactive and the list reflects the change.
 8. **Given** a party with open (Draft/Submitted) documents, **When** the registrar attempts to deactivate it, **Then** a blocking warning lists the open documents and prevents deactivation unless confirmed.
 9. **Given** a party detail page, **When** the registrar clicks "Edit", **Then** all editable fields are presented in an editable form with current values pre-filled.
-10. **Given** a user without PartiesCreate permission navigates to the party list, **When** the page loads, **Then** the "New Party" button is not visible.
-11. **Given** a user without PartiesEdit permission views a party detail page, **When** the page loads, **Then** the "Edit" button is not visible.
+10. **Given** a user without `Parties.Create` permission navigates to the party list, **When** the page loads, **Then** the "New Party" button is not visible.
+11. **Given** a user without `Parties.Update` permission views a party detail page, **When** the page loads, **Then** the "Edit" button is not visible.
+12. **Given** the registrar submits a party with NameAr empty or whitespace, **When** validation runs, **Then** the form shows a required-field error on NameAr and does not submit.
+13. **Given** two users edit the same party concurrently, **When** the second user saves, **Then** a conflict error is shown and the user is prompted to reload.
+14. **Given** the registrar creates a party, **When** the form is submitted with valid data, **Then** PartyCode is auto-generated server-side and displayed as read-only after creation.
+
+**Permissions (FR items)**:
+
+- FR-PERM-01: Party list page requires `Parties.View` permission. Users without this permission cannot access the route.
+- FR-PERM-02: "New Party" button requires `Parties.Create` permission. Hidden when not granted.
+- FR-PERM-03: "Edit" button on party detail requires `Parties.Update` permission. Hidden when not granted.
+- FR-PERM-04: Toggle Active action requires `Parties.Update` permission. Hidden when not granted.
 
 ---
 
@@ -116,11 +126,59 @@ As a user viewing a party's detail page, I see a list of all documents related t
 
 | Entity | Purpose | Key Fields |
 |--------|---------|------------|
-| Party | Registry of all external parties | PartyCode, PartyType, NameAr, TaxNumber, IsActive |
+| Party | Registry of all external parties | PartyCode, PartyType, NameAr, NameEn, TaxNumber, NationalId, Phone, Email, Address, Notes, IsActive |
 | ApprovalHistory | Append-only approval decisions | DocumentType, DocumentId, Decision, ApproverUserId, DecisionAt, Reason |
 | DocumentStatusLog | Append-only status transitions | EntityName, DocumentId, FromStatus, ToStatus, ChangedById, ChangedAt |
 | Attachment | File attachments on documents | EntityName, DocumentId, DocumentType, FileName, StoragePath, IsRequired |
 | DocumentAttachmentRequirement | Mandatory attachment rules | DocumentType, AttachmentTypeCode, IsMandatory |
+
+### Field Contract — Party
+
+Every field below MUST appear in the Party form (create/edit), the party detail view, and the party list grid. No field may be silently dropped.
+
+| Field | Type | Required | Editable | List Column | Detail Section | Formatter / Notes |
+|-------|------|----------|----------|-------------|----------------|-------------------|
+| PartyCode | string | auto-gen | read-only | yes | profile header | `{PREFIX}-{D6}` format, generated on create |
+| PartyType | enum (PartyType) | yes | yes (create only, locked after save) | yes (translated label) | profile header | Dropdown: Supplier/Customer/GovEntity/TaxAuthority/Other. Labels from PARTY_TYPE_LABELS |
+| NameAr | string | yes | yes | yes (primary display) | profile header | Arabic text, max 200 chars. Primary search target |
+| NameEn | string | no | yes | no (detail only) | profile body | Latin text, max 200 chars, optional |
+| TaxNumber | string | no | yes | yes | profile body | Unique-adjacent: soft duplicate warning on blur. Max 20 chars |
+| NationalId | string | no | yes | no (detail only) | profile body | Max 20 chars |
+| Phone | string | no | yes | no (detail only) | profile body | Max 20 chars |
+| Email | string | no | yes | no (detail only) | profile body | Max 200 chars, optional email format |
+| Address | string | no | yes | no (detail only) | profile body | Max 500 chars, free text |
+| Notes | string | no | yes | no (detail only) | profile body | Max 1000 chars, free text |
+| IsActive | boolean | yes (default true) | yes (toggle button) | yes (badge: active/inactive) | profile header | Toggle button, guarded by deactivation check |
+
+### Field Contract — ApprovalHistory (shared panel, read-only)
+
+| Field | Display | Formatter |
+|-------|---------|-----------|
+| ApproverName | timeline card title | User full name lookup |
+| DecisionAt | timeline card timestamp | Relative time + absolute on hover (RTL) |
+| Decision | timeline card badge | Approved=green, Rejected=red, Pending=amber |
+| Reason | timeline card body | Text or "—" if null |
+
+### Field Contract — DocumentStatusLog (shared panel, read-only)
+
+| Field | Display | Formatter |
+|-------|---------|-----------|
+| FromStatus | table cell | Status badge (localized) |
+| ToStatus | table cell | Status badge (localized) |
+| ChangedBy | table cell | User full name lookup |
+| ChangedAt | table cell | Relative time + absolute on hover |
+| Reason | table cell | Text or "—" if null |
+
+### Field Contract — Attachment (shared panel, editable)
+
+| Field | Display | Formatter |
+|-------|---------|-----------|
+| FileName | list item primary | Click to download |
+| AttachmentTypeCode | list item badge | From requirements or "Other" |
+| UploadedBy | list item secondary | User full name lookup |
+| CreatedAt | list item secondary | Relative time |
+| SizeBytes | list item secondary | Human-readable (KB/MB) |
+| Gate status | badge above panel | "Missing required attachment: {code}" (amber) or "All required attachments uploaded" (green) |
 
 ## Success Criteria
 
@@ -131,6 +189,53 @@ As a user viewing a party's detail page, I see a list of all documents related t
 5. **Task completion**: A registrar can create a party, edit it, and toggle its active status in under 2 minutes total.
 6. **Related documents load time**: The party detail page's related documents section loads within 2 seconds for up to 100 related documents.
 7. **Zero custom code per document screen**: Future document screens that embed the shared panels require only component import and configuration — no inline approval/status/attachment logic.
+
+## UI States Required
+
+Every page MUST implement all applicable states from this matrix. "—" means not applicable.
+
+| Page | Loading | Empty | Error | Unauthorized | Not Found | Pending | Conflict | Validation Summary |
+|------|---------|-------|-------|--------------|-----------|---------|----------|-------------------|
+| PartiesListPage | Skeleton rows | "No parties found" illustration | Error banner + retry | Redirect to /unauthorized | — | — | — | Inline per-field errors on create/edit modal |
+| PartyDetailPage | Skeleton profile + panels | — (404 if party missing) | Error banner + retry | Redirect to /unauthorized | "Party not found" page | — | Conflict dialog on concurrent save | Inline per-field errors on edit form |
+| ApprovalsPanel | Skeleton timeline | "No approvals yet" | Inline error + retry | — | — | Pending badge on undecided steps | — | — |
+| StatusLogPanel | Skeleton table | "No status changes recorded" | Inline error + retry | — | — | — | — | — |
+| AttachmentsPanel | Skeleton list | "No attachments uploaded" | Inline error + retry | — | — | — | — | File size / type errors inline |
+| RelatedDocuments | Skeleton table | "No related documents" | Inline error + retry | — | — | — | — | — |
+
+## Tests Expected
+
+Every item below maps 1:1 to a Vitest test file. Test behavior, not implementation.
+
+| ID | Test File | Scenario | Assertion |
+|----|-----------|----------|-----------|
+| TEST-01 | PartiesListPage.test.tsx | Renders party list with columns | PartyCode, NameAr, PartyType, TaxNumber, IsActive columns present |
+| TEST-02 | PartiesListPage.test.tsx | Filters by PartyType | After selecting "Supplier" filter, only Supplier rows visible |
+| TEST-03 | PartiesListPage.test.tsx | Searches by NameAr | Typing "أحمد" shows matching parties |
+| TEST-04 | PartiesListPage.test.tsx | Searches by TaxNumber | Typing "12345" shows matching parties |
+| TEST-05 | PartiesListPage.test.tsx | New Party button hidden without permission | User lacking Parties.Create sees no "New Party" button |
+| TEST-06 | PartiesListPage.test.tsx | Toggle Active hidden without permission | User lacking Parties.Update sees no toggle button |
+| TEST-07 | PartyDetailPage.test.tsx | Renders party profile with all fields | All 11 Party fields displayed |
+| TEST-08 | PartyDetailPage.test.tsx | Edit form pre-fills values | All fields pre-filled with current party data |
+| TEST-09 | PartyDetailPage.test.tsx | Edit button hidden without permission | User lacking Parties.Update sees no "Edit" button |
+| TEST-10 | PartyDetailPage.test.tsx | Deactivation guard blocks on open documents | Warning dialog lists open documents, deactivation blocked until confirmed |
+| TEST-11 | PartyDetailPage.test.tsx | Related documents list renders | DocumentType, DocumentNumber, Status, Date, Amount columns present |
+| TEST-12 | PartyDetailPage.test.tsx | Related documents empty state | "No related documents" shown when no documents reference party |
+| TEST-13 | PartyDetailPage.test.tsx | Related documents filter by type | Selecting "ReceiptVoucher" filter shows only vouchers |
+| TEST-14 | DuplicateTaxWarning.test.tsx | Shows warning on duplicate TaxNumber | ConfirmDialog appears when TaxNumber matches existing party |
+| TEST-15 | DuplicateTaxWarning.test.tsx | User can confirm to proceed | After confirm, form submits despite duplicate |
+| TEST-16 | DuplicateTaxWarning.test.tsx | Warning clears when TaxNumber changes | Changing TaxNumber hides the warning |
+| TEST-17 | ApprovalsPanel.test.tsx | Renders approval timeline | ApproverName, DecisionAt, Decision, Reason displayed |
+| TEST-18 | ApprovalsPanel.test.tsx | Empty state | "No approvals yet" shown when no records |
+| TEST-19 | ApprovalsPanel.test.tsx | Pending badge for undecided steps | Undecided step shows amber "Pending" badge |
+| TEST-20 | StatusLogPanel.test.tsx | Renders status log table | FromStatus, ToStatus, ChangedBy, ChangedAt, Reason displayed |
+| TEST-21 | StatusLogPanel.test.tsx | Empty state | "No status changes recorded" shown when no records |
+| TEST-22 | AttachmentsPanel.test.tsx | Renders attachment list | FileName, UploadedBy, CreatedAt, Size displayed |
+| TEST-23 | AttachmentsPanel.test.tsx | Upload shows type dropdown | Requirements-loaded types + "Other" option present |
+| TEST-24 | AttachmentsPanel.test.tsx | Delete shows confirmation | ConfirmDialog appears on delete click |
+| TEST-25 | AttachmentsPanel.test.tsx | Gate badge — missing required | Amber badge "Missing required attachment: INVOICE" shown |
+| TEST-26 | AttachmentsPanel.test.tsx | Gate badge — all satisfied | Green badge shown, approval button enabled |
+| TEST-27 | AttachmentsPanel.test.tsx | Oversized upload rejected | Error message states max 10 MB |
 
 ## Scope
 

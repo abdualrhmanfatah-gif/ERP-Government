@@ -234,7 +234,7 @@ public class Budgets : IEndpointGroup
         [FromBody] CreateBudgetItemRequest body)
     {
         var result = await sender.Send(new CreateBudgetItemCommand(
-            id, body.ItemCode, body.ItemName, body.ParentId, body.Remarks));
+            id, body.ItemCode, body.ItemName, body.ParentId, body.AccountId, body.FundId, body.CostCenterId, body.BudgetClassificationId, body.Remarks, body.AllowOverrun));
         if (!result.Succeeded)
             return Results.BadRequest(result.Errors);
         return Results.Created($"/api/Budgets/{id}/items/{result.Value}", result.Value);
@@ -303,7 +303,12 @@ public record CreateBudgetItemRequest(
     string ItemCode,
     string ItemName,
     int? ParentId,
-    string? Remarks);
+    int? AccountId,
+    int? FundId,
+    int? CostCenterId,
+    int? BudgetClassificationId,
+    string? Remarks,
+    bool? AllowOverrun);
 
 public record UpdateBudgetItemRequest(
     string ItemName,

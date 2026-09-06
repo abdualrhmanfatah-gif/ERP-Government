@@ -1,4 +1,4 @@
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import { Trash2, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { DataGrid } from '@/components/ui/DataGrid';
@@ -17,9 +17,9 @@ export function SessionsTab({ userId }: SessionsTabProps) {
   async function handleRevoke(sessionId: number) {
     try {
       await revokeSession.mutateAsync({ userId, sessionId });
-      toast.success('تم إلغاء الجلسة بنجاح');
+      notify({ type: 'success', title: 'تم إلغاء الجلسة بنجاح' });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+      notify({ type: 'error', title: err instanceof Error ? err.message : 'حدث خطأ' });
     }
   }
 
@@ -27,9 +27,9 @@ export function SessionsTab({ userId }: SessionsTabProps) {
     if (!confirm('هل تريد إلغاء جميع الجلسات النشطة؟')) return;
     try {
       await revokeAll.mutateAsync(userId);
-      toast.success('تم إلغاء جميع الجلسات بنجاح');
+      notify({ type: 'success', title: 'تم إلغاء جميع الجلسات بنجاح' });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+      notify({ type: 'error', title: err instanceof Error ? err.message : 'حدث خطأ' });
     }
   }
 

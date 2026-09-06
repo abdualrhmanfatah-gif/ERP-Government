@@ -18,6 +18,7 @@ public static class DependencyInjection
         builder.Services.AddHttpContextAccessor();
 
         builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
+        builder.Services.AddProblemDetails();
 
         // Customise default API behaviour
         builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -368,6 +369,12 @@ public static class DependencyInjection
             // ─── FinancialControl ──────────────────────────────────────
             options.AddPolicy(PermissionCodes.FinancialControlLapseYear, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.FinancialControlApproveFinalAccount, p => p.RequireAssertion(_ => true));
+
+            // ─── ClosingEntries ──────────────────────────────────────────
+            options.AddPolicy(PermissionCodes.ClosingEntriesView, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ClosingEntriesGenerate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ClosingEntriesApprove, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ClosingEntriesReverse, p => p.RequireAssertion(_ => true));
 
             // ─── Reporting ────────────────────────────────────────────
             options.AddPolicy(PermissionCodes.ReportingViewBudgetExecution, p => p.RequireAssertion(_ => true));

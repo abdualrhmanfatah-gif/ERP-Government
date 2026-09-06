@@ -76,12 +76,12 @@ vi.mock('../../../shared/hooks/usePermission', () => ({
   usePermission: () => ({ hasPermission: true, isLoading: false }),
 }));
 
-vi.mock('sonner', () => ({
-  toast: { success: vi.fn(), error: vi.fn() },
+vi.mock('@/features/notifications/notify', () => ({
+  notify: vi.fn(),
 }));
 
 import { useClassificationsTree } from '../classifications/hooks/useClassifications';
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 const mockUseClassificationsTree = vi.mocked(useClassificationsTree);
 
 HTMLDialogElement.prototype.showModal = vi.fn(function (this: HTMLDialogElement) {
@@ -186,7 +186,7 @@ describe('T044: SC-004 - RowVersion conflict handling', () => {
     const confirmBtn = screen.getByRole('button', { name: /تأكيد/ });
     await user.click(confirmBtn);
 
-    expect(toast.error).toHaveBeenCalledWith('تعارض في البيانات. جاري تحديث البيانات...');
+    expect(notify).toHaveBeenCalledWith(expect.objectContaining({ type: 'error', title: 'تعارض في البيانات. جاري تحديث البيانات...' }));
   });
 
   it('non-409 error shows generic error toast', async () => {
@@ -204,7 +204,7 @@ describe('T044: SC-004 - RowVersion conflict handling', () => {
     const confirmBtn = screen.getByRole('button', { name: /تأكيد/ });
     await user.click(confirmBtn);
 
-    expect(toast.error).toHaveBeenCalledWith('خطأ في تحديث الحالة');
+    expect(notify).toHaveBeenCalledWith(expect.objectContaining({ type: 'error', title: 'خطأ في تحديث الحالة' }));
   });
 });
 

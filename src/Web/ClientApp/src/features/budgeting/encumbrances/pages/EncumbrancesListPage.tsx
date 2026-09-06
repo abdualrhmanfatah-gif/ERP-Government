@@ -5,7 +5,8 @@ import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { LifecycleActions, type LifecycleAction } from '../../components/LifecycleActions';
 import { Button, Badge } from '@/components/ui';
-import { ArrowRight, Plus, RotateCcw } from 'lucide-react';
+import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
+import { Plus, RotateCcw } from 'lucide-react';
 
 const encumbranceActions: Record<number, LifecycleAction[]> = {
   [EncumbranceStatus.Draft]: [
@@ -32,7 +33,8 @@ export default function EncumbrancesListPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const appropriationId = searchParams.get('appropriationId') ? Number(searchParams.get('appropriationId')) : undefined;
-  const can = usePermission();
+  const { hasPermission } = usePermission();
+  const can = (_permission?: string) => hasPermission;
 
   const { data: encumbrances, isLoading } = useEncumbrancesList({ appropriationId });
   const submit = useSubmitEncumbrance();
@@ -52,9 +54,36 @@ export default function EncumbrancesListPage() {
     await hook.mutateAsync({ id, rowVersion });
   }
 
-  if (isLoading) {
-    return <div className="p-6 text-center text-[var(--color-on-surface-variant)]">جارٍ التحميل...</div>;
-  }
+  const columns: DataGridColumn<any>[] = [
+    { header: 'رقم الالتزام', cell: (row) => <span className="font-mono">{row.encumbranceNumber}</span> },
+    { header: 'النوع', cell: (row) => <Badge variant="outline">{encumbranceTypeLabels[row.encumbranceType]}</Badge> },
+    { header: 'المبلغ', cell: (row) => <span className="font-mono">{row.amount.toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</span> },
+    { header: 'التاريخ', cell: (row) => row.encumbranceDate },
+    {
+      header: 'الحالة',
+      cell: (row) => (
+        <div className="flex items-center gap-2">
+          <Badge>{encumbranceStatusLabels[row.status]}</Badge>
+          {row.isReversed && (
+            <Badge variant="danger">
+              <RotateCcw size={12} className="ms-1" />
+              معكوس
+            </Badge>
+          )}
+        </div>
+      ),
+    },
+    {
+      header: 'إجراءات',
+      cell: (row) => (
+        <LifecycleActions
+          actions={encumbranceActions[row.status] ?? []}
+          can={can}
+          onAction={(key) => handleAction(key, row.id, row.rowVersion)}
+        />
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -66,56 +95,13 @@ export default function EncumbrancesListPage() {
         </Button>
       </div>
 
-      {!encumbrances || encumbrances.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[var(--color-outline)] p-12 text-center">
-          <p className="text-sm text-[var(--color-on-surface-variant)]">لا توجد التزامات بعد</p>
-        </div>
-      ) : (
-        <div className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container)]">
-                <th className="px-4 py-3 text-start font-medium text-[var(--color-on-surface-variant)]">رقم الالتزام</th>
-                <th className="px-4 py-3 text-start font-medium text-[var(--color-on-surface-variant)]">النوع</th>
-                <th className="px-4 py-3 text-start font-medium text-[var(--color-on-surface-variant)]">المبلغ</th>
-                <th className="px-4 py-3 text-start font-medium text-[var(--color-on-surface-variant)]">التاريخ</th>
-                <th className="px-4 py-3 text-start font-medium text-[var(--color-on-surface-variant)]">الحالة</th>
-                <th className="px-4 py-3 text-start font-medium text-[var(--color-on-surface-variant)]">إجراءات</th>
-              </tr>
-            </thead>
-            <tbody>
-              {encumbrances.map((enc) => (
-                <tr key={enc.id} className="border-b border-[var(--color-outline-variant)] last:border-0">
-                  <td className="px-4 py-3 font-mono">{enc.encumbranceNumber}</td>
-                  <td className="px-4 py-3">
-                    <Badge variant="outline">{encumbranceTypeLabels[enc.encumbranceType]}</Badge>
-                  </td>
-                  <td className="px-4 py-3 font-mono">{enc.amount.toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</td>
-                  <td className="px-4 py-3">{enc.encumbranceDate}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <Badge>{encumbranceStatusLabels[enc.status]}</Badge>
-                      {enc.isReversed && (
-                        <Badge variant="danger">
-                          <RotateCcw size={12} className="ms-1" />
-                          معكوس
-                        </Badge>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <LifecycleActions
-                      actions={encumbranceActions[enc.status] ?? []}
-                      can={can}
-                      onAction={(key) => handleAction(key, enc.id, enc.rowVersion)}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <DataGrid
+        columns={columns}
+        data={encumbrances ?? []}
+        loading={isLoading}
+        emptyMessage="لا توجد التزامات بعد"
+        rowKey={(row) => row.id}
+      />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { RoleForm } from '../components/RoleForm';
@@ -13,11 +13,11 @@ export function RoleCreatePage() {
   const handleSubmit = async (data: CreateRoleCommand) => {
     try {
       await createMutation.mutateAsync(data);
-      toast.success('تم إنشاء الدور بنجاح');
+      notify({ type: 'success', title: 'تم إنشاء الدور بنجاح' });
       navigate('/security/roles');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'حدث خطأ أثناء إنشاء الدور';
-      toast.error(message);
+      notify({ type: 'error', title: message });
     }
   };
 

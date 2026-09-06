@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import { Pencil, Save, X, Shield, Lock, Users as UsersIcon } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
@@ -51,14 +51,14 @@ export function UserDetailPage() {
         accountType: editAccountType,
         rowVersion: (user as any).rowVersion ?? '',
       });
-      toast.success('تم الحفظ بنجاح');
+      notify({ type: 'success', title: 'تم الحفظ بنجاح' });
       setIsEditing(false);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ أثناء الحفظ';
       if (message.includes('409') || message.includes('Conflict')) {
-        toast.error('تعارض في البيانات — يرجى تحديث الصفحة');
+        notify({ type: 'error', title: 'تعارض في البيانات — يرجى تحديث الصفحة' });
       } else {
-        toast.error(message);
+        notify({ type: 'error', title: message });
       }
     }
   }

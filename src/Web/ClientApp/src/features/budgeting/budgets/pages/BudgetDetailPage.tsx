@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBudgetDetail, useSubmitBudget, useApproveBudget, useActivateBudget, useSuspendBudget, useCloseBudget, useCancelBudget } from '../../hooks/useBudgets';
 import { useBudgetItemsTree, useCreateBudgetItem, useUpdateBudgetItem, useDeleteBudgetItem } from '../../hooks/useBudgetItems';
+import { useBudgetItemFormFields } from '../../hooks/useBudgetItemFormFields';
 import { budgetStatusLabels, BudgetStatus } from '../../shared/types';
 import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
 import { usePermission } from '@/shared/hooks/usePermission';
@@ -10,10 +11,10 @@ import { LifecycleActions, type LifecycleAction } from '../../components/Lifecyc
 import { ApprovalHistoryPanel } from '../../components/ApprovalHistoryPanel';
 import { MonthlyPlanEditor } from '../../monthly-plan/components/MonthlyPlanEditor';
 import { ExecutionDrillDown } from '../../execution/components/ExecutionDrillDown';
-import { Button, Badge } from '@/components/ui';
+import { Button, Badge, Switch } from '@/components/ui';
 import { ArrowRight, Plus, Calendar, BarChart3 } from 'lucide-react';
 
-const budgetActions: Record<number, LifecycleAction[]> = {
+const budgetActions: Record<string, LifecycleAction[]> = {
   [BudgetStatus.Draft]: [
     { key: 'submit', label: 'تقديم', permission: BUDGET_PERMISSIONS.Budgets.Submit, confirmMessage: 'هل أنت متأكد من تقديم هذه الموازنة؟' },
   ],
@@ -33,31 +34,39 @@ const budgetActions: Record<number, LifecycleAction[]> = {
   ],
 };
 
-const transitionHooks: Record<string, ReturnType<typeof useSubmitBudget>> = {
-  submit: useSubmitBudget(),
-  approve: useApproveBudget(),
-  activate: useActivateBudget(),
-  suspend: useSuspendBudget(),
-  close: useCloseBudget(),
-  cancel: useCancelBudget(),
-};
-
 export default function BudgetDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const budgetId = Number(id);
-  const can = usePermission();
+  const { hasPermission } = usePermission();
+  const can = (_permission?: string) => hasPermission;
+
+  const transitionHooks: Record<string, ReturnType<typeof useSubmitBudget>> = {
+    submit: useSubmitBudget(),
+    approve: useApproveBudget(),
+    activate: useActivateBudget(),
+    suspend: useSuspendBudget(),
+    close: useCloseBudget(),
+    cancel: useCancelBudget(),
+  };
 
   const { data: budget, isLoading } = useBudgetDetail(budgetId);
   const { data: tree } = useBudgetItemsTree(budgetId);
   const createItem = useCreateBudgetItem(budgetId);
   const updateItem = useUpdateBudgetItem();
   const deleteItem = useDeleteBudgetItem();
+  const { fundOptions, costCenterOptions, accountOptions, classificationOptions } = useBudgetItemFormFields();
 
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [showAddItem, setShowAddItem] = useState(false);
   const [newItemCode, setNewItemCode] = useState('');
   const [newItemName, setNewItemName] = useState('');
+  const [newFundId, setNewFundId] = useState<number>(0);
+  const [newAccountId, setNewAccountId] = useState<number>(0);
+  const [newCostCenterId, setNewCostCenterId] = useState<number>(0);
+  const [newClassificationId, setNewClassificationId] = useState<number>(0);
+  const [newRemarks, setNewRemarks] = useState('');
+  const [newAllowOverrun, setNewAllowOverrun] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'items' | 'execution'>('items');
 
@@ -79,9 +88,25 @@ export default function BudgetDetailPage() {
 
   async function handleAddItem() {
     if (!newItemCode.trim() || !newItemName.trim()) return;
-    await createItem.mutateAsync({ itemCode: newItemCode, itemName: newItemName });
+    await createItem.mutateAsync({
+      budgetId,
+      itemCode: newItemCode,
+      itemName: newItemName,
+      fundId: newFundId || undefined,
+      accountId: newAccountId || undefined,
+      costCenterId: newCostCenterId || undefined,
+      budgetClassificationId: newClassificationId || undefined,
+      remarks: newRemarks || undefined,
+      allowOverrun: newAllowOverrun || undefined,
+    });
     setNewItemCode('');
     setNewItemName('');
+    setNewFundId(0);
+    setNewAccountId(0);
+    setNewCostCenterId(0);
+    setNewClassificationId(0);
+    setNewRemarks('');
+    setNewAllowOverrun(false);
     setShowAddItem(false);
   }
 
@@ -127,7 +152,7 @@ export default function BudgetDetailPage() {
           </div>
           <div>
             <span className="block text-xs text-[var(--color-on-surface-variant)] mb-1">من تاريخ</span>
-            <span className="block text-sm">{budget.effectiveFrom}</span>
+            <span className="block text-sm">{budget.effectiveFrom?.toLocaleDateString('ar-EG')}</span>
           </div>
         </div>
       </div>
@@ -178,23 +203,82 @@ export default function BudgetDetailPage() {
           </div>
 
           {showAddItem && (
-            <div className="flex gap-2 mb-4 p-3 rounded bg-[var(--color-surface-container)]">
-              <input
-                type="text"
-                placeholder="كود البند"
-                value={newItemCode}
-                onChange={(e) => setNewItemCode(e.target.value)}
-                className="rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-2 py-1 text-sm w-24"
+            <div className="mb-4 p-3 rounded bg-[var(--color-surface-container)] space-y-3">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="كود البند"
+                  value={newItemCode}
+                  onChange={(e) => setNewItemCode(e.target.value)}
+                  className="rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-2 py-1 text-sm w-24"
+                />
+                <input
+                  type="text"
+                  placeholder="اسم البند"
+                  value={newItemName}
+                  onChange={(e) => setNewItemName(e.target.value)}
+                  className="flex-1 rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-2 py-1 text-sm"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  value={newFundId}
+                  onChange={(e) => setNewFundId(Number(e.target.value))}
+                  className="rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-2 py-1 text-sm"
+                >
+                  <option value={0}>الصندوق...</option>
+                  {fundOptions.map((f) => (
+                    <option key={f.id} value={f.id}>{f.label}</option>
+                  ))}
+                </select>
+                <select
+                  value={newAccountId}
+                  onChange={(e) => setNewAccountId(Number(e.target.value))}
+                  className="rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-2 py-1 text-sm"
+                >
+                  <option value={0}>الحساب...</option>
+                  {accountOptions.map((a) => (
+                    <option key={a.id} value={a.id}>{a.label}</option>
+                  ))}
+                </select>
+                <select
+                  value={newCostCenterId}
+                  onChange={(e) => setNewCostCenterId(Number(e.target.value))}
+                  className="rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-2 py-1 text-sm"
+                >
+                  <option value={0}>مركز التكلفة...</option>
+                  {costCenterOptions.map((cc) => (
+                    <option key={cc.id} value={cc.id}>{cc.label}</option>
+                  ))}
+                </select>
+                <select
+                  value={newClassificationId}
+                  onChange={(e) => setNewClassificationId(Number(e.target.value))}
+                  className="rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-2 py-1 text-sm"
+                >
+                  <option value={0}>التصنيف...</option>
+                  {classificationOptions.map((c) => (
+                    <option key={c.id} value={c.id}>{c.label}</option>
+                  ))}
+                </select>
+              </div>
+              <textarea
+                placeholder="ملاحظات"
+                value={newRemarks}
+                onChange={(e) => setNewRemarks(e.target.value)}
+                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-2 py-1 text-sm"
+                rows={2}
               />
-              <input
-                type="text"
-                placeholder="اسم البند"
-                value={newItemName}
-                onChange={(e) => setNewItemName(e.target.value)}
-                className="flex-1 rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-2 py-1 text-sm"
-              />
-              <Button variant="primary" size="sm" onClick={handleAddItem}>حفظ</Button>
-              <Button variant="ghost" size="sm" onClick={() => setShowAddItem(false)}>إلغاء</Button>
+              <div className="flex items-center gap-4">
+                <Switch
+                  checked={newAllowOverrun}
+                  onChange={setNewAllowOverrun}
+                  label="السماح بالتجاوز"
+                />
+                <div className="flex-1" />
+                <Button variant="primary" size="sm" onClick={handleAddItem}>حفظ</Button>
+                <Button variant="ghost" size="sm" onClick={() => setShowAddItem(false)}>إلغاء</Button>
+              </div>
             </div>
           )}
 

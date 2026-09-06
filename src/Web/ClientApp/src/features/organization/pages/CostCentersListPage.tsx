@@ -7,7 +7,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { CostCenterDialog } from '../components/CostCenterDialog';
 import { useCostCenters, useCostCenter, useCreateCostCenter, useUpdateCostCenter, useDeleteCostCenter } from '../hooks';
 import { useState } from 'react';
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import type { CreateCostCenterCommand } from '../types';
 
 export function CostCentersListPage() {
@@ -26,7 +26,7 @@ export function CostCentersListPage() {
     try {
       await createMutation.mutateAsync(data);
       setDialogOpen(false);
-      toast.success('تم إنشاء مركز التكلفة بنجاح');
+      notify({ type: 'success', title: 'تم إنشاء مركز التكلفة بنجاح' });
     } catch {
       // Error shown via form
     }
@@ -42,7 +42,7 @@ export function CostCentersListPage() {
       });
       setDialogOpen(false);
       setEditingId(null);
-      toast.success('تم تحديث مركز التكلفة بنجاح');
+      notify({ type: 'success', title: 'تم تحديث مركز التكلفة بنجاح' });
     } catch {
       // Error shown via form
     }
@@ -53,7 +53,7 @@ export function CostCentersListPage() {
     try {
       await deleteMutation.mutateAsync(deleteTarget.id);
       setDeleteTarget(null);
-      toast.success('تم حذف مركز التكلفة بنجاح');
+      notify({ type: 'success', title: 'تم حذف مركز التكلفة بنجاح' });
     } catch {
       // Error shown via toast
     }

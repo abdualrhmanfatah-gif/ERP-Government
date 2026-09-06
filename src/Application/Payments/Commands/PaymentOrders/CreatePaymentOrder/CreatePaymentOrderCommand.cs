@@ -127,9 +127,15 @@ public class CreatePaymentOrderCommandHandler(
             return Result.Failure(["Deductions must sum to the deduction amount."]);
 
         // Generate PaymentOrderNumber
-        var paymentOrderNumber = await sequenceService.GenerateNextNumberAsync("PaymentOrder", cancellationToken);
-        if (paymentOrderNumber.StartsWith("Error:"))
-            return Result.Failure([paymentOrderNumber]);
+        string paymentOrderNumber;
+        try
+        {
+            paymentOrderNumber = await sequenceService.GenerateNextNumberAsync("PaymentOrder", cancellationToken);
+        }
+        catch (DocumentSequenceException ex)
+        {
+            return Result.Failure([ex.Message]);
+        }
 
         var entity = new PaymentOrder
         {

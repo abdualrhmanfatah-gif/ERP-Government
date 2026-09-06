@@ -41,3 +41,4 @@ export { StatusBadge } from './StatusBadge';
 export { Switch } from './Switch';
 export { Tabs } from './Tabs';
 export { ToastProvider, showToast } from './Toast';
+export { notify, useNotify } from '../../features/notifications/notify';

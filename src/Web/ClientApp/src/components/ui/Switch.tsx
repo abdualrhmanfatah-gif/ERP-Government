@@ -1,5 +1,6 @@
 import { useId, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { Switch as SwitchPrimitive } from '@base-ui/react/switch';
 
 interface SwitchProps {
   checked?: boolean;
@@ -7,6 +8,7 @@ interface SwitchProps {
   disabled?: boolean;
   label?: ReactNode;
   id?: string;
+  size?: 'sm' | 'default';
 }
 
 export function Switch({
@@ -15,6 +17,7 @@ export function Switch({
   disabled = false,
   label,
   id,
+  size = 'default',
 }: SwitchProps) {
   const autoId = useId();
   const switchId = id ?? autoId;
@@ -23,29 +26,35 @@ export function Switch({
     <label
       htmlFor={switchId}
       className={cn(
-        'inline-flex items-center gap-2 cursor-pointer min-h-11 py-1',
+        'inline-flex items-center gap-2 cursor-pointer min-h-11 py-1 rtl:flex-row-reverse',
         disabled && 'opacity-50 cursor-not-allowed'
       )}
     >
-      <button
+      <SwitchPrimitive.Root
         id={switchId}
-        type="button"
-        role="switch"
-        aria-checked={checked}
+        data-slot="switch"
+        data-size={size}
+        checked={checked}
+        onCheckedChange={onChange}
         disabled={disabled}
-        onClick={() => onChange?.(!checked)}
         className={cn(
-          'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-          checked ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-outline-variant)]'
+          'peer group/switch relative inline-flex shrink-0 items-center rounded-full border border-transparent transition-all outline-none',
+          'focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2',
+          'data-[size=default]:h-[18.4px] data-[size=default]:w-[32px] data-[size=sm]:h-[14px] data-[size=sm]:w-[24px]',
+          'data-checked:bg-[var(--color-primary)] data-unchecked:bg-[var(--color-outline-variant)]',
+          'data-disabled:cursor-not-allowed data-disabled:opacity-50'
         )}
       >
-        <span
+        <SwitchPrimitive.Thumb
+          data-slot="switch-thumb"
           className={cn(
-            'pointer-events-none block h-5 w-5 rounded-full bg-[var(--color-surface-container-lowest)] shadow-sm transition-transform duration-150 rtl:translate-x-reverse',
-            checked ? 'translate-x-5' : 'translate-x-0'
+            'pointer-events-none block rounded-full bg-[var(--color-surface-container-lowest)] shadow-sm ring-0 transition-transform',
+            'group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3',
+            'group-data-[size=default]/switch:data-checked:translate-x-[calc(100%-2px)] group-data-[size=sm]/switch:data-checked:translate-x-[calc(100%-2px)]',
+            'group-data-[size=default]/switch:data-unchecked:translate-x-0 group-data-[size=sm]/switch:data-unchecked:translate-x-0'
           )}
         />
-      </button>
+      </SwitchPrimitive.Root>
       {label && (
         <span className="text-sm text-[var(--color-on-surface)]">{label}</span>
       )}

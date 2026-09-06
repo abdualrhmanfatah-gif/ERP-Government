@@ -6,7 +6,6 @@ namespace ERP_Government.Application.FinancialSettings.Common.Services;
 public class DocumentSequenceService : IDocumentSequenceService
 {
     private readonly IApplicationDbContext _context;
-    private readonly IDatabaseTransactionFactory _transactionFactory;
 
     private static readonly Dictionary<string, string> PrefixMap = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -35,10 +34,9 @@ public class DocumentSequenceService : IDocumentSequenceService
         ["Payment"] = "PAY"
     };
 
-    public DocumentSequenceService(IApplicationDbContext context, IDatabaseTransactionFactory transactionFactory)
+    public DocumentSequenceService(IApplicationDbContext context)
     {
         _context = context;
-        _transactionFactory = transactionFactory;
     }
 
     public async Task<string> GenerateNextNumberAsync(string documentType, CancellationToken cancellationToken = default)
@@ -46,40 +44,30 @@ public class DocumentSequenceService : IDocumentSequenceService
         if (!PrefixMap.TryGetValue(documentType, out var prefix))
             throw new DocumentSequenceException($"Unknown document type '{documentType}'.");
 
-        // Atomic: read + version-checked increment inside a transaction.
-        // Two concurrent callers with the same read rowversion — only one update succeeds.
-        await using var transaction = await _transactionFactory
-            .BeginTransactionAsync(cancellationToken);
+        // RowVersion-based optimistic concurrency — no manual transaction needed.
+        // SaveChangesAsync checks RowVersion; concurrency conflict → DbUpdateConcurrencyException.
+        var row = await _context.DocumentSequences
+            .Where(s => s.DocumentType == documentType)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (row is null)
+            throw new DocumentSequenceException($"No sequence found for document type '{documentType}'.");
+
+        if (!row.IsActive)
+            throw new DocumentSequenceException($"Sequence for '{documentType}' is deactivated.");
+
+        row.CurrentNumber++;
 
         try
         {
-            var row = await _context.DocumentSequences
-                .Where(s => s.DocumentType == documentType)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (row is null)
-                throw new DocumentSequenceException($"No sequence found for document type '{documentType}'.");
-
-            if (!row.IsActive)
-                throw new DocumentSequenceException($"Sequence for '{documentType}' is deactivated.");
-
-            var oldVersion = (byte[])row.RowVersion.Clone();
-            row.CurrentNumber++;
-
-            var affected = await _context.SaveChangesAsync(cancellationToken);
-
-            if (affected == 0)
-                throw new SequenceConcurrencyException(documentType);
-
-            await transaction.CommitAsync(cancellationToken);
-
-            return $"{prefix}-{row.CurrentNumber:D6}";
+            await _context.SaveChangesAsync(cancellationToken);
         }
-        catch
+        catch (DbUpdateConcurrencyException)
         {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
+            throw new SequenceConcurrencyException(documentType);
         }
+
+        return $"{prefix}-{row.CurrentNumber:D6}";
     }
 }
 

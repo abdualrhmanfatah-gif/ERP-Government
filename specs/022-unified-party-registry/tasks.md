@@ -11,7 +11,7 @@
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
-- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
+- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3, US4, FCOV)
 - Include exact file paths in descriptions
 
 ---
@@ -142,7 +142,31 @@
 
 ---
 
-## Phase 7: Polish & Cross-Cutting Concerns
+## Phase 7: Field-Coverage Verification
+
+**Purpose**: Verify every field name from spec.md Field Contract appears in implemented source code. Run after all user stories are complete.
+
+### Field-Coverage Tasks (one per field group)
+
+- [x] T042 [FCOV] Verify Party fields in parties feature — grep `PartyCode|PartyType|NameAr|NameEn|TaxNumber|NationalId|Phone|Email|Address|Notes|IsActive` in `src/Web/ClientApp/src/features/parties/` — every field name must appear in at least one .ts/.tsx file
+- [x] T043 [FCOV] Verify ApprovalHistory fields in documents feature — grep `ApproverName|DecisionAt|Decision|Reason` in `src/Web/ClientApp/src/features/documents/` — every field name must appear in at least one .ts/.tsx file
+- [x] T044 [FCOV] Verify DocumentStatusLog fields in documents feature — grep `FromStatus|ToStatus|ChangedBy|ChangedAt|Reason` in `src/Web/ClientApp/src/features/documents/` — every field name must appear in at least one .ts/.tsx file
+- [x] T045 [FCOV] Verify Attachment fields in documents feature — grep `FileName|AttachmentTypeCode|UploadedBy|CreatedAt|SizeBytes|Gate` in `src/Web/ClientApp/src/features/documents/` — every field name must appear in at least one .ts/.tsx file
+- [x] T046 [FCOV] Verify PartyDocumentResponse fields in parties feature — grep `DocumentType|DocumentNumber|Status|Date|Amount` in `src/Web/ClientApp/src/features/parties/` — every field name must appear in at least one .ts/.tsx file
+- [x] T047 [FCOV] Verify Permission codes in parties feature — grep `Parties\.View|Parties\.Create|Parties\.Update` in `src/Web/ClientApp/src/features/parties/` — every permission code must appear
+
+### Final Convergence Verification
+
+- [x] T048 [FCOV] Run full field-coverage grep — execute all 6 grep commands from plan.md Section 5 COMPLETENESS GATE; any missing field = FAIL; report gaps explicitly
+- [x] T049 [FCOV] Verify UI States implementation — check each page component implements loading (Skeleton), empty, error states per spec UI States Required matrix
+- [x] T050 [FCOV] Verify Dark Mode — toggle theme on each page, confirm no hardcoded colors, all semantic tokens used
+- [x] T051 [FCOV] Verify RTL — confirm `dir="rtl"` on page roots, Arabic text renders correctly, no LTR drift
+- [x] T052 [FCOV] Run frontend tests — `cd src/Web/ClientApp && npm run test -- --run` — all 27 spec tests must pass
+- [x] T053 [FCOV] Run frontend lint + typecheck — `cd src/Web/ClientApp && npm run lint && npm run typecheck` — zero errors
+
+---
+
+## Phase 8: Polish & Cross-Cutting Concerns
 
 **Purpose**: Route registration, final integration, validation
 
@@ -150,7 +174,7 @@
 - [x] T038 [P] Verify barrel exports — `src/Web/ClientApp/src/features/parties/shared/index.ts` exports all public types and client; `src/Web/ClientApp/src/features/documents/shared/index.ts` exports ApprovalsPanel, StatusLogPanel, AttachmentsPanel
 - [x] T039 Run frontend lint and type check — `cd src/Web/ClientApp && npm run lint && npm run typecheck`
 - [x] T040 Run frontend tests — `cd src/Web/ClientApp && npm run test -- --run`
-- [x] T41 Run quickstart.md validation — execute V1 through V11 scenarios from `specs/022-unified-party-registry/quickstart.md`
+- [x] T041 Run quickstart.md validation — execute V1 through V11 scenarios from `specs/022-unified-party-registry/quickstart.md`
 
 ---
 
@@ -164,7 +188,8 @@
 - **Phase 4 (US2)**: Depends on Phase 2 — can run in parallel with US1
 - **Phase 5 (US3)**: Depends on Phase 2 — can run in parallel with US1 and US2
 - **Phase 6 (US4)**: Depends on Phase 3 (needs PartyDetailPage) and Phase 5 (needs AttachmentsPanel integration)
-- **Phase 7 (Polish)**: Depends on all desired stories being complete
+- **Phase 7 (Field-Coverage)**: Depends on all user stories being complete (Phases 3-6)
+- **Phase 8 (Polish)**: Depends on Phase 7 passing
 
 ### User Story Dependencies
 
@@ -172,6 +197,7 @@
 - **US2 (P1)**: Can start after Phase 2 — no dependencies on other stories; integrates into US1's PartyDetailPage in T027
 - **US3 (P2)**: Can start after Phase 2 — no dependencies on other stories; integrates into US1's PartyDetailPage in T033
 - **US4 (P2)**: Depends on US1 (PartyDetailPage exists) and US3 (AttachmentsPanel exists)
+- **FCOV**: Depends on ALL stories complete — final gate before merge
 
 ### Within Each User Story
 
@@ -196,6 +222,9 @@ Task T017 + T018         (pages)
 Task T022 + T023         (tests)
 Task T024 + T025         (components)
 
+# Phase 7: All field-coverage greps in parallel
+Task T042 + T043 + T044 + T045 + T046 + T047
+
 # Cross-story: US1 and US2 implementation in parallel after Phase 2
 ```
 
@@ -218,7 +247,8 @@ Task T024 + T025         (components)
 3. US2 (Approvals + Status Log) → Test independently → Deploy/Demo
 4. US3 (Attachments + Gate) → Test independently → Deploy/Demo
 5. US4 (Related Documents) → Test independently → Deploy/Demo
-6. Each story adds value without breaking previous stories
+6. FCOV (Field-Coverage Verification) → All fields present → Ready for merge
+7. Each story adds value without breaking previous stories
 
 ### Parallel Team Strategy
 
@@ -229,7 +259,8 @@ With multiple developers:
    - Developer B: US2 (Approvals + Status Log panels)
    - Developer C: US3 (Attachments panel)
 3. US4 waits for US1 + US3 completion
-4. Stories integrate into PartyDetailPage
+4. FCOV runs after all stories — single developer verifies all fields
+5. Stories integrate into PartyDetailPage
 
 ---
 
@@ -237,7 +268,9 @@ With multiple developers:
 
 - [P] tasks = different files, no dependencies
 - [Story] label maps task to specific user story for traceability
+- [FCOV] label marks field-coverage verification tasks — final gate
 - Each user story should be independently completable and testable
 - Tests written FIRST (TDD) — observe red, implement, observe green
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
+- **Field-coverage verification (Phase 7) is mandatory before merge — no partial pass**

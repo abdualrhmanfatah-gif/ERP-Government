@@ -6,9 +6,9 @@ import { AccountsListPage } from '../features/accounting/pages/AccountsListPage'
 import { AccountDetailPage } from '../features/accounting/pages/AccountDetailPage';
 import { AccountCreatePage } from '../features/accounting/pages/AccountCreatePage';
 import { AccountEditPage } from '../features/accounting/pages/AccountEditPage';
-import { MovesListPage } from '../features/accounting/pages/MovesListPage';
-import { MoveCreatePage } from '../features/accounting/pages/MoveCreatePage';
-import { MoveDetailPage } from '../features/accounting/pages/MoveDetailPage';
+import { JournalEntriesListPage } from '../features/accounting/pages/JournalEntriesListPage';
+import { JournalEntryCreatePage } from '../features/accounting/pages/JournalEntryCreatePage';
+import { JournalEntryDetailPage } from '../features/accounting/pages/JournalEntryDetailPage';
 
 import { RolesListPage } from '../features/security/rbac/pages/RolesListPage';
 import { RoleCreatePage } from '../features/security/rbac/pages/RoleCreatePage';
@@ -30,10 +30,33 @@ import { ProjectEditPage } from '../features/organization/pages/ProjectCreatePag
 
 import { AccountGroupsListPage } from '../features/accounting/account-groups/pages/AccountGroupsListPage';
 import { AccountGroupDetailPage } from '../features/accounting/account-groups/pages/AccountGroupDetailPage';
+import FiscalYearsListPage from '../features/financial-settings/fiscal-years/pages/FiscalYearsListPage';
+import FiscalYearDetailPage from '../features/financial-settings/fiscal-years/pages/FiscalYearDetailPage';
+import FiscalYearCreatePage from '../features/financial-settings/fiscal-years/pages/FiscalYearCreatePage';
+import DocumentSequencesListPage from '../features/financial-settings/document-sequences/pages/DocumentSequencesListPage';
+import CurrenciesListPage from '../features/financial-settings/currencies/pages/CurrenciesListPage';
+import CurrencyCreatePage from '../features/financial-settings/currencies/pages/CurrencyCreatePage';
+import CurrencyDetailPage from '../features/financial-settings/currencies/pages/CurrencyDetailPage';
+import ExchangeRatesListPage from '../features/financial-settings/exchange-rates/pages/ExchangeRatesListPage';
+import ExchangeRateCreatePage from '../features/financial-settings/exchange-rates/pages/ExchangeRateCreatePage';
+import ClosingEntriesListPage from '../features/financial-settings/closing-entries/pages/ClosingEntriesListPage';
+import ClosingEntryDetailPage from '../features/financial-settings/closing-entries/pages/ClosingEntryDetailPage';
+
 import BudgetTypesListPage from '../features/budgeting/budget-types/pages/BudgetTypesListPage';
 import FundsListPage from '../features/budgeting/funds/pages/FundsListPage';
 import FundDetailPage from '../features/budgeting/funds/pages/FundDetailPage';
 import ClassificationsListPage from '../features/budgeting/classifications/pages/ClassificationsListPage';
+import PartiesListPage from '../features/parties/pages/PartiesListPage';
+import PartyCreatePage from '../features/parties/pages/PartyCreatePage';
+import PartyDetailPage from '../features/parties/pages/PartyDetailPage';
+import BudgetsListPage from '../features/budgeting/budgets/pages/BudgetsListPage';
+import BudgetDetailPage from '../features/budgeting/budgets/pages/BudgetDetailPage';
+import BudgetCreatePage from '../features/budgeting/budgets/pages/BudgetCreatePage';
+import AppropriationsListPage from '../features/budgeting/appropriations/pages/AppropriationsListPage';
+import AppropriationCreatePage from '../features/budgeting/appropriations/pages/AppropriationCreatePage';
+import AppropriationDetailPage from '../features/budgeting/appropriations/pages/AppropriationDetailPage';
+import EncumbrancesListPage from '../features/budgeting/encumbrances/pages/EncumbrancesListPage';
+import EncumbranceCreatePage from '../features/budgeting/encumbrances/pages/EncumbranceCreatePage';
 
 export interface RouteConfig {
   path: string;
@@ -86,21 +109,22 @@ export const AppRoutes: RouteConfig[] = [
     label: 'تفاصيل الحساب',
     protected: true,
   },
+  // Accounting — Journal Entries
   {
     path: '/accounting/journal-entries',
-    element: <MovesListPage />,
+    element: <JournalEntriesListPage />,
     label: 'قيود اليومية',
     protected: true,
   },
   {
     path: '/accounting/journal-entries/create',
-    element: <MoveCreatePage />,
+    element: <JournalEntryCreatePage />,
     label: 'قيد جديد',
     protected: true,
   },
   {
     path: '/accounting/journal-entries/:id',
-    element: <MoveDetailPage />,
+    element: <JournalEntryDetailPage />,
     label: 'تفاصيل القيد',
     protected: true,
   },
@@ -244,6 +268,143 @@ export const AppRoutes: RouteConfig[] = [
     path: '/budgeting/budget-classifications',
     element: <ClassificationsListPage />,
     label: 'التصنيفات المالية',
+    protected: true,
+  },
+  // Budgeting — Budgets
+  {
+    path: '/budgeting/budgets',
+    element: <BudgetsListPage />,
+    label: 'الموازنات',
+    protected: true,
+  },
+  {
+    path: '/budgeting/budgets/create',
+    element: <BudgetCreatePage />,
+    label: 'موازنة جديدة',
+    protected: true,
+  },
+  {
+    path: '/budgeting/budgets/:id',
+    element: <BudgetDetailPage />,
+    label: 'تفاصيل الموازنة',
+    protected: true,
+  },
+  // Budgeting — Appropriations
+  {
+    path: '/budgeting/appropriations',
+    element: <AppropriationsListPage />,
+    label: 'التخصيصات',
+    protected: true,
+  },
+  {
+    path: '/budgeting/appropriations/create',
+    element: <AppropriationCreatePage />,
+    label: 'تخصيص جديد',
+    protected: true,
+  },
+  {
+    path: '/budgeting/appropriations/:id',
+    element: <AppropriationDetailPage />,
+    label: 'تفاصيل التخصيص',
+    protected: true,
+  },
+  // Budgeting — Encumbrances
+  {
+    path: '/budgeting/encumbrances',
+    element: <EncumbrancesListPage />,
+    label: 'الالتزامات',
+    protected: true,
+  },
+  {
+    path: '/budgeting/encumbrances/create',
+    element: <EncumbranceCreatePage />,
+    label: 'التزام جديد',
+    protected: true,
+  },
+  // Parties
+  {
+    path: '/parties',
+    element: <PartiesListPage />,
+    label: 'الأطراف',
+    protected: true,
+  },
+  {
+    path: '/parties/create',
+    element: <PartyCreatePage />,
+    label: 'طرف جديد',
+    protected: true,
+  },
+  {
+    path: '/parties/:id',
+    element: <PartyDetailPage />,
+    label: 'تفاصيل الطرف',
+    protected: true,
+  },
+  // Financial Settings
+  {
+    path: '/financial-settings/fiscal-years',
+    element: <FiscalYearsListPage />,
+    label: 'السنوات المالية',
+    protected: true,
+  },
+  {
+    path: '/financial-settings/fiscal-years/create',
+    element: <FiscalYearCreatePage />,
+    label: 'سنة مالية جديدة',
+    protected: true,
+  },
+  {
+    path: '/financial-settings/fiscal-years/:id',
+    element: <FiscalYearDetailPage />,
+    label: 'تفاصيل السنة المالية',
+    protected: true,
+  },
+  {
+    path: '/financial-settings/document-sequences',
+    element: <DocumentSequencesListPage />,
+    label: 'تسلسل الوثائق',
+    protected: true,
+  },
+  {
+    path: '/financial-settings/currencies',
+    element: <CurrenciesListPage />,
+    label: 'العملات',
+    protected: true,
+  },
+  {
+    path: '/financial-settings/currencies/new',
+    element: <CurrencyCreatePage />,
+    label: 'عملة جديدة',
+    protected: true,
+  },
+  {
+    path: '/financial-settings/currencies/:id',
+    element: <CurrencyDetailPage />,
+    label: 'تفاصيل العملة',
+    protected: true,
+  },
+  {
+    path: '/financial-settings/exchange-rates',
+    element: <ExchangeRatesListPage />,
+    label: 'أسعار الصرف',
+    protected: true,
+  },
+  {
+    path: '/financial-settings/exchange-rates/new',
+    element: <ExchangeRateCreatePage />,
+    label: 'سعر صرف جديد',
+    protected: true,
+  },
+  {
+    path: '/financial-settings/closing-entries',
+    element: <ClosingEntriesListPage />,
+    label: 'قيود الإغلاق',
+    protected: true,
+  },
+  {
+    path: '/financial-settings/closing-entries/:id',
+    element: <ClosingEntryDetailPage />,
+    label: 'تفاصيل قيد الإغلاق',
     protected: true,
   },
 ];

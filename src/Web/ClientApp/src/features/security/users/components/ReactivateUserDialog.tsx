@@ -1,4 +1,4 @@
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import { CheckCircle } from 'lucide-react';
 import { Dialog } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
@@ -17,10 +17,10 @@ export function ReactivateUserDialog({ open, onClose, userId, userName }: Reacti
   async function handleReactivate() {
     try {
       await reactivate.mutateAsync(userId);
-      toast.success('تم تنشيط المستخدم بنجاح');
+      notify({ type: 'success', title: 'تم تنشيط المستخدم بنجاح' });
       onClose();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+      notify({ type: 'error', title: err instanceof Error ? err.message : 'حدث خطأ' });
     }
   }
 

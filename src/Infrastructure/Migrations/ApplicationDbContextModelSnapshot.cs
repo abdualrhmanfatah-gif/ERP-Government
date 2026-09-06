@@ -646,7 +646,7 @@ namespace ERP_Government.Infrastructure.Migrations
 
                     b.ToTable("JournalEntryLines", null, t =>
                         {
-                            t.HasCheckConstraint("CK_JournalEntryLines_DebitCreditXOR", "([Debit] > 0) != ([Credit] > 0)");
+                            t.HasCheckConstraint("CK_JournalEntryLines_DebitCreditXOR", "(([Debit] > 0 AND [Credit] = 0) OR ([Debit] = 0 AND [Credit] > 0))");
                         });
                 });
 
@@ -1380,7 +1380,8 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<decimal?>("DepreciationRate")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -5385,7 +5386,7 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("PaidAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<int>("PaymentMethod")
+                    b.Property<int?>("PaymentMethod")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(6);
@@ -6709,7 +6710,7 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("PaymentMethod")
+                    b.Property<int?>("PaymentMethod")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(6);
@@ -8681,13 +8682,13 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.HasOne("ERP_Government.Domain.Budgeting.Entities.Budget", "Budget")
                         .WithMany()
                         .HasForeignKey("BudgetId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("ERP_Government.Domain.Budgeting.Entities.BudgetItem", "BudgetItem")
                         .WithMany()
                         .HasForeignKey("BudgetItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Budget");

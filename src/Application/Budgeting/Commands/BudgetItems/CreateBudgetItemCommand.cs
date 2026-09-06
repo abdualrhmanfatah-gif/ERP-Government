@@ -9,7 +9,12 @@ public record CreateBudgetItemCommand(
     string ItemCode,
     string ItemName,
     int? ParentId,
-    string? Remarks) : IRequest<Result<int>>;
+    int? AccountId,
+    int? FundId,
+    int? CostCenterId,
+    int? BudgetClassificationId,
+    string? Remarks,
+    bool? AllowOverrun) : IRequest<Result<int>>;
 
 public class CreateBudgetItemCommandHandler(
     IApplicationDbContext context) : IRequestHandler<CreateBudgetItemCommand, Result<int>>
@@ -45,7 +50,12 @@ public class CreateBudgetItemCommandHandler(
             ItemCode = request.ItemCode,
             ItemName = request.ItemName,
             ParentId = request.ParentId,
+            AccountId = request.AccountId,
+            FundId = request.FundId,
+            CostCenterId = request.CostCenterId,
+            BudgetClassificationId = request.BudgetClassificationId,
             Remarks = request.Remarks,
+            AllowOverrun = request.AllowOverrun,
         };
 
         context.BudgetItems.Add(entity);

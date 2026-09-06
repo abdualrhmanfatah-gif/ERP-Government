@@ -36,6 +36,12 @@ export const PERMISSIONS = {
     View: 'DocumentSequences.View',
     Create: 'DocumentSequences.Create',
   },
+  ClosingEntries: {
+    View: 'ClosingEntries.View',
+    Generate: 'ClosingEntries.Generate',
+    Approve: 'ClosingEntries.Approve',
+    Reverse: 'ClosingEntries.Reverse',
+  },
   Accounting: {
     ChartOfAccounts: {
       Read: 'Accounting.ChartOfAccounts.Read',
@@ -255,6 +261,7 @@ export const BUDGET_PERMISSIONS = {
     Suspend: 'Appropriations.Suspend',
     Close: 'Appropriations.Close',
     Cancel: 'Appropriations.Cancel',
+    Reverse: 'Appropriations.Reverse',
   },
   Encumbrances: {
     View: 'Encumbrances.View',

@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
 import { Button, Switch, FilterBar, FilterSearch, FilterSelect, Dialog, ConfirmDialog, Badge } from '@/components/ui';
+import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Pencil } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import { budgetControlMethodLabels, BudgetControlMethod } from '../../shared/types';
 import type { BudgetTypeDto } from '../../shared/types';
 import { useBudgetTypesList, useCreateBudgetType, useUpdateBudgetType, useToggleBudgetTypeActive } from '../hooks/useBudgetTypes';
@@ -22,6 +23,13 @@ const controlMethodOptions = Object.entries(budgetControlMethodLabels).map(([val
 const isActiveOptions = [
   { value: 'true', label: 'نشط' },
   { value: 'false', label: 'معطل' },
+];
+
+const columns: DataGridColumn<BudgetTypeDto>[] = [
+  { header: 'الكود', cell: (row) => <span className="font-mono">{row.code}</span> },
+  { header: 'الاسم', cell: (row) => row.name },
+  { header: 'طريقة التحكم', cell: (row) => <Badge variant={controlMethodBadgeVariant[row.controlMethod]}>{budgetControlMethodLabels[row.controlMethod]}</Badge> },
+  { header: 'السماح بالتجاوز', cell: (row) => <Switch checked={row.allowOverrun} disabled /> },
 ];
 
 export default function BudgetTypesListPage() {
@@ -78,10 +86,10 @@ export default function BudgetTypesListPage() {
       { id: confirmToggle.id, rowVersion: confirmToggle.rowVersion, isActive: !confirmToggle.isActive },
       {
         onSuccess: () => {
-          toast.success(confirmToggle.isActive ? 'تم التعطيل بنجاح' : 'تم التنشيط بنجاح');
+          notify({ type: 'success', title: confirmToggle.isActive ? 'تم التعطيل بنجاح' : 'تم التنشيط بنجاح' });
           setConfirmToggle(null);
         },
-        onError: () => toast.error('حدث خطأ أثناء التبديل'),
+        onError: () => notify({ type: 'error', title: 'حدث خطأ أثناء التبديل' }),
       },
     );
   }
@@ -102,22 +110,36 @@ export default function BudgetTypesListPage() {
         { id: editItem.id, rowVersion: editItem.rowVersion, ...data },
         {
           onSuccess: () => {
-            toast.success('تم التحديث بنجاح');
+            notify({ type: 'success', title: 'تم التحديث بنجاح' });
             setDialogOpen(false);
           },
-          onError: () => toast.error('حدث خطأ أثناء التحديث'),
+          onError: () => notify({ type: 'error', title: 'حدث خطأ أثناء التحديث' }),
         },
       );
     } else {
       createMutation.mutate(data, {
         onSuccess: () => {
-          toast.success('تم الإنشاء بنجاح');
+          notify({ type: 'success', title: 'تم الإنشاء بنجاح' });
           setDialogOpen(false);
         },
-        onError: () => toast.error('حدث خطأ أثناء الإنشاء'),
+        onError: () => notify({ type: 'error', title: 'حدث خطأ أثناء الإنشاء' }),
       });
     }
   }
+
+  const allColumns: DataGridColumn<BudgetTypeDto>[] = [
+    ...columns,
+    {
+      header: 'الحالة',
+      cell: (row) => canManage
+        ? <Switch checked={row.isActive} onChange={() => handleToggle(row)} label={row.isActive ? 'نشط' : 'معطل'} />
+        : <Badge variant={row.isActive ? 'success' : 'danger'}>{row.isActive ? 'نشط' : 'معطل'}</Badge>,
+    },
+    ...(canManage ? [{
+      header: 'إجراءات',
+      cell: (row: BudgetTypeDto) => <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} aria-label="تعديل"><Pencil size={16} /></Button>,
+    }] : []),
+  ];
 
   return (
     <div className="space-y-4">
@@ -153,56 +175,13 @@ export default function BudgetTypesListPage() {
         {items.length > 0 && <span>({items.length} إجمالي)</span>}
       </div>
 
-      <div className="w-full overflow-x-auto rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container-lowest)]">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-[var(--color-border-container)] bg-[var(--color-surface-container-low)]">
-              <th className="px-4 py-3 text-right font-medium text-[var(--color-on-surface-variant)]">الكود</th>
-              <th className="px-4 py-3 text-right font-medium text-[var(--color-on-surface-variant)]">الاسم</th>
-              <th className="px-4 py-3 text-right font-medium text-[var(--color-on-surface-variant)]">طريقة التحكم</th>
-              <th className="px-4 py-3 text-right font-medium text-[var(--color-on-surface-variant)]">السماح بالتجاوز</th>
-              <th className="px-4 py-3 text-right font-medium text-[var(--color-on-surface-variant)]">الحالة</th>
-              {canManage && <th className="px-4 py-3 text-right font-medium text-[var(--color-on-surface-variant)]">إجراءات</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((item) => (
-              <tr key={item.id} className="border-b border-[var(--color-border-container)] last:border-0 hover:bg-[var(--color-surface-container-low)] transition-colors">
-                <td className="px-4 py-3 font-mono text-[var(--color-on-surface)]">{item.code}</td>
-                <td className="px-4 py-3 text-[var(--color-on-surface)]">{item.name}</td>
-                <td className="px-4 py-3">
-                  <Badge variant={controlMethodBadgeVariant[item.controlMethod]}>
-                    {budgetControlMethodLabels[item.controlMethod]}
-                  </Badge>
-                </td>
-                <td className="px-4 py-3">
-                  <Switch checked={item.allowOverrun} disabled />
-                </td>
-                <td className="px-4 py-3">
-                  {canManage ? (
-                    <Switch
-                      checked={item.isActive}
-                      onChange={() => handleToggle(item)}
-                      label={item.isActive ? 'نشط' : 'معطل'}
-                    />
-                  ) : (
-                    <Badge variant={item.isActive ? 'success' : 'danger'}>
-                      {item.isActive ? 'نشط' : 'معطل'}
-                    </Badge>
-                  )}
-                </td>
-                {canManage && (
-                  <td className="px-4 py-3">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(item)} aria-label="تعديل">
-                      <Pencil size={16} />
-                    </Button>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataGrid
+        columns={allColumns}
+        data={filtered}
+        loading={isLoading}
+        emptyMessage="لا توجد نتائج"
+        rowKey={(row) => row.id}
+      />
 
       <Dialog
         open={dialogOpen}

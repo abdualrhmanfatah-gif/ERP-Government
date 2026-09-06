@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import { Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
@@ -56,7 +56,7 @@ export function PermissionsTab({ userId }: PermissionsTabProps) {
           userId,
           data: { userId, permissionId: pendingAction.permissionId, isGranted: true, reason: reason.trim() },
         });
-        toast.success('تم تعيين الصلاحية بنجاح');
+        notify({ type: 'success', title: 'تم تعيين الصلاحية بنجاح' });
         setSelectedPermissionId('');
       } else {
         if (pendingAction.source === 'override') {
@@ -67,12 +67,12 @@ export function PermissionsTab({ userId }: PermissionsTabProps) {
             data: { userId, permissionId: pendingAction.permissionId, isGranted: false, reason: reason.trim() },
           });
         }
-        toast.success('تم إزالة الصلاحية بنجاح');
+        notify({ type: 'success', title: 'تم إزالة الصلاحية بنجاح' });
       }
       setPendingAction(null);
       setReason('');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+      notify({ type: 'error', title: err instanceof Error ? err.message : 'حدث خطأ' });
     }
   }
 

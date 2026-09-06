@@ -12,6 +12,7 @@ type PolicyString =
   | 'FiscalYears.View' | 'FiscalYears.Create' | 'FiscalYears.Update' | 'FiscalYears.Open' | 'FiscalYears.Close'
   | 'FiscalPeriods.View' | 'FiscalPeriods.Create' | 'FiscalPeriods.Update' | 'FiscalPeriods.Lock' | 'FiscalPeriods.Unlock'
   | 'DocumentSequences.View' | 'DocumentSequences.Create'
+  | 'ClosingEntries.View' | 'ClosingEntries.Generate' | 'ClosingEntries.Approve' | 'ClosingEntries.Reverse'
   | 'Suppliers.View' | 'Suppliers.Create' | 'Suppliers.Update' | 'Suppliers.Activate' | 'Suppliers.Deactivate'
   | 'PurchaseRequests.View' | 'PurchaseRequests.Create' | 'PurchaseRequests.Submit' | 'PurchaseRequests.Approve' | 'PurchaseRequests.Reject'
   | 'RFQ.View' | 'RFQ.Create' | 'RFQ.Publish' | 'RFQ.Complete' | 'RFQ.Cancel'
@@ -44,6 +45,7 @@ type PolicyString =
   | 'Encumbrances.View' | 'Encumbrances.Create' | 'Encumbrances.Submit' | 'Encumbrances.Approve'
   | 'Encumbrances.Activate' | 'Encumbrances.Release' | 'Encumbrances.Close' | 'Encumbrances.Cancel'
   | 'Encumbrances.Reverse'
+  | 'Parties.View' | 'Parties.Create' | 'Parties.Update'
   | 'Accounting.ChartOfAccounts.Read' | 'Accounting.ChartOfAccounts.Create' | 'Accounting.ChartOfAccounts.Edit'
   | 'Accounting.JournalEntries.Read' | 'Accounting.JournalEntries.Create' | 'Accounting.JournalEntries.Submit'
   | 'Accounting.JournalEntries.Approve' | 'Accounting.JournalEntries.Post' | 'Accounting.JournalEntries.Reverse'
@@ -61,6 +63,7 @@ const STUB_GRANTED_POLICIES: Set<string> = new Set(
     FiscalYears: ['View', 'Create', 'Update', 'Open', 'Close'],
     FiscalPeriods: ['View', 'Create', 'Update', 'Lock', 'Unlock'],
     DocumentSequences: ['View', 'Create'],
+    ClosingEntries: ['View', 'Generate', 'Approve', 'Reverse'],
     Suppliers: ['View', 'Create', 'Update', 'Activate', 'Deactivate'],
     PurchaseRequests: ['View', 'Create', 'Submit', 'Approve', 'Reject'],
     RFQ: ['View', 'Create', 'Publish', 'Complete', 'Cancel'],
@@ -88,6 +91,7 @@ const STUB_GRANTED_POLICIES: Set<string> = new Set(
     BudgetItems: ['View', 'Create', 'Update', 'Delete'],
     Appropriations: ['View', 'Create', 'Update', 'Delete', 'Submit', 'Approve', 'Activate', 'Suspend', 'Close', 'Cancel'],
     Encumbrances: ['View', 'Create', 'Submit', 'Approve', 'Activate', 'Release', 'Close', 'Cancel', 'Reverse'],
+    Parties: ['View', 'Create', 'Update'],
     'Accounting.ChartOfAccounts': ['Read', 'Create', 'Edit'],
     'Accounting.JournalEntries': ['Read', 'Create', 'Submit', 'Approve', 'Post', 'Reverse', 'UpdateLines', 'Cancel'],
     'Accounting.Reports': ['BalanceSheet', 'IncomeStatement', 'GeneralLedger', 'CashFlow', 'Export', 'Print'],

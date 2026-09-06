@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import { Shield, ShieldOff, Save } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
@@ -63,17 +63,17 @@ export function RolesTab({ userId }: RolesTabProps) {
     if (!selectedRoleId) return;
     try {
       await setRole.mutateAsync({ userId, data: { userId, roleId: Number(selectedRoleId) } });
-      toast.success('تم تعيين الدور بنجاح');
+      notify({ type: 'success', title: 'تم تعيين الدور بنجاح' });
       setSelectedRoleId('');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ';
-      toast.error(message);
+      notify({ type: 'error', title: message });
     }
   }
 
   async function handleSaveOverrides() {
     if (!overrideReason.trim()) {
-      toast.error('يجب إدخال سبب التغيير');
+      notify({ type: 'error', title: 'يجب إدخال سبب التغيير' });
       return;
     }
     try {
@@ -83,12 +83,12 @@ export function RolesTab({ userId }: RolesTabProps) {
           data: { userId, permissionId: permId, isGranted, reason: overrideReason },
         });
       }
-      toast.success('تم حفظ التغييرات بنجاح');
+      notify({ type: 'success', title: 'تم حفظ التغييرات بنجاح' });
       setPendingOverrides(new Map());
       setOverrideReason('');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ';
-      toast.error(message);
+      notify({ type: 'error', title: message });
     }
   }
 

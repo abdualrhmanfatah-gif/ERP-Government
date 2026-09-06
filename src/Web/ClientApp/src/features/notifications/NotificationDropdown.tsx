@@ -1,6 +1,8 @@
 import { Check, X } from 'lucide-react';
 import { useNotifications, useMarkAsRead, useMarkAllAsRead, useDeleteNotification, useClearAllNotifications } from './hooks';
-import type { NotificationDto } from './types';
+import { useNotificationStore } from './store';
+import type { NotificationEntry, NotificationDto } from './types';
+import { useEffect } from 'react';
 
 interface Props {
   onClose: () => void;
@@ -29,14 +31,26 @@ function notificationTypeIcon(type: string): string {
   }
 }
 
+function toEntry(dto: NotificationDto): NotificationEntry {
+  return {
+    id: String(dto.id),
+    notificationType: dto.notificationType as NotificationEntry['notificationType'],
+    title: dto.title,
+    message: dto.message,
+    isRead: dto.isRead,
+    created: dto.created,
+    source: 'server',
+  };
+}
+
 function NotificationItem({
   notification,
   onMarkAsRead,
   onDelete,
 }: {
-  notification: NotificationDto;
-  onMarkAsRead: (id: number) => void;
-  onDelete: (id: number) => void;
+  notification: NotificationEntry;
+  onMarkAsRead: (id: string) => void;
+  onDelete: (id: string) => void;
 }) {
   return (
     <li
@@ -72,7 +86,7 @@ function NotificationItem({
           ) : null}
           <button
             type="button"
-              className="p-2 min-w-9 min-h-9 rounded-lg hover:bg-[var(--color-surface-container-high)] transition-colors text-[var(--color-on-surface-variant)]"
+            className="p-2 min-w-9 min-h-9 rounded-lg hover:bg-[var(--color-surface-container-high)] transition-colors text-[var(--color-on-surface-variant)]"
             aria-label="حذف"
             onClick={() => onDelete(notification.id)}
           >
@@ -85,20 +99,29 @@ function NotificationItem({
 }
 
 export function NotificationDropdown({ onClose: _onClose }: Props) {
-  const { data, isLoading } = useNotifications(1, 50);
+  const { data } = useNotifications(1, 50);
   const markAsRead = useMarkAsRead();
   const markAllAsRead = useMarkAllAsRead();
   const deleteNotification = useDeleteNotification();
   const clearAll = useClearAllNotifications();
+  const store = useNotificationStore();
 
-  const unreadCount = data?.items.filter((n) => !n.isRead).length ?? 0;
+  useEffect(() => {
+    if (data?.items) {
+      store.setServer(data.items.map(toEntry));
+    }
+  }, [data, store]);
+
+  const unreadCount = store.entries.filter((n) => !n.isRead).length;
 
   function handleMarkAllAsRead() {
     markAllAsRead.mutate();
+    store.entries.filter((n) => !n.isRead).forEach((n) => store.markRead(n.id));
   }
 
   function handleClearAll() {
     clearAll.mutate();
+    store.clearLocal();
   }
 
   return (
@@ -120,7 +143,7 @@ export function NotificationDropdown({ onClose: _onClose }: Props) {
               تحديد الكل كمقروء
             </button>
           ) : null}
-          {data && data.items.length > 0 ? (
+          {store.entries.length > 0 ? (
             <button
               type="button"
               className="text-label-sm text-[var(--color-error)] transition-colors"
@@ -132,18 +155,20 @@ export function NotificationDropdown({ onClose: _onClose }: Props) {
           ) : null}
         </div>
       </div>
-      {isLoading ? (
-        <div className="px-4 py-6 text-center text-body-sm text-[var(--color-on-surface-variant)]">
-          جاري التحميل...
-        </div>
-      ) : data && data.items.length > 0 ? (
+      {store.entries.length > 0 ? (
         <ul className="list-none m-0 p-0 max-h-64 overflow-y-auto">
-          {data.items.map((notification) => (
+          {store.entries.map((notification) => (
             <NotificationItem
               key={notification.id}
               notification={notification}
-              onMarkAsRead={(id) => markAsRead.mutate(id)}
-              onDelete={(id) => deleteNotification.mutate(id)}
+              onMarkAsRead={(id) => {
+                if (notification.source === 'server') markAsRead.mutate(Number(id));
+                store.markRead(id);
+              }}
+              onDelete={(id) => {
+                if (notification.source === 'server') deleteNotification.mutate(Number(id));
+                store.remove(id);
+              }}
             />
           ))}
         </ul>

@@ -12746,6 +12746,80 @@ export class DisbursementRegisterReportsClient {
         }
         return Promise.resolve<DisbursementRegisterDetailDto>(null as any);
     }
+
+    /**
+     * Export disbursement register report to Excel or PDF
+     * @param fiscalPeriodId (optional) 
+     * @param fundId (optional) 
+     * @param status (optional) 
+     * @param approverId (optional) 
+     * @return OK
+     */
+    export4(format: string, fiscalYearId: number, fiscalPeriodId: number | undefined, fundId: number | undefined, status: string | undefined, approverId: number | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/DisbursementRegisterReports/export?";
+        if (format === undefined || format === null)
+            throw new globalThis.Error("The parameter 'format' must be defined and cannot be null.");
+        else
+            url_ += "format=" + encodeURIComponent("" + format) + "&";
+        if (fiscalYearId === undefined || fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
+        else
+            url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
+        if (fiscalPeriodId === null)
+            throw new globalThis.Error("The parameter 'fiscalPeriodId' cannot be null.");
+        else if (fiscalPeriodId !== undefined)
+            url_ += "FiscalPeriodId=" + encodeURIComponent("" + fiscalPeriodId) + "&";
+        if (fundId === null)
+            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
+        else if (fundId !== undefined)
+            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
+        if (status === null)
+            throw new globalThis.Error("The parameter 'status' cannot be null.");
+        else if (status !== undefined)
+            url_ += "Status=" + encodeURIComponent("" + status) + "&";
+        if (approverId === null)
+            throw new globalThis.Error("The parameter 'approverId' cannot be null.");
+        else if (approverId !== undefined)
+            url_ += "ApproverId=" + encodeURIComponent("" + approverId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processExport4(_response);
+        });
+    }
+
+    protected processExport4(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
 }
 
 export class RevenueCollectionsReportsClient {
@@ -12899,7 +12973,7 @@ export class RevenueCollectionsReportsClient {
      * @param paymentMethod (optional) 
      * @return OK
      */
-    export4(format: string, fiscalYearId: number, fiscalPeriodId: number | undefined, fundId: number | undefined, revenueAccountId: number | undefined, partyId: number | undefined, paymentMethod: string | undefined): Promise<void> {
+    export5(format: string, fiscalYearId: number, fiscalPeriodId: number | undefined, fundId: number | undefined, revenueAccountId: number | undefined, partyId: number | undefined, paymentMethod: string | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/RevenueCollectionsReports/export?";
         if (format === undefined || format === null)
             throw new globalThis.Error("The parameter 'format' must be defined and cannot be null.");
@@ -12938,11 +13012,11 @@ export class RevenueCollectionsReportsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processExport4(_response);
+            return this.processExport5(_response);
         });
     }
 
-    protected processExport4(response: Response): Promise<void> {
+    protected processExport5(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -13118,7 +13192,7 @@ export class TrialBalanceReportsClient {
      * @param projectId (optional) 
      * @return OK
      */
-    export5(format: string, fiscalYearId: number, fiscalPeriodId: number | undefined, fundId: number | undefined, projectId: number | undefined): Promise<void> {
+    export6(format: string, fiscalYearId: number, fiscalPeriodId: number | undefined, fundId: number | undefined, projectId: number | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/TrialBalanceReports/export?";
         if (format === undefined || format === null)
             throw new globalThis.Error("The parameter 'format' must be defined and cannot be null.");
@@ -13149,11 +13223,11 @@ export class TrialBalanceReportsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processExport5(_response);
+            return this.processExport6(_response);
         });
     }
 
-    protected processExport5(response: Response): Promise<void> {
+    protected processExport6(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -14490,6 +14564,107 @@ export class PartiesClient {
         }
         return Promise.resolve<Result>(null as any);
     }
+
+    /**
+     * @return OK
+     */
+    documents(id: number): Promise<PartyDocumentResponse[]> {
+        let url_ = this.baseUrl + "/api/Parties/{id}/documents";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDocuments(_response);
+        });
+    }
+
+    protected processDocuments(response: Response): Promise<PartyDocumentResponse[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(PartyDocumentResponse.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PartyDocumentResponse[]>(null as any);
+    }
+
+    /**
+     * @param excludeId (optional) 
+     * @return OK
+     */
+    checkTaxNumber(taxNumber: string, excludeId: number | undefined): Promise<TaxNumberCheckResponse> {
+        let url_ = this.baseUrl + "/api/Parties/check-tax-number?";
+        if (taxNumber === undefined || taxNumber === null)
+            throw new globalThis.Error("The parameter 'taxNumber' must be defined and cannot be null.");
+        else
+            url_ += "taxNumber=" + encodeURIComponent("" + taxNumber) + "&";
+        if (excludeId === null)
+            throw new globalThis.Error("The parameter 'excludeId' cannot be null.");
+        else if (excludeId !== undefined)
+            url_ += "excludeId=" + encodeURIComponent("" + excludeId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCheckTaxNumber(_response);
+        });
+    }
+
+    protected processCheckTaxNumber(response: Response): Promise<TaxNumberCheckResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = TaxNumberCheckResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TaxNumberCheckResponse>(null as any);
+    }
 }
 
 export class NotificationsClient {
@@ -15527,6 +15702,89 @@ export class DocumentsClient {
     }
 
     protected processAttachmentsDELETE(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    attachmentGateCheck(documentType: string, documentId: number): Promise<void> {
+        let url_ = this.baseUrl + "/api/Documents/{documentType}/{documentId}/attachment-gate-check";
+        if (documentType === undefined || documentType === null)
+            throw new globalThis.Error("The parameter 'documentType' must be defined.");
+        url_ = url_.replace("{documentType}", encodeURIComponent("" + documentType));
+        if (documentId === undefined || documentId === null)
+            throw new globalThis.Error("The parameter 'documentId' must be defined.");
+        url_ = url_.replace("{documentId}", encodeURIComponent("" + documentId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAttachmentGateCheck(_response);
+        });
+    }
+
+    protected processAttachmentGateCheck(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    download(id: number): Promise<void> {
+        let url_ = this.baseUrl + "/api/Documents/attachments/{id}/download";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDownload(_response);
+        });
+    }
+
+    protected processDownload(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -20808,6 +21066,8 @@ export class AppropriationDto implements IAppropriationDto {
     fundNumber?: string;
     fundName?: string;
     fiscalYearName?: string;
+    budgetNumber?: string;
+    budgetName?: string;
     itemCode?: string;
     itemName?: string;
 
@@ -20843,6 +21103,8 @@ export class AppropriationDto implements IAppropriationDto {
             this.fundNumber = _data["fundNumber"];
             this.fundName = _data["fundName"];
             this.fiscalYearName = _data["fiscalYearName"];
+            this.budgetNumber = _data["budgetNumber"];
+            this.budgetName = _data["budgetName"];
             this.itemCode = _data["itemCode"];
             this.itemName = _data["itemName"];
         }
@@ -20876,6 +21138,8 @@ export class AppropriationDto implements IAppropriationDto {
         data["fundNumber"] = this.fundNumber;
         data["fundName"] = this.fundName;
         data["fiscalYearName"] = this.fiscalYearName;
+        data["budgetNumber"] = this.budgetNumber;
+        data["budgetName"] = this.budgetName;
         data["itemCode"] = this.itemCode;
         data["itemName"] = this.itemName;
         return data;
@@ -20898,6 +21162,8 @@ export interface IAppropriationDto {
     fundNumber?: string;
     fundName?: string;
     fiscalYearName?: string;
+    budgetNumber?: string;
+    budgetName?: string;
     itemCode?: string;
     itemName?: string;
 
@@ -23337,6 +23603,9 @@ export class BudgetDto implements IBudgetDto {
     budgetTypeId?: number;
     status?: BudgetStatus;
     allowOverrun?: boolean | undefined;
+    totalAmount?: number;
+    effectiveFrom?: Date;
+    effectiveTo?: Date | undefined;
     description?: string | undefined;
     rowVersion?: string;
     created?: Date;
@@ -23369,6 +23638,9 @@ export class BudgetDto implements IBudgetDto {
             this.budgetTypeId = _data["budgetTypeId"];
             this.status = _data["status"];
             this.allowOverrun = _data["allowOverrun"];
+            this.totalAmount = _data["totalAmount"];
+            this.effectiveFrom = _data["effectiveFrom"] ? new Date(_data["effectiveFrom"].toString()) : undefined as any;
+            this.effectiveTo = _data["effectiveTo"] ? new Date(_data["effectiveTo"].toString()) : undefined as any;
             this.description = _data["description"];
             this.rowVersion = _data["rowVersion"];
             this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
@@ -23399,6 +23671,9 @@ export class BudgetDto implements IBudgetDto {
         data["budgetTypeId"] = this.budgetTypeId;
         data["status"] = this.status;
         data["allowOverrun"] = this.allowOverrun;
+        data["totalAmount"] = this.totalAmount;
+        data["effectiveFrom"] = this.effectiveFrom ? formatDate(this.effectiveFrom) : undefined as any;
+        data["effectiveTo"] = this.effectiveTo ? formatDate(this.effectiveTo) : undefined as any;
         data["description"] = this.description;
         data["rowVersion"] = this.rowVersion;
         data["created"] = this.created ? this.created.toISOString() : undefined as any;
@@ -23418,6 +23693,9 @@ export interface IBudgetDto {
     budgetTypeId?: number;
     status?: BudgetStatus;
     allowOverrun?: boolean | undefined;
+    totalAmount?: number;
+    effectiveFrom?: Date;
+    effectiveTo?: Date | undefined;
     description?: string | undefined;
     rowVersion?: string;
     created?: Date;
@@ -23750,6 +24028,14 @@ export class BudgetItemDto implements IBudgetItemDto {
     itemCode?: string;
     itemName?: string;
     parentId?: number | undefined;
+    accountId?: number | undefined;
+    accountName?: string | undefined;
+    fundId?: number | undefined;
+    fundName?: string | undefined;
+    costCenterId?: number | undefined;
+    costCenterName?: string | undefined;
+    budgetClassificationId?: number | undefined;
+    budgetClassificationName?: string | undefined;
     remarks?: string | undefined;
     level?: number;
     allowOverrun?: boolean | undefined;
@@ -23782,6 +24068,14 @@ export class BudgetItemDto implements IBudgetItemDto {
             this.itemCode = _data["itemCode"];
             this.itemName = _data["itemName"];
             this.parentId = _data["parentId"];
+            this.accountId = _data["accountId"];
+            this.accountName = _data["accountName"];
+            this.fundId = _data["fundId"];
+            this.fundName = _data["fundName"];
+            this.costCenterId = _data["costCenterId"];
+            this.costCenterName = _data["costCenterName"];
+            this.budgetClassificationId = _data["budgetClassificationId"];
+            this.budgetClassificationName = _data["budgetClassificationName"];
             this.remarks = _data["remarks"];
             this.level = _data["level"];
             this.allowOverrun = _data["allowOverrun"];
@@ -23816,6 +24110,14 @@ export class BudgetItemDto implements IBudgetItemDto {
         data["itemCode"] = this.itemCode;
         data["itemName"] = this.itemName;
         data["parentId"] = this.parentId;
+        data["accountId"] = this.accountId;
+        data["accountName"] = this.accountName;
+        data["fundId"] = this.fundId;
+        data["fundName"] = this.fundName;
+        data["costCenterId"] = this.costCenterId;
+        data["costCenterName"] = this.costCenterName;
+        data["budgetClassificationId"] = this.budgetClassificationId;
+        data["budgetClassificationName"] = this.budgetClassificationName;
         data["remarks"] = this.remarks;
         data["level"] = this.level;
         data["allowOverrun"] = this.allowOverrun;
@@ -23839,6 +24141,14 @@ export interface IBudgetItemDto {
     itemCode?: string;
     itemName?: string;
     parentId?: number | undefined;
+    accountId?: number | undefined;
+    accountName?: string | undefined;
+    fundId?: number | undefined;
+    fundName?: string | undefined;
+    costCenterId?: number | undefined;
+    costCenterName?: string | undefined;
+    budgetClassificationId?: number | undefined;
+    budgetClassificationName?: string | undefined;
     remarks?: string | undefined;
     level?: number;
     allowOverrun?: boolean | undefined;
@@ -26360,7 +26670,12 @@ export class CreateBudgetItemRequest implements ICreateBudgetItemRequest {
     itemCode!: string;
     itemName!: string;
     parentId!: number | undefined;
+    accountId!: number | undefined;
+    fundId!: number | undefined;
+    costCenterId!: number | undefined;
+    budgetClassificationId!: number | undefined;
     remarks!: string | undefined;
+    allowOverrun!: boolean | undefined;
 
     [key: string]: any;
 
@@ -26382,7 +26697,12 @@ export class CreateBudgetItemRequest implements ICreateBudgetItemRequest {
             this.itemCode = _data["itemCode"];
             this.itemName = _data["itemName"];
             this.parentId = _data["parentId"];
+            this.accountId = _data["accountId"];
+            this.fundId = _data["fundId"];
+            this.costCenterId = _data["costCenterId"];
+            this.budgetClassificationId = _data["budgetClassificationId"];
             this.remarks = _data["remarks"];
+            this.allowOverrun = _data["allowOverrun"];
         }
     }
 
@@ -26402,7 +26722,12 @@ export class CreateBudgetItemRequest implements ICreateBudgetItemRequest {
         data["itemCode"] = this.itemCode;
         data["itemName"] = this.itemName;
         data["parentId"] = this.parentId;
+        data["accountId"] = this.accountId;
+        data["fundId"] = this.fundId;
+        data["costCenterId"] = this.costCenterId;
+        data["budgetClassificationId"] = this.budgetClassificationId;
         data["remarks"] = this.remarks;
+        data["allowOverrun"] = this.allowOverrun;
         return data;
     }
 }
@@ -26411,7 +26736,12 @@ export interface ICreateBudgetItemRequest {
     itemCode: string;
     itemName: string;
     parentId: number | undefined;
+    accountId: number | undefined;
+    fundId: number | undefined;
+    costCenterId: number | undefined;
+    budgetClassificationId: number | undefined;
     remarks: string | undefined;
+    allowOverrun: boolean | undefined;
 
     [key: string]: any;
 }
@@ -33594,6 +33924,74 @@ export interface IPaginatedResultOfNotificationDto {
     [key: string]: any;
 }
 
+export class PartyDocumentResponse implements IPartyDocumentResponse {
+    documentType!: string;
+    documentId!: number;
+    documentNumber!: string;
+    status!: string;
+    date!: Date;
+    amount!: number;
+
+    [key: string]: any;
+
+    constructor(data?: IPartyDocumentResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.documentType = _data["documentType"];
+            this.documentId = _data["documentId"];
+            this.documentNumber = _data["documentNumber"];
+            this.status = _data["status"];
+            this.date = _data["date"] ? new Date(_data["date"].toString()) : undefined as any;
+            this.amount = _data["amount"];
+        }
+    }
+
+    static fromJS(data: any): PartyDocumentResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new PartyDocumentResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["documentType"] = this.documentType;
+        data["documentId"] = this.documentId;
+        data["documentNumber"] = this.documentNumber;
+        data["status"] = this.status;
+        data["date"] = this.date ? formatDate(this.date) : undefined as any;
+        data["amount"] = this.amount;
+        return data;
+    }
+}
+
+export interface IPartyDocumentResponse {
+    documentType: string;
+    documentId: number;
+    documentNumber: string;
+    status: string;
+    date: Date;
+    amount: number;
+
+    [key: string]: any;
+}
+
 export class PartyResponse implements IPartyResponse {
     id!: number;
     partyCode!: string;
@@ -34030,7 +34428,7 @@ export class PaymentOrderDto implements IPaymentOrderDto {
     exchangeRate?: number | undefined;
     amountGross?: number;
     deductionAmount?: number;
-    paymentMethod?: PaymentMethod;
+    paymentMethod?: PaymentMethod | undefined;
     paymentMethodName?: string;
     bankAccountId?: number | undefined;
     beneficiaryName?: string;
@@ -34190,7 +34588,7 @@ export interface IPaymentOrderDto {
     exchangeRate?: number | undefined;
     amountGross?: number;
     deductionAmount?: number;
-    paymentMethod?: PaymentMethod;
+    paymentMethod?: PaymentMethod | undefined;
     paymentMethodName?: string;
     bankAccountId?: number | undefined;
     beneficiaryName?: string;
@@ -37368,6 +37766,54 @@ export class SubmitReceiptVoucherCommand implements ISubmitReceiptVoucherCommand
 export interface ISubmitReceiptVoucherCommand {
     id?: number;
     rowVersion?: string;
+
+    [key: string]: any;
+}
+
+export class TaxNumberCheckResponse implements ITaxNumberCheckResponse {
+    exists!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: ITaxNumberCheckResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.exists = _data["exists"];
+        }
+    }
+
+    static fromJS(data: any): TaxNumberCheckResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new TaxNumberCheckResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["exists"] = this.exists;
+        return data;
+    }
+}
+
+export interface ITaxNumberCheckResponse {
+    exists: boolean;
 
     [key: string]: any;
 }
