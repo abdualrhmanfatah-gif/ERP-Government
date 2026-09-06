@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useCreateAppropriation } from '../../hooks/useAppropriations';
+import { useCreateAppropriation, useCreateTransfer } from '../../hooks/useAppropriations';
 import { useBudgetItemsTree } from '../../hooks/useBudgetItems';
 import { AvailabilityIndicator } from '../../components/AvailabilityIndicator';
 import { appropriationTypeLabels, AppropriationType } from '../../shared/types';
@@ -14,6 +14,7 @@ export default function AppropriationCreatePage() {
   const budgetIdParam = searchParams.get('budgetId');
 
   const createAppropriation = useCreateAppropriation();
+  const createTransfer = useCreateTransfer();
   const { data: tree } = useBudgetItemsTree(budgetIdParam ? Number(budgetIdParam) : undefined);
 
   const [form, setForm] = useState({
@@ -28,6 +29,7 @@ export default function AppropriationCreatePage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const isTransfer = form.appropriationType === AppropriationType.Transfer;
+  const isPending = createAppropriation.isPending || createTransfer.isPending;
 
   const targetItems = useMemo(() => {
     if (!tree || !isTransfer) return [];
@@ -43,9 +45,9 @@ export default function AppropriationCreatePage() {
 
   function validate(): boolean {
     const e: Record<string, string> = {};
-    if (!form.budgetItemId) e.budgetItemId = '请选择预算项目';
+    if (!form.budgetItemId) e.budgetItemId = 'يجب اختيار بند الموازنة';
     if (form.amount <= 0) e.amount = 'المبلغ يجب أن يكون أكبر من صفر';
-    if (!form.documentType.trim()) e.documentType = 'نوع المستند مطلوب';
+    if (!isTransfer && !form.documentType.trim()) e.documentType = 'نوع المستند مطلوب';
     if (isTransfer && !form.targetBudgetItemId) e.targetBudgetItemId = 'يرجى اختيار بند الهدف';
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -56,17 +58,24 @@ export default function AppropriationCreatePage() {
     if (!validate()) return;
 
     try {
-      const data: Record<string, unknown> = {
-        budgetItemId: form.budgetItemId,
-        appropriationType: form.appropriationType,
-        amount: form.amount,
-        documentType: form.documentType,
-        documentId: form.documentId,
-      };
-      if (isTransfer) data.targetBudgetItemId = form.targetBudgetItemId;
-
-      const result = await createAppropriation.mutateAsync(data);
-      navigate(`/budgeting/appropriations`);
+      if (isTransfer) {
+        await createTransfer.mutateAsync({
+          budgetId: budgetIdParam ? Number(budgetIdParam) : 0,
+          sourceBudgetItemId: form.budgetItemId,
+          targetBudgetItemId: form.targetBudgetItemId,
+          amount: form.amount,
+        });
+      } else {
+        await createAppropriation.mutateAsync({
+          budgetId: budgetIdParam ? Number(budgetIdParam) : 0,
+          budgetItemId: form.budgetItemId,
+          appropriationType: form.appropriationType,
+          amount: form.amount,
+          documentType: form.documentType,
+          documentId: form.documentId,
+        });
+      }
+      navigate('/budgeting/appropriations');
     } catch (err: unknown) {
       const problem = err as { detail?: string };
       setErrors({ submit: problem.detail ?? 'حدث خطأ أثناء الحفظ' });
@@ -97,7 +106,7 @@ export default function AppropriationCreatePage() {
             <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">نوع التخصيص *</label>
             <select
               value={form.appropriationType}
-              onChange={(e) => updateField('appropriationType', Number(e.target.value))}
+              onChange={(e) => updateField('appropriationType', e.target.value)}
               className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
             >
               {Object.entries(appropriationTypeLabels).map(([val, label]) => (
@@ -119,26 +128,30 @@ export default function AppropriationCreatePage() {
             {errors.amount && <p className="text-xs text-[var(--color-error)] mt-1">{errors.amount}</p>}
           </div>
 
-          <div>
-            <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">نوع المستند *</label>
-            <input
-              type="text"
-              value={form.documentType}
-              onChange={(e) => updateField('documentType', e.target.value)}
-              className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-            />
-            {errors.documentType && <p className="text-xs text-[var(--color-error)] mt-1">{errors.documentType}</p>}
-          </div>
+          {!isTransfer && (
+            <>
+              <div>
+                <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">نوع المستند *</label>
+                <input
+                  type="text"
+                  value={form.documentType}
+                  onChange={(e) => updateField('documentType', e.target.value)}
+                  className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
+                />
+                {errors.documentType && <p className="text-xs text-[var(--color-error)] mt-1">{errors.documentType}</p>}
+              </div>
 
-          <div>
-            <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">رقم المستند</label>
-            <input
-              type="number"
-              value={form.documentId || ''}
-              onChange={(e) => updateField('documentId', Number(e.target.value))}
-              className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-            />
-          </div>
+              <div>
+                <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">رقم المستند</label>
+                <input
+                  type="number"
+                  value={form.documentId || ''}
+                  onChange={(e) => updateField('documentId', Number(e.target.value))}
+                  className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
+                />
+              </div>
+            </>
+          )}
 
           {isTransfer && (
             <div className="md:col-span-2">
@@ -162,8 +175,8 @@ export default function AppropriationCreatePage() {
 
         <div className="flex justify-end gap-2 mt-6">
           <Button variant="ghost" type="button" onClick={() => navigate(-1)}>إلغاء</Button>
-          <Button variant="primary" type="submit" disabled={createAppropriation.isPending}>
-            {createAppropriation.isPending ? 'جارٍ الحفظ...' : 'حفظ'}
+          <Button variant="primary" type="submit" disabled={isPending}>
+            {isPending ? 'جارٍ الحفظ...' : 'حفظ'}
           </Button>
         </div>
       </form>

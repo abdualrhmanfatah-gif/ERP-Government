@@ -33,7 +33,6 @@ public static class DependencyInjection
         // Authorization services
         builder.Services.AddScoped<IPermissionService, PermissionService>();
 
-        builder.Services.AddScoped<IDatabaseTransactionFactory, DatabaseTransactionFactory>();
         builder.Services.AddScoped<IDocumentSequenceService, DocumentSequenceService>();
         builder.Services.AddScoped<IExchangeRateResolver, ExchangeRateResolver>();
         builder.Services.AddScoped<ICurrencyConversionService, CurrencyConversionService>();

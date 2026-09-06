@@ -184,7 +184,7 @@ public static class RolePermissionSeedData
             Make("Accounting.Reports.CashFlow"), Make("Accounting.Reports.TrialBalance"), Make("Accounting.Reports.Export"), Make("Accounting.Reports.Print"),
 
             // Budgeting
-            Make("Funds.View"), Make("Funds.Create"), Make("Funds.Update"), Make("Funds.Activate"), Make("Funds.Deactivate"),
+            Make("Funds.View"), Make("Funds.Create"), Make("Funds.Update"), Make("Funds.ToggleActive"),
             Make("Budgets.View"), Make("Budgets.Create"), Make("Budgets.Update"), Make("Budgets.Submit"), Make("Budgets.Approve"), Make("Budgets.Activate"),
             Make("Budgets.Suspend"), Make("Budgets.Close"), Make("Budgets.Cancel"),
             Make("BudgetItems.View"), Make("BudgetItems.Create"), Make("BudgetItems.Update"), Make("BudgetItems.Delete"),

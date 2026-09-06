@@ -1,3 +1,16 @@
+export type NotificationType = 'success' | 'error' | 'info' | 'warning';
+export type Source = 'local' | 'server';
+
+export interface NotificationEntry {
+  id: string;
+  notificationType: NotificationType;
+  title: string;
+  message: string;
+  isRead: boolean;
+  created: string;
+  source: Source;
+}
+
 export interface NotificationDto {
   id: number;
   userId: number;

@@ -48,9 +48,15 @@ public class CreateDisbursementRequestCommandHandler(
         if (existingRequest is not null)
             return Result<DisbursementRequestDto>.Failure(["A disbursement request already exists for this payment order."]);
 
-        var requestNumber = await sequenceService.GenerateNextNumberAsync("DisbursementRequest", cancellationToken);
-        if (requestNumber.StartsWith("Error:"))
-            return Result<DisbursementRequestDto>.Failure([requestNumber]);
+        string requestNumber;
+        try
+        {
+            requestNumber = await sequenceService.GenerateNextNumberAsync("DisbursementRequest", cancellationToken);
+        }
+        catch (DocumentSequenceException ex)
+        {
+            return Result<DisbursementRequestDto>.Failure([ex.Message]);
+        }
 
         var fiscalYearLapsed = await context.YearClosingRuns
             .AnyAsync(r => r.FiscalYearId == paymentOrder.FiscalYearId

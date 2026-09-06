@@ -2,6 +2,7 @@ using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.FinancialSettings.Common.Services;
 using ERP_Government.Domain.Parties.Entities;
 using ERP_Government.Domain.Parties.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP_Government.Application.Parties.Commands.CreateParty;
 
@@ -25,9 +26,15 @@ public class CreatePartyCommandHandler(
         CreatePartyCommand request,
         CancellationToken cancellationToken)
     {
-        var partyCode = await sequenceService.GenerateNextNumberAsync("Party", cancellationToken);
-        if (partyCode.StartsWith("Error:"))
-            return Result<int>.Failure([partyCode]);
+        string partyCode;
+        try
+        {
+            partyCode = await sequenceService.GenerateNextNumberAsync("Party", cancellationToken);
+        }
+        catch (DocumentSequenceException ex)
+        {
+            return Result<int>.Failure([ex.Message]);
+        }
 
         var entity = new Party
         {
@@ -55,7 +62,7 @@ public class CreatePartyCommandHandler(
 
 public class CreatePartyCommandValidator : AbstractValidator<CreatePartyCommand>
 {
-    public CreatePartyCommandValidator()
+    public CreatePartyCommandValidator(IApplicationDbContext context)
     {
         RuleFor(x => x.PartyType)
             .IsInEnum().WithMessage("Invalid party type.");
@@ -68,7 +75,11 @@ public class CreatePartyCommandValidator : AbstractValidator<CreatePartyCommand>
             .MaximumLength(500).WithMessage("Name (English) must not exceed 500 characters.");
 
         RuleFor(x => x.TaxNumber)
-            .MaximumLength(50).WithMessage("Tax number must not exceed 50 characters.");
+            .MaximumLength(50).WithMessage("Tax number must not exceed 50 characters.")
+            .MustAsync(async (taxNumber, ct) =>
+                string.IsNullOrEmpty(taxNumber) ||
+                !await context.Parties.AnyAsync(p => p.TaxNumber == taxNumber, ct))
+            .WithMessage("A party with this tax number already exists.");
 
         RuleFor(x => x.NationalId)
             .MaximumLength(50).WithMessage("National ID must not exceed 50 characters.");

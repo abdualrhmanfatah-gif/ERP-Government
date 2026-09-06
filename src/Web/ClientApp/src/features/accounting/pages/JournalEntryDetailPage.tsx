@@ -1,0 +1,274 @@
+import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+  useJournalEntry,
+  useSubmitJournalEntry,
+  useApproveJournalEntry,
+  usePostJournalEntry,
+  useReverseJournalEntry,
+  useCancelJournalEntry,
+} from '../hooks/useJournalEntries';
+import { usePermission, hasPermission as checkPermission } from '../../../shared/hooks/usePermission';
+import { StatusBadge } from '../components/StatusBadge';
+import { BalanceIndicator } from '../components/BalanceIndicator';
+import { ReverseDialog } from '../components/ReverseDialog';
+import { ApprovalsPanel } from '../../documents/components/ApprovalsPanel';
+import { StatusLogPanel } from '../../documents/components/StatusLogPanel';
+function formatDate(value: unknown): string {
+  if (!value) return '';
+  if (typeof value === 'string') return value;
+  if (value instanceof Date) return value.toLocaleDateString('ar-YE');
+  return String(value);
+}
+
+function getActionsForStatus(status: string) {
+  switch (status) {
+    case 'Draft': return ['submit', 'cancel'];
+    case 'Submitted': return ['approve', 'cancel'];
+    case 'Approved': return ['post'];
+    case 'Posted': return ['reverse'];
+    default: return [];
+  }
+}
+
+const actionLabels: Record<string, string> = { submit: 'تقديم', approve: 'موافقة', post: 'تسجيل', reverse: 'عكس', cancel: 'إلغاء' };
+const actionLoadingLabels: Record<string, string> = { submit: 'جاري التقديم...', approve: 'جاري الموافقة...', post: 'جاري التسجيل...', reverse: 'جاري العكس...', cancel: 'جاري الإلغاء...' };
+const permissionMap: Record<string, string> = {
+  submit: 'Accounting.JournalEntries.Submit', approve: 'Accounting.JournalEntries.Approve',
+  post: 'Accounting.JournalEntries.Post', reverse: 'Accounting.JournalEntries.Reverse', cancel: 'Accounting.JournalEntries.Cancel',
+};
+
+export function JournalEntryDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const entryId = Number(id);
+
+  const { data: entry, isLoading, error, refetch } = useJournalEntry(entryId);
+  const submitMutation = useSubmitJournalEntry();
+  const approveMutation = useApproveJournalEntry();
+  const postMutation = usePostJournalEntry();
+  const reverseMutation = useReverseJournalEntry();
+  const cancelMutation = useCancelJournalEntry();
+  const { hasPermission } = usePermission();
+
+  const [showReverseDialog, setShowReverseDialog] = useState(false);
+  const [conflictError, setConflictError] = useState<string | null>(null);
+
+  const handleAction = async (action: string) => {
+    setConflictError(null);
+    try {
+      switch (action) {
+        case 'submit': await submitMutation.mutateAsync({ id: entryId, command: {} }); break;
+        case 'approve': await approveMutation.mutateAsync({ id: entryId, command: {} }); break;
+        case 'post': await postMutation.mutateAsync({ id: entryId, command: {} }); break;
+        case 'reverse': setShowReverseDialog(true); break;
+        case 'cancel': await cancelMutation.mutateAsync({ id: entryId, command: {} }); break;
+      }
+    } catch (err: unknown) {
+      const e = err as { status?: number };
+      if (e?.status === 409) { setConflictError('تم تعديل القيد بواسطة مستخدم آخر. سيتم إعادة تحميل البيانات.'); refetch(); }
+    }
+  };
+
+  const handleReverseConfirm = async (reason: string) => {
+    setConflictError(null);
+    try {
+      await reverseMutation.mutateAsync({ id: entryId, command: { reason } });
+      setShowReverseDialog(false);
+    } catch (err: unknown) {
+      const e = err as { status?: number };
+      if (e?.status === 409) { setConflictError('تم تعديل القيد بواسطة مستخدم آخر.'); refetch(); setShowReverseDialog(false); }
+    }
+  };
+
+  const loadingMap: Record<string, boolean | undefined> = {
+    submit: submitMutation.isPending, approve: approveMutation.isPending,
+    post: postMutation.isPending, reverse: reverseMutation.isPending, cancel: cancelMutation.isPending,
+  };
+  const handlerMap: Record<string, (() => void) | undefined> = {
+    submit: () => handleAction('submit'), approve: () => handleAction('approve'),
+    post: () => handleAction('post'), reverse: () => handleAction('reverse'), cancel: () => handleAction('cancel'),
+  };
+
+  const cardClass = 'rounded-xl border overflow-hidden';
+  const cardBorder = { borderColor: 'var(--color-outlineVariant)' };
+  const cardHeader = 'px-6 py-4 border-b';
+
+  if (isLoading) {
+    return (
+      <div className="max-w-6xl mx-auto py-16 px-6">
+        <div className="flex items-center justify-center gap-3" style={{ color: 'var(--color-onSurfaceVariant)' }}>
+          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+          <span className="text-sm font-medium">جاري تحميل القيد...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !entry) {
+    return (
+      <div className="max-w-6xl mx-auto py-16 px-6 text-center">
+        <svg className="mx-auto h-12 w-12 mb-4" style={{ color: 'var(--color-error)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+        </svg>
+        <p className="text-sm font-bold" style={{ color: 'var(--color-error)' }}>خطأ في تحميل القيد</p>
+        <button onClick={() => navigate('/accounting/journal-entries')} className="mt-4 text-sm font-bold cursor-pointer hover:underline" style={{ color: 'var(--color-link)' }}>العودة للقائمة</button>
+      </div>
+    );
+  }
+
+  const actions = getActionsForStatus(entry.entryStatus);
+
+  return (
+    <div className="max-w-6xl mx-auto py-8 px-6" dir="rtl">
+      {conflictError && (
+        <div className="mb-6 p-4 rounded-xl text-sm flex items-center justify-between" style={{ backgroundColor: 'var(--color-error-container)', color: 'var(--color-error)' }}>
+          <div className="flex items-center gap-2">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>{conflictError}</span>
+          </div>
+          <button onClick={() => setConflictError(null)} className="cursor-pointer hover:opacity-70">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+      )}
+
+      <div className="space-y-6">
+        {/* بيانات القيد */}
+        <div className={cardClass} style={{ backgroundColor: 'var(--color-surface)', ...cardBorder }}>
+          <div className={cardHeader} style={{ borderColor: 'var(--color-outlineVariant)', backgroundColor: 'var(--color-surfaceContainerLow)' }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold" style={{ color: 'var(--color-onSurface)' }}>
+                  {entry.entryNumber}
+                  {entry.isSystemGenerated && (
+                    <span className="mr-2 text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ backgroundColor: 'var(--color-surfaceContainerHigh)', color: 'var(--color-onSurfaceVariant)' }}>نظام</span>
+                  )}
+                </h2>
+                <p className="text-sm mt-0.5" style={{ color: 'var(--color-onSurfaceVariant)' }}>{formatDate(entry.documentDate)}</p>
+              </div>
+              <StatusBadge status={entry.entryStatus} />
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-3 gap-4 text-sm">
+              <div><span style={{ color: 'var(--color-onSurfaceVariant)' }}>الفترة:</span> <span className="font-bold" style={{ color: 'var(--color-onSurface)' }}>{entry.periodName || entry.periodId}</span></div>
+              <div><span style={{ color: 'var(--color-onSurfaceVariant)' }}>السنة المالية:</span> <span className="font-bold" style={{ color: 'var(--color-onSurface)' }}>{entry.fiscalYearName || entry.fiscalYearId}</span></div>
+              <div><span style={{ color: 'var(--color-onSurfaceVariant)' }}>اليومية:</span> <span className="font-bold" style={{ color: 'var(--color-onSurface)' }}>{entry.journalName || '-'}</span></div>
+            </div>
+            {entry.narration && <p className="mt-4 text-sm" style={{ color: 'var(--color-onSurface)' }}>{entry.narration}</p>}
+            {entry.ref && <p className="mt-2 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>المرجع: {entry.ref}</p>}
+            {entry.postedByName && entry.postedAt && <p className="mt-2 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>سجل بواسطة: {entry.postedByName} — {formatDate(entry.postedAt)}</p>}
+            {entry.cancelledByName && entry.cancelledAt && <p className="mt-2 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>ألغى بواسطة: {entry.cancelledByName} — {formatDate(entry.cancelledAt)}</p>}
+          </div>
+        </div>
+
+        {/* الأسطر */}
+        <div className={cardClass} style={{ backgroundColor: 'var(--color-surface)', ...cardBorder }}>
+          <div className={cardHeader} style={{ borderColor: 'var(--color-outlineVariant)', backgroundColor: 'var(--color-surfaceContainerLow)' }}>
+            <h2 className="text-base font-bold" style={{ color: 'var(--color-onSurface)' }}>الأسطر</h2>
+          </div>
+          <div className="p-6">
+            {entry.lines.length > 0 ? (
+              <div className="overflow-x-auto rounded-lg border" style={{ borderColor: 'var(--color-outlineVariant)' }}>
+                <table className="min-w-full divide-y" style={{ borderColor: 'var(--color-outlineVariant)' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: 'var(--color-surfaceContainerLow)' }}>
+                        <th className="px-4 py-3 text-right text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>#</th>
+                        <th className="px-4 py-3 text-right text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>الحساب</th>
+                        <th className="px-4 py-3 text-left text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>مدين</th>
+                        <th className="px-4 py-3 text-left text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>دائن</th>
+                        <th className="px-4 py-3 text-right text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>الوصف</th>
+                        <th className="px-4 py-3 text-right text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>الأبعاد</th>
+                      </tr>
+                    </thead>
+                  <tbody className="divide-y" style={{ borderColor: 'var(--color-outlineVariant)' }}>
+                    {entry.lines.map((line) => (
+                      <tr key={line.id} style={{ backgroundColor: 'var(--color-surface)' }}>
+                        <td className="px-4 py-3 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>{line.sequence}</td>
+                        <td className="px-4 py-3 text-sm font-bold" style={{ color: 'var(--color-onSurface)' }}>{line.accountCode} - {line.accountName}</td>
+                        <td className="px-4 py-3 text-sm text-left tabular-nums font-bold" style={{ color: 'var(--color-onSurface)' }}>{line.debit > 0 ? line.debit.toLocaleString('ar-YE') : '-'}</td>
+                        <td className="px-4 py-3 text-sm text-left tabular-nums font-bold" style={{ color: 'var(--color-onSurface)' }}>{line.credit > 0 ? line.credit.toLocaleString('ar-YE') : '-'}</td>
+                        <td className="px-4 py-3 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>{line.description || '-'}</td>
+                        <td className="px-4 py-3 text-xs" style={{ color: 'var(--color-onSurfaceVariant)' }}>
+                          {[
+                            line.fundName && `صندوق: ${line.fundName}`,
+                            line.projectName && `مشروع: ${line.projectName}`,
+                            line.budgetItemCode && `بند: ${line.budgetItemCode}`,
+                            line.encumbranceNumber && `التزام: ${line.encumbranceNumber}`,
+                            line.paymentOrderNumber && `دفع: ${line.paymentOrderNumber}`,
+                          ].filter(Boolean).join(' · ') || '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>لا توجد أسطر</p>
+            )}
+            <div className="mt-4"><BalanceIndicator totalDebit={entry.totalDebit} totalCredit={entry.totalCredit} /></div>
+          </div>
+        </div>
+
+        {/* الإجراءات */}
+        {actions.length > 0 && !entry.isSystemGenerated && (
+          <div className={cardClass} style={{ backgroundColor: 'var(--color-surface)', ...cardBorder }}>
+            <div className={cardHeader} style={{ borderColor: 'var(--color-outlineVariant)', backgroundColor: 'var(--color-surfaceContainerLow)' }}>
+              <h2 className="text-base font-bold" style={{ color: 'var(--color-onSurface)' }}>الإجراءات</h2>
+            </div>
+            <div className="p-6">
+              <div className="flex flex-wrap gap-2">
+                {actions.map((action) => {
+                  const isLoading = loadingMap[action];
+                  const handler = handlerMap[action];
+                  const allowed = hasPermission || checkPermission(permissionMap[action]);
+                  return (
+                    <button key={action} type="button" onClick={handler} disabled={isLoading || !allowed}
+                      className="px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:shadow-sm"
+                      style={{
+                        backgroundColor: action === 'cancel' || action === 'reverse' ? 'var(--color-error-container)' : 'var(--color-primary)',
+                        color: action === 'cancel' || action === 'reverse' ? 'var(--color-error)' : 'var(--color-on-primary)',
+                      }}>
+                      {isLoading ? actionLoadingLabels[action] : actionLabels[action]}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ربط العكس */}
+        {entry.reversalOfId && (
+          <div className={cardClass} style={{ backgroundColor: 'var(--color-surface)', ...cardBorder }}>
+            <div className="p-6">
+              <p className="text-sm" style={{ color: 'var(--color-onSurface)' }}>
+                هذا القيد عكس لـ <a href={`/accounting/journal-entries/${entry.reversalOfId}`} className="font-bold underline cursor-pointer" style={{ color: 'var(--color-link)' }}>القيد رقم {entry.reversalOfId}</a>
+              </p>
+              {entry.reversalReason && <p className="mt-2 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>السبب: {entry.reversalReason}</p>}
+            </div>
+          </div>
+        )}
+
+        {/* سجل الحالة */}
+        <div className={cardClass} style={{ backgroundColor: 'var(--color-surface)', ...cardBorder }}>
+          <div className="p-6"><StatusLogPanel documentType="JournalEntry" documentId={entry.id} /></div>
+        </div>
+
+        {/* الموافقات */}
+        {(entry.entryStatus === 'Submitted' || entry.entryStatus === 'Approved') && (
+          <div className={cardClass} style={{ backgroundColor: 'var(--color-surface)', ...cardBorder }}>
+            <div className="p-6"><ApprovalsPanel documentType="JournalEntry" documentId={entry.id} /></div>
+          </div>
+        )}
+      </div>
+
+      {showReverseDialog && (
+        <ReverseDialog entryId={entry.id} entryNumber={entry.entryNumber} lines={entry.lines}
+          onConfirm={handleReverseConfirm} onClose={() => setShowReverseDialog(false)}
+          isReversing={reverseMutation.isPending} error={reverseMutation.isError ? (reverseMutation.error as Error)?.message : undefined} />
+      )}
+    </div>
+  );
+}

@@ -22,7 +22,7 @@ public class PaymentOrderDto
     public decimal? ExchangeRate { get; init; }
     public decimal AmountGross { get; init; }
     public decimal DeductionAmount { get; init; }
-    public ERP_Government.Domain.Payments.Enums.PaymentMethod PaymentMethod { get; init; }
+    public ERP_Government.Domain.Payments.Enums.PaymentMethod? PaymentMethod { get; init; }
     public string PaymentMethodName { get; init; } = string.Empty;
     public int? BankAccountId { get; init; }
     public string BeneficiaryName { get; init; } = string.Empty;

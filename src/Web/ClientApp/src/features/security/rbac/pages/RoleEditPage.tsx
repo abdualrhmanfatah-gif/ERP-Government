@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { RoleForm } from '../components/RoleForm';
@@ -27,11 +27,11 @@ export function RoleEditPage() {
   const handleSubmit = async (data: CreateRoleCommand) => {
     try {
       await updateMutation.mutateAsync({ id: roleId, ...data } as UpdateRoleCommand);
-      toast.success('تم تحديث الدور بنجاح');
+      notify({ type: 'success', title: 'تم تحديث الدور بنجاح' });
       navigate('/security/roles');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'حدث خطأ أثناء تحديث الدور';
-      toast.error(message);
+      notify({ type: 'error', title: message });
     }
   };
 

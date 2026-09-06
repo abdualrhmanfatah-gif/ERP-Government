@@ -27,7 +27,7 @@ public class JournalEntryLineConfiguration : IEntityTypeConfiguration<JournalEnt
 
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_JournalEntryLines_DebitCreditXOR",
-            "([Debit] > 0) != ([Credit] > 0)"));
+            "(([Debit] > 0 AND [Credit] = 0) OR ([Debit] = 0 AND [Credit] > 0))"));
 
         builder.Property(e => e.RowVersion)
             .IsRowVersion();

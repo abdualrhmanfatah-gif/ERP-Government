@@ -21,51 +21,53 @@ export enum FundCategory {
 }
 
 export enum BudgetStatus {
-  Draft = 0,
-  Submitted = 1,
-  Approved = 2,
-  Active = 3,
-  Suspended = 4,
-  Closed = 5,
-  Cancelled = 6,
+  Draft = 'Draft',
+  Submitted = 'Submitted',
+  Approved = 'Approved',
+  Active = 'Active',
+  Suspended = 'Suspended',
+  Closed = 'Closed',
+  Cancelled = 'Cancelled',
 }
 
 export enum AppropriationType {
-  Original = 0,
-  Supplement = 1,
-  Reduction = 2,
-  Adjustment = 3,
+  Original = 'Original',
+  Supplement = 'Supplement',
+  Reduction = 'Reduction',
+  Transfer = 'Transfer',
+  Adjustment = 'Adjustment',
 }
 
 export enum AppropriationStatus {
-  Draft = 0,
-  PendingApproval = 1,
-  Approved = 2,
-  Active = 3,
-  Suspended = 4,
-  Closed = 5,
-  Cancelled = 6,
+  Draft = 'Draft',
+  PendingApproval = 'PendingApproval',
+  Approved = 'Approved',
+  Active = 'Active',
+  Suspended = 'Suspended',
+  Closed = 'Closed',
+  Cancelled = 'Cancelled',
+  Reversed = 'Reversed',
 }
 
 export enum EncumbranceType {
-  Commitment = 0,
-  Obligational = 1,
-  Contractual = 2,
-  Advance = 3,
-  Adjustment = 4,
+  Commitment = 'Commitment',
+  Obligational = 'Obligational',
+  Contractual = 'Contractual',
+  Advance = 'Advance',
+  Adjustment = 'Adjustment',
 }
 
 export enum EncumbranceStatus {
-  Draft = 0,
-  PendingApproval = 1,
-  Approved = 2,
-  Active = 3,
-  PartialReleased = 4,
-  PartialLiquidated = 5,
-  FullyLiquidated = 6,
-  Closed = 7,
-  Cancelled = 8,
-  Reversed = 9,
+  Draft = 'Draft',
+  PendingApproval = 'PendingApproval',
+  Approved = 'Approved',
+  Active = 'Active',
+  PartiallyReleased = 'PartiallyReleased',
+  PartiallyLiquidated = 'PartiallyLiquidated',
+  FullyLiquidated = 'FullyLiquidated',
+  Closed = 'Closed',
+  Cancelled = 'Cancelled',
+  Reversed = 'Reversed',
 }
 
 // ─── Arabic Label Maps ────────────────────────────────────────────────────────
@@ -101,6 +103,7 @@ export const appropriationTypeLabels: Record<AppropriationType, string> = {
   [AppropriationType.Original]: 'أصلي',
   [AppropriationType.Supplement]: 'تكميلي',
   [AppropriationType.Reduction]: 'تخفيض',
+  [AppropriationType.Transfer]: 'تحويل',
   [AppropriationType.Adjustment]: 'تعديل',
 };
 
@@ -112,6 +115,7 @@ export const appropriationStatusLabels: Record<AppropriationStatus, string> = {
   [AppropriationStatus.Suspended]: 'معلق',
   [AppropriationStatus.Closed]: 'مغلق',
   [AppropriationStatus.Cancelled]: 'ملغي',
+  [AppropriationStatus.Reversed]: 'معكوس',
 };
 
 export const encumbranceTypeLabels: Record<EncumbranceType, string> = {

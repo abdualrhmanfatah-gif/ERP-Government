@@ -6,7 +6,7 @@ import { usePermission } from '../../../../shared/hooks/usePermission';
 import { BUDGET_PERMISSIONS } from '../../../../shared/constants/permissions';
 import { ChevronRight, ChevronLeft, Plus, Pencil } from 'lucide-react';
 import { FilterBar, FilterSearch, FilterSelect, Dialog, Switch, ConfirmDialog } from '../../../../components/ui';
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 
 export function normalizeTree(
   nodes: BudgetClassificationTreeDto[],
@@ -346,14 +346,14 @@ export default function ClassificationsListPage() {
       { id: toggleItem.id, data: { id: toggleItem.id, rowVersion: toggleItem.rowVersion, isActive: !toggleItem.isActive } },
       {
         onSuccess: () => {
-          toast.success('تم تحديث الحالة بنجاح');
+          notify({ type: 'success', title: 'تم تحديث الحالة بنجاح' });
           setToggleItem(null);
         },
         onError: (err: any) => {
           if (err?.status === 409) {
-            toast.error('تعارض في البيانات. جاري تحديث البيانات...');
+            notify({ type: 'error', title: 'تعارض في البيانات. جاري تحديث البيانات...' });
           } else {
-            toast.error('خطأ في تحديث الحالة');
+            notify({ type: 'error', title: 'خطأ في تحديث الحالة' });
           }
           setToggleItem(null);
         },

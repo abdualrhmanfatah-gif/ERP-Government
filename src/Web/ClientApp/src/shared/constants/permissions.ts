@@ -35,6 +35,14 @@ export const PERMISSIONS = {
   DocumentSequences: {
     View: 'DocumentSequences.View',
     Create: 'DocumentSequences.Create',
+    Update: 'DocumentSequences.Update',
+    Deactivate: 'DocumentSequences.Deactivate',
+  },
+  ClosingEntries: {
+    View: 'ClosingEntries.View',
+    Generate: 'ClosingEntries.Generate',
+    Approve: 'ClosingEntries.Approve',
+    Reverse: 'ClosingEntries.Reverse',
   },
   Accounting: {
     ChartOfAccounts: {
@@ -219,8 +227,7 @@ export const BUDGET_PERMISSIONS = {
     View: 'Funds.View',
     Create: 'Funds.Create',
     Update: 'Funds.Update',
-    Activate: 'Funds.Activate',
-    Deactivate: 'Funds.Deactivate',
+    ToggleActive: 'Funds.ToggleActive',
   },
   BudgetClassifications: {
     View: 'BudgetClassifications.View',
@@ -255,6 +262,7 @@ export const BUDGET_PERMISSIONS = {
     Suspend: 'Appropriations.Suspend',
     Close: 'Appropriations.Close',
     Cancel: 'Appropriations.Cancel',
+    Reverse: 'Appropriations.Reverse',
   },
   Encumbrances: {
     View: 'Encumbrances.View',

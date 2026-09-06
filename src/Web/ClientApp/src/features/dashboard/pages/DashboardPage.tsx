@@ -5,16 +5,18 @@ import { Button } from '@/components/ui/Button';
 import { Loading } from '../../../components/ui/Loading';
 import { ErrorState } from '../../../components/ui/ErrorState';
 import { EmptyState } from '../../../components/ui/EmptyState';
+import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
+import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { DashboardCard } from '../components/DashboardCard';
 import { BudgetVsActualChart } from '../components/BudgetVsActualChart';
 import { RevenueTrendChart } from '../components/RevenueTrendChart';
 import { ExpenseBreakdownChart } from '../components/ExpenseBreakdownChart';
-import { RecentTransactionsTable } from '../components/RecentTransactionsTable';
 import { PendingApprovalsList } from '../components/PendingApprovalsList';
 import { useBudgetUtilization } from '../hooks/useBudgetUtilization';
 import { usePendingApprovalsCount } from '../hooks/usePendingApprovalsCount';
 import { useCashPosition } from '../hooks/useCashPosition';
 import { useTotalTransactions } from '../hooks/useTotalTransactions';
+import { useRecentTransactions } from '../hooks/useRecentTransactions';
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('ar-SA', {
@@ -23,12 +25,47 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('ar-SA', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(date);
+}
+
+const statusMap: Record<string, { label: string; variant: 'approved' | 'pending' | 'draft' }> = {
+  posted: { label: 'مرحل', variant: 'approved' },
+  pending: { label: 'معلق', variant: 'pending' },
+  draft: { label: 'مسودة', variant: 'draft' },
+};
+
+interface Transaction {
+  id: number;
+  date: string;
+  description: string;
+  account: string;
+  debit: number;
+  credit: number;
+  status: string;
+}
+
+const txColumns: DataGridColumn<Transaction>[] = [
+  { header: 'التاريخ', cell: (row) => formatDate(row.date) },
+  { header: 'الوصف', cell: (row) => <span className="font-medium">{row.description}</span> },
+  { header: 'الحساب', cell: (row) => row.account },
+  { header: 'المدين', align: 'left', cell: (row) => row.debit > 0 ? <span className="text-[var(--color-error)]">{formatCurrency(row.debit)}</span> : <span className="text-[var(--color-on-surface-variant)]">—</span> },
+  { header: 'الدائن', align: 'left', cell: (row) => row.credit > 0 ? <span className="text-[var(--color-success)]">{formatCurrency(row.credit)}</span> : <span className="text-[var(--color-on-surface-variant)]">—</span> },
+  { header: 'الحالة', align: 'center', cell: (row) => { const s = statusMap[row.status]; return s ? <StatusBadge variant={s.variant} size="sm">{s.label}</StatusBadge> : row.status; } },
+];
+
 export function DashboardPage() {
   const navigate = useNavigate();
   const budget = useBudgetUtilization();
   const approvals = usePendingApprovalsCount();
   const cash = useCashPosition();
   const transactions = useTotalTransactions();
+  const recentTx = useRecentTransactions();
 
   const budgetValue = useMemo(() => {
     if (budget.data?.utilizationPercent === null) return undefined;
@@ -181,7 +218,15 @@ export function DashboardPage() {
 
       {/* Recent Transactions */}
       <DashboardCard title="آخر المعاملات">
-        <RecentTransactionsTable />
+        <DataGrid
+          columns={txColumns}
+          data={recentTx.data ?? []}
+          loading={recentTx.isLoading}
+          error={recentTx.error?.message}
+          onRetry={recentTx.refetch}
+          emptyMessage="لا توجد معاملات حديثة"
+          rowKey={(row) => row.id}
+        />
       </DashboardCard>
     </div>
   );

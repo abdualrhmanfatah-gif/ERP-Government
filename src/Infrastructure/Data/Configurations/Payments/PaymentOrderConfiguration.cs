@@ -89,7 +89,9 @@ public class PaymentOrderConfiguration : IEntityTypeConfiguration<PaymentOrder>
 
         builder.HasIndex(e => e.BankAccountId);
 
-        builder.Property(e => e.PaymentMethod).HasDefaultValue(PaymentMethod.Other);
+        builder.Property(e => e.PaymentMethod)
+            .HasDefaultValue(PaymentMethod.Other)
+            .HasSentinel(null);
 
         builder.HasIndex(e => e.JournalEntryId);
 

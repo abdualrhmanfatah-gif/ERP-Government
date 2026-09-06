@@ -18,6 +18,7 @@ public static class DependencyInjection
         builder.Services.AddHttpContextAccessor();
 
         builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
+        builder.Services.AddProblemDetails();
 
         // Customise default API behaviour
         builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -66,6 +67,8 @@ public static class DependencyInjection
 
             options.AddPolicy(PermissionCodes.DocumentSequencesView, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.DocumentSequencesCreate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DocumentSequencesUpdate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DocumentSequencesDeactivate, p => p.RequireAssertion(_ => true));
 
             // ─── Accounting ───────────────────────────────────────────
             options.AddPolicy(PermissionCodes.ChartOfAccountsRead, p => p.RequireAssertion(_ => true));
@@ -119,8 +122,7 @@ public static class DependencyInjection
             options.AddPolicy(PermissionCodes.FundsView, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.FundsCreate, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.FundsUpdate, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.FundsActivate, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.FundsDeactivate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.FundsToggleActive, p => p.RequireAssertion(_ => true));
 
             options.AddPolicy(PermissionCodes.BudgetsView, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.BudgetsCreate, p => p.RequireAssertion(_ => true));
@@ -368,6 +370,12 @@ public static class DependencyInjection
             // ─── FinancialControl ──────────────────────────────────────
             options.AddPolicy(PermissionCodes.FinancialControlLapseYear, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.FinancialControlApproveFinalAccount, p => p.RequireAssertion(_ => true));
+
+            // ─── ClosingEntries ──────────────────────────────────────────
+            options.AddPolicy(PermissionCodes.ClosingEntriesView, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ClosingEntriesGenerate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ClosingEntriesApprove, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ClosingEntriesReverse, p => p.RequireAssertion(_ => true));
 
             // ─── Reporting ────────────────────────────────────────────
             options.AddPolicy(PermissionCodes.ReportingViewBudgetExecution, p => p.RequireAssertion(_ => true));

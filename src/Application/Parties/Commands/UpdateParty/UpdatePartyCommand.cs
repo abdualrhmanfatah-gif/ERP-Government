@@ -1,5 +1,6 @@
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Domain.Parties.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP_Government.Application.Parties.Commands.UpdateParty;
 
@@ -46,7 +47,7 @@ public class UpdatePartyCommandHandler(
 
 public class UpdatePartyCommandValidator : AbstractValidator<UpdatePartyCommand>
 {
-    public UpdatePartyCommandValidator()
+    public UpdatePartyCommandValidator(IApplicationDbContext context)
     {
         RuleFor(x => x.Id)
             .GreaterThan(0).WithMessage("Invalid party ID.");
@@ -57,6 +58,13 @@ public class UpdatePartyCommandValidator : AbstractValidator<UpdatePartyCommand>
         RuleFor(x => x.NameAr)
             .NotEmpty().WithMessage("Name (Arabic) is required.")
             .MaximumLength(500).WithMessage("Name must not exceed 500 characters.");
+
+        RuleFor(x => x.TaxNumber)
+            .MaximumLength(50).WithMessage("Tax number must not exceed 50 characters.")
+            .MustAsync(async (model, taxNumber, ct) =>
+                string.IsNullOrEmpty(taxNumber) ||
+                !await context.Parties.AnyAsync(p => p.TaxNumber == taxNumber && p.Id != model.Id, ct))
+            .WithMessage("A party with this tax number already exists.");
 
         RuleFor(x => x.Email)
             .MaximumLength(200).WithMessage("Email must not exceed 200 characters.")

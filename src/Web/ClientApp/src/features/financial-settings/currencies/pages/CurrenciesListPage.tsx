@@ -1,0 +1,104 @@
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { usePermission } from '@/shared/hooks/usePermission';
+import { PERMISSIONS } from '@/shared/constants/permissions';
+import { Button, Switch, FilterBar, FilterSearch, ConfirmDialog, Loading } from '@/components/ui';
+import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
+import { Plus, Eye } from 'lucide-react';
+import { notify } from '@/features/notifications/notify';
+import { useCurrenciesList, useActivateCurrency, useDeactivateCurrency } from '../../hooks/useCurrencies';
+
+export default function CurrenciesListPage() {
+  const navigate = useNavigate();
+  const canCreate = usePermission(PERMISSIONS.Currencies.Create);
+  const [search, setSearch] = useState('');
+  const [confirmToggle, setConfirmToggle] = useState<{ id: number; rowVersion: string; isActive: boolean; code: string } | null>(null);
+
+  const { data: items = [], isLoading } = useCurrenciesList();
+  const activateMutation = useActivateCurrency();
+  const deactivateMutation = useDeactivateCurrency();
+
+  const filtered = useMemo(() => {
+    return items.filter((item) => {
+      if (search) {
+        const q = search.toLowerCase();
+        if (!item.code.toLowerCase().includes(q) && !item.name.toLowerCase().includes(q)) return false;
+      }
+      return true;
+    });
+  }, [items, search]);
+
+  function handleToggle(item: typeof items[0]) {
+    setConfirmToggle({ id: item.id, rowVersion: item.rowVersion, isActive: item.isActive, code: item.code });
+  }
+
+  function confirmToggleAction() {
+    if (!confirmToggle) return;
+    const mutation = confirmToggle.isActive ? deactivateMutation : activateMutation;
+    mutation.mutate(
+      { id: confirmToggle.id, rowVersion: confirmToggle.rowVersion },
+      {
+        onSuccess: () => {
+          notify({ type: 'success', title: confirmToggle.isActive ? 'تم التعطيل بنجاح' : 'تم التنشيط بنجاح' });
+          setConfirmToggle(null);
+        },
+        onError: (err) => notify({ type: 'error', title: err instanceof Error ? err.message : 'حدث خطأ' }),
+      },
+    );
+  }
+
+  const columns: DataGridColumn<typeof items[0]>[] = [
+    { header: 'الكود', cell: (row) => <span className="font-mono font-medium">{row.code}</span> },
+    { header: 'الاسم', cell: (row) => row.name },
+    { header: 'الرمز', cell: (row) => row.symbol },
+    { header: 'الكسور', align: 'start', cell: (row) => row.decimalPlaces },
+    { header: 'العملة الأساسية', cell: (row) => row.isBase && <span className="text-xs font-medium text-[var(--color-primary)] bg-[var(--color-primary-container)] px-2 py-0.5 rounded-full">أساسية</span> },
+    {
+      header: 'الحالة',
+      cell: (row) => canCreate
+        ? <Switch checked={row.isActive} onChange={() => handleToggle(row)} label={row.isActive ? 'نشط' : 'معطل'} />
+        : <span className={row.isActive ? 'text-[var(--color-success)]' : 'text-[var(--color-error)]'}>{row.isActive ? 'نشط' : 'معطل'}</span>,
+    },
+    {
+      header: 'إجراءات',
+      cell: (row) => <Button variant="ghost" size="icon" onClick={() => navigate(`/financial-settings/currencies/${row.id}`)} aria-label="عرض" className="cursor-pointer"><Eye size={16} /></Button>,
+    },
+  ];
+
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-headline-sm sm:text-headline-md font-bold text-[var(--color-on-surface)]">العملات</h1>
+          <p className="text-body-sm text-[var(--color-on-surface-variant)] mt-1">إدارة العملات ودعمها</p>
+        </div>
+        {canCreate && (
+          <Button onClick={() => navigate('/financial-settings/currencies/new')} icon={<Plus size={16} />} className="self-start sm:self-auto cursor-pointer shadow-sm hover:shadow transition-shadow">
+            عملة جديدة
+          </Button>
+        )}
+      </div>
+
+      <FilterBar hasFilters={!!search} onClear={() => setSearch('')}>
+        <FilterSearch value={search} onChange={setSearch} placeholder="بحث بالكود أو الاسم..." />
+      </FilterBar>
+
+      <DataGrid
+        columns={columns}
+        data={filtered}
+        loading={isLoading}
+        emptyMessage="لا توجد عملات بعد"
+        rowKey={(row) => row.id}
+      />
+
+      <ConfirmDialog
+        open={!!confirmToggle}
+        onClose={() => setConfirmToggle(null)}
+        onConfirm={confirmToggleAction}
+        title={confirmToggle?.isActive ? 'تعطيل العملة' : 'تنشيط العملة'}
+        message={confirmToggle?.isActive ? `هل تريد تعطيل العملة ${confirmToggle?.code}؟` : `هل تريد تنشيط العملة ${confirmToggle?.code}؟`}
+        loading={activateMutation.isPending || deactivateMutation.isPending}
+      />
+    </div>
+  );
+}

@@ -1,18 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ActivateFundCommand,
-  CreateFundCommand,
-  DeactivateFundCommand,
   FundsClient,
-  UpdateFundCommand,
+  CreateFundRequest,
+  UpdateFundRequest,
+  FundToggleActiveRequest,
 } from '../../../web-api-client';
 
 const client = new FundsClient();
 
-export function useFundsList(isActive?: boolean) {
+export function useFundsList() {
   return useQuery({
-    queryKey: ['funds', isActive],
-    queryFn: () => client.fundsAll(isActive),
+    queryKey: ['funds'],
+    queryFn: () => client.fundsAll(),
   });
 }
 
@@ -28,7 +27,7 @@ export function useCreateFund() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: Record<string, unknown>) =>
-      client.fundsPOST(CreateFundCommand.fromJS(data)),
+      client.fundsPOST(new CreateFundRequest(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['funds'] }),
   });
 }
@@ -37,7 +36,7 @@ export function useUpdateFund() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...data }: Record<string, unknown> & { id: number }) =>
-      client.fundsPUT(id, UpdateFundCommand.fromJS({ id, ...data })),
+      client.fundsPUT(id, new UpdateFundRequest({ id, ...data })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['funds'] }),
   });
 }
@@ -46,7 +45,7 @@ export function useActivateFund() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...data }: Record<string, unknown> & { id: number }) =>
-      client.activate9(id, ActivateFundCommand.fromJS({ id, ...data })),
+      client.toggleActivePATCH3(id, new FundToggleActiveRequest({ id, ...data })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['funds'] }),
   });
 }
@@ -55,7 +54,7 @@ export function useDeactivateFund() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...data }: Record<string, unknown> & { id: number }) =>
-      client.deactivatePOST8(id, DeactivateFundCommand.fromJS({ id, ...data })),
+      client.toggleActivePATCH3(id, new FundToggleActiveRequest({ id, ...data })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['funds'] }),
   });
 }

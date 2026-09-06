@@ -42,6 +42,16 @@ public class AppropriationConfiguration : IEntityTypeConfiguration<Appropriation
 
         builder.HasIndex(e => e.TargetBudgetItemId);
 
+        builder.HasOne(e => e.Budget)
+            .WithMany()
+            .HasForeignKey(e => e.BudgetId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.BudgetItem)
+            .WithMany()
+            .HasForeignKey(e => e.BudgetItemId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.Ignore(e => e.DomainEvents);
     }
 }

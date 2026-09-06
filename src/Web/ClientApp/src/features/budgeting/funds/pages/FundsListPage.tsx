@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
 import { Button, Switch, FilterBar, FilterSearch, FilterSelect, Dialog, ConfirmDialog, Badge } from '@/components/ui';
+import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Pencil, Eye } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import { fundTypeLabels, fundCategoryLabels, FundType, FundCategory } from '../../shared/types';
 import type { FundDto } from '../../shared/types';
-import { useFundsList, useCreateFund, useUpdateFund, useActivateFund, useDeactivateFund } from '../hooks/useFunds';
+import { useFundsList, useCreateFund, useUpdateFund, useToggleFundActive } from '../hooks/useFunds';
 
 const fundTypeOptions = Object.entries(fundTypeLabels).map(([value, label]) => ({
   value,
@@ -38,18 +39,13 @@ export default function FundsListPage() {
   const { data: items = [], isLoading } = useFundsList();
   const createMutation = useCreateFund();
   const updateMutation = useUpdateFund();
-  const activateMutation = useActivateFund();
-  const deactivateMutation = useDeactivateFund();
+  const toggleMutation = useToggleFundActive();
 
   const filtered = useMemo(() => {
     return items.filter((item) => {
       if (search) {
         const q = search.toLowerCase();
-        if (
-          !item.fundNumber.toLowerCase().includes(q) &&
-          !item.fundName.toLowerCase().includes(q) &&
-          !item.legalAuthority.toLowerCase().includes(q)
-        ) return false;
+        if (!item.fundNumber.toLowerCase().includes(q) && !item.fundName.toLowerCase().includes(q) && !item.legalAuthority.toLowerCase().includes(q)) return false;
       }
       if (fundTypeFilter && Number(fundTypeFilter) !== item.fundType) return false;
       if (fundCategoryFilter && Number(fundCategoryFilter) !== item.fundCategory) return false;
@@ -83,15 +79,14 @@ export default function FundsListPage() {
 
   function confirmToggleAction() {
     if (!confirmToggle) return;
-    const mutation = confirmToggle.isActive ? deactivateMutation : activateMutation;
-    mutation.mutate(
+    toggleMutation.mutate(
       { id: confirmToggle.id, rowVersion: confirmToggle.rowVersion },
       {
         onSuccess: () => {
-          toast.success(confirmToggle.isActive ? 'تم التعطيل بنجاح' : 'تم التنشيط بنجاح');
+          notify({ type: 'success', title: confirmToggle.isActive ? 'تم التعطيل بنجاح' : 'تم التنشيط بنجاح' });
           setConfirmToggle(null);
         },
-        onError: () => toast.error('حدث خطأ أثناء التبديل'),
+        onError: (err) => notify({ type: 'error', title: err instanceof Error ? err.message : 'حدث خطأ أثناء التبديل' }),
       },
     );
   }
@@ -107,32 +102,46 @@ export default function FundsListPage() {
       legalAuthority: form.get('legalAuthority') as string,
       description: (form.get('description') as string) || undefined,
       fiscalYearId: form.get('fiscalYearId') ? Number(form.get('fiscalYearId')) : undefined,
-      defaultRevenueDebitAccountId: form.get('defaultRevenueDebitAccountId')
-        ? Number(form.get('defaultRevenueDebitAccountId'))
-        : undefined,
+      defaultRevenueDebitAccountId: form.get('defaultRevenueDebitAccountId') ? Number(form.get('defaultRevenueDebitAccountId')) : undefined,
     };
 
     if (editItem) {
       updateMutation.mutate(
         { id: editItem.id, rowVersion: editItem.rowVersion, ...data },
         {
-          onSuccess: () => {
-            toast.success('تم التحديث بنجاح');
-            setDialogOpen(false);
-          },
-          onError: () => toast.error('حدث خطأ أثناء التحديث'),
+          onSuccess: () => { notify({ type: 'success', title: 'تم التحديث بنجاح' }); setDialogOpen(false); },
+          onError: () => notify({ type: 'error', title: 'حدث خطأ أثناء التحديث' }),
         },
       );
     } else {
       createMutation.mutate(data, {
-        onSuccess: () => {
-          toast.success('تم الإنشاء بنجاح');
-          setDialogOpen(false);
-        },
-        onError: () => toast.error('حدث خطأ أثناء الإنشاء'),
+        onSuccess: () => { notify({ type: 'success', title: 'تم الإنشاء بنجاح' }); setDialogOpen(false); },
+        onError: () => notify({ type: 'error', title: 'حدث خطأ أثناء الإنشاء' }),
       });
     }
   }
+
+  const columns: DataGridColumn<FundDto>[] = [
+    { header: 'رقم الصندوق', cell: (row) => <span className="font-mono font-medium whitespace-nowrap">{row.fundNumber}</span> },
+    { header: 'اسم الصندوق', cell: (row) => <span className="max-w-[220px] truncate">{row.fundName}</span> },
+    { header: 'النوع', cell: (row) => <Badge variant="outline" className="whitespace-nowrap">{fundTypeLabels[row.fundType]}</Badge> },
+    { header: 'الفئة', cell: (row) => <Badge variant="outline" className="whitespace-nowrap">{fundCategoryLabels[row.fundCategory]}</Badge> },
+    {
+      header: 'الحالة',
+      cell: (row) => canManage
+        ? <Switch checked={row.isActive} onChange={() => handleToggle(row)} label={row.isActive ? 'نشط' : 'معطل'} />
+        : <Badge variant={row.isActive ? 'success' : 'danger'}>{row.isActive ? 'نشط' : 'معطل'}</Badge>,
+    },
+    {
+      header: 'إجراءات',
+      cell: (row) => (
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={() => navigate(`/budgeting/funds/${row.id}`)} aria-label="عرض" className="cursor-pointer"><Eye size={16} /></Button>
+          {canManage && <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} aria-label="تعديل" className="cursor-pointer"><Pencil size={16} /></Button>}
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-5">
@@ -150,87 +159,20 @@ export default function FundsListPage() {
 
       <FilterBar hasFilters={hasFilters} onClear={handleClearFilters}>
         <FilterSearch value={search} onChange={setSearch} placeholder="بحث برقم الصندوق أو الاسم..." />
-        <FilterSelect
-          value={fundTypeFilter}
-          onChange={setFundTypeFilter}
-          options={fundTypeOptions}
-          placeholder="النوع"
-          label="النوع"
-        />
-        <FilterSelect
-          value={fundCategoryFilter}
-          onChange={setFundCategoryFilter}
-          options={fundCategoryOptions}
-          placeholder="الفئة"
-          label="الفئة"
-        />
-        <FilterSelect
-          value={isActiveFilter}
-          onChange={setIsActiveFilter}
-          options={isActiveOptions}
-          placeholder="الحالة"
-          label="الحالة"
-        />
+        <FilterSelect value={fundTypeFilter} onChange={setFundTypeFilter} options={fundTypeOptions} placeholder="النوع" label="النوع" />
+        <FilterSelect value={fundCategoryFilter} onChange={setFundCategoryFilter} options={fundCategoryOptions} placeholder="الفئة" label="الفئة" />
+        <FilterSelect value={isActiveFilter} onChange={setIsActiveFilter} options={isActiveOptions} placeholder="الحالة" label="الحالة" />
       </FilterBar>
 
-      <div className="flex items-center gap-2 text-sm">
-        <span className="inline-flex items-center rounded-full bg-[var(--color-surface-container)] px-3 py-1 font-medium text-[var(--color-on-surface)] border border-[var(--color-border-container)]">{filtered.length} نتيجة</span>
-        {items.length > 0 && <span className="text-[var(--color-on-surface-variant)]">من أصل {items.length} إجمالي</span>}
-      </div>
+ 
 
-      <div className="w-full overflow-x-auto rounded-xl border border-[var(--color-border-container)] bg-[var(--color-surface-container-lowest)] shadow-sm">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-[var(--color-border-container)] bg-[var(--color-surface-container)]">
-              <th className="px-4 py-3.5 text-right font-semibold text-[var(--color-on-surface)] whitespace-nowrap">رقم الصندوق</th>
-              <th className="px-4 py-3.5 text-right font-semibold text-[var(--color-on-surface)] whitespace-nowrap">اسم الصندوق</th>
-              <th className="px-4 py-3.5 text-right font-semibold text-[var(--color-on-surface)] whitespace-nowrap">النوع</th>
-              <th className="px-4 py-3.5 text-right font-semibold text-[var(--color-on-surface)] whitespace-nowrap">الفئة</th>
-              <th className="px-4 py-3.5 text-right font-semibold text-[var(--color-on-surface)] whitespace-nowrap">الحالة</th>
-              <th className="px-4 py-3.5 text-right font-semibold text-[var(--color-on-surface)] whitespace-nowrap w-[120px]">إجراءات</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((item) => (
-              <tr key={item.id} className="border-b border-[var(--color-border-container)] last:border-0 hover:bg-[var(--color-surface-container)] transition-colors duration-150">
-                <td className="px-4 py-3.5 font-mono font-medium text-[var(--color-on-surface)] whitespace-nowrap">{item.fundNumber}</td>
-                <td className="px-4 py-3.5 text-[var(--color-on-surface)] max-w-[220px] truncate">{item.fundName}</td>
-                <td className="px-4 py-3.5">
-                  <Badge variant="outline" className="whitespace-nowrap">{fundTypeLabels[item.fundType]}</Badge>
-                </td>
-                <td className="px-4 py-3.5">
-                  <Badge variant="outline" className="whitespace-nowrap">{fundCategoryLabels[item.fundCategory]}</Badge>
-                </td>
-                <td className="px-4 py-3.5">
-                  {canManage ? (
-                    <Switch
-                      checked={item.isActive}
-                      onChange={() => handleToggle(item)}
-                      label={item.isActive ? 'نشط' : 'معطل'}
-                    />
-                  ) : (
-                    <Badge variant={item.isActive ? 'success' : 'danger'}>
-                      {item.isActive ? 'نشط' : 'معطل'}
-                    </Badge>
-                  )}
-                </td>
-                <td className="px-4 py-3.5">
-                  <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => navigate(`/budgeting/funds/${item.id}`)} aria-label="عرض" className="cursor-pointer hover:bg-[var(--color-surface-container-high)] transition-colors duration-200">
-                      <Eye size={16} />
-                    </Button>
-                    {canManage && (
-                      <Button variant="ghost" size="icon" onClick={() => handleEdit(item)} aria-label="تعديل" className="cursor-pointer hover:bg-[var(--color-surface-container-high)] transition-colors duration-200">
-                        <Pencil size={16} />
-                      </Button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataGrid
+        columns={columns}
+        data={filtered}
+        loading={isLoading}
+        emptyMessage="لا توجد صناديق بعد"
+        rowKey={(row) => row.id}
+      />
 
       <Dialog
         open={dialogOpen}
@@ -245,36 +187,16 @@ export default function FundsListPage() {
         <form id="fund-form" onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="fundNumber" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">رقم الصندوق *</label>
-            <input
-              id="fundNumber"
-              name="fundNumber"
-              type="text"
-              required
-              defaultValue={editItem?.fundNumber}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            />
+            <input id="fundNumber" name="fundNumber" type="text" required defaultValue={editItem?.fundNumber} className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]" />
           </div>
           <div>
             <label htmlFor="fundName" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">اسم الصندوق *</label>
-            <input
-              id="fundName"
-              name="fundName"
-              type="text"
-              required
-              defaultValue={editItem?.fundName}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            />
+            <input id="fundName" name="fundName" type="text" required defaultValue={editItem?.fundName} className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="fundType" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">النوع *</label>
-              <select
-                id="fundType"
-                name="fundType"
-                required
-                defaultValue={editItem?.fundType}
-                className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-              >
+              <select id="fundType" name="fundType" required defaultValue={editItem?.fundType} className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]">
                 {Object.entries(fundTypeLabels).map(([value, label]) => (
                   <option key={value} value={value}>{label}</option>
                 ))}
@@ -282,13 +204,7 @@ export default function FundsListPage() {
             </div>
             <div>
               <label htmlFor="fundCategory" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">الفئة *</label>
-              <select
-                id="fundCategory"
-                name="fundCategory"
-                required
-                defaultValue={editItem?.fundCategory}
-                className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-              >
+              <select id="fundCategory" name="fundCategory" required defaultValue={editItem?.fundCategory} className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]">
                 {Object.entries(fundCategoryLabels).map(([value, label]) => (
                   <option key={value} value={value}>{label}</option>
                 ))}
@@ -297,24 +213,11 @@ export default function FundsListPage() {
           </div>
           <div>
             <label htmlFor="legalAuthority" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">الجهة القانونية *</label>
-            <input
-              id="legalAuthority"
-              name="legalAuthority"
-              type="text"
-              required
-              defaultValue={editItem?.legalAuthority}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            />
+            <input id="legalAuthority" name="legalAuthority" type="text" required defaultValue={editItem?.legalAuthority} className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]" />
           </div>
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">الوصف</label>
-            <textarea
-              id="description"
-              name="description"
-              rows={3}
-              defaultValue={editItem?.description}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            />
+            <textarea id="description" name="description" rows={3} defaultValue={editItem?.description} className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]" />
           </div>
         </form>
       </Dialog>
@@ -325,7 +228,7 @@ export default function FundsListPage() {
         onConfirm={confirmToggleAction}
         message={confirmToggle?.isActive ? 'هل تريد تعطيل هذا الصندوق؟' : 'هل تريد تنشيط هذا الصندوق؟'}
         title={confirmToggle?.isActive ? 'تعطيل الصندوق' : 'تنشيط الصندوق'}
-        loading={activateMutation.isPending || deactivateMutation.isPending}
+        loading={toggleMutation.isPending}
       />
     </div>
   );

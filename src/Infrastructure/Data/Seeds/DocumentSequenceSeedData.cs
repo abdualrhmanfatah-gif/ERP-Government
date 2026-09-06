@@ -23,5 +23,8 @@ public static class DocumentSequenceSeedData
         new() { Name="تسلسل القيود المحجوزة", DocumentType="Encumbrance", FiscalYearId=2, CurrentNumber=1, ResetPolicy=ResetPolicy.Yearly },
         new() { Name="تسلسل طلبات الصرف", DocumentType="DisbursementRequest", FiscalYearId=2, CurrentNumber=1, ResetPolicy=ResetPolicy.Yearly },
         new() { Name="تسلسل المدفوعات المنفذة", DocumentType="Payment", FiscalYearId=2, CurrentNumber=1, ResetPolicy=ResetPolicy.Yearly },
+        new() { Name="تسلسل الأطراف", DocumentType="Party", FiscalYearId=2, CurrentNumber=1, ResetPolicy=ResetPolicy.Yearly },
+        new() { Name="تسلسل سندات القبض", DocumentType="ReceiptVoucher", FiscalYearId=2, CurrentNumber=1, ResetPolicy=ResetPolicy.Yearly },
+        new() { Name="تسلسل الإيداعات", DocumentType="DepositSlip", FiscalYearId=2, CurrentNumber=1, ResetPolicy=ResetPolicy.Yearly },
     ];
 }

@@ -1,10 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   BudgetsClient,
-  CreateBudgetItemCommand,
-  DeleteBudgetItemCommand,
-  MoveBudgetItemCommand,
-  UpdateBudgetItemCommand,
+  CreateBudgetItemRequest,
+  UpdateBudgetItemRequest,
+  MoveBudgetItemRequest,
 } from '../../../web-api-client';
 
 const client = new BudgetsClient();
@@ -35,7 +34,7 @@ export function useCreateBudgetItem() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ budgetId, ...data }: Record<string, unknown> & { budgetId: number }) =>
-      client.itemsPOST(budgetId, CreateBudgetItemCommand.fromJS({ budgetId, ...data })),
+      client.itemsPOST(budgetId, new CreateBudgetItemRequest({ budgetId, ...data } as any)),
     onSuccess: () => invalidateItems(qc),
   });
 }
@@ -43,8 +42,8 @@ export function useCreateBudgetItem() {
 export function useUpdateBudgetItem() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...data }: Record<string, unknown> & { id: number }) =>
-      client.itemsPUT(id, UpdateBudgetItemCommand.fromJS({ id, ...data })),
+    mutationFn: ({ budgetId, itemId, ...data }: Record<string, unknown> & { budgetId: number; itemId: number }) =>
+      client.itemsPUT(budgetId, itemId, new UpdateBudgetItemRequest({ ...data } as any)),
     onSuccess: () => invalidateItems(qc),
   });
 }
@@ -52,8 +51,8 @@ export function useUpdateBudgetItem() {
 export function useDeleteBudgetItem() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...data }: Record<string, unknown> & { id: number }) =>
-      client.itemsDELETE(id, DeleteBudgetItemCommand.fromJS({ id, ...data })),
+    mutationFn: ({ budgetId, itemId }: { budgetId: number; itemId: number }) =>
+      client.itemsDELETE(budgetId, itemId),
     onSuccess: () => invalidateItems(qc),
   });
 }
@@ -61,8 +60,8 @@ export function useDeleteBudgetItem() {
 export function useMoveBudgetItem() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...data }: Record<string, unknown> & { id: number }) =>
-      client.move(id, MoveBudgetItemCommand.fromJS({ id, ...data })),
+    mutationFn: ({ budgetId, itemId, ...data }: Record<string, unknown> & { budgetId: number; itemId: number }) =>
+      client.move(budgetId, itemId, new MoveBudgetItemRequest(data as any)),
     onSuccess: () => invalidateItems(qc),
   });
 }

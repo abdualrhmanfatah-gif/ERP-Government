@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Power, PowerOff, Eye, Pencil } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { DataGrid } from '@/components/ui/DataGrid';
 import { Button } from '@/components/ui/Button';
@@ -47,10 +47,10 @@ export function AccountGroupsListPage() {
   const handleCreate = async (payload: Parameters<ReturnType<typeof useCreateAccountGroup>['mutateAsync']>[0]) => {
     try {
       await createMut.mutateAsync(payload);
-      toast.success('تم إنشاء المجموعة بنجاح');
+      notify({ type: 'success', title: 'تم إنشاء المجموعة بنجاح' });
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'فشل الإنشاء';
-      toast.error(msg);
+      notify({ type: 'error', title: msg });
       throw e;
     }
   };
@@ -59,10 +59,10 @@ export function AccountGroupsListPage() {
     if (!confirmToggle) return;
     try {
       await toggleMut.mutateAsync({ id: confirmToggle.id, isActive: !confirmToggle.isActive, rowVersion: confirmToggle.rowVersion });
-      toast.success(confirmToggle.isActive ? 'تم التعطيل' : 'تم التفعيل');
+      notify({ type: 'success', title: confirmToggle.isActive ? 'تم التعطيل' : 'تم التفعيل' });
       setConfirmToggle(null);
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : 'فشل العملية');
+      notify({ type: 'error', title: e instanceof Error ? e.message : 'فشل العملية' });
     }
   };
 
@@ -70,11 +70,11 @@ export function AccountGroupsListPage() {
     if (!editingGroup) return;
     try {
       await updateMut.mutateAsync({ id: editingGroup.id, rowVersion: editingGroup.rowVersion, ...(payload as { name:string; type:string; normalBalance:string; description?:string; parentId?:number|null }) } as never);
-      toast.success('تم التحديث بنجاح');
+      notify({ type: 'success', title: 'تم التحديث بنجاح' });
       setEditingGroup(null);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'فشل التحديث';
-      toast.error(msg);
+      notify({ type: 'error', title: msg });
       throw e;
     }
   };

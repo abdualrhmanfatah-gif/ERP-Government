@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import { Dialog } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -58,12 +58,12 @@ export function CreateUserDialog({ open, onClose, onCreated }: CreateUserDialogP
         accountType,
         password,
       });
-      toast.success('تم إنشاء المستخدم بنجاح');
+      notify({ type: 'success', title: 'تم إنشاء المستخدم بنجاح' });
       handleClose();
       onCreated(id);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ أثناء إنشاء المستخدم';
-      toast.error(message);
+      notify({ type: 'error', title: message });
     }
   }
 

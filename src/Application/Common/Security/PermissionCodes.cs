@@ -38,6 +38,8 @@ public static class PermissionCodes
 
     public const string DocumentSequencesView = "DocumentSequences.View";
     public const string DocumentSequencesCreate = "DocumentSequences.Create";
+    public const string DocumentSequencesUpdate = "DocumentSequences.Update";
+    public const string DocumentSequencesDeactivate = "DocumentSequences.Deactivate";
 
     // ─── Accounting ───────────────────────────────────────────────────
     public const string ChartOfAccountsRead = "Accounting.ChartOfAccounts.Read";

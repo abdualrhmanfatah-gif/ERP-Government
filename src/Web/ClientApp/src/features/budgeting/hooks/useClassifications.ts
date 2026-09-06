@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   BudgetClassificationsClient,
-  CreateBudgetClassificationCommand,
-  ToggleBudgetClassificationActiveCommand,
-  UpdateBudgetClassificationCommand,
+  CreateBudgetClassificationRequest,
+  BudgetClassificationToggleActiveRequest,
+  UpdateBudgetClassificationRequest,
 } from '../../../web-api-client';
 
 const client = new BudgetClassificationsClient();
@@ -27,7 +27,7 @@ export function useCreateClassification() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: Record<string, unknown>) =>
-      client.budgetClassificationsPOST(CreateBudgetClassificationCommand.fromJS(data)),
+      client.budgetClassificationsPOST(CreateBudgetClassificationRequest.fromJS(data)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['budget-classifications-tree'] });
       qc.invalidateQueries({ queryKey: ['budget-classifications'] });
@@ -39,7 +39,7 @@ export function useUpdateClassification() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...data }: Record<string, unknown> & { id: number }) =>
-      client.budgetClassificationsPUT(id, UpdateBudgetClassificationCommand.fromJS({ id, ...data })),
+      client.budgetClassificationsPUT(id, UpdateBudgetClassificationRequest.fromJS({ id, ...data })),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['budget-classifications-tree'] });
       qc.invalidateQueries({ queryKey: ['budget-classifications'] });
@@ -51,7 +51,7 @@ export function useToggleClassificationActive() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...data }: Record<string, unknown> & { id: number }) =>
-      client.toggleActive(id, ToggleBudgetClassificationActiveCommand.fromJS({ id, ...data })),
+      client.toggleActivePATCH(id, BudgetClassificationToggleActiveRequest.fromJS({ id, ...data })),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['budget-classifications-tree'] });
       qc.invalidateQueries({ queryKey: ['budget-classifications'] });
