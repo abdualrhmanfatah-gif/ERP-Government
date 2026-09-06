@@ -134,29 +134,29 @@ public class EventHandlerRaisingTests
     }
 
     [Test]
-    public void PostRevenueReceiptCommand_RaisesRevenueReceiptPosted()
+    public void ApproveDepositSlipCommand_RaisesReceiptVoucherCollected()
     {
         // Arrange
-        var entity = new ERP_Government.Domain.Revenue.Entities.RevenueReceipt
+        var entity = new ERP_Government.Domain.Revenue.Entities.ReceiptVoucher
         {
             Id = 1,
-            ReceiptNumber = "REV-001",
-            PayerName = "Test Payer",
-            AmountTotal = 1000m
+            VoucherNumber = "RCV-001",
+            ReceivedFrom = "Test Payer"
         };
 
         // Act
-        entity.AddDomainEvent(new ERP_Government.Domain.Events.Revenue.RevenueReceiptPosted
+        entity.AddDomainEvent(new ERP_Government.Domain.Events.Revenue.ReceiptVoucherCollected
         {
             SourceEntityId = entity.Id,
             OccurredAt = DateTimeOffset.UtcNow,
-            PayerName = entity.PayerName,
-            TotalAmount = entity.AmountTotal,
-            CurrencyId = 1
+            PartyName = entity.ReceivedFrom,
+            TotalAmount = 1000m,
+            CurrencyId = 1,
+            FormType = ERP_Government.Domain.Revenue.Enums.FormType.Form47
         });
 
         // Assert
-        entity.DomainEvents.ShouldContain(e => e is ERP_Government.Domain.Events.Revenue.RevenueReceiptPosted);
+        entity.DomainEvents.ShouldContain(e => e is ERP_Government.Domain.Events.Revenue.ReceiptVoucherCollected);
         entity.DomainEvents.Count.ShouldBe(1);
     }
 }

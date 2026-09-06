@@ -11756,361 +11756,6 @@ export class ReceiptVouchersClient {
     }
 }
 
-export class RevenueReceiptsClient {
-    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
-
-    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
-        this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "";
-    }
-
-    /**
-     * Get all revenue receipts
-     * @param status (optional) 
-     * @param receiptType (optional) 
-     * @param fundId (optional) 
-     * @param fromDate (optional) 
-     * @param toDate (optional) 
-     * @return OK
-     */
-    revenueReceiptsAll(status: RevenueReceiptStatus | undefined, receiptType: RevenueReceiptType | undefined, fundId: number | undefined, fromDate: Date | undefined, toDate: Date | undefined): Promise<RevenueReceiptDto[]> {
-        let url_ = this.baseUrl + "/api/RevenueReceipts?";
-        if (status === null)
-            throw new globalThis.Error("The parameter 'status' cannot be null.");
-        else if (status !== undefined)
-            url_ += "Status=" + encodeURIComponent("" + status) + "&";
-        if (receiptType === null)
-            throw new globalThis.Error("The parameter 'receiptType' cannot be null.");
-        else if (receiptType !== undefined)
-            url_ += "ReceiptType=" + encodeURIComponent("" + receiptType) + "&";
-        if (fundId === null)
-            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
-        else if (fundId !== undefined)
-            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
-        if (fromDate === null)
-            throw new globalThis.Error("The parameter 'fromDate' cannot be null.");
-        else if (fromDate !== undefined)
-            url_ += "FromDate=" + encodeURIComponent(fromDate ? "" + fromDate.toISOString() : "") + "&";
-        if (toDate === null)
-            throw new globalThis.Error("The parameter 'toDate' cannot be null.");
-        else if (toDate !== undefined)
-            url_ += "ToDate=" + encodeURIComponent(toDate ? "" + toDate.toISOString() : "") + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processRevenueReceiptsAll(_response);
-        });
-    }
-
-    protected processRevenueReceiptsAll(response: Response): Promise<RevenueReceiptDto[]> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(RevenueReceiptDto.fromJS(item));
-            }
-            else {
-                result200 = null as any;
-            }
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<RevenueReceiptDto[]>(null as any);
-    }
-
-    /**
-     * Create a new revenue receipt
-     * @return No Content
-     */
-    revenueReceiptsPOST(body: CreateRevenueReceiptCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/RevenueReceipts";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processRevenueReceiptsPOST(_response);
-        });
-    }
-
-    protected processRevenueReceiptsPOST(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Get revenue receipt by ID
-     * @return OK
-     */
-    revenueReceiptsGET(id: number): Promise<RevenueReceiptDto> {
-        let url_ = this.baseUrl + "/api/RevenueReceipts/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processRevenueReceiptsGET(_response);
-        });
-    }
-
-    protected processRevenueReceiptsGET(response: Response): Promise<RevenueReceiptDto> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = RevenueReceiptDto.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<RevenueReceiptDto>(null as any);
-    }
-
-    /**
-     * Approve a revenue receipt
-     * @return No Content
-     */
-    approvePOST6(id: number, body: ApproveRevenueReceiptCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/RevenueReceipts/{id}/approve";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprovePOST6(_response);
-        });
-    }
-
-    protected processApprovePOST6(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Post a revenue receipt (creates accounting entry)
-     * @return No Content
-     */
-    post(id: number, body: PostRevenueReceiptCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/RevenueReceipts/{id}/post";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processPost(_response);
-        });
-    }
-
-    protected processPost(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Cancel a revenue receipt
-     * @return No Content
-     */
-    cancelPOST5(id: number, body: CancelRevenueReceiptCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/RevenueReceipts/{id}/cancel";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancelPOST5(_response);
-        });
-    }
-
-    protected processCancelPOST5(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-}
-
 export class ReportsClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -14161,7 +13806,7 @@ export class PaymentOrdersClient {
      * Approve a submitted payment order
      * @return No Content
      */
-    approvePOST7(id: number, body: ApprovePaymentOrderCommand): Promise<void> {
+    approvePOST6(id: number, body: ApprovePaymentOrderCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/PaymentOrders/{id}/approve";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -14179,11 +13824,11 @@ export class PaymentOrdersClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprovePOST7(_response);
+            return this.processApprovePOST6(_response);
         });
     }
 
-    protected processApprovePOST7(response: Response): Promise<void> {
+    protected processApprovePOST6(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -14267,7 +13912,7 @@ export class PaymentOrdersClient {
      * Cancel a payment order
      * @return No Content
      */
-    cancelPOST6(id: number, body: CancelPaymentOrderCommand): Promise<void> {
+    cancelPOST5(id: number, body: CancelPaymentOrderCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/PaymentOrders/{id}/cancel";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -14285,11 +13930,11 @@ export class PaymentOrdersClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancelPOST6(_response);
+            return this.processCancelPOST5(_response);
         });
     }
 
-    protected processCancelPOST6(response: Response): Promise<void> {
+    protected processCancelPOST5(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -18498,7 +18143,7 @@ export class JournalEntriesClient {
      * Cancel a journal entry
      * @return No Content
      */
-    cancelPOST7(id: number, body: CancelJournalEntryCommand): Promise<void> {
+    cancelPOST6(id: number, body: CancelJournalEntryCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/JournalEntries/{id}/cancel";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -18516,11 +18161,11 @@ export class JournalEntriesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancelPOST7(_response);
+            return this.processCancelPOST6(_response);
         });
     }
 
-    protected processCancelPOST7(response: Response): Promise<void> {
+    protected processCancelPOST6(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -18604,7 +18249,7 @@ export class JournalEntriesClient {
      * Approve a submitted journal entry
      * @return No Content
      */
-    approvePOST8(id: number, body: ApproveJournalEntryCommand): Promise<void> {
+    approvePOST7(id: number, body: ApproveJournalEntryCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/JournalEntries/{id}/approve";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -18622,11 +18267,11 @@ export class JournalEntriesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprovePOST8(_response);
+            return this.processApprovePOST7(_response);
         });
     }
 
-    protected processApprovePOST8(response: Response): Promise<void> {
+    protected processApprovePOST7(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -18657,7 +18302,7 @@ export class JournalEntriesClient {
      * Post an approved journal entry
      * @return No Content
      */
-    post2(id: number, body: PostJournalEntryCommand): Promise<void> {
+    post(id: number, body: PostJournalEntryCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/JournalEntries/{id}/post";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -18675,11 +18320,11 @@ export class JournalEntriesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processPost2(_response);
+            return this.processPost(_response);
         });
     }
 
-    protected processPost2(response: Response): Promise<void> {
+    protected processPost(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -19737,7 +19382,7 @@ export class RecurringEntriesClient {
      * Cancel a recurring entry
      * @return No Content
      */
-    cancelPOST8(id: number, body: CancelRecurringEntryCommand): Promise<void> {
+    cancelPOST7(id: number, body: CancelRecurringEntryCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/RecurringEntries/{id}/cancel";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -19755,11 +19400,11 @@ export class RecurringEntriesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancelPOST8(_response);
+            return this.processCancelPOST7(_response);
         });
     }
 
-    protected processCancelPOST8(response: Response): Promise<void> {
+    protected processCancelPOST7(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -21766,54 +21411,6 @@ export interface IApproveReceiptVoucherCommand {
     id?: number;
     reason?: string | undefined;
     rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class ApproveRevenueReceiptCommand implements IApproveRevenueReceiptCommand {
-    id?: number;
-
-    [key: string]: any;
-
-    constructor(data?: IApproveRevenueReceiptCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-        }
-    }
-
-    static fromJS(data: any): ApproveRevenueReceiptCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new ApproveRevenueReceiptCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        return data;
-    }
-}
-
-export interface IApproveRevenueReceiptCommand {
-    id?: number;
 
     [key: string]: any;
 }
@@ -24769,58 +24366,6 @@ export interface ICancelRecurringEntryCommand {
     id?: number;
     reason?: string | undefined;
     rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class CancelRevenueReceiptCommand implements ICancelRevenueReceiptCommand {
-    id?: number;
-    reason?: string | undefined;
-
-    [key: string]: any;
-
-    constructor(data?: ICancelRevenueReceiptCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.reason = _data["reason"];
-        }
-    }
-
-    static fromJS(data: any): CancelRevenueReceiptCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new CancelRevenueReceiptCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["reason"] = this.reason;
-        return data;
-    }
-}
-
-export interface ICancelRevenueReceiptCommand {
-    id?: number;
-    reason?: string | undefined;
 
     [key: string]: any;
 }
@@ -28991,154 +28536,6 @@ export interface ICreateRecurringEntryCommand {
     costCenterId?: number | undefined;
     projectId?: number | undefined;
     descriptionTemplate?: string | undefined;
-
-    [key: string]: any;
-}
-
-export class CreateRevenueReceiptCommand implements ICreateRevenueReceiptCommand {
-    receiptType?: RevenueReceiptType;
-    receiptDate?: Date;
-    payerName?: string;
-    payerNationalId?: string | undefined;
-    fundId?: number;
-    budgetClassificationId?: number | undefined;
-    currencyId?: number;
-    paymentMethod?: PaymentMethod;
-    externalTransactionRef?: string | undefined;
-    lines?: CreateRevenueReceiptLineDto[];
-
-    [key: string]: any;
-
-    constructor(data?: ICreateRevenueReceiptCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.receiptType = _data["receiptType"];
-            this.receiptDate = _data["receiptDate"] ? new Date(_data["receiptDate"].toString()) : undefined as any;
-            this.payerName = _data["payerName"];
-            this.payerNationalId = _data["payerNationalId"];
-            this.fundId = _data["fundId"];
-            this.budgetClassificationId = _data["budgetClassificationId"];
-            this.currencyId = _data["currencyId"];
-            this.paymentMethod = _data["paymentMethod"];
-            this.externalTransactionRef = _data["externalTransactionRef"];
-            if (Array.isArray(_data["lines"])) {
-                this.lines = [] as any;
-                for (let item of _data["lines"])
-                    this.lines!.push(CreateRevenueReceiptLineDto.fromJS(item));
-            }
-        }
-    }
-
-    static fromJS(data: any): CreateRevenueReceiptCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new CreateRevenueReceiptCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["receiptType"] = this.receiptType;
-        data["receiptDate"] = this.receiptDate ? this.receiptDate.toISOString() : undefined as any;
-        data["payerName"] = this.payerName;
-        data["payerNationalId"] = this.payerNationalId;
-        data["fundId"] = this.fundId;
-        data["budgetClassificationId"] = this.budgetClassificationId;
-        data["currencyId"] = this.currencyId;
-        data["paymentMethod"] = this.paymentMethod;
-        data["externalTransactionRef"] = this.externalTransactionRef;
-        if (Array.isArray(this.lines)) {
-            data["lines"] = [];
-            for (let item of this.lines)
-                data["lines"].push(item ? item.toJSON() : undefined as any);
-        }
-        return data;
-    }
-}
-
-export interface ICreateRevenueReceiptCommand {
-    receiptType?: RevenueReceiptType;
-    receiptDate?: Date;
-    payerName?: string;
-    payerNationalId?: string | undefined;
-    fundId?: number;
-    budgetClassificationId?: number | undefined;
-    currencyId?: number;
-    paymentMethod?: PaymentMethod;
-    externalTransactionRef?: string | undefined;
-    lines?: CreateRevenueReceiptLineDto[];
-
-    [key: string]: any;
-}
-
-export class CreateRevenueReceiptLineDto implements ICreateRevenueReceiptLineDto {
-    accountId?: number;
-    description?: string | undefined;
-    amount?: number;
-
-    [key: string]: any;
-
-    constructor(data?: ICreateRevenueReceiptLineDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.accountId = _data["accountId"];
-            this.description = _data["description"];
-            this.amount = _data["amount"];
-        }
-    }
-
-    static fromJS(data: any): CreateRevenueReceiptLineDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new CreateRevenueReceiptLineDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["accountId"] = this.accountId;
-        data["description"] = this.description;
-        data["amount"] = this.amount;
-        return data;
-    }
-}
-
-export interface ICreateRevenueReceiptLineDto {
-    accountId?: number;
-    description?: string | undefined;
-    amount?: number;
 
     [key: string]: any;
 }
@@ -35275,54 +34672,6 @@ export interface IPostJournalEntryCommand {
     [key: string]: any;
 }
 
-export class PostRevenueReceiptCommand implements IPostRevenueReceiptCommand {
-    id?: number;
-
-    [key: string]: any;
-
-    constructor(data?: IPostRevenueReceiptCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-        }
-    }
-
-    static fromJS(data: any): PostRevenueReceiptCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new PostRevenueReceiptCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        return data;
-    }
-}
-
-export interface IPostRevenueReceiptCommand {
-    id?: number;
-
-    [key: string]: any;
-}
-
 export class ProjectDto implements IProjectDto {
     id?: number;
     code?: string;
@@ -37195,215 +36544,6 @@ export interface IRevenueCollectionsTotalDto {
     bouncedChecks?: number;
 
     [key: string]: any;
-}
-
-export class RevenueReceiptDto implements IRevenueReceiptDto {
-    id?: number;
-    receiptNumber?: string;
-    receiptType?: RevenueReceiptType;
-    receiptDate?: Date;
-    payerName?: string;
-    payerNationalId?: string | undefined;
-    fundId?: number;
-    budgetClassificationId?: number | undefined;
-    currencyId?: number;
-    amountTotal?: number;
-    paymentMethod?: PaymentMethod;
-    paymentMethodName?: string;
-    externalTransactionRef?: string | undefined;
-    journalEntryId?: number | undefined;
-    status?: RevenueReceiptStatus;
-    created?: Date;
-    createdBy?: string | undefined;
-    lastModified?: Date;
-    lastModifiedBy?: string | undefined;
-    lines?: RevenueReceiptLineDto[];
-
-    [key: string]: any;
-
-    constructor(data?: IRevenueReceiptDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.receiptNumber = _data["receiptNumber"];
-            this.receiptType = _data["receiptType"];
-            this.receiptDate = _data["receiptDate"] ? new Date(_data["receiptDate"].toString()) : undefined as any;
-            this.payerName = _data["payerName"];
-            this.payerNationalId = _data["payerNationalId"];
-            this.fundId = _data["fundId"];
-            this.budgetClassificationId = _data["budgetClassificationId"];
-            this.currencyId = _data["currencyId"];
-            this.amountTotal = _data["amountTotal"];
-            this.paymentMethod = _data["paymentMethod"];
-            this.paymentMethodName = _data["paymentMethodName"];
-            this.externalTransactionRef = _data["externalTransactionRef"];
-            this.journalEntryId = _data["journalEntryId"];
-            this.status = _data["status"];
-            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
-            this.createdBy = _data["createdBy"];
-            this.lastModified = _data["lastModified"] ? new Date(_data["lastModified"].toString()) : undefined as any;
-            this.lastModifiedBy = _data["lastModifiedBy"];
-            if (Array.isArray(_data["lines"])) {
-                this.lines = [] as any;
-                for (let item of _data["lines"])
-                    this.lines!.push(RevenueReceiptLineDto.fromJS(item));
-            }
-        }
-    }
-
-    static fromJS(data: any): RevenueReceiptDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new RevenueReceiptDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["receiptNumber"] = this.receiptNumber;
-        data["receiptType"] = this.receiptType;
-        data["receiptDate"] = this.receiptDate ? this.receiptDate.toISOString() : undefined as any;
-        data["payerName"] = this.payerName;
-        data["payerNationalId"] = this.payerNationalId;
-        data["fundId"] = this.fundId;
-        data["budgetClassificationId"] = this.budgetClassificationId;
-        data["currencyId"] = this.currencyId;
-        data["amountTotal"] = this.amountTotal;
-        data["paymentMethod"] = this.paymentMethod;
-        data["paymentMethodName"] = this.paymentMethodName;
-        data["externalTransactionRef"] = this.externalTransactionRef;
-        data["journalEntryId"] = this.journalEntryId;
-        data["status"] = this.status;
-        data["created"] = this.created ? this.created.toISOString() : undefined as any;
-        data["createdBy"] = this.createdBy;
-        data["lastModified"] = this.lastModified ? this.lastModified.toISOString() : undefined as any;
-        data["lastModifiedBy"] = this.lastModifiedBy;
-        if (Array.isArray(this.lines)) {
-            data["lines"] = [];
-            for (let item of this.lines)
-                data["lines"].push(item ? item.toJSON() : undefined as any);
-        }
-        return data;
-    }
-}
-
-export interface IRevenueReceiptDto {
-    id?: number;
-    receiptNumber?: string;
-    receiptType?: RevenueReceiptType;
-    receiptDate?: Date;
-    payerName?: string;
-    payerNationalId?: string | undefined;
-    fundId?: number;
-    budgetClassificationId?: number | undefined;
-    currencyId?: number;
-    amountTotal?: number;
-    paymentMethod?: PaymentMethod;
-    paymentMethodName?: string;
-    externalTransactionRef?: string | undefined;
-    journalEntryId?: number | undefined;
-    status?: RevenueReceiptStatus;
-    created?: Date;
-    createdBy?: string | undefined;
-    lastModified?: Date;
-    lastModifiedBy?: string | undefined;
-    lines?: RevenueReceiptLineDto[];
-
-    [key: string]: any;
-}
-
-export class RevenueReceiptLineDto implements IRevenueReceiptLineDto {
-    id?: number;
-    receiptId?: number;
-    accountId?: number;
-    description?: string | undefined;
-    amount?: number;
-
-    [key: string]: any;
-
-    constructor(data?: IRevenueReceiptLineDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.receiptId = _data["receiptId"];
-            this.accountId = _data["accountId"];
-            this.description = _data["description"];
-            this.amount = _data["amount"];
-        }
-    }
-
-    static fromJS(data: any): RevenueReceiptLineDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new RevenueReceiptLineDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["receiptId"] = this.receiptId;
-        data["accountId"] = this.accountId;
-        data["description"] = this.description;
-        data["amount"] = this.amount;
-        return data;
-    }
-}
-
-export interface IRevenueReceiptLineDto {
-    id?: number;
-    receiptId?: number;
-    accountId?: number;
-    description?: string | undefined;
-    amount?: number;
-
-    [key: string]: any;
-}
-
-export enum RevenueReceiptStatus {
-    Draft = "Draft",
-    Approved = "Approved",
-    Posted = "Posted",
-    Cancelled = "Cancelled",
-}
-
-export enum RevenueReceiptType {
-    Cash = "Cash",
-    Bank = "Bank",
-    Transfer = "Transfer",
 }
 
 export class ReverseClosingEntryCommand implements IReverseClosingEntryCommand {
