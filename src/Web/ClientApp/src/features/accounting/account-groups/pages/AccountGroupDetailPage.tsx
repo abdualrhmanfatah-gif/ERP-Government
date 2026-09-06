@@ -9,7 +9,7 @@ import { useAccountGroupDetail } from '../hooks/useAccountGroupDetail';
 import { useToggleAccountGroupActive } from '../hooks/useToggleAccountGroupActive';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import { useState } from 'react';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { AccountGroupForm } from '../components/AccountGroupForm';
@@ -52,10 +52,10 @@ export function AccountGroupDetailPage() {
   const handleToggle = async () => {
     try {
       await toggleMut.mutateAsync({ id: g.id, isActive: !g.isActive, rowVersion: g.rowVersion });
-      toast.success(g.isActive ? 'تم التعطيل' : 'تم التفعيل');
+      notify({ type: 'success', title: g.isActive ? 'تم التعطيل' : 'تم التفعيل' });
       setConfirmToggle(false);
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : 'فشل');
+      notify({ type: 'error', title: e instanceof Error ? e.message : 'فشل' });
     }
   };
 
@@ -251,7 +251,7 @@ export function AccountGroupDetailPage() {
         initial={g}
         onSubmit={async (payload) => {
           await updateMut.mutateAsync({ id: g.id, rowVersion: g.rowVersion, ...payload } as never);
-          toast.success('تم التحديث');
+          notify({ type: 'success', title: 'تم التحديث' });
         }}
         isPending={updateMut.isPending}
       />
