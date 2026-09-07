@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Button, FilterBar, FilterSelect, Badge, EmptyState, Loading, MoneyDisplay, PageHeader } from '@/components/ui';
+import { Button, FilterBar, FilterSelect, Badge, EmptyState, Loading, MoneyDisplay, Page } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Eye } from 'lucide-react';
 import { DepositSlipsClient } from '../../../web-api-client';
@@ -99,36 +99,36 @@ export default function DepositSlipsListPage() {
   );
 
   return (
-    <div className="space-y-6" dir="rtl">
-      <PageHeader
-        title="بطاقات الإيداع"
-        actions={
-          <Button onClick={() => navigate('/treasury/deposit-slips/create')}>
-            <Plus className="h-4 w-4 ml-2" /> إنشاء بطاقة
-          </Button>
-        }
-      />
-
-      <FilterBar>
-        <FilterSelect
-          label="الحالة"
-          value={statusFilter}
-          onChange={setStatusFilter}
-          options={statusOptions}
-        />
-        <FilterSelect
-          label="النوع"
-          value={formTypeFilter}
-          onChange={setFormTypeFilter}
-          options={formTypeOptions}
-        />
-      </FilterBar>
-
-      {isLoading ? <Loading /> : slips.length === 0 ? (
+    <Page
+      title="بطاقات الإيداع"
+      actions={
+        <Button onClick={() => navigate('/treasury/deposit-slips/create')}>
+          <Plus className="h-4 w-4 ml-2" /> إنشاء بطاقة
+        </Button>
+      }
+      toolbar={
+        <FilterBar>
+          <FilterSelect
+            label="الحالة"
+            value={statusFilter}
+            onChange={setStatusFilter}
+            options={statusOptions}
+          />
+          <FilterSelect
+            label="النوع"
+            value={formTypeFilter}
+            onChange={setFormTypeFilter}
+            options={formTypeOptions}
+          />
+        </FilterBar>
+      }
+      loading={isLoading}
+    >
+      {slips.length === 0 ? (
         <EmptyState message="لا توجد بطاقات إيداع" />
       ) : (
         <DataGrid columns={columns} data={slips as any} rowKey={(row: any) => row.id} />
       )}
-    </div>
+    </Page>
   );
 }

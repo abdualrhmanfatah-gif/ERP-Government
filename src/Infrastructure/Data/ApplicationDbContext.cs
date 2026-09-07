@@ -73,7 +73,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<JournalEntryTemplateLine> JournalEntryTemplateLines => Set<JournalEntryTemplateLine>();
     public DbSet<RecurringEntry> RecurringEntries => Set<RecurringEntry>();
     public DbSet<RecurringEntryExecutionLog> RecurringEntryExecutionLogs => Set<RecurringEntryExecutionLog>();
-    public DbSet<CashFlowMappingRule> CashFlowMappingRules => Set<CashFlowMappingRule>();
 
     // Module 5: Budgeting & Funds
     public DbSet<BudgetClassification> BudgetClassifications => Set<BudgetClassification>();

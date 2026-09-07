@@ -1,6 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Loading, EmptyState } from '@/components/ui';
+import { Page, Loading, EmptyState } from '@/components/ui';
 import { OrgUnitForm } from '@/components/OrganizationOrgUnitForm';
 import { useOrganizationalUnit, useCreateOrgUnit, useUpdateOrgUnit } from '../hooks';
 import type { CreateOrgUnitCommand } from '../types';
@@ -15,16 +14,13 @@ export function OrgUnitCreatePage() {
   };
 
   return (
-    <div>
-      <PageHeader title="وحدة تنظيمية جديدة" description="إضافة وحدة تنظيمية جديدة" />
-      <div className="max-w-xl">
-        <OrgUnitForm
-          onSubmit={handleSubmit}
-          serverError={createMutation.error?.message}
-          loading={createMutation.isPending}
-        />
-      </div>
-    </div>
+    <Page title="وحدة تنظيمية جديدة" description="إضافة وحدة تنظيمية جديدة" maxWidth="sm">
+      <OrgUnitForm
+        onSubmit={handleSubmit}
+        serverError={createMutation.error?.message}
+        loading={createMutation.isPending}
+      />
+    </Page>
   );
 }
 
@@ -44,17 +40,14 @@ export function OrgUnitEditPage() {
   if (!orgUnit) return <EmptyState message="الوحدة غير موجودة" />;
 
   return (
-    <div>
-      <PageHeader title={`تعديل: ${orgUnit.name}`} description="تحديث بيانات الوحدة التنظيمية" />
-      <div className="max-w-xl">
-        <OrgUnitForm
-          initialData={orgUnit}
-          isEdit
-          onSubmit={handleSubmit}
-          serverError={updateMutation.error?.message}
-          loading={updateMutation.isPending}
-        />
-      </div>
-    </div>
+    <Page title={`تعديل: ${orgUnit.name}`} description="تحديث بيانات الوحدة التنظيمية" maxWidth="sm">
+      <OrgUnitForm
+        initialData={orgUnit}
+        isEdit
+        onSubmit={handleSubmit}
+        serverError={updateMutation.error?.message}
+        loading={updateMutation.isPending}
+      />
+    </Page>
   );
 }

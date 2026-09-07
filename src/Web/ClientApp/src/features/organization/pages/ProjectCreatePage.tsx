@@ -1,6 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Loading, EmptyState } from '@/components/ui';
+import { Page, Loading, EmptyState } from '@/components/ui';
 import { ProjectForm } from '@/components/OrganizationProjectForm';
 import { useProject, useCreateProject, useUpdateProject } from '../hooks';
 import type { CreateProjectCommand } from '../types';
@@ -15,16 +14,13 @@ export function ProjectCreatePage() {
   };
 
   return (
-    <div>
-      <PageHeader title="مشروع جديد" description="إضافة مشروع جديد" />
-      <div className="max-w-xl">
-        <ProjectForm
-          onSubmit={handleSubmit}
-          serverError={createMutation.error?.message}
-          loading={createMutation.isPending}
-        />
-      </div>
-    </div>
+    <Page title="مشروع جديد" description="إضافة مشروع جديد" maxWidth="sm">
+      <ProjectForm
+        onSubmit={handleSubmit}
+        serverError={createMutation.error?.message}
+        loading={createMutation.isPending}
+      />
+    </Page>
   );
 }
 
@@ -49,17 +45,14 @@ export function ProjectEditPage() {
   if (!project) return <EmptyState message="المشروع غير موجود" />;
 
   return (
-    <div>
-      <PageHeader title={`تعديل: ${project.name}`} description="تحديث بيانات المشروع" />
-      <div className="max-w-xl">
-        <ProjectForm
-          initialData={project}
-          isEdit
-          onSubmit={handleSubmit}
-          serverError={updateMutation.error?.message}
-          loading={updateMutation.isPending}
-        />
-      </div>
-    </div>
+    <Page title={`تعديل: ${project.name}`} description="تحديث بيانات المشروع" maxWidth="sm">
+      <ProjectForm
+        initialData={project}
+        isEdit
+        onSubmit={handleSubmit}
+        serverError={updateMutation.error?.message}
+        loading={updateMutation.isPending}
+      />
+    </Page>
   );
 }

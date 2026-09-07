@@ -4,7 +4,7 @@ import { useCreateParty } from '../hooks/useParties';
 import { partiesClient } from '../shared/client';
 import { PartyType, PARTY_TYPE_LABELS, type CreatePartyCommand } from '../shared/types';
 import { usePermission } from '@/shared/hooks/usePermission';
-import { Button, Input, Select, Textarea } from '@/components/ui';
+import { Page, Button, Input, Select, Textarea } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 
 export default function PartyCreatePage() {
@@ -75,14 +75,14 @@ export default function PartyCreatePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
+    <Page
+      title="طرف جديد"
+      actions={
         <Button variant="ghost" size="icon" onClick={() => navigate('/parties')} aria-label="العودة">
           <ArrowRight size={18} />
         </Button>
-        <h1 className="text-xl font-semibold text-[var(--color-on-surface)]">طرف جديد</h1>
-      </div>
-
+      }
+    >
       <form onSubmit={handleSubmit} className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -185,6 +185,6 @@ export default function PartyCreatePage() {
           </Button>
         </div>
       </form>
-    </div>
+    </Page>
   );
 }

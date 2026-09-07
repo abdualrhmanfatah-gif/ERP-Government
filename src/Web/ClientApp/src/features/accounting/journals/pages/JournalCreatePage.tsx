@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { PageHeader } from '@/components/ui/PageHeader';
+import { Page } from '@/components/ui';
 import { JournalForm } from '@/components/AccountingJournalForm';
 import { useCreateJournal } from '../../hooks/useCreateJournal';
 import { showToast } from '@/components/ui/Toast';
@@ -20,9 +20,8 @@ export function JournalCreatePage() {
   };
 
   return (
-    <div>
-      <PageHeader title="إنشاء دفتر جديد" description="إضافة دفتر يومية جديد" />
+    <Page title="إنشاء دفتر جديد" description="إضافة دفتر يومية جديد" maxWidth="sm">
       <JournalForm onSubmit={handleSubmit} loading={isPending} />
-    </div>
+    </Page>
   );
 }

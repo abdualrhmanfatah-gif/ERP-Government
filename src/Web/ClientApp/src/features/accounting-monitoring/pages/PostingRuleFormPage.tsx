@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { usePostingRule, useCreatePostingRule, useUpdatePostingRule } from '../hooks/usePostingRules';
 import { notify } from '@/features/notifications/notify';
 import type { PostingRuleLineDto } from '../shared/types';
-import { Button, Card, Input, Select, Loading } from '@/components/ui';
+import { Page, Button, Card, Input, Select } from '@/components/ui';
 
 interface LineForm extends Partial<PostingRuleLineDto> {
   _key: number;
@@ -92,22 +92,12 @@ export function PostingRuleFormPage() {
     }
   };
 
-  if (isEdit && loadingExisting) {
-    return (
-        <div className="max-w-4xl mx-auto py-8 px-6" dir="rtl">
-          <Loading />
-        </div>
-    );
-  }
-
   return (
-    <div className="max-w-4xl mx-auto py-8 px-6" dir="rtl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--color-on-surface)]">
-          {isEdit ? 'تعديل قاعدة الترحيل' : 'قاعدة ترحيل جديدة'}
-        </h1>
-      </div>
-
+    <Page
+      title={isEdit ? 'تعديل قاعدة الترحيل' : 'قاعدة ترحيل جديدة'}
+      loading={isEdit && loadingExisting}
+      maxWidth="lg"
+    >
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card variant="default" padding="md">
           <h2 className="text-sm font-bold text-[var(--color-on-surface)]">البيانات الأساسية</h2>
@@ -245,6 +235,6 @@ export function PostingRuleFormPage() {
           </Button>
         </div>
       </form>
-    </div>
+    </Page>
   );
 }

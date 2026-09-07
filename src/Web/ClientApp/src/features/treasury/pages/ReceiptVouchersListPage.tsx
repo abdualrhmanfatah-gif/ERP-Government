@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Button, FilterBar, FilterDate, FilterSelect, Badge, EmptyState, Loading, MoneyDisplay, PageHeader } from '@/components/ui';
+import { Button, FilterBar, FilterDate, FilterSelect, Badge, EmptyState, Loading, MoneyDisplay, Page } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Eye } from 'lucide-react';
 import { ReceiptVouchersClient, PaymentMethod, ReceiptVoucherStatus } from '../../../web-api-client';
@@ -112,63 +112,61 @@ export default function ReceiptVouchersListPage() {
   }));
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="سندات القبض"
-        actions={
-          <Button onClick={() => navigate('/treasury/receipt-vouchers/create')}>
-            <Plus size={16} />
-            سند جديد
-          </Button>
-        }
-      />
-
-      <FilterBar
-        hasFilters={hasFilters}
-        onClear={() => {
-          setPartyId('');
-          setPaymentMethod('');
-          setStatus('');
-          setFromDate('');
-          setToDate('');
-        }}
-      >
-        <FilterSelect
-          label="الجهة"
-          value={partyId}
-          onChange={setPartyId}
-          options={[{ value: '', label: 'الكل' }, ...partyOptions]}
-        />
-        <FilterSelect
-          label="طريقة الدفع"
-          value={paymentMethod}
-          onChange={setPaymentMethod}
-          options={[
-            { value: '', label: 'الكل' },
-            { value: PaymentMethod.Cash, label: 'نقدي' },
-            { value: PaymentMethod.Check, label: 'شيكات' },
-          ]}
-        />
-        <FilterSelect
-          label="الحالة"
-          value={status}
-          onChange={setStatus}
-          options={[
-            { value: '', label: 'الكل' },
-            ...Object.entries(voucherStatusLabels).map(([value, label]) => ({ value, label })),
-          ]}
-        />
-        <FilterDate label="من تاريخ" value={fromDate} onChange={setFromDate} />
-        <FilterDate label="إلى تاريخ" value={toDate} onChange={setToDate} />
-      </FilterBar>
-
-      {isLoading ? (
-        <Loading />
-      ) : vouchers.length === 0 ? (
+    <Page
+      title="سندات القبض"
+      actions={
+        <Button onClick={() => navigate('/treasury/receipt-vouchers/create')}>
+          <Plus size={16} />
+          سند جديد
+        </Button>
+      }
+      toolbar={
+        <FilterBar
+          hasFilters={hasFilters}
+          onClear={() => {
+            setPartyId('');
+            setPaymentMethod('');
+            setStatus('');
+            setFromDate('');
+            setToDate('');
+          }}
+        >
+          <FilterSelect
+            label="الجهة"
+            value={partyId}
+            onChange={setPartyId}
+            options={[{ value: '', label: 'الكل' }, ...partyOptions]}
+          />
+          <FilterSelect
+            label="طريقة الدفع"
+            value={paymentMethod}
+            onChange={setPaymentMethod}
+            options={[
+              { value: '', label: 'الكل' },
+              { value: PaymentMethod.Cash, label: 'نقدي' },
+              { value: PaymentMethod.Check, label: 'شيكات' },
+            ]}
+          />
+          <FilterSelect
+            label="الحالة"
+            value={status}
+            onChange={setStatus}
+            options={[
+              { value: '', label: 'الكل' },
+              ...Object.entries(voucherStatusLabels).map(([value, label]) => ({ value, label })),
+            ]}
+          />
+          <FilterDate label="من تاريخ" value={fromDate} onChange={setFromDate} />
+          <FilterDate label="إلى تاريخ" value={toDate} onChange={setToDate} />
+        </FilterBar>
+      }
+      loading={isLoading}
+    >
+      {vouchers.length === 0 ? (
         <EmptyState message="لم يتم العثور على سندات قبض مطابقة للفلاتر المحددة." />
       ) : (
         <DataGrid columns={columns} data={vouchers} rowKey={(row) => row.id ?? 0} />
       )}
-    </div>
+    </Page>
   );
 }

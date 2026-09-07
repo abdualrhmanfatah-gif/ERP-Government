@@ -2,7 +2,7 @@
 // Reviewer display name resolved from users lookup (SC-002); contract DTO stays literal.
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Button, Badge, Card, Dialog, Loading, MoneyDisplay, EmptyState, Textarea } from '@/components/ui';
+import { Button, Badge, Card, Dialog, MoneyDisplay, EmptyState, Textarea, Page } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 import { useUserDetail } from '../../security/users/hooks/useUserDetail';
 import { notify } from '@/features/notifications/notify';
@@ -36,19 +36,12 @@ export default function ReceiptVoucherDetailPage() {
   const [cancelReason, setCancelReason] = useState('');
   const [actionError, setActionError] = useState('');
 
-  if (isLoading) return <Loading />;
-  if (!voucher || !voucher.id)
-    return (
-      <EmptyState
-        message="السند غير موجود."
-        action={<Button variant="outline" onClick={() => navigate('/treasury/receipt-vouchers')}>العودة للقائمة</Button>}
-      />
-    );
+  const notFound = !voucher || !voucher.id;
 
-  const rowVersion = voucher.rowVersion ?? '';
-  const status = voucher.status ?? ReceiptVoucherStatus.Draft;
-  const lines = voucher.lines ?? [];
-  const checks = voucher.checks ?? [];
+  const rowVersion = voucher?.rowVersion ?? '';
+  const status = voucher?.status ?? ReceiptVoucherStatus.Draft;
+  const lines = voucher?.lines ?? [];
+  const checks = voucher?.checks ?? [];
 
   async function submit() {
     setActionError('');
@@ -91,16 +84,19 @@ export default function ReceiptVoucherDetailPage() {
   const canCancel = status === ReceiptVoucherStatus.Draft || status === ReceiptVoucherStatus.PendingReview;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/treasury/receipt-vouchers')} aria-label="العودة">
-          <ArrowRight size={18} />
-        </Button>
-        <h1 className="text-xl font-semibold tabular-nums text-[var(--color-on-surface)]">
-          سند القبض {voucher.voucherNumber}
-        </h1>
-        <Badge variant={voucherStatusBadgeVariant[status]}>{voucherStatusLabels[status]}</Badge>
-      </div>
+    <Page
+      title={notFound ? '' : `سند القبض ${voucher.voucherNumber}`}
+      loading={isLoading}
+      error={notFound ? 'السند غير موجود.' : undefined}
+      actions={
+        !notFound && (
+          <Badge variant={voucherStatusBadgeVariant[status]}>{voucherStatusLabels[status]}</Badge>
+        )
+      }
+    >
+      <Button variant="ghost" size="icon" onClick={() => navigate('/treasury/receipt-vouchers')} aria-label="العودة" className="mb-4">
+        <ArrowRight size={18} />
+      </Button>
 
       {actionError && (
         <p className="rounded bg-[var(--color-error-container)] px-4 py-2 text-xs text-[var(--color-on-error-container)]">
@@ -231,6 +227,6 @@ export default function ReceiptVoucherDetailPage() {
           </div>
         </div>
       </Dialog>
-    </div>
+    </Page>
   );
 }

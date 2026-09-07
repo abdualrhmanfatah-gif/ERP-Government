@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useCreateEncumbrance, useReverseEncumbrance, useEncumbranceAvailability } from '../../hooks/useEncumbrances';
 import { AvailabilityIndicator } from '@/components/BudgetingAvailabilityIndicator';
 import { encumbranceTypeLabels, EncumbranceType } from '../../shared/types';
-import { Button, Card, Input, Select, Textarea } from '@/components/ui';
+import { Page, Button, Card, Input, Select, Textarea } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 
 export default function EncumbranceCreatePage() {

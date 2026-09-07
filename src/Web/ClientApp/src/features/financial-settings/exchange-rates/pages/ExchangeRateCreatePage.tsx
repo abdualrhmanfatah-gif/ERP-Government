@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card, Input, Select, Loading } from '@/components/ui';
+import { Page, Button, Card, Input, Select, Loading } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { useCreateExchangeRate } from '../../hooks/useExchangeRates';
@@ -47,17 +47,17 @@ export default function ExchangeRateCreatePage() {
     );
   }
 
-  if (currenciesLoading) return <Loading />;
-
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center gap-3">
+    <Page
+      title="سعر صرف جديد"
+      maxWidth="sm"
+      loading={currenciesLoading}
+      actions={
         <Button variant="ghost" size="icon" onClick={() => navigate('/financial-settings/exchange-rates')} className="cursor-pointer">
           <ArrowRight size={18} />
         </Button>
-        <h1 className="text-headline-sm sm:text-headline-md font-bold text-[var(--color-on-surface)]">سعر صرف جديد</h1>
-      </div>
-
+      }
+    >
       <Card className="bg-[var(--color-surface-container-lowest)]">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -132,6 +132,6 @@ export default function ExchangeRateCreatePage() {
           </div>
         </form>
       </Card>
-    </div>
+    </Page>
   );
 }

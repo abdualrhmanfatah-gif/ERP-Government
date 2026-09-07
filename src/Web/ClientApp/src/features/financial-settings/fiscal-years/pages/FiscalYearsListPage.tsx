@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Button, FilterBar, FilterSearch, Loading } from '@/components/ui';
+import { Page, Button, FilterBar, FilterSearch } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Eye } from 'lucide-react';
 import { FiscalYearStatusBadge } from '@/components/FinancialSettingsFiscalYearStatusBadge';
@@ -38,23 +38,22 @@ export default function FiscalYearsListPage() {
   ];
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-headline-sm sm:text-headline-md font-bold text-[var(--color-on-surface)]">السنوات المالية</h1>
-          <p className="text-body-sm text-[var(--color-on-surface-variant)] mt-1">إدارة السنوات المالية ولفتراتها المحاسبية</p>
-        </div>
-        {canCreate && (
-          <Button onClick={() => navigate('/financial-settings/fiscal-years/new')} icon={<Plus size={16} />} className="self-start sm:self-auto cursor-pointer shadow-sm hover:shadow transition-shadow">
+    <Page
+      title="السنوات المالية"
+      description="إدارة السنوات المالية ولفتراتها المحاسبية"
+      actions={
+        canCreate && (
+          <Button onClick={() => navigate('/financial-settings/fiscal-years/new')} icon={<Plus size={16} />} className="cursor-pointer shadow-sm hover:shadow transition-shadow">
             سنة مالية جديدة
           </Button>
-        )}
-      </div>
-
-      <FilterBar hasFilters={!!search} onClear={() => setSearch('')}>
-        <FilterSearch value={search} onChange={setSearch} placeholder="بحث بالاسم أو رقم السنة..." />
-      </FilterBar>
-
+        )
+      }
+      toolbar={
+        <FilterBar hasFilters={!!search} onClear={() => setSearch('')}>
+          <FilterSearch value={search} onChange={setSearch} placeholder="بحث بالاسم أو رقم السنة..." />
+        </FilterBar>
+      }
+    >
       <div className="flex items-center gap-2 text-sm">
         <span className="inline-flex items-center rounded-full bg-[var(--color-surface-container)] px-3 py-1 font-medium text-[var(--color-on-surface)] border border-[var(--color-border-container)]">{filtered.length} نتيجة</span>
         {items.length > 0 && <span className="text-[var(--color-on-surface-variant)]">من أصل {items.length} إجمالي</span>}
@@ -67,6 +66,6 @@ export default function FiscalYearsListPage() {
         emptyMessage="لا توجد سنوات مالية بعد"
         rowKey={(row) => row.id}
       />
-    </div>
+    </Page>
   );
 }

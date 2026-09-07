@@ -44,8 +44,7 @@ export function RegisterPage() {
   };
 
   return (
-    <article className="w-full max-w-sm">
-      <h2 className="text-center mb-6">إنشاء حساب جديد</h2>
+    <Page title="إنشاء حساب جديد" maxWidth="sm">
       {error ? (
         <div role="alert" className="p-3 bg-[color-mix(in_srgb,var(--color-error)_8%,transparent)] rounded-lg text-sm text-[var(--color-error)] mb-4 text-center">
           {error}
@@ -89,6 +88,6 @@ export function RegisterPage() {
           <Link to="/login" className="text-[var(--color-primary)]">تسجيل الدخول</Link>
         </p>
       </form>
-    </article>
+    </Page>
   );
 }

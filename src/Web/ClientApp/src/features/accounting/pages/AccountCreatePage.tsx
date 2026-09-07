@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { PageHeader } from '@/components/ui/PageHeader';
+import { Page } from '@/components/ui';
 import { AccountForm } from '@/components/AccountingAccountForm';
 import { useCreateAccount } from '../hooks/useCreateAccount';
 import { useAccountGroups } from '../hooks/useAccountGroups';
@@ -23,14 +23,13 @@ export function AccountCreatePage() {
   };
 
   return (
-    <div>
-      <PageHeader title="إنشاء حساب جديد" description="إضافة حساب جديد في دليل الحسابات" />
+    <Page title="إنشاء حساب جديد" description="إضافة حساب جديد في دليل الحسابات" maxWidth="sm">
       <AccountForm
         accountGroups={groups}
         parentAccounts={allAccounts}
         onSubmit={handleSubmit}
         loading={isPending}
       />
-    </div>
+    </Page>
   );
 }

@@ -20,7 +20,7 @@ import {
 import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { LifecycleActions, type LifecycleAction } from '@/components/BudgetingLifecycleActions';
-import { Button, Badge } from '@/components/ui';
+import { Page, Button, Badge } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { FilterSelect } from '@/components/ui/FilterSelect';
 import { Plus } from 'lucide-react';
@@ -131,37 +131,39 @@ export default function AppropriationsListPage() {
   const hasFilters = !!statusFilter || !!typeFilter;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-[var(--color-on-surface)]">التخصيصات</h1>
+    <Page
+      title="التخصيصات"
+      loading={isLoading}
+      actions={
         <Button variant="primary" size="sm" onClick={() => navigate('/budgeting/appropriations/create')}>
           <Plus size={16} className="ms-1" />
           تخصيص جديد
         </Button>
-      </div>
-
-      <div className="flex gap-2 items-center">
-        <FilterSelect
-          value={statusFilter}
-          onChange={setStatusFilter}
-          options={statusOptions}
-          placeholder="الحالة"
-          label="الحالة"
-        />
-        <FilterSelect
-          value={typeFilter}
-          onChange={setTypeFilter}
-          options={typeOptions}
-          placeholder="النوع"
-          label="النوع"
-        />
-        {hasFilters && (
-          <Button variant="ghost" size="sm" onClick={() => { setStatusFilter(''); setTypeFilter(''); }}>
-            مسح الفلاتر
-          </Button>
-        )}
-      </div>
-
+      }
+      toolbar={
+        <div className="flex gap-2 items-center">
+          <FilterSelect
+            value={statusFilter}
+            onChange={setStatusFilter}
+            options={statusOptions}
+            placeholder="الحالة"
+            label="الحالة"
+          />
+          <FilterSelect
+            value={typeFilter}
+            onChange={setTypeFilter}
+            options={typeOptions}
+            placeholder="النوع"
+            label="النوع"
+          />
+          {hasFilters && (
+            <Button variant="ghost" size="sm" onClick={() => { setStatusFilter(''); setTypeFilter(''); }}>
+              مسح الفلاتر
+            </Button>
+          )}
+        </div>
+      }
+    >
       <DataGrid
         columns={columns}
         data={appropriations ?? []}
@@ -169,6 +171,6 @@ export default function AppropriationsListPage() {
         emptyMessage="لا توجد تخصيصات بعد"
         rowKey={(row) => row.id}
       />
-    </div>
+    </Page>
   );
 }

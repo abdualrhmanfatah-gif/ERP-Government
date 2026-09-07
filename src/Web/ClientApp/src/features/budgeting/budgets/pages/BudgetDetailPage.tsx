@@ -11,7 +11,7 @@ import { LifecycleActions, type LifecycleAction } from '@/components/BudgetingLi
 import { ApprovalHistoryPanel } from '@/components/BudgetingApprovalHistoryPanel';
 import { MonthlyPlanEditor } from '@/components/BudgetingMonthlyPlanEditor';
 import { ExecutionDrillDown } from '@/components/BudgetingExecutionDrillDown';
-import { Button, Badge, Card, Switch, Input, Select, Textarea } from '@/components/ui';
+import { Page, Button, Badge, Card, Switch, Input, Select, Textarea } from '@/components/ui';
 import { ArrowRight, Plus, Calendar, BarChart3 } from 'lucide-react';
 
 const budgetActions: Record<string, LifecycleAction[]> = {
@@ -110,35 +110,26 @@ export default function BudgetDetailPage() {
     setShowAddItem(false);
   }
 
-  if (isLoading) {
-    return (
-      <div className="p-6 space-y-4">
-        <div className="h-8 w-64 rounded bg-[var(--color-surface-container)] animate-pulse" />
-        <div className="h-48 rounded-lg bg-[var(--color-surface-container)] animate-pulse" />
-      </div>
-    );
-  }
-
-  if (!budget) {
-    return <div className="p-6 text-center text-[var(--color-error)]">لم يتم العثور على الموازنة</div>;
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/budgeting/budgets')} aria-label="العودة">
-          <ArrowRight size={18} />
-        </Button>
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-[var(--color-on-surface)]">{budget.budgetName}</h1>
+    <Page
+      title={budget?.budgetName ?? ''}
+      description={budget?.budgetNumber}
+      loading={isLoading}
+      error={!isLoading && !budget ? 'لم يتم العثور على الموازنة' : undefined}
+      breadcrumbs={[{ label: 'الموازنات', path: '/budgeting/budgets' }, { label: budget?.budgetName ?? '' }]}
+      actions={
+        <div className="flex items-center gap-2">
+          {budget && (
             <Badge variant={budget.status === BudgetStatus.Active ? 'info' : budget.status === BudgetStatus.Draft ? 'default' : 'success'}>
               {budgetStatusLabels[budget.status]}
             </Badge>
-          </div>
-          <p className="text-sm text-[var(--color-on-surface-variant)]">{budget.budgetNumber}</p>
+          )}
+          <Button variant="ghost" size="icon" onClick={() => navigate('/budgeting/budgets')} aria-label="العودة">
+            <ArrowRight size={18} />
+          </Button>
         </div>
-      </div>
+      }
+    >
 
       <Card className="bg-[var(--color-surface-container-lowest)]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -307,8 +298,8 @@ export default function BudgetDetailPage() {
 
       <ApprovalHistoryPanel
         decisions={[budget.latestApproval].filter(Boolean)}
-        title="سجل اعتمادات الموازنة"
+        title="سجل اعتمدادات الموازنة"
       />
-    </div>
+    </Page>
   );
 }

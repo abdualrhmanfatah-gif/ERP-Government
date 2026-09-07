@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, PageHeader, MoneyDisplay, EmptyState, Loading, Input, Select } from '@/components/ui';
+import { Button, MoneyDisplay, EmptyState, Loading, Input, Select, Page } from '@/components/ui';
 import { notify } from '@/features/notifications/notify';
 import { DepositSlipsClient, FormType } from '../../../web-api-client';
 import { useEligibleVouchers } from '../hooks/useEligibleVouchers';
@@ -56,8 +56,7 @@ export default function CreateDepositSlipPage() {
   const clearAll = () => setSelectedIds([]);
 
   return (
-    <div className="space-y-6" dir="rtl">
-      <PageHeader title="إنشاء بطاقة إيداع" />
+    <Page title="إنشاء بطاقة إيداع" loading={isLoading}>
 
       <div className="flex gap-4 items-end">
         <Select
@@ -79,9 +78,7 @@ export default function CreateDepositSlipPage() {
         />
       </div>
 
-      {isLoading ? (
-        <Loading />
-      ) : eligible.length === 0 ? (
+      {eligible.length === 0 ? (
         <EmptyState message="لا توجد سندات مؤهلة لهذا النوع" />
       ) : (
         <>
@@ -130,6 +127,6 @@ export default function CreateDepositSlipPage() {
           </div>
         </>
       )}
-    </div>
+    </Page>
   );
 }

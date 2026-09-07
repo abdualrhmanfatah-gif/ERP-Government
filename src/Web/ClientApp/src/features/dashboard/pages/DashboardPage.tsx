@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrendingUp, Clock, Wallet, Plus, Activity } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Page, Button } from '@/components/ui';
 import { Loading } from '../../../components/ui/Loading';
 import { ErrorState } from '../../../components/ui/ErrorState';
 import { EmptyState } from '../../../components/ui/EmptyState';
@@ -79,15 +79,14 @@ export function DashboardPage() {
   const cashEmpty = cash.data && !cash.data.hasBankAccounts ? 'لا توجد حسابات بنكية' : undefined;
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-headline-sm font-bold text-[var(--color-on-surface)]">لوحة التحكم</h1>
+    <Page
+      title="لوحة التحكم"
+      actions={
         <Button variant="primary" icon={<Plus size={16} />} onClick={() => navigate('/accounting/journal-entries/new')}>
           إجراء سريع
         </Button>
-      </div>
-
+      }
+    >
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <DashboardCard
@@ -228,6 +227,6 @@ export function DashboardPage() {
           rowKey={(row) => row.id}
         />
       </DashboardCard>
-    </div>
+    </Page>
   );
 }

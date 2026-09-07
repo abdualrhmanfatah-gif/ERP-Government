@@ -71,7 +71,6 @@ public interface IApplicationDbContext
     DbSet<JournalEntryTemplateLine> JournalEntryTemplateLines { get; }
     DbSet<RecurringEntry> RecurringEntries { get; }
     DbSet<RecurringEntryExecutionLog> RecurringEntryExecutionLogs { get; }
-    DbSet<CashFlowMappingRule> CashFlowMappingRules { get; }
 
     // Module 5: Budgeting & Funds
     DbSet<BudgetClassification> BudgetClassifications { get; }

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Button, FilterBar, FilterSelect, ConfirmDialog, Loading } from '@/components/ui';
+import { Page, Button, FilterBar, FilterSelect, ConfirmDialog } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Eye } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
@@ -59,23 +59,22 @@ export default function ClosingEntriesListPage() {
   ];
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-headline-sm sm:text-headline-md font-bold text-[var(--color-on-surface)]">قيود الإغلاق</h1>
-          <p className="text-body-sm text-[var(--color-on-surface-variant)] mt-1">إدارة قيود إغلاق السنة المالية</p>
-        </div>
-        {canGenerate && fyFilter && (
-          <Button onClick={() => setConfirmGenerate(true)} icon={<Plus size={16} />} className="self-start sm:self-auto cursor-pointer shadow-sm hover:shadow transition-shadow">
+    <Page
+      title="قيود الإغلاق"
+      description="إدارة قيود إغلاق السنة المالية"
+      actions={
+        canGenerate && fyFilter && (
+          <Button onClick={() => setConfirmGenerate(true)} icon={<Plus size={16} />} className="cursor-pointer shadow-sm hover:shadow transition-shadow">
             إنشاء قيد إغلاق
           </Button>
-        )}
-      </div>
-
-      <FilterBar hasFilters={!!fyFilter} onClear={() => setFyFilter('')}>
-        <FilterSelect value={fyFilter} onChange={setFyFilter} options={fyOptions} placeholder="اختر السنة المالية" label="السنة المالية" />
-      </FilterBar>
-
+        )
+      }
+      toolbar={
+        <FilterBar hasFilters={!!fyFilter} onClear={() => setFyFilter('')}>
+          <FilterSelect value={fyFilter} onChange={setFyFilter} options={fyOptions} placeholder="اختر السنة المالية" label="السنة المالية" />
+        </FilterBar>
+      }
+    >
       {!fyFilter ? (
         <div className="text-center py-12 border-2 border-dashed border-[var(--color-border-container)] rounded-xl">
           <p className="text-[var(--color-on-surface-variant)]">اختر سنة مالية لعرض قيود الإغلاق</p>
@@ -98,6 +97,6 @@ export default function ClosingEntriesListPage() {
         message="هل تريد إنشاء قيد إغلاق لهذه السنة المالية؟ سيتم إنشاء مقترح محاسبي متوازن."
         loading={generateMutation.isPending}
       />
-    </div>
+    </Page>
   );
 }

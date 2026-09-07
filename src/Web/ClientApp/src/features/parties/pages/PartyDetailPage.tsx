@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useParty, useUpdateParty, useTogglePartyActive, usePartyDocuments } from '../hooks/useParties';
 import { PartyType, PARTY_TYPE_LABELS, type UpdatePartyCommand } from '../shared/types';
 import { usePermission } from '@/shared/hooks/usePermission';
-import { Button, Badge, Card, Input, Select, Textarea } from '@/components/ui';
+import { Page, Button, Badge, Card, Input, Select, Textarea } from '@/components/ui';
 import { ArrowRight, Edit, Save, X } from 'lucide-react';
 import { ApprovalsPanel } from '@/components/DocumentsApprovalsPanel';
 import { StatusLogPanel } from '@/components/DocumentsStatusLogPanel';
@@ -80,21 +80,14 @@ export default function PartyDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/parties')} aria-label="العودة">
-          <ArrowRight size={18} />
-        </Button>
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-[var(--color-on-surface)]">{party.nameAr}</h1>
-            <Badge variant={party.isActive ? 'success' : 'default'}>
-              {party.isActive ? 'نشط' : 'غير نشط'}
-            </Badge>
-          </div>
-          <p className="text-sm text-[var(--color-on-surface-variant)]">{party.partyCode}</p>
-        </div>
+    <Page
+      title={party.nameAr}
+      description={party.partyCode}
+      actions={
         <div className="flex gap-2">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/parties')} aria-label="العودة">
+            <ArrowRight size={18} />
+          </Button>
           {!isEditing && canUpdate && (
             <Button variant="ghost" size="sm" onClick={startEdit}>
               <Edit size={14} className="ms-1" />
@@ -124,6 +117,12 @@ export default function PartyDetailPage() {
             </Button>
           )}
         </div>
+      }
+    >
+      <div className="flex items-center gap-3 mb-2">
+        <Badge variant={party.isActive ? 'success' : 'default'}>
+          {party.isActive ? 'نشط' : 'غير نشط'}
+        </Badge>
       </div>
 
       {showDeactivationWarning && (
@@ -298,6 +297,6 @@ export default function PartyDetailPage() {
           </div>
         )}
       </Card>
-    </div>
+    </Page>
   );
 }

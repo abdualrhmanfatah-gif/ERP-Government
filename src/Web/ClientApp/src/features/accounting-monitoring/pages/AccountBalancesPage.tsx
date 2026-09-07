@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Button, ConfirmDialog, DataGrid, FilterBar, FilterSelect, StatusBadge } from '@/components/ui';
+import { Page, Button, ConfirmDialog, DataGrid, FilterBar, FilterSelect, StatusBadge } from '@/components/ui';
 import type { DataGridColumn } from '@/components/ui/DataGrid';
 import { MoneyDisplay } from '@/components/ui/MoneyDisplay';
 import { notify } from '@/features/notifications/notify';
@@ -168,13 +168,11 @@ export function AccountBalancesPage() {
   );
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-headline-sm sm:text-headline-md font-bold text-[var(--color-on-surface)]">أرصدة الحسابات</h1>
-          <p className="text-body-sm text-[var(--color-on-surface-variant)] mt-1">أرصدة الحسابات حسب السنة والفترة المالية</p>
-        </div>
-        {canRebuild && fiscalYearId && fiscalPeriodId && (
+    <Page
+      title="أرصدة الحسابات"
+      description="أرصدة الحسابات حسب السنة والفترة المالية"
+      actions={
+        canRebuild && fiscalYearId && fiscalPeriodId ? (
           <Button
             variant="secondary"
             disabled={actionPending}
@@ -188,44 +186,45 @@ export function AccountBalancesPage() {
           >
             إعادة بناء الأرصدة
           </Button>
-        )}
-      </div>
-
-      <FilterBar
-        hasFilters={hasFilters}
-        onClear={() => {
-          setFiscalYearId('');
-          setFiscalPeriodId('');
-          setAccountId('');
-        }}
-      >
-        <FilterSelect
-          label="السنة المالية"
-          value={fiscalYearId}
-          onChange={(v) => {
-            setFiscalYearId(v);
+        ) : undefined
+      }
+      toolbar={
+        <FilterBar
+          hasFilters={hasFilters}
+          onClear={() => {
+            setFiscalYearId('');
             setFiscalPeriodId('');
+            setAccountId('');
           }}
-          options={yearOptions}
-          placeholder="اختر السنة المالية"
-        />
-        <FilterSelect
-          label="الفترة المالية"
-          value={fiscalPeriodId}
-          onChange={setFiscalPeriodId}
-          options={periodOptions}
-          placeholder="اختر الفترة المالية"
-          disabled={!fiscalYearId}
-        />
-        <FilterSelect
-          label="الحساب"
-          value={accountId}
-          onChange={setAccountId}
-          options={accountOptions}
-          placeholder="جميع الحسابات"
-        />
-      </FilterBar>
-
+        >
+          <FilterSelect
+            label="السنة المالية"
+            value={fiscalYearId}
+            onChange={(v) => {
+              setFiscalYearId(v);
+              setFiscalPeriodId('');
+            }}
+            options={yearOptions}
+            placeholder="اختر السنة المالية"
+          />
+          <FilterSelect
+            label="الفترة المالية"
+            value={fiscalPeriodId}
+            onChange={setFiscalPeriodId}
+            options={periodOptions}
+            placeholder="اختر الفترة المالية"
+            disabled={!fiscalYearId}
+          />
+          <FilterSelect
+            label="الحساب"
+            value={accountId}
+            onChange={setAccountId}
+            options={accountOptions}
+            placeholder="جميع الحسابات"
+          />
+        </FilterBar>
+      }
+    >
       {!fiscalYearId || !fiscalPeriodId ? (
         <div className="text-center py-12 border-2 border-dashed border-[var(--color-border-container)] rounded-xl">
           <p className="text-[var(--color-on-surface-variant)]">اختر السنة والفترة المالية لعرض الأرصدة</p>
@@ -269,6 +268,6 @@ export function AccountBalancesPage() {
         }
         loading={actionPending}
       />
-    </div>
+    </Page>
   );
 }

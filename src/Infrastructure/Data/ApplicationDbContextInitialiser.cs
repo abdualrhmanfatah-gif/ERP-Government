@@ -119,13 +119,6 @@ public class ApplicationDbContextInitialiser
             _context.Accounts.AddRange(accounts);
             await _context.SaveChangesAsync();
         }
-
-        if (!_context.CashFlowMappingRules.Any())
-        {
-            var rules = CashFlowMappingRuleSeedData.GetRules();
-            _context.CashFlowMappingRules.AddRange(rules);
-            await _context.SaveChangesAsync();
-        }
     }
 
     private async Task SeedSecurityDataAsync()

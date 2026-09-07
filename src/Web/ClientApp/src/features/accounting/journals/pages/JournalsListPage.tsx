@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Button } from '@/components/ui/Button';
-import { FilterBar, FilterSelect } from '@/components/ui';
+import { Page, Button, FilterBar, FilterSelect } from '@/components/ui';
 import { JournalGrid } from '@/components/AccountingJournalGrid';
 import { useJournalsList } from '../../hooks/useJournalsList';
 import { JournalType } from '../../../../web-api-client';
@@ -43,38 +41,40 @@ export function JournalsListPage() {
   };
 
   return (
-    <div>
-      <PageHeader
-        title="دفاتر اليومية"
-        description="إدارة دفاتر اليومية المحاسبية"
-        actions={
-          <Button variant="primary" size="sm" icon={<Plus size={16} />} onClick={() => navigate('/accounting/journals/create')}>
-            إنشاء دفتر
-          </Button>
-        }
+    <Page
+      title="دفاتر اليومية"
+      description="إدارة دفاتر اليومية المحاسبية"
+      actions={
+        <Button variant="primary" size="sm" icon={<Plus size={16} />} onClick={() => navigate('/accounting/journals/create')}>
+          إنشاء دفتر
+        </Button>
+      }
+      toolbar={
+        <FilterBar hasFilters={hasFilters} onClear={clearAll}>
+          <FilterSelect
+            label="النوع"
+            value={type}
+            onChange={setType}
+            options={journalTypeOptions}
+          />
+          <FilterSelect
+            label="الحالة"
+            value={isActive}
+            onChange={setIsActive}
+            options={activeOptions}
+          />
+        </FilterBar>
+      }
+      loading={isLoading}
+      error={error ? 'فشل تحميل البيانات' : undefined}
+      onRetry={() => refetch()}
+    >
+      <JournalGrid
+        data={journals}
+        loading={isLoading}
+        error={error ? 'فشل تحميل البيانات' : undefined}
+        onRetry={() => refetch()}
       />
-      <FilterBar hasFilters={hasFilters} onClear={clearAll}>
-        <FilterSelect
-          label="النوع"
-          value={type}
-          onChange={setType}
-          options={journalTypeOptions}
-        />
-        <FilterSelect
-          label="الحالة"
-          value={isActive}
-          onChange={setIsActive}
-          options={activeOptions}
-        />
-      </FilterBar>
-      <div className="mt-4">
-        <JournalGrid
-          data={journals}
-          loading={isLoading}
-          error={error ? 'فشل تحميل البيانات' : undefined}
-          onRetry={() => refetch()}
-        />
-      </div>
-    </div>
+    </Page>
   );
 }

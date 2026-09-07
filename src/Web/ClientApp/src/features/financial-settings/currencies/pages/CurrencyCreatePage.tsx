@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card, FormField, Input } from '@/components/ui';
+import { Page, Button, Card, FormField, Input } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { useCreateCurrency } from '../../hooks/useCurrencies';
@@ -47,14 +47,15 @@ export default function CurrencyCreatePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center gap-3">
+    <Page
+      title="عملة جديدة"
+      maxWidth="sm"
+      actions={
         <Button variant="ghost" size="icon" onClick={() => navigate('/financial-settings/currencies')} className="cursor-pointer">
           <ArrowRight size={18} />
         </Button>
-        <h1 className="text-headline-sm sm:text-headline-md font-bold text-[var(--color-on-surface)]">عملة جديدة</h1>
-      </div>
-
+      }
+    >
       <Card className="bg-[var(--color-surface-container-lowest)]">
         <form onSubmit={handleSubmit} className="space-y-4">
           <Iso4217Picker
@@ -125,6 +126,6 @@ export default function CurrencyCreatePage() {
           </div>
         </form>
       </Card>
-    </div>
+    </Page>
   );
 }

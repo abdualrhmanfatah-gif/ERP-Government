@@ -1,12 +1,8 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
-import { FilterSelect } from '@/components/ui/FilterSelect';
-import { FormField } from '@/components/ui/FormField';
-import { Input } from '@/components/ui/Input';
+import { Badge, Button, DataGrid, FilterSelect, FormField, Input, Page } from '@/components/ui';
+import type { DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus } from 'lucide-react';
 import { TreasuryChecksClearDialog } from '@/components/TreasuryChecksClearDialog';
 import { TreasuryChecksBounceDialog } from '@/components/TreasuryChecksBounceDialog';
@@ -116,20 +112,18 @@ export default function ChecksListPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-[var(--color-on-surface)]">
-          الشيكات
-        </h1>
+    <Page
+      title="الشيكات"
+      actions={
         <Button
           onClick={() => navigate('/treasury/receipt-vouchers/create')}
           icon={<Plus size={16} />}
         >
           إضافة شيك
         </Button>
-      </div>
-
-      <div className="flex items-center gap-4">
+      }
+      toolbar={
+        <div className="flex items-center gap-4">
         <FormField label="من" htmlFor="checks-from-date" className="w-auto">
           <Input
             id="checks-from-date"
@@ -156,14 +150,15 @@ export default function ChecksListPage() {
             { value: 'Bounced', label: 'مرتجع' },
           ]}
         />
-      </div>
-
+        </div>
+      }
+      loading={isLoading}
+      error={error ? 'حدث خطأ في تحميل البيانات' : undefined}
+      onRetry={() => window.location.reload()}
+    >
       <DataGrid
         columns={columns}
         data={checks || []}
-        loading={isLoading}
-        error={error ? 'حدث خطأ في تحميل البيانات' : undefined}
-        onRetry={() => window.location.reload()}
         rowKey={(row) => row.id}
         emptyMessage="لا توجد شيكات في الفترة المحددة"
       />
@@ -190,6 +185,6 @@ export default function ChecksListPage() {
           />
         </>
       )}
-    </div>
+    </Page>
   );
 }

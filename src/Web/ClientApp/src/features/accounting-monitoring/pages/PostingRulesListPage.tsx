@@ -1,5 +1,5 @@
 import { usePostingRules, useDeletePostingRule } from '../hooks/usePostingRules';
-import { Button, Badge } from '@/components/ui';
+import { Page, Button, Badge } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 
 type RuleRow = NonNullable<ReturnType<typeof usePostingRules>['data']>[number];
@@ -49,11 +49,7 @@ export function PostingRulesListPage() {
   ];
 
   return (
-    <div dir="rtl" className="p-6">
-      <h1 className="text-2xl font-bold mb-6 text-[var(--color-on-surface)]">
-        قواعد الترحيل
-      </h1>
-
+    <Page title="قواعد الترحيل">
       <DataGrid
         columns={columns}
         data={rules ?? []}
@@ -61,6 +57,6 @@ export function PostingRulesListPage() {
         emptyMessage="لا توجد قواعد ترحيل"
         rowKey={(rule) => rule.id}
       />
-    </div>
+    </Page>
   );
 }
