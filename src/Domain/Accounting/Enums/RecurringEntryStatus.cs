@@ -7,5 +7,6 @@ public enum RecurringEntryStatus
 {
     Active = 0,
     Paused = 1,
-    Completed = 2
+    Completed = 2,
+    Cancelled = 3
 }

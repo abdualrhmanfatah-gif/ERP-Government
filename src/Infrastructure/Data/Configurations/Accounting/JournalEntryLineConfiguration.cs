@@ -40,14 +40,6 @@ public class JournalEntryLineConfiguration : IEntityTypeConfiguration<JournalEnt
 
         builder.HasIndex(e => e.CostCenterId);
 
-        builder.HasIndex(e => e.FundId);
-
-        builder.HasIndex(e => e.ProjectId);
-
-        builder.HasIndex(e => e.BudgetItemId);
-
-        builder.HasIndex(e => e.EncumbranceId);
-
         builder.HasIndex(e => e.PaymentOrderId);
 
         // Performance index for General Ledger report (running balance computation)

@@ -10,10 +10,10 @@ public class PostingRuleLine : BaseAuditableEntity
 {
     public int PostingRuleId { get; set; }
     public int Sequence { get; set; }
-    public string AccountSource { get; set; } = string.Empty; // NEEDS_BUSINESS_CONFIRMATION
+    public AccountSource AccountSource { get; set; }
     public int? FixedAccountId { get; set; }
     public DebitOrCredit DebitOrCredit { get; set; }
-    public string AmountSource { get; set; } = string.Empty; // NEEDS_BUSINESS_CONFIRMATION
+    public AmountSource AmountSource { get; set; }
     public bool FundDimensionRequired { get; set; }
     public bool CostCenterDimensionRequired { get; set; }
     public bool ProjectDimensionRequired { get; set; }

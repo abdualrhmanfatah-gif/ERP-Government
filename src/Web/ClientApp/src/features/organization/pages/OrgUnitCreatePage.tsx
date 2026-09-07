@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { OrgUnitForm } from '../components/OrgUnitForm';
+import { OrgUnitForm } from '@/components/OrganizationOrgUnitForm';
 import { useOrganizationalUnit, useCreateOrgUnit, useUpdateOrgUnit } from '../hooks';
 import type { CreateOrgUnitCommand } from '../types';
 

@@ -6,6 +6,8 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
+import { Loading } from '@/components/ui/Loading';
+import { Card, Input } from '@/components/ui';
 import { useRoles, useRolePermissions, useAssignRolePermission, useRemoveRolePermission, usePermissions } from '../hooks';
 
 interface AssignedPermission {
@@ -60,7 +62,7 @@ export function RoleDetailPage() {
   }
 
   if (isLoading) {
-    return <div className="p-8 text-center text-[var(--color-on-surface-variant)]">جاري التحميل...</div>;
+    return <Loading />;
   }
 
   if (!role) {
@@ -103,7 +105,7 @@ export function RoleDetailPage() {
       />
 
       <div className="space-y-6">
-        <div className="bg-[var(--color-surface-container-lowest)] rounded-lg p-4">
+        <Card>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-[var(--color-on-surface-variant)]">الكود:</span>
@@ -126,7 +128,7 @@ export function RoleDetailPage() {
               <span className="me-2 text-[var(--color-on-surface)] font-medium">{role.requiresMfa ? 'نعم' : 'لا'}</span>
             </div>
           </div>
-        </div>
+        </Card>
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -137,15 +139,14 @@ export function RoleDetailPage() {
           </div>
 
           {showAdd && (
-            <div className="p-3 bg-[var(--color-surface-container)] rounded-lg border border-[var(--color-border-container)]">
+            <Card className="p-3">
               <label htmlFor="permission-search" className="sr-only">بحث في الصلاحيات</label>
-              <input
+              <Input
                 id="permission-search"
-                type="text"
                 placeholder="بحث في الصلاحيات..."
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                className="w-full px-3 py-2 mb-2 border border-[var(--color-border-container)] rounded-lg bg-[var(--color-surface)] text-[var(--color-on-surface)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                className="mb-2"
               />
               <div className="max-h-48 overflow-y-auto space-y-1">
                 {availablePermissions.length === 0 && (
@@ -165,7 +166,7 @@ export function RoleDetailPage() {
                   </Button>
                 ))}
               </div>
-            </div>
+            </Card>
           )}
 
           <DataGrid

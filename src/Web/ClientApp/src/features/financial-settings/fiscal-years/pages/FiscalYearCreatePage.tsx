@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui';
+import { Button, Card, Input } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { useCreateFiscalYear } from '../../hooks/useFiscalYears';
@@ -52,39 +52,34 @@ export default function FiscalYearCreatePage() {
         <h1 className="text-headline-sm sm:text-headline-md font-bold text-[var(--color-on-surface)]">سنة مالية جديدة</h1>
       </div>
 
-      <div className="rounded-xl border border-[var(--color-border-container)] bg-[var(--color-surface-container-lowest)] p-6">
+      <Card className="bg-[var(--color-surface-container-lowest)]">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">اسم السنة المالية *</label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            />
-            {errors.name && <p className="text-xs text-[var(--color-error)] mt-1">{errors.name}</p>}
-          </div>
+          <Input
+            label="اسم السنة المالية *"
+            id="name"
+            name="name"
+            type="text"
+            required
+          />
+          {errors.name && <p className="text-xs text-[var(--color-error)] mt-1">{errors.name}</p>}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="startDate" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">تاريخ البداية *</label>
-              <input
+              <Input
+                label="تاريخ البداية *"
                 id="startDate"
                 name="startDate"
                 type="date"
                 required
-                className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
               />
               {errors.startDate && <p className="text-xs text-[var(--color-error)] mt-1">{errors.startDate}</p>}
             </div>
             <div>
-              <label htmlFor="endDate" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">تاريخ النهاية *</label>
-              <input
+              <Input
+                label="تاريخ النهاية *"
                 id="endDate"
                 name="endDate"
                 type="date"
                 required
-                className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
               />
               {errors.endDate && <p className="text-xs text-[var(--color-error)] mt-1">{errors.endDate}</p>}
             </div>
@@ -98,7 +93,7 @@ export default function FiscalYearCreatePage() {
             </Button>
           </div>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }

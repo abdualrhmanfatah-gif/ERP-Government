@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
-import { Button, Loading, ConfirmDialog } from '@/components/ui';
+import { Button, Card, Loading, ConfirmDialog, Textarea } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { useClosingEntryDetail, useApproveClosingEntry, useReverseClosingEntry } from '../../hooks/useClosingEntries';
-import { FiscalYearStatusBadge } from '../../components/FiscalYearStatusBadge';
+import { FiscalYearStatusBadge } from '@/components/FinancialSettingsFiscalYearStatusBadge';
 
 export default function ClosingEntryDetailPage() {
   const navigate = useNavigate();
@@ -74,7 +74,7 @@ export default function ClosingEntryDetailPage() {
       </div>
 
       {/* Info Card */}
-      <div className="rounded-xl border border-[var(--color-border-container)] bg-[var(--color-surface-container-lowest)] p-6">
+      <Card className="bg-[var(--color-surface-container-lowest)]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <div className="text-xs text-[var(--color-on-surface-variant)] mb-1">رقم القيد</div>
@@ -109,7 +109,7 @@ export default function ClosingEntryDetailPage() {
             <div className="text-sm text-[var(--color-on-surface)] font-mono">{entry.journalEntryEntryNumber}</div>
           </div>
         )}
-      </div>
+      </Card>
 
       <ConfirmDialog
         open={confirmAction === 'approve'}
@@ -128,11 +128,10 @@ export default function ClosingEntryDetailPage() {
         message={
           <div className="space-y-2">
             <p>هل تريد إنشاء قيد تراجع لهذا القيد؟</p>
-            <textarea
+            <Textarea
               value={reverseReason}
               onChange={(e) => setReverseReason(e.target.value)}
               placeholder="سبب التراجع..."
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)] text-sm"
               rows={3}
             />
           </div>

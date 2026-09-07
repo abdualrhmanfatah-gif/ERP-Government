@@ -5,7 +5,7 @@ READ THIS FIRST. Conventions below are verified as-built — follow them, do not
 
 ## Stack
 .NET 10 / C# 13, EF Core + SQL Server, MediatR, FluentValidation, minimal APIs, .NET Aspire (src/AppHost + ServiceDefaults).
-Frontend: React 19 + TypeScript + Vite in src/Web/ClientApp.
+Frontend stack — see `## Frontend Architecture` below.
 
 ## Build & Verify (exact commands — NO .sln exists, always target projects directly)
 - Backend build: dotnet build src/Web/Web.csproj
@@ -15,13 +15,16 @@ Frontend: React 19 + TypeScript + Vite in src/Web/ClientApp.
   dotnet test tests/Application.FunctionalTests
   dotnet test tests/Infrastructure.IntegrationTests
   dotnet test tests/Web.AcceptanceTests
-- Frontend (cd src/Web/ClientApp): npm run lint | npm run test | npm run build
-  (prebuild/prestart auto-run `npm run generate-api` — NSwag API client regeneration; regenerate after endpoint changes)
+- Frontend (cd src/Web/ClientApp): npm run lint | npm run build
+  (prebuild/prestart auto-run `npm run generate-api` — NSwag API client regeneration; regenerate after endpoint changes.
+  Also available: `npm run generate-tokens`, `npm run design:lint`, `npm run design:check`.)
 - EF migration: dotnet ef migrations add <Name> --project src/Infrastructure --startup-project src/Web
-- TDD per-cycle: single filtered test (red) → touched project's suite only (green/refactor). 
+- TDD per-cycle: single filtered test (red) → touched project's suite only (green/refactor).
   Full 5-project suite runs ONLY at gates: session preflight, /speckit.converge, pre-merge.
   Project scoping for cycle economy is NOT test-filtering-to-green (Hard Rule 4); no assertion
   is ever weakened, skipped, or deleted — full suite still gates every merge.
+- **Frontend has NO test suite by governance decision** (see Frontend Architecture). Frontend
+  `npm run lint` runs ESLint + dependency-cruiser only.
 
 ## Layer map
 - src/Domain/<Feature>/Entities/ — EF entities. src/Domain/Common/ = BaseEntity (int PK), BaseAuditableEntity (+audit +RowVersion). ALWAYS inherit one.
@@ -31,8 +34,7 @@ Frontend: React 19 + TypeScript + Vite in src/Web/ClientApp.
 - src/Application/<Feature>/Queries/<Entity>/ — same pattern.
 - src/Web/Endpoints/<Feature>/<Entity>s.cs — IEndpointGroup (src/Web/Infrastructure/IEndpointGroup.cs), auto-registered via WebApplicationExtensions (MapEndpointGroups).
 - src/Infrastructure/Data/ — DbContext, Migrations/ (NEVER edit an applied migration; always add new).
-- src/Web/ClientApp/src/features/<domain>/ — pages/ components/ hooks/ shared/.
-  API clients: NSwag-generated (npm run generate-api) + manual fetch wrappers in features/<domain>/shared/client.ts — follow whichever the feature already uses.
+- Frontend layer map — see `## Frontend Architecture` below.
 
 ## Pattern Exemplars — open the exemplar first, mimic it, do not search for alternatives
 
@@ -49,8 +51,8 @@ Frontend: React 19 + TypeScript + Vite in src/Web/ClientApp.
 | Document numbering | src/Application/FinancialSettings/Common/Services/ (DocumentSequenceService) |
 | Availability check | src/Application/Budgeting/Common/BudgetAvailabilityService |
 | Functional test | tests/Application.FunctionalTests/Budgeting/AppropriationEdgeCaseTests.cs · EncumbranceLifecycleTests.cs |
-| Frontend feature folder | src/Web/ClientApp/src/features/budgeting/ (pages/components/hooks/shared) |
-| Frontend test | src/Web/ClientApp/src/features/budgeting/__tests__/BudgetItemTree.test.tsx |
+| Frontend feature folder (top reference) | src/Web/ClientApp/src/features/budgeting/ (entity-based: appropriations/, classifications/, funds/, ...) |
+| Frontend canonical page | src/Web/ClientApp/src/features/budgeting/appropriations/pages/AppropriationsListPage.tsx |
 
 Maintenance: when a newer better exemplar lands (e.g. ReceiptVouchers after treasury spec, JournalEntries after 014 rename), repoint this table in the same task — never leave it stale.
 
@@ -63,6 +65,67 @@ Maintenance: when a newer better exemplar lands (e.g. ReceiptVouchers after trea
 - Approvals/status: ApprovalHistory + DocumentStatusLog (append-only) via IDocumentStatusLogger — never inline approval columns.
 - Ledger posting: domain event → AccountingEvent (unique SourceTable+SourceId+EventType) → PostingRules → JournalEntry + lines.
 - Availability: BudgetAvailabilityService (src/Application/Budgeting/Common/) — item-level net appropriations − open encumbrances.
+
+## Frontend Architecture
+
+### Stack
+React 19 + TypeScript + Vite. Path: `src/Web/ClientApp`.
+- Routing: React Router v7 (declarative, route guards via loaders).
+- Server state: TanStack Query (NSwag-generated clients + query hooks).
+- Client state: Zustand (UI-only state; never for server data).
+- Forms: React Hook Form + Zod (Zod schemas co-located in `features/<x>/<entity>/shared/schemas.ts`).
+- Styling: Tailwind v3 + **shadcn** (the primitives source — `src/components/ui/`). Theme bridged from `src/Web/ClientApp/src/components/tokens.ts` (SSOT, read-only).
+- Charts: `@nivo/{bar,line,pie,core}`. Tables: `@tanstack/react-table`. Icons: `lucide-react`. Toasts: `sonner`. Dates: `date-fns` + `react-day-picker`. Headless primitives: `@base-ui/react`.
+- Language: Arabic only, hardcoded strings. `<html dir="rtl" lang="ar">` fixed at boot.
+- Vite aliases: `@app`, `@shared`, `@features`, `@routes`.
+
+### Layer map
+```
+src/Web/ClientApp/src/
+├── app/                    # bootstrap: router, providers, QueryClient
+├── components/             # ALL UI components in ONE place (shadcn primitives + feature-scoped, domain-prefixed). NO `components/` folders inside features/.
+├── shared/
+│   ├── zod-schemas/        # shared input shapes (Money, dates, ...)
+│   └── api/                # query keys factory, Result<T>→UI helpers, error mappers
+├── features/<domain>/
+│   ├── <entity>/           # entity-scoped subfolders (appropriations, classifications, funds, ...)
+│   │   ├── pages/          # route components
+│   │   ├── hooks/          # entity-scoped hooks
+│   │   └── shared/         # client.ts, types.ts, schemas.ts (entity-scoped)
+│   ├── hooks/              # cross-entity hooks
+│   ├── shared/             # cross-entity types, schemas
+│   └── utils/              # cross-entity helpers
+└── routes/                 # route definitions consumed by app/router
+```
+
+### API Strategy
+- Default: NSwag-generated client (`npm run generate-api`).
+- Manual wrapper in `features/<domain>/<entity>/shared/client.ts` ONLY when needed for custom retry, request cancellation, transform, or multi-endpoint composition. Header must state WHY in a comment.
+- All API errors funnel through `shared/api/result-to-ui.ts` — maps `Result<T>.Errors` to toast or inline by severity.
+
+### Cross-cutting Rules
+- Forms: every form has a Zod schema in `features/<domain>/<entity>/shared/schemas.ts`; same schema reused for `defaultValues` + validation.
+- Server errors: 4xx → inline field error (via Zod refine), 5xx → toast. Never swallow.
+- Loading states: every query has `isPending` skeleton + `isError` retry UI. No spinners-as-default.
+- RTL: logical CSS properties only (`ms-/me-`, `ps-/pe-`, `start/end`). Physical properties (`margin-left`, `padding-right`) prohibited.
+- Strings: hardcoded Arabic directly in JSX. No `t()` calls, no locale files, no language switcher.
+- Accessibility (manual review): ARIA-labelled, keyboard-reachable, focus-visible. No automated tier.
+
+### Dependency Rules
+- `features/` NEVER imports from other features/. Cross-feature sharing via `shared/` or events only.
+- `features/<domain>/` NEVER has a `components/` subfolder. Feature-scoped components live in `src/components/` with a domain prefix (e.g. `BudgetingAppropriationsFilters.tsx`).
+- Acyclic graph enforced by `dependency-cruiser` at `src/Web/ClientApp/.dependency-cruiser.cjs`. CI fails on violation.
+- `components/` is a leaf — cannot import from `features/` or `routes/`. Features may import from `components/`.
+
+### Exemplar maintenance
+- Top reference (folder): `src/Web/ClientApp/src/features/budgeting/` — entity-based nesting (`appropriations/`, `classifications/`, `funds/`, ...) with cross-entity `hooks/`/`shared/`/`utils/` at root.
+- Canonical page: `src/Web/ClientApp/src/features/budgeting/appropriations/pages/AppropriationsListPage.tsx` — list + filtering + server state + Arabic RTL UI.
+- UI primitives (shadcn) and feature-scoped components live in `src/Web/ClientApp/src/components/`, organized by domain prefix (e.g. `Button.tsx`, `BudgetingAppropriationsFilters.tsx`).
+- When a newer/better pattern lands, repoint this section in the same task — never leave it stale.
+
+### Frontend Governance Override
+Frontend code does not use TDD or frontend automated tests. Backend testing requirements remain unchanged. This is an AGENTS.md frontend convention and does not amend `.specify/memory/constitution.md`.
+
 ## Authentication & Authorization
 - Auth: JWT Bearer (src/Infrastructure/DependencyInjection.cs). Key from config "Jwt:Key". No issuer/audience validation (dev config).
 - Login: POST /api/Users/login → { token, userId, role }. Passwords: ASP.NET Identity PasswordHasher (User.PasswordHash). Lockout: 5 failed attempts → 15 min. Token claims: NameIdentifier, Name, Role (single role code) + permission claims loaded from RolePermissions.
@@ -80,13 +143,14 @@ Maintenance: when a newer better exemplar lands (e.g. ReceiptVouchers after trea
 - TDD mandatory (constitution XI): test first, observe red, implement, green. Never weaken/skip/delete tests.
 
 ## Docs
-- DESIGN.md — Agent-facing UI design tokens + rationale (YAML front matter + prose). Agents: read DESIGN.md before any UI work; tokens.ts remains SSOT; sync DESIGN.md ← tokens.ts in every token-change task.
+- DESIGN.md — Agent-facing UI design tokens + rationale (YAML front matter + prose). Agents: read DESIGN.md before any UI work; tokens.ts remains SSOT (read-only by convention — edit only when justified); sync DESIGN.md ← tokens.ts in every token-change task.
 - docs/database-schema.md — table source of truth; update on every schema change.
 - docs/feature-architecture-map-v1.0.md — feature/domain map.
 - .specify/memory/constitution.md — 12 binding principles; plan gates enforce.
 
 ## Don't
 - No controllers. No stored computed values. No inline approval columns. No spec duplication. No editing applied migrations. No multi-entity concepts (single-entity deployment).
+- No frontend test files (Vitest/RTL/Playwright/axe prohibited — see Frontend Architecture). No cross-feature imports. No CSS physical properties (logical only). No hardcoded strings bypassing `components/` primitives when a primitive exists. No mock data layer (MSW/mock servers/fake APIs prohibited — backend live only).
 
 ## Maintenance
 - When conventions, commands, or schema change: update this file + docs/database-schema.md in the same task.

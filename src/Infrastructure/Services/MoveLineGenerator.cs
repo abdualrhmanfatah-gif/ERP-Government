@@ -4,7 +4,7 @@ namespace ERP_Government.Infrastructure.Services;
 
 /// <summary>
 /// Generates JournalEntryLines from JournalEntryTemplateLines for recurring entry processing.
-/// Handles dimension override (CostCenterId, ProjectId) from RecurringEntry.
+/// Handles dimension override (CostCenterId) from RecurringEntry.
 /// </summary>
 public static class JournalEntryLineGenerator
 {
@@ -35,7 +35,7 @@ public static class JournalEntryLineGenerator
                 Credit = credit,
                 // Dimension override: RecurringEntry values take precedence over template defaults
                 CostCenterId = entry.CostCenterId ?? templateLine.CostCenterId,
-                CurrencyId = templateLine.CurrencyId ?? 1, // Fallback to system base currency
+                CurrencyId = templateLine.CurrencyId, // Required on template line
                 ExchangeRate = 1 // Multi-currency deferred
             };
 

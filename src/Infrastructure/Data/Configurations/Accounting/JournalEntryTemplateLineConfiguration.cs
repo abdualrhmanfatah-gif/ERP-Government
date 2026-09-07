@@ -12,10 +12,13 @@ public class JournalEntryTemplateLineConfiguration : IEntityTypeConfiguration<Jo
 
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.DebitAmount)
+        builder.Property(e => e.ExchangeRate)
+            .HasColumnType("decimal(18,6)");
+
+        builder.Property(e => e.Debit)
             .HasColumnType("decimal(23,2)");
 
-        builder.Property(e => e.CreditAmount)
+        builder.Property(e => e.Credit)
             .HasColumnType("decimal(23,2)");
 
         builder.Property(e => e.Description)
@@ -28,13 +31,7 @@ public class JournalEntryTemplateLineConfiguration : IEntityTypeConfiguration<Jo
 
         builder.HasIndex(e => e.AccountId);
 
-        builder.HasIndex(e => e.FundId);
-
         builder.HasIndex(e => e.CostCenterId);
-
-        builder.HasIndex(e => e.ProjectId);
-
-        builder.HasIndex(e => e.OrganizationUnitId);
 
         builder.HasIndex(e => e.CurrencyId);
 
@@ -48,27 +45,10 @@ public class JournalEntryTemplateLineConfiguration : IEntityTypeConfiguration<Jo
             .HasForeignKey(e => e.AccountId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Cross-module FKs (Module 3)
         builder.HasOne(e => e.CostCenter)
             .WithMany()
             .HasForeignKey(e => e.CostCenterId)
             .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(e => e.OrganizationUnit)
-            .WithMany()
-            .HasForeignKey(e => e.OrganizationUnitId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(e => e.Project)
-            .WithMany()
-            .HasForeignKey(e => e.ProjectId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        // Deferred FK to Module 5 — Funds table not yet implemented
-        // builder.HasOne(e => e.Fund)
-        //     .WithMany()
-        //     .HasForeignKey(e => e.FundId)
-        //     .OnDelete(DeleteBehavior.Restrict);
 
         builder.Ignore(e => e.DomainEvents);
     }

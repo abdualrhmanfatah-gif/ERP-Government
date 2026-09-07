@@ -21,5 +21,6 @@ public static class PostingRuleSeedData
         new() { Name="ترحيل تصفية الأصول", EventType="AssetDisposed", JournalId=6, Priority=1 },
         new() { Name="ترحيل إعادة تقييم الأصول", EventType="AssetRevalued", JournalId=6, Priority=1 },
         new() { Name="ترحيل هلاك الأصول", EventType="AssetImpaired", JournalId=6, Priority=1 },
+        new() { Name="ترحيل تحصيل الشيكات", EventType="CheckCleared", JournalId=3, Priority=1 },
     ];
 }

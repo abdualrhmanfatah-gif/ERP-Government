@@ -264,3 +264,16 @@ Task T027: DisbursementRequests endpoint group
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
 - Entity status values: DisbursementRequest uses Draft/PendingApproval/Approved/Rejected/Cancelled/Disbursed/Invalidated; Payment uses Completed/Failed
+
+---
+
+## Phase 9: Follow-ups from Contract Alignment Check (2026-09-08)
+
+Discovered by verifying as-built code against the PAY contract (PAY-01/PAY-02). See spec.md Clarifications, Session 2026-09-08. New unchecked tasks; TDD rules apply.
+
+- [x] T060 [US1] Bind permission codes to DisbursementRequests endpoints: RequireAuthorization(DisbursementRequests.View/Create/Submit/Approve/Reject/Cancel) on routes in src/Web/Endpoints/DisbursementRequests/DisbursementRequests.cs (codes already exist — PermissionCodes.cs:186-191). Verify policies registered in src/Web/DependencyInjection.cs. Test: endpoint without permission claim → 403 (open placeholder assertion stays consistent with dev-state note in AGENTS.md). DONE 2026-09-08 — structural test tests/Application.FunctionalTests/WebApiTests/EndpointAuthorizationTests.cs (red→green).
+- [ ] T061 [US1] Add PaymentOrders.Update permission code (PermissionCodes.cs) + register policy + UpdatePaymentOrder command (handler enforces: edit Draft only, BR-2; amountGross/deductionAmount recomputed server-side) + PUT endpoint with RequireAuthorization. Tests: update Draft succeeds, update non-Draft blocked.
+- [ ] T062 [Engineering-decision] Resolve PAY-02 contract deviation on qualified-role position (contract: SECOND approver must hold AccountsManager/AuthorizingOfficer; as-built: FIRST). Decide and either amend contract or move role check to step 2 in ApproveDisbursementRequestCommand (with test change — no weakening).
+- [ ] T063 [Engineering-decision] Resolve PAY-02 contract deviation on availability-gate timing (contract: Blocking reject at submit; as-built: at creation). Decide and align one side; keep BudgetAvailabilityService as the sole gate either way.
+- [ ] T064 [PAY-01 owner] Void semantics conflict: as-built VoidPaymentOrderCommand allows voiding only Paid orders (reversal); PAY-01 contract expects void of unpaid Approved/SentToTreasury, blocked for PartiallyPaid (OQ-N1). Track under PAY-01 (payment-orders), not 018.
+- [ ] T065 [Docs] PAY contract route table marks `/api/Payments/PaymentOrders` + `/api/Payments/DisbursementRequests`; as-built uses `/api/{ClassName}` per AGENTS.md convention. Mark as documented deviation in the contract source; do not change routes.

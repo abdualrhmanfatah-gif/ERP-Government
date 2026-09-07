@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFundDetail } from '../hooks/useFunds';
 import { fundTypeLabels, fundCategoryLabels } from '../../shared/types';
-import { Button, Badge } from '@/components/ui';
+import { Button, Badge, Card } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 
 export default function FundDetailPage() {
@@ -36,7 +36,7 @@ export default function FundDetailPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container-lowest)] p-6">
+      <Card className="bg-[var(--color-surface-container-lowest)]">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <span className="block text-xs text-[var(--color-on-surface-variant)] mb-1">رقم الصندوق</span>
@@ -77,7 +77,7 @@ export default function FundDetailPage() {
             </div>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

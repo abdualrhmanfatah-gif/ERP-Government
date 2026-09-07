@@ -2,9 +2,9 @@ import { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useCreateAppropriation, useCreateTransfer } from '../../hooks/useAppropriations';
 import { useBudgetItemsTree } from '../../hooks/useBudgetItems';
-import { AvailabilityIndicator } from '../../components/AvailabilityIndicator';
+import { AvailabilityIndicator } from '@/components/BudgetingAvailabilityIndicator';
 import { appropriationTypeLabels, AppropriationType } from '../../shared/types';
-import { Button } from '@/components/ui';
+import { Button, Input, Select } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 
 export default function AppropriationCreatePage() {
@@ -102,70 +102,55 @@ export default function AppropriationCreatePage() {
 
       <form onSubmit={handleSubmit} className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">نوع التخصيص *</label>
-            <select
-              value={form.appropriationType}
-              onChange={(e) => updateField('appropriationType', e.target.value)}
-              className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-            >
-              {Object.entries(appropriationTypeLabels).map(([val, label]) => (
-                <option key={val} value={val}>{label}</option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label="نوع التخصيص *"
+            value={String(form.appropriationType)}
+            onChange={(e) => updateField('appropriationType', e.target.value)}
+            options={Object.entries(appropriationTypeLabels).map(([val, label]) => ({ value: val, label }))}
+          />
 
-          <div>
-            <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">المبلغ *</label>
-            <input
-              type="number"
-              value={form.amount || ''}
-              onChange={(e) => updateField('amount', Number(e.target.value))}
-              className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-              min="0"
-              step="0.01"
-            />
-            {errors.amount && <p className="text-xs text-[var(--color-error)] mt-1">{errors.amount}</p>}
-          </div>
+          <Input
+            label="المبلغ *"
+            type="number"
+            value={form.amount || ''}
+            onChange={(e) => updateField('amount', Number(e.target.value))}
+            min="0"
+            step="0.01"
+            required
+          />
+          {errors.amount && <p className="text-xs text-[var(--color-error)] mt-1">{errors.amount}</p>}
 
           {!isTransfer && (
             <>
-              <div>
-                <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">نوع المستند *</label>
-                <input
-                  type="text"
-                  value={form.documentType}
-                  onChange={(e) => updateField('documentType', e.target.value)}
-                  className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-                />
-                {errors.documentType && <p className="text-xs text-[var(--color-error)] mt-1">{errors.documentType}</p>}
-              </div>
+              <Input
+                label="نوع المستند *"
+                type="text"
+                value={form.documentType}
+                onChange={(e) => updateField('documentType', e.target.value)}
+                required
+              />
+              {errors.documentType && <p className="text-xs text-[var(--color-error)] mt-1">{errors.documentType}</p>}
 
-              <div>
-                <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">رقم المستند</label>
-                <input
-                  type="number"
-                  value={form.documentId || ''}
-                  onChange={(e) => updateField('documentId', Number(e.target.value))}
-                  className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-                />
-              </div>
+              <Input
+                label="رقم المستند"
+                type="number"
+                value={form.documentId || ''}
+                onChange={(e) => updateField('documentId', Number(e.target.value))}
+              />
             </>
           )}
 
           {isTransfer && (
             <div className="md:col-span-2">
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">بند الهدف *</label>
-              <select
-                value={form.targetBudgetItemId}
+              <Select
+                label="بند الهدف *"
+                value={String(form.targetBudgetItemId)}
                 onChange={(e) => updateField('targetBudgetItemId', Number(e.target.value))}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-              >
-                <option value={0}>اختر بند الهدف</option>
-                {targetItems.map((item) => (
-                  <option key={item.id} value={item.id}>{item.itemCode} — {item.itemName}</option>
-                ))}
-              </select>
+                options={[
+                  { value: '0', label: 'اختر بند الهدف' },
+                  ...targetItems.map((item) => ({ value: String(item.id), label: `${item.itemCode} — ${item.itemName}` })),
+                ]}
+              />
               {errors.targetBudgetItemId && <p className="text-xs text-[var(--color-error)] mt-1">{errors.targetBudgetItemId}</p>}
             </div>
           )}

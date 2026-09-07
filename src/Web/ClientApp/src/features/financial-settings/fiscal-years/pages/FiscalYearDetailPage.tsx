@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Button, Loading, ConfirmDialog } from '@/components/ui';
+import { Button, Card, Loading, ConfirmDialog } from '@/components/ui';
 import { ArrowRight, Unlock, Lock, CalendarPlus, FolderOpen, X } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
-import { FiscalYearStatusBadge } from '../../components/FiscalYearStatusBadge';
-import { PeriodLockIndicator } from '../../components/PeriodLockIndicator';
+import { FiscalYearStatusBadge } from '@/components/FinancialSettingsFiscalYearStatusBadge';
+import { PeriodLockIndicator } from '@/components/FinancialSettingsPeriodLockIndicator';
 import { useFiscalYearDetail, useOpenFiscalYear, useCloseFiscalYear } from '../../hooks/useFiscalYears';
 import { useFiscalPeriodsList, useBulkGeneratePeriods, useLockFiscalPeriod, useUnlockFiscalPeriod } from '../../hooks/useFiscalPeriods';
 
@@ -96,7 +96,7 @@ export default function FiscalYearDetailPage() {
       </div>
 
       {/* Info Card */}
-      <div className="rounded-xl border border-[var(--color-border-container)] bg-[var(--color-surface-container-lowest)] p-6">
+      <Card className="bg-[var(--color-surface-container-lowest)]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <div className="text-xs text-[var(--color-on-surface-variant)] mb-1">تاريخ البداية</div>
@@ -120,7 +120,7 @@ export default function FiscalYearDetailPage() {
             أنشأ: {fy.createdBy} — {fy.createdAt ? new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(fy.createdAt)) : ''}
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Periods */}
       <div>

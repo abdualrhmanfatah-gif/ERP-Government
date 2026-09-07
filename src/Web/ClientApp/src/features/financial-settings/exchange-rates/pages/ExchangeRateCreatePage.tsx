@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui';
+import { Button, Card, Input, Select, Loading } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { useCreateExchangeRate } from '../../hooks/useExchangeRates';
@@ -47,7 +47,7 @@ export default function ExchangeRateCreatePage() {
     );
   }
 
-  if (currenciesLoading) return <div className="text-center py-12 text-[var(--color-on-surface-variant)]">جاري التحميل...</div>;
+  if (currenciesLoading) return <Loading />;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -58,76 +58,67 @@ export default function ExchangeRateCreatePage() {
         <h1 className="text-headline-sm sm:text-headline-md font-bold text-[var(--color-on-surface)]">سعر صرف جديد</h1>
       </div>
 
-      <div className="rounded-xl border border-[var(--color-border-container)] bg-[var(--color-surface-container-lowest)] p-6">
+      <Card className="bg-[var(--color-surface-container-lowest)]">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="baseCurrencyId" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">العملة الأساسية *</label>
-              <select
+              <Select
+                label="العملة الأساسية *"
                 id="baseCurrencyId"
                 name="baseCurrencyId"
                 required
-                className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-              >
-                <option value="">اختر...</option>
-                {currencies.map((c) => (
-                  <option key={c.id} value={c.id}>{c.code} — {c.name}</option>
-                ))}
-              </select>
+                value=""
+                options={[
+                  { value: '', label: 'اختر...' },
+                  ...currencies.map((c) => ({ value: String(c.id), label: `${c.code} — ${c.name}` })),
+                ]}
+              />
               {errors.baseCurrencyId && <p className="text-xs text-[var(--color-error)] mt-1">{errors.baseCurrencyId}</p>}
             </div>
             <div>
-              <label htmlFor="currencyId" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">العملة *</label>
-              <select
+              <Select
+                label="العملة *"
                 id="currencyId"
                 name="currencyId"
                 required
-                className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-              >
-                <option value="">اختر...</option>
-                {currencies.map((c) => (
-                  <option key={c.id} value={c.id}>{c.code} — {c.name}</option>
-                ))}
-              </select>
+                options={[
+                  { value: '', label: 'اختر...' },
+                  ...currencies.map((c) => ({ value: String(c.id), label: `${c.code} — ${c.name}` })),
+                ]}
+              />
               {errors.currencyId && <p className="text-xs text-[var(--color-error)] mt-1">{errors.currencyId}</p>}
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="rateDate" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">تاريخ السعر *</label>
-              <input
+              <Input
+                label="تاريخ السعر *"
                 id="rateDate"
                 name="rateDate"
                 type="date"
                 required
-                className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
               />
               {errors.rateDate && <p className="text-xs text-[var(--color-error)] mt-1">{errors.rateDate}</p>}
             </div>
             <div>
-              <label htmlFor="rateType" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">نوع السعر *</label>
-              <select
+              <Select
+                label="نوع السعر *"
                 id="rateType"
                 name="rateType"
                 required
-                className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-              >
-                {Object.entries(exchangeRateTypeLabels).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
+                options={Object.entries(exchangeRateTypeLabels).map(([value, label]) => ({ value, label }))}
+              />
             </div>
           </div>
           <div>
-            <label htmlFor="rate" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">السعر *</label>
-            <input
+            <Input
+              label="السعر *"
               id="rate"
               name="rate"
               type="number"
               step="0.000001"
               min="0"
               required
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
             />
             {errors.rate && <p className="text-xs text-[var(--color-error)] mt-1">{errors.rate}</p>}
           </div>
@@ -140,7 +131,7 @@ export default function ExchangeRateCreatePage() {
             </Button>
           </div>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }

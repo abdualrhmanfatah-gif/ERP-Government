@@ -2,7 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { notify } from '@/features/notifications/notify';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
-import { RoleForm } from '../components/RoleForm';
+import { Card } from '@/components/ui';
+import { RoleForm } from '@/components/SecurityRbacRoleForm';
 import { useCreateRole } from '../hooks/useCreateRole';
 import type { CreateRoleCommand } from '../types';
 
@@ -32,13 +33,13 @@ export function RoleCreatePage() {
           </Button>
         }
       />
-      <div className="bg-[var(--color-surface-container-low)] rounded-lg p-6 max-w-2xl">
+      <Card className="max-w-2xl">
         <RoleForm
           onSubmit={handleSubmit}
           serverError={createMutation.error ? 'حدث خطأ أثناء إنشاء الدور' : undefined}
           loading={createMutation.isPending}
         />
-      </div>
+      </Card>
     </div>
   );
 }

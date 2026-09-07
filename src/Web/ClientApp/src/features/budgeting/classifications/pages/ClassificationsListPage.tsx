@@ -5,7 +5,7 @@ import { getExcludedDescendantIds } from '../utils/classification-utils';
 import { usePermission } from '../../../../shared/hooks/usePermission';
 import { BUDGET_PERMISSIONS } from '../../../../shared/constants/permissions';
 import { ChevronRight, ChevronLeft, Plus, Pencil } from 'lucide-react';
-import { FilterBar, FilterSearch, FilterSelect, Dialog, Switch, ConfirmDialog } from '../../../../components/ui';
+import { FilterBar, FilterSearch, FilterSelect, Dialog, Switch, ConfirmDialog, Button, Input, Select } from '../../../../components/ui';
 import { notify } from '@/features/notifications/notify';
 
 export function normalizeTree(
@@ -152,12 +152,15 @@ function TreeItem({
           />
         )}
         {canEdit && (
-          <button
+          <Button
+            variant="ghost"
+            size="icon-xs"
             onClick={(e) => { e.stopPropagation(); onEdit(node); }}
-            className="ms-auto text-[var(--color-on-surface-variant)] hover:text-[var(--color-primary)] p-1"
+            className="ms-auto"
+            aria-label="تعديل"
           >
             <Pencil size={14} />
-          </button>
+          </Button>
         )}
       </div>
       {isExpanded && hasChildren && (
@@ -405,12 +408,9 @@ export default function ClassificationsListPage() {
     return (
       <div className="p-6 text-center">
         <p className="text-[var(--color-error)]">خطأ في تحميل التصنيفات</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-2 text-sm text-[var(--color-primary)] underline"
-        >
+        <Button variant="link" onClick={() => window.location.reload()} className="mt-2">
           إعادة المحاولة
-        </button>
+        </Button>
       </div>
     );
   }
@@ -420,10 +420,9 @@ export default function ClassificationsListPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-[var(--color-on-surface)]">التصنيفات المالية</h1>
         {canCreate && (
-          <button onClick={handleOpenCreate} className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-on-primary)] px-4 py-2 rounded-lg">
-            <Plus size={16} />
+          <Button variant="primary" onClick={handleOpenCreate} icon={<Plus size={16} />}>
             إضافة تصنيف جديد
-          </button>
+          </Button>
         )}
       </div>
 
@@ -445,9 +444,9 @@ export default function ClassificationsListPage() {
       {tree.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-[var(--color-on-surface-variant)]">لا توجد تصنيفات بعد</p>
-          <button className="mt-2 text-sm text-[var(--color-primary)] underline">
+          <Button variant="link" className="mt-2">
             إضافة تصنيف رئيسي
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="border border-[var(--color-outline-variant)] rounded-lg overflow-hidden" role="tree">
@@ -472,59 +471,40 @@ export default function ClassificationsListPage() {
         onClose={handleCloseDialog}
         title={editItem ? 'تعديل التصنيف' : 'إضافة تصنيف جديد'}
         footer={
-          <button
-            type="submit"
-            form="classification-form"
-            disabled={createMutation.isPending || updateMutation.isPending}
-            className="bg-[var(--color-primary)] text-[var(--color-on-primary)] px-4 py-2 rounded-lg disabled:opacity-50"
-          >
+          <Button type="submit" form="classification-form" variant="primary" disabled={createMutation.isPending || updateMutation.isPending} loading={createMutation.isPending || updateMutation.isPending}>
             {editItem ? 'حفظ التعديلات' : 'إنشاء'}
-          </button>
+          </Button>
         }
       >
         <form id="classification-form" onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="code" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">الكود *</label>
-            <input
-              id="code"
-              name="code"
-              type="text"
-              required
-              defaultValue={editItem?.code}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            />
-          </div>
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">الاسم *</label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              defaultValue={editItem?.name}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            />
-          </div>
-          <div>
-            <label htmlFor="parentId" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">التصنيف الأب</label>
-            <select
-              id="parentId"
-              value={selectedParentId === undefined ? '' : String(selectedParentId)}
-              onChange={(e) => {
-                const val = e.target.value;
-                setSelectedParentId(val ? Number(val) : undefined);
-                setParentIdError('');
-              }}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            >
-              {parentOptions.map((opt) => (
-                <option key={opt.value} value={opt.value} disabled={opt.disabled}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            {parentIdError && <p className="text-xs text-[var(--color-error)] mt-1">{parentIdError}</p>}
-          </div>
+          <Input
+            id="code"
+            name="code"
+            type="text"
+            required
+            defaultValue={editItem?.code}
+            label="الكود"
+          />
+          <Input
+            id="name"
+            name="name"
+            type="text"
+            required
+            defaultValue={editItem?.name}
+            label="الاسم"
+          />
+          <Select
+            id="parentId"
+            label="التصنيف الأب"
+            value={selectedParentId === undefined ? '' : String(selectedParentId)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSelectedParentId(val ? Number(val) : undefined);
+              setParentIdError('');
+            }}
+            options={parentOptions.map((opt) => ({ value: opt.value, label: opt.label, disabled: opt.disabled }))}
+          />
+          {parentIdError && <p className="text-xs text-[var(--color-error)] mt-1">{parentIdError}</p>}
           <Switch
             checked={formIsActive}
             onChange={setFormIsActive}

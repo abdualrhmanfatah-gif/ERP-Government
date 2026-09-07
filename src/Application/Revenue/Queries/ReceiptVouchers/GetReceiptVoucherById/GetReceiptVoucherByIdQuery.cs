@@ -20,6 +20,7 @@ public class GetReceiptVoucherByIdQueryHandler(
             .Include(v => v.Party)
             .Include(v => v.Lines)
             .Include(v => v.Checks)
+            .Include(v => v.DepositSlip)
             .FirstOrDefaultAsync(v => v.Id == request.Id, cancellationToken);
 
         if (voucher is null)
@@ -37,6 +38,7 @@ public class GetReceiptVoucherByIdQueryHandler(
             ReceivedFrom = voucher.ReceivedFrom,
             Notes = voucher.Notes,
             DepositSlipId = voucher.DepositSlipId,
+            DepositSlipNumber = voucher.DepositSlip?.SlipNumber,
             Status = voucher.Status,
             StatusName = voucher.Status.ToString(),
             TotalAmount = voucher.Lines.Sum(l => l.Amount),

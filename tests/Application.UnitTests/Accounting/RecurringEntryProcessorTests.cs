@@ -136,8 +136,8 @@ namespace ERP_Government.Application.UnitTests.Accounting
                     TemplateId = templateId,
                     Sequence = 1,
                     AccountId = 100,
-                    DebitAmount = debit1,
-                    CreditAmount = 0,
+                    Debit = debit1,
+                    Credit = 0,
                     CurrencyId = 1
                 },
                 new JournalEntryTemplateLine
@@ -145,8 +145,8 @@ namespace ERP_Government.Application.UnitTests.Accounting
                     TemplateId = templateId,
                     Sequence = 2,
                     AccountId = 200,
-                    DebitAmount = 0,
-                    CreditAmount = credit2,
+                    Debit = 0,
+                    Credit = credit2,
                     CurrencyId = 1
                 });
             await _dbContext.SaveChangesAsync();
@@ -489,8 +489,8 @@ namespace ERP_Government.Application.UnitTests.Accounting
                     TemplateId = 1,
                     Sequence = 1,
                     AccountId = 100,
-                    DebitAmount = 100,
-                    CreditAmount = 0,
+                    Debit = 100,
+                    Credit = 0,
                     CurrencyId = 1
                 },
                 new JournalEntryTemplateLine
@@ -498,8 +498,8 @@ namespace ERP_Government.Application.UnitTests.Accounting
                     TemplateId = 1,
                     Sequence = 2,
                     AccountId = 200,
-                    DebitAmount = 0,
-                    CreditAmount = 80,
+                    Debit = 0,
+                    Credit = 80,
                     CurrencyId = 1
                 });
             await _dbContext.SaveChangesAsync();
@@ -533,8 +533,8 @@ namespace ERP_Government.Application.UnitTests.Accounting
                     TemplateId = 1,
                     Sequence = 1,
                     AccountId = 100,
-                    DebitAmount = 500,
-                    CreditAmount = 0,
+                    Debit = 500,
+                    Credit = 0,
                     CurrencyId = 5
                 },
                 new JournalEntryTemplateLine
@@ -542,8 +542,8 @@ namespace ERP_Government.Application.UnitTests.Accounting
                     TemplateId = 1,
                     Sequence = 2,
                     AccountId = 200,
-                    DebitAmount = 0,
-                    CreditAmount = 500,
+                    Debit = 0,
+                    Credit = 500,
                     CurrencyId = 5
                 });
             await _dbContext.SaveChangesAsync();
@@ -569,18 +569,18 @@ namespace ERP_Government.Application.UnitTests.Accounting
                     TemplateId = 1,
                     Sequence = 1,
                     AccountId = 100,
-                    DebitAmount = 500,
-                    CreditAmount = 0,
-                    CurrencyId = null // No currency set
+                    Debit = 500,
+                    Credit = 0,
+                    CurrencyId = 1
                 },
                 new JournalEntryTemplateLine
                 {
                     TemplateId = 1,
                     Sequence = 2,
                     AccountId = 200,
-                    DebitAmount = 0,
-                    CreditAmount = 500,
-                    CurrencyId = null
+                    Debit = 0,
+                    Credit = 500,
+                    CurrencyId = 1
                 });
             await _dbContext.SaveChangesAsync();
 
@@ -606,8 +606,8 @@ namespace ERP_Government.Application.UnitTests.Accounting
                     TemplateId = 1,
                     Sequence = 1,
                     AccountId = 100,
-                    DebitAmount = 60,
-                    CreditAmount = 0,
+                    Debit = 60,
+                    Credit = 0,
                     CurrencyId = 1
                 },
                 new JournalEntryTemplateLine
@@ -615,8 +615,8 @@ namespace ERP_Government.Application.UnitTests.Accounting
                     TemplateId = 1,
                     Sequence = 2,
                     AccountId = 200,
-                    DebitAmount = 0,
-                    CreditAmount = 60,
+                    Debit = 0,
+                    Credit = 60,
                     CurrencyId = 1
                 });
             await _dbContext.SaveChangesAsync();

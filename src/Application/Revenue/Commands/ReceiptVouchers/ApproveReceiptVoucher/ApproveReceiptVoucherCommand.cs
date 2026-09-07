@@ -32,8 +32,8 @@ public class ApproveReceiptVoucherCommandHandler(
         if (voucher.Status != ReceiptVoucherStatus.PendingReview)
             return Result.Failure(new[] { "Only Pending Review vouchers can be approved."});
 
-        if (voucher.SubmittedById == userId)
-            return Result.Failure(new[] { "Reviewer cannot be the same as the submitter (separation of duties)."});
+        // No separation-of-duties restriction: submitter may approve their own voucher
+        // (TRE-01 clarification session 2026-09-07). Decision still recorded in history.
 
         voucher.Status = ReceiptVoucherStatus.Approved;
         voucher.ReviewedById = userId;

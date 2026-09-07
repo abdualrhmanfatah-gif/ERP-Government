@@ -1,4 +1,5 @@
 using ERP_Government.Application.Common.Models;
+using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Payments.Commands.DisbursementRequests.ApproveDisbursementRequest;
 using ERP_Government.Application.Payments.Commands.DisbursementRequests.CancelDisbursementRequest;
 using ERP_Government.Application.Payments.Commands.DisbursementRequests.CreateDisbursementRequest;
@@ -16,18 +17,25 @@ public class DisbursementRequests : IEndpointGroup
     public static void Map(RouteGroupBuilder group)
     {
         group.MapGet("/", HandleGetAll)
+            .RequireAuthorization(PermissionCodes.DisbursementRequestsView)
             .Produces<IReadOnlyList<Application.Payments.Common.DTOs.DisbursementRequestDto>>();
         group.MapGet("/{id:int}", HandleGetById)
+            .RequireAuthorization(PermissionCodes.DisbursementRequestsView)
             .Produces<Application.Payments.Common.DTOs.DisbursementRequestDetailDto?>();
         group.MapPost("/", HandleCreate)
+            .RequireAuthorization(PermissionCodes.DisbursementRequestsCreate)
             .Produces<Application.Payments.Common.DTOs.DisbursementRequestDto>();
         group.MapPatch("/{id:int}/submit", HandleSubmit)
+            .RequireAuthorization(PermissionCodes.DisbursementRequestsSubmit)
             .Produces<Result>();
         group.MapPatch("/{id:int}/approve", HandleApprove)
+            .RequireAuthorization(PermissionCodes.DisbursementRequestsApprove)
             .Produces<Result>();
         group.MapPatch("/{id:int}/reject", HandleReject)
+            .RequireAuthorization(PermissionCodes.DisbursementRequestsReject)
             .Produces<Result>();
         group.MapPatch("/{id:int}/cancel", HandleCancel)
+            .RequireAuthorization(PermissionCodes.DisbursementRequestsCancel)
             .Produces<Result>();
     }
 

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
-import { Button, Switch, FilterBar, FilterSearch, FilterSelect, Dialog, ConfirmDialog, Badge } from '@/components/ui';
+import { Button, Switch, FilterBar, FilterSearch, FilterSelect, Dialog, ConfirmDialog, Badge, Input, Textarea, Select } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Pencil } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
@@ -194,52 +194,37 @@ export default function BudgetTypesListPage() {
         }
       >
         <form id="budget-type-form" onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="code" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">الكود *</label>
-            <input
-              id="code"
-              name="code"
-              type="text"
-              required
-              defaultValue={editItem?.code}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            />
-          </div>
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">الاسم *</label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              defaultValue={editItem?.name}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            />
-          </div>
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">الوصف</label>
-            <textarea
-              id="description"
-              name="description"
-              rows={3}
-              defaultValue={editItem?.description}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            />
-          </div>
-          <div>
-            <label htmlFor="controlMethod" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">طريقة التحكم *</label>
-            <select
-              id="controlMethod"
-              name="controlMethod"
-              required
-              defaultValue={editItem?.controlMethod}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            >
-              {Object.entries(budgetControlMethodLabels).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
-            </select>
-          </div>
+          <Input
+            label="الكود *"
+            id="code"
+            name="code"
+            type="text"
+            required
+            defaultValue={editItem?.code}
+          />
+          <Input
+            label="الاسم *"
+            id="name"
+            name="name"
+            type="text"
+            required
+            defaultValue={editItem?.name}
+          />
+          <Textarea
+            label="الوصف"
+            id="description"
+            name="description"
+            rows={3}
+            defaultValue={editItem?.description}
+          />
+          <Select
+            label="طريقة التحكم *"
+            id="controlMethod"
+            name="controlMethod"
+            required
+            defaultValue={String(editItem?.controlMethod ?? '')}
+            options={Object.entries(budgetControlMethodLabels).map(([value, label]) => ({ value, label }))}
+          />
           <div className="flex items-center gap-2">
             <input
               id="allowOverrun"

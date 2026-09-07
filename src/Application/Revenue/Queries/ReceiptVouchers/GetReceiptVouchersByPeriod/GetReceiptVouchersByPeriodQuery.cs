@@ -23,6 +23,7 @@ public class GetReceiptVouchersByPeriodQueryHandler(
             .Include(v => v.Party)
             .Include(v => v.Lines)
             .Include(v => v.Checks)
+            .Include(v => v.DepositSlip)
             .Where(v => v.VoucherDate >= request.FromDate && v.VoucherDate <= request.ToDate)
             .OrderByDescending(v => v.Created)
             .Skip((request.Page - 1) * request.PageSize)
@@ -39,6 +40,7 @@ public class GetReceiptVouchersByPeriodQueryHandler(
                 ReceivedFrom = v.ReceivedFrom,
                 Notes = v.Notes,
                 DepositSlipId = v.DepositSlipId,
+                DepositSlipNumber = v.DepositSlip != null ? v.DepositSlip.SlipNumber : null,
                 Status = v.Status,
                 StatusName = v.Status.ToString(),
                 TotalAmount = v.Lines.Sum(l => l.Amount),

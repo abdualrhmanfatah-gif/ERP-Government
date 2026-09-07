@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Tabs } from '@/components/ui/Tabs';
 import { Loading } from '@/components/ui/Loading';
-import { AccountDetail } from '../components/AccountDetail';
+import { AccountDetail } from '@/components/AccountingAccountDetail';
 import { useAccountDetail } from '../hooks/useAccountDetail';
 
 export function AccountDetailPage() {

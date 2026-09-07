@@ -65,7 +65,7 @@ public class BudgetItemCommandTests
         _contextMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         var result = await new CreateBudgetItemCommandHandler(_contextMock.Object)
-            .Handle(new CreateBudgetItemCommand(1, "PS-001", "Personnel Services", null, null), CancellationToken.None);
+            .Handle(new CreateBudgetItemCommand(1, "PS-001", "Personnel Services", null, null, null, null, null, null, null), CancellationToken.None);
 
         result.Succeeded.ShouldBeTrue();
         budgetItems.Verify(x => x.Add(It.IsAny<BudgetItem>()), Times.Once);
@@ -79,7 +79,7 @@ public class BudgetItemCommandTests
         WireContext(budgetItems: budgetItems, budgets: budgets);
 
         var result = await new CreateBudgetItemCommandHandler(_contextMock.Object)
-            .Handle(new CreateBudgetItemCommand(1, "PS-001", "Duplicate", null, null), CancellationToken.None);
+            .Handle(new CreateBudgetItemCommand(1, "PS-001", "Duplicate", null, null, null, null, null, null, null), CancellationToken.None);
 
         result.Succeeded.ShouldBeFalse();
         result.Errors.ShouldContain(e => e.Contains("already exists"));
@@ -93,7 +93,7 @@ public class BudgetItemCommandTests
         WireContext(budgetItems: budgetItems, budgets: budgets);
 
         var result = await new CreateBudgetItemCommandHandler(_contextMock.Object)
-            .Handle(new CreateBudgetItemCommand(999, "PS-001", "Item", null, null), CancellationToken.None);
+            .Handle(new CreateBudgetItemCommand(999, "PS-001", "Item", null, null, null, null, null, null, null), CancellationToken.None);
 
         result.Succeeded.ShouldBeFalse();
         result.Errors.ShouldContain(e => e.Contains("Budget not found"));
@@ -107,7 +107,7 @@ public class BudgetItemCommandTests
         WireContext(budgetItems: budgetItems, budgets: budgets);
 
         var result = await new CreateBudgetItemCommandHandler(_contextMock.Object)
-            .Handle(new CreateBudgetItemCommand(1, "PS-001", "Item", 999, null), CancellationToken.None);
+            .Handle(new CreateBudgetItemCommand(1, "PS-001", "Item", 999, null, null, null, null, null, null), CancellationToken.None);
 
         result.Succeeded.ShouldBeFalse();
         result.Errors.ShouldContain(e => e.Contains("Parent budget item not found"));
@@ -121,7 +121,7 @@ public class BudgetItemCommandTests
         WireContext(budgetItems: budgetItems, budgets: budgets);
 
         var result = await new CreateBudgetItemCommandHandler(_contextMock.Object)
-            .Handle(new CreateBudgetItemCommand(1, "PS-001", "Item", 10, null), CancellationToken.None);
+            .Handle(new CreateBudgetItemCommand(1, "PS-001", "Item", 10, null, null, null, null, null, null), CancellationToken.None);
 
         result.Succeeded.ShouldBeFalse();
         result.Errors.ShouldContain(e => e.Contains("Parent budget item not found in the same budget"));
@@ -291,7 +291,7 @@ public class BudgetItemCommandTests
     [Test]
     public async Task CreateItemValidator_EmptyItemCode_ShouldHaveError()
     {
-        var result = await new CreateBudgetItemCommandValidator().ValidateAsync(new CreateBudgetItemCommand(1, "", "Name", null, null));
+        var result = await new CreateBudgetItemCommandValidator().ValidateAsync(new CreateBudgetItemCommand(1, "", "Name", null, null, null, null, null, null, null));
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldContain(e => e.PropertyName == "ItemCode");
     }
@@ -299,7 +299,7 @@ public class BudgetItemCommandTests
     [Test]
     public async Task CreateItemValidator_EmptyItemName_ShouldHaveError()
     {
-        var result = await new CreateBudgetItemCommandValidator().ValidateAsync(new CreateBudgetItemCommand(1, "CODE", "", null, null));
+        var result = await new CreateBudgetItemCommandValidator().ValidateAsync(new CreateBudgetItemCommand(1, "CODE", "", null, null, null, null, null, null, null));
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldContain(e => e.PropertyName == "ItemName");
     }

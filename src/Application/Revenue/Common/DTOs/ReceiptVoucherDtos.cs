@@ -11,7 +11,7 @@ public class ReceiptVoucherDto
     public string PartyName { get; init; } = string.Empty;
     public PaymentMethod PaymentMethod { get; init; }
     public string PaymentMethodName { get; init; } = string.Empty;
-    public string ReceivedFrom { get; init; } = string.Empty;
+    public string? ReceivedFrom { get; init; }
     public string? Notes { get; init; }
     public int? DepositSlipId { get; init; }
     public string? DepositSlipNumber { get; init; }
@@ -120,4 +120,15 @@ public class CheckClearingDto
     public string BankName { get; init; } = string.Empty;
     public DateTimeOffset ClearedAt { get; init; }
     public decimal Amount { get; init; }
+}
+
+public class CheckDetailDto
+{
+    public int CheckId { get; init; }
+    public string BankName { get; init; } = string.Empty;
+    public string CheckNumber { get; init; } = string.Empty;
+    public DateOnly CheckDate { get; init; }
+    public decimal Amount { get; init; }
+    public CheckStatus Status { get; init; }
+    public DateTimeOffset? ClearedAt { get; init; }
 }

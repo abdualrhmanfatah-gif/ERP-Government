@@ -563,9 +563,6 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int>("AccountId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("BudgetItemId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("CostCenterId")
                         .HasColumnType("int");
 
@@ -588,14 +585,8 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int?>("EncumbranceId")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("ExchangeRate")
                         .HasColumnType("decimal(18,6)");
-
-                    b.Property<int?>("FundId")
-                        .HasColumnType("int");
 
                     b.Property<int>("JournalEntryId")
                         .HasColumnType("int");
@@ -607,9 +598,6 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("PaymentOrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<byte[]>("RowVersion")
@@ -625,21 +613,13 @@ namespace ERP_Government.Infrastructure.Migrations
 
                     b.HasIndex("AccountId");
 
-                    b.HasIndex("BudgetItemId");
-
                     b.HasIndex("CostCenterId");
 
                     b.HasIndex("CurrencyId");
 
-                    b.HasIndex("EncumbranceId");
-
-                    b.HasIndex("FundId");
-
                     b.HasIndex("JournalEntryId");
 
                     b.HasIndex("PaymentOrderId");
-
-                    b.HasIndex("ProjectId");
 
                     b.HasIndex("AccountId", "JournalEntryId")
                         .HasDatabaseName("IX_JournalEntryLines_AccountId_JournalEntryId");
@@ -724,36 +704,27 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("CreditAmount")
+                    b.Property<decimal>("Credit")
                         .HasColumnType("decimal(23,2)");
 
-                    b.Property<int?>("CurrencyId")
+                    b.Property<int>("CurrencyId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("DebitAmount")
+                    b.Property<decimal>("Debit")
                         .HasColumnType("decimal(23,2)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int?>("FundId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsMandatory")
-                        .HasColumnType("bit");
+                    b.Property<decimal>("ExchangeRate")
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("OrganizationUnitId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ProjectId")
-                        .HasColumnType("int");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -774,12 +745,6 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.HasIndex("CostCenterId");
 
                     b.HasIndex("CurrencyId");
-
-                    b.HasIndex("FundId");
-
-                    b.HasIndex("OrganizationUnitId");
-
-                    b.HasIndex("ProjectId");
 
                     b.HasIndex("TemplateId");
 
@@ -7372,74 +7337,6 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.ToTable("Notifications", (string)null);
                 });
 
-            modelBuilder.Entity("ERP_Government.Domain.Security.Entities.RecordRule", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AccessScope")
-                        .HasMaxLength(30)
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset>("Created")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DomainFilter")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("EntityName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset>("LastModified")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("RoleId")
-                        .HasColumnType("int");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int>("RuleType")
-                        .HasMaxLength(20)
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("EntityName", "RoleId", "RuleType")
-                        .IsUnique()
-                        .HasFilter("[RoleId] IS NOT NULL");
-
-                    b.ToTable("RecordRules", (string)null);
-                });
-
             modelBuilder.Entity("ERP_Government.Domain.Security.Entities.RolePermission", b =>
                 {
                     b.Property<int>("RoleId")
@@ -8393,16 +8290,6 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasForeignKey("CostCenterId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("ERP_Government.Domain.Organization.Entities.OrganizationalUnit", "OrganizationUnit")
-                        .WithMany()
-                        .HasForeignKey("OrganizationUnitId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("ERP_Government.Domain.Organization.Entities.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("ERP_Government.Domain.Accounting.Entities.JournalEntryTemplate", "Template")
                         .WithMany()
                         .HasForeignKey("TemplateId")
@@ -8412,10 +8299,6 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("CostCenter");
-
-                    b.Navigation("OrganizationUnit");
-
-                    b.Navigation("Project");
 
                     b.Navigation("Template");
                 });
@@ -9356,16 +9239,6 @@ namespace ERP_Government.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ERP_Government.Domain.Security.Entities.RecordRule", b =>
-                {
-                    b.HasOne("ERP_Government.Domain.Security.Entities.SecurityRole", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("ERP_Government.Domain.Security.Entities.RolePermission", b =>

@@ -27,9 +27,6 @@ internal class GetLedgerMovementQueryHandler(IApplicationDbContext dbContext)
                      && l.JournalEntry.FiscalYearId == request.FiscalYearId
                      && l.JournalEntry.EntryStatus == EntryStatus.Posted);
 
-        if (request.FundId.HasValue)
-            query = query.Where(l => l.FundId == request.FundId.Value);
-
         var lines = await query
             .OrderBy(l => l.JournalEntry.DocumentDate)
             .ThenBy(l => l.JournalEntry.EntryNumber)
@@ -40,8 +37,7 @@ internal class GetLedgerMovementQueryHandler(IApplicationDbContext dbContext)
             .AsNoTracking()
             .Where(l => l.AccountId == request.AccountId
                      && l.JournalEntry.EntryStatus == EntryStatus.Posted
-                     && l.JournalEntry.DocumentDate < fiscalYear.StartDate
-                     && (request.FundId == null || l.FundId == request.FundId))
+                     && l.JournalEntry.DocumentDate < fiscalYear.StartDate)
             .SumAsync(l => l.Debit - l.Credit, cancellationToken);
 
         var runningBalance = openingBalance;

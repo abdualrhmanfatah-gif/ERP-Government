@@ -1,4 +1,5 @@
 import { Check, X } from 'lucide-react';
+import { Button } from '@/components/ui';
 import { useNotifications, useMarkAsRead, useMarkAllAsRead, useDeleteNotification, useClearAllNotifications } from './hooks';
 import { useNotificationStore } from './store';
 import type { NotificationEntry, NotificationDto } from './types';
@@ -75,23 +76,23 @@ function NotificationItem({
         </div>
         <div className="flex items-center gap-1">
           {!notification.isRead ? (
-            <button
-              type="button"
-              className="p-2 min-w-9 min-h-9 rounded-lg hover:bg-[var(--color-surface-container-high)] transition-colors text-[var(--color-on-surface-variant)]"
+            <Button
+              variant="ghost"
+              size="icon-xs"
               aria-label="تحديد كمقروء"
               onClick={() => onMarkAsRead(notification.id)}
             >
               <Check size={16} />
-            </button>
+            </Button>
           ) : null}
-          <button
-            type="button"
-            className="p-2 min-w-9 min-h-9 rounded-lg hover:bg-[var(--color-surface-container-high)] transition-colors text-[var(--color-on-surface-variant)]"
+          <Button
+            variant="ghost"
+            size="icon-xs"
             aria-label="حذف"
             onClick={() => onDelete(notification.id)}
           >
             <X size={16} />
-          </button>
+          </Button>
         </div>
       </div>
     </li>
@@ -134,24 +135,26 @@ export function NotificationDropdown({ onClose: _onClose }: Props) {
         <span className="text-body-sm font-semibold text-[var(--color-on-surface)]">الإشعارات</span>
         <div className="flex items-center gap-2">
           {unreadCount > 0 ? (
-            <button
-              type="button"
-              className="text-label-sm text-[var(--color-primary)] hover:text-[var(--color-primary-container)] transition-colors"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[var(--color-primary)]"
               onClick={handleMarkAllAsRead}
               disabled={markAllAsRead.isPending}
             >
               تحديد الكل كمقروء
-            </button>
+            </Button>
           ) : null}
           {store.entries.length > 0 ? (
-            <button
-              type="button"
-              className="text-label-sm text-[var(--color-error)] transition-colors"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[var(--color-error)]"
               onClick={handleClearAll}
               disabled={clearAll.isPending}
             >
               مسح الكل
-            </button>
+            </Button>
           ) : null}
         </div>
       </div>

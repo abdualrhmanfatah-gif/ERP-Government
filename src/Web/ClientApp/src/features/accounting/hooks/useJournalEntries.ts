@@ -1,13 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { journalEntriesClient as client } from '../shared/client';
-import type {
-  CreateJournalEntryCommand,
+import {
   UpdateJournalEntryCommand,
   SubmitJournalEntryCommand,
   ApproveJournalEntryCommand,
   PostJournalEntryCommand,
   ReverseJournalEntryCommand,
   CancelJournalEntryCommand,
+} from '../../../web-api-client';
+import type {
+  CreateJournalEntryCommand,
+  UpdateJournalEntryCommand as UpdateJournalEntryCommandData,
+  SubmitJournalEntryCommand as SubmitJournalEntryCommandData,
+  ApproveJournalEntryCommand as ApproveJournalEntryCommandData,
+  PostJournalEntryCommand as PostJournalEntryCommandData,
+  ReverseJournalEntryCommand as ReverseJournalEntryCommandData,
+  CancelJournalEntryCommand as CancelJournalEntryCommandData,
 } from '../types';
 
 export interface ProblemDetails {
@@ -49,7 +57,16 @@ export function useCreateJournalEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (command: CreateJournalEntryCommand) => client.journalEntriesPOST(command),
+    mutationFn: async (command: CreateJournalEntryCommand) => {
+      const response = await fetch('/api/JournalEntries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(command),
+      });
+      if (!response.ok) throw new Error('Failed to create');
+      const data = await response.json();
+      return data.id as number;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
     },
@@ -60,8 +77,13 @@ export function useUpdateJournalEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, command }: { id: number; command: UpdateJournalEntryCommand }) =>
-      client.journalEntriesPUT(id, command),
+    mutationFn: ({ id, command }: { id: number; command: UpdateJournalEntryCommandData }) =>
+      client.journalEntriesPUT(id, new UpdateJournalEntryCommand({
+        id,
+        narration: command.narration ?? undefined,
+        ref: command.ref ?? undefined,
+        rowVersion: command.rowVersion,
+      })),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
       queryClient.invalidateQueries({ queryKey: ['journalEntry', variables.id] });
@@ -73,8 +95,8 @@ export function useSubmitJournalEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, command }: { id: number; command?: SubmitJournalEntryCommand }) =>
-      client.submitPOST3(id, command ?? {}),
+    mutationFn: ({ id, command }: { id: number; command?: SubmitJournalEntryCommandData }) =>
+      client.submitPOST3(id, new SubmitJournalEntryCommand({ id, ...command })),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
       queryClient.invalidateQueries({ queryKey: ['journalEntry', variables.id] });
@@ -86,8 +108,8 @@ export function useApproveJournalEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, command }: { id: number; command?: ApproveJournalEntryCommand }) =>
-      client.approvePOST7(id, command ?? {}),
+    mutationFn: ({ id, command }: { id: number; command?: ApproveJournalEntryCommandData }) =>
+      client.approvePOST7(id, new ApproveJournalEntryCommand({ id, ...command })),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
       queryClient.invalidateQueries({ queryKey: ['journalEntry', variables.id] });
@@ -99,8 +121,8 @@ export function usePostJournalEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, command }: { id: number; command?: PostJournalEntryCommand }) =>
-      client.post(id, command ?? {}),
+    mutationFn: ({ id, command }: { id: number; command?: PostJournalEntryCommandData }) =>
+      client.post(id, new PostJournalEntryCommand({ id, ...command })),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
       queryClient.invalidateQueries({ queryKey: ['journalEntry', variables.id] });
@@ -112,8 +134,8 @@ export function useReverseJournalEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, command }: { id: number; command: ReverseJournalEntryCommand }) =>
-      client.reversePOST2(id, command),
+    mutationFn: ({ id, command }: { id: number; command: ReverseJournalEntryCommandData }) =>
+      client.reversePOST2(id, new ReverseJournalEntryCommand({ id, ...command })),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
       queryClient.invalidateQueries({ queryKey: ['journalEntry', variables.id] });
@@ -125,8 +147,8 @@ export function useCancelJournalEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, command }: { id: number; command?: CancelJournalEntryCommand }) =>
-      client.cancelPOST6(id, command ?? {}),
+    mutationFn: ({ id, command }: { id: number; command?: CancelJournalEntryCommandData }) =>
+      client.cancelPOST6(id, new CancelJournalEntryCommand({ id, ...command })),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
       queryClient.invalidateQueries({ queryKey: ['journalEntry', variables.id] });

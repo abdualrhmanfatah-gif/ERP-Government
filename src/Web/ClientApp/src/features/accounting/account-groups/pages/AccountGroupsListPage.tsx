@@ -7,10 +7,10 @@ import { DataGrid } from '@/components/ui/DataGrid';
 import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Input } from '@/components/ui/Input';
-import { FilterBar, FilterSelect } from '@/components/ui';
+import { FilterBar, FilterSelect, Loading } from '@/components/ui';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { GroupTree } from '../components/GroupTree';
-import { AccountGroupForm } from '../components/AccountGroupForm';
+import { GroupTree } from '@/components/AccountingGroupTree';
+import { AccountGroupForm } from '@/components/AccountingAccountGroupForm';
 import { useAccountGroupsList } from '../hooks/useAccountGroupsList';
 import { useCreateAccountGroup } from '../hooks/useCreateAccountGroup';
 import { useUpdateAccountGroup } from '../hooks/useUpdateAccountGroup';
@@ -91,7 +91,7 @@ export function AccountGroupsListPage() {
         <FilterSelect label="الحالة" value={filterActive} onChange={(v: string)=>{setFilterActive(v); setPage(1);}} options={[{value:'All',label:'الكل'},{value:'active',label:'نشط'},{value:'inactive',label:'معطل'}]} />
       </FilterBar>
 
-      {isLoading && <p className="text-sm text-[var(--color-on-surface-variant)]">جاري التحميل...</p>}
+      {isLoading && <Loading />}
       {error && <p className="text-sm text-[var(--color-error)]">خطأ في التحميل</p>}
 
       {isTreeMode ? (

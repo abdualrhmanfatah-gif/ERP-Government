@@ -5,7 +5,7 @@ import { PERMISSIONS } from '@/shared/constants/permissions';
 import { Button, FilterBar, FilterSearch, Loading } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Eye } from 'lucide-react';
-import { FiscalYearStatusBadge } from '../../components/FiscalYearStatusBadge';
+import { FiscalYearStatusBadge } from '@/components/FinancialSettingsFiscalYearStatusBadge';
 import { useFiscalYearsList } from '../../hooks/useFiscalYears';
 
 export default function FiscalYearsListPage() {

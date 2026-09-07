@@ -1,4 +1,5 @@
 using ERP_Government.Domain.Accounting.Entities;
+using ERP_Government.Domain.Accounting.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,10 +14,12 @@ public class PostingRuleLineConfiguration : IEntityTypeConfiguration<PostingRule
         builder.HasKey(e => e.Id);
 
         builder.Property(e => e.AccountSource)
+            .HasConversion<string>()
             .HasMaxLength(20)
             .IsRequired();
 
         builder.Property(e => e.AmountSource)
+            .HasConversion<string>()
             .HasMaxLength(30)
             .IsRequired();
 

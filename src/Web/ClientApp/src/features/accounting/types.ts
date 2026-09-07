@@ -1,6 +1,6 @@
-import type { AccountDto, AccountGroupDto } from '../../web-api-client';
+import type { AccountDto, AccountGroupDto, MoveEntryType } from '../../web-api-client';
 
-export type { AccountDto, AccountGroupDto };
+export type { AccountDto, AccountGroupDto, MoveEntryType };
 
 export interface AccountTreeNode extends AccountDto {
   children: AccountTreeNode[];
@@ -14,16 +14,6 @@ export enum EntryStatus {
   Posted = "Posted",
   Reversed = "Reversed",
   Cancelled = "Cancelled",
-}
-
-// ─── MoveEntryType Enum ────────────────────────────────────────────────
-export enum MoveEntryType {
-  Standard = "Standard",
-  Reversing = "Reversing",
-  Adjusting = "Adjusting",
-  Closing = "Closing",
-  Opening = "Opening",
-  SystemGenerated = "SystemGenerated",
 }
 
 // ─── JournalEntry DTOs ─────────────────────────────────────────────────

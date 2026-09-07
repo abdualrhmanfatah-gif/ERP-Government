@@ -4,7 +4,7 @@ using ERP_Government.Domain.Revenue.Enums;
 
 namespace ERP_Government.Application.Revenue.Commands.DepositSlips.AddVoucherToSlip;
 
-[Authorize(Policy = PermissionCodes.DepositSlipsManage)]
+[Authorize(Policy = PermissionCodes.DepositSlipsUpdate)]
 public class AddVoucherToSlipCommand : IRequest<Result>
 {
     public int SlipId { get; init; }
@@ -21,32 +21,31 @@ public class AddVoucherToSlipCommandHandler(
     {
         var slip = await context.DepositSlips.FindAsync(request.SlipId, cancellationToken);
         if (slip is null)
-            return Result.Failure(new[] { "Deposit slip not found."});
+            return Result.Failure(new[] { "Deposit slip not found." });
 
         if (slip.Status != DepositSlipStatus.Draft)
-            return Result.Failure(new[] { "Only Draft slips can be modified."});
+            return Result.Failure(new[] { "Only Draft slips can be modified." });
 
         var voucher = await context.ReceiptVouchers.FindAsync(request.VoucherId, cancellationToken);
         if (voucher is null)
-            return Result.Failure(new[] { "Receipt voucher not found."});
+            return Result.Failure(new[] { "Receipt voucher not found." });
 
         if (voucher.Status != ReceiptVoucherStatus.Approved)
-            return Result.Failure(new[] { "Voucher must be Approved."});
+            return Result.Failure(new[] { "Voucher must be Approved." });
 
         if (voucher.DepositSlipId.HasValue)
-            return Result.Failure(new[] { "Voucher is already part of a deposit slip."});
+            return Result.Failure(new[] { "Voucher is already part of a deposit slip." });
 
-        var hasCheck = await context.Checks.AnyAsync(c => c.ReceiptVoucherId == voucher.Id, cancellationToken);
-        var isCheckVoucher = hasCheck || voucher.PaymentMethod == PaymentMethod.Check;
+        if (slip.FormType == FormType.Form47 && voucher.PaymentMethod != PaymentMethod.Cash)
+            return Result.Failure(new[] { "Voucher is not a cash voucher and cannot be added to a Form 47 (cash-only) slip." });
 
-        if (slip.FormType == FormType.Form47 && isCheckVoucher)
-            return Result.Failure(new[] { "Voucher contains checks and cannot be added to a Form 47 (cash-only) slip."});
-
-        if (slip.FormType == FormType.Form48 && !isCheckVoucher)
-            return Result.Failure(new[] { "Voucher is cash-only and cannot be added to a Form 48 (checks-only) slip."});
+        if (slip.FormType == FormType.Form48 && voucher.PaymentMethod != PaymentMethod.Check)
+            return Result.Failure(new[] { "Voucher is not a check voucher and cannot be added to a Form 48 (checks-only) slip." });
 
         voucher.DepositSlipId = slip.Id;
-        slip.TotalAmount += voucher.Lines.Sum(l => l.Amount);
+
+        var allMembers = slip.ReceiptVouchers.Append(voucher).ToList();
+        slip.TotalAmount = allMembers.Sum(v => v.Lines.Sum(l => l.Amount));
         slip.RowVersion = request.RowVersion;
 
         try
@@ -55,7 +54,7 @@ public class AddVoucherToSlipCommandHandler(
         }
         catch (DbUpdateConcurrencyException)
         {
-            return Result.Failure(new[] { "Deposit slip was modified by another user. Please refresh and try again."});
+            return Result.Failure(new[] { "Deposit slip was modified by another user. Please refresh and try again." });
         }
 
         return Result.Success();

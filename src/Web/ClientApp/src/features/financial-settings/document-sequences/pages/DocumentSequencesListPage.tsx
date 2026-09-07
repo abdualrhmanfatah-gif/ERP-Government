@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Button, Switch, ConfirmDialog } from '@/components/ui';
+import { Button, Switch, ConfirmDialog, Input } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { notify } from '@/features/notifications/notify';
 import { useDocumentSequencesList, useUpdateDocumentSequence, useDeactivateDocumentSequence } from '../../hooks/useDocumentSequences';
@@ -50,7 +50,7 @@ export default function DocumentSequencesListPage() {
     {
       header: 'الاسم',
       cell: (row) => editItem?.id === row.id
-        ? <input value={editName} onChange={(e) => setEditName(e.target.value)} className="px-2 py-1 rounded border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)] text-sm" />
+        ? <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="h-8 text-sm" />
         : <span className="font-medium">{row.name}</span>,
     },
     { header: 'نوع الوثيقة', cell: (row) => <span className="font-mono">{row.documentType}</span> },

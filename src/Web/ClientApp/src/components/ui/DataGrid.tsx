@@ -15,7 +15,7 @@ import { ErrorState } from './ErrorState';
 import { Pagination } from './Pagination';
 import { MobileCard, MobileCardField } from './MobileCard';
 
-interface DataGridColumn<T> {
+export interface DataGridColumn<T> {
   id?: string;
   key?: string;
   header: string;

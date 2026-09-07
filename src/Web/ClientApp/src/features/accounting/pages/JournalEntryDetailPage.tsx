@@ -9,11 +9,12 @@ import {
   useCancelJournalEntry,
 } from '../hooks/useJournalEntries';
 import { usePermission, hasPermission as checkPermission } from '../../../shared/hooks/usePermission';
-import { StatusBadge } from '../components/StatusBadge';
-import { BalanceIndicator } from '../components/BalanceIndicator';
-import { ReverseDialog } from '../components/ReverseDialog';
-import { ApprovalsPanel } from '../../documents/components/ApprovalsPanel';
-import { StatusLogPanel } from '../../documents/components/StatusLogPanel';
+import { StatusBadge } from '@/components/AccountingStatusBadge';
+import { BalanceIndicator } from '@/components/AccountingBalanceIndicator';
+import { ReverseDialog } from '@/components/AccountingReverseDialog';
+import { ApprovalsPanel } from '@/components/DocumentsApprovalsPanel';
+import { StatusLogPanel } from '@/components/DocumentsStatusLogPanel';
+import { Button, Card } from '@/components/ui';
 function formatDate(value: unknown): string {
   if (!value) return '';
   if (typeof value === 'string') return value;
@@ -32,7 +33,6 @@ function getActionsForStatus(status: string) {
 }
 
 const actionLabels: Record<string, string> = { submit: 'تقديم', approve: 'موافقة', post: 'تسجيل', reverse: 'عكس', cancel: 'إلغاء' };
-const actionLoadingLabels: Record<string, string> = { submit: 'جاري التقديم...', approve: 'جاري الموافقة...', post: 'جاري التسجيل...', reverse: 'جاري العكس...', cancel: 'جاري الإلغاء...' };
 const permissionMap: Record<string, string> = {
   submit: 'Accounting.JournalEntries.Submit', approve: 'Accounting.JournalEntries.Approve',
   post: 'Accounting.JournalEntries.Post', reverse: 'Accounting.JournalEntries.Reverse', cancel: 'Accounting.JournalEntries.Cancel',
@@ -58,11 +58,11 @@ export function JournalEntryDetailPage() {
     setConflictError(null);
     try {
       switch (action) {
-        case 'submit': await submitMutation.mutateAsync({ id: entryId, command: {} }); break;
-        case 'approve': await approveMutation.mutateAsync({ id: entryId, command: {} }); break;
-        case 'post': await postMutation.mutateAsync({ id: entryId, command: {} }); break;
+        case 'submit': await submitMutation.mutateAsync({ id: entryId, command: { rowVersion: entry?.rowVersion ?? '' } }); break;
+        case 'approve': await approveMutation.mutateAsync({ id: entryId, command: { rowVersion: entry?.rowVersion ?? '' } }); break;
+        case 'post': await postMutation.mutateAsync({ id: entryId, command: { rowVersion: entry?.rowVersion ?? '' } }); break;
         case 'reverse': setShowReverseDialog(true); break;
-        case 'cancel': await cancelMutation.mutateAsync({ id: entryId, command: {} }); break;
+        case 'cancel': await cancelMutation.mutateAsync({ id: entryId, command: { rowVersion: entry?.rowVersion ?? '' } }); break;
       }
     } catch (err: unknown) {
       const e = err as { status?: number };
@@ -73,7 +73,7 @@ export function JournalEntryDetailPage() {
   const handleReverseConfirm = async (reason: string) => {
     setConflictError(null);
     try {
-      await reverseMutation.mutateAsync({ id: entryId, command: { reason } });
+      await reverseMutation.mutateAsync({ id: entryId, command: { reason, rowVersion: entry?.rowVersion ?? '' } });
       setShowReverseDialog(false);
     } catch (err: unknown) {
       const e = err as { status?: number };
@@ -89,10 +89,6 @@ export function JournalEntryDetailPage() {
     submit: () => handleAction('submit'), approve: () => handleAction('approve'),
     post: () => handleAction('post'), reverse: () => handleAction('reverse'), cancel: () => handleAction('cancel'),
   };
-
-  const cardClass = 'rounded-xl border overflow-hidden';
-  const cardBorder = { borderColor: 'var(--color-outlineVariant)' };
-  const cardHeader = 'px-6 py-4 border-b';
 
   if (isLoading) {
     return (
@@ -112,7 +108,7 @@ export function JournalEntryDetailPage() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
         </svg>
         <p className="text-sm font-bold" style={{ color: 'var(--color-error)' }}>خطأ في تحميل القيد</p>
-        <button onClick={() => navigate('/accounting/journal-entries')} className="mt-4 text-sm font-bold cursor-pointer hover:underline" style={{ color: 'var(--color-link)' }}>العودة للقائمة</button>
+        <Button variant="link" onClick={() => navigate('/accounting/journal-entries')} className="mt-4">العودة للقائمة</Button>
       </div>
     );
   }
@@ -122,27 +118,27 @@ export function JournalEntryDetailPage() {
   return (
     <div className="max-w-6xl mx-auto py-8 px-6" dir="rtl">
       {conflictError && (
-        <div className="mb-6 p-4 rounded-xl text-sm flex items-center justify-between" style={{ backgroundColor: 'var(--color-error-container)', color: 'var(--color-error)' }}>
+        <Card variant="default" padding="sm" className="mb-6 text-sm flex items-center justify-between bg-[var(--color-error-container)] text-[var(--color-error)]">
           <div className="flex items-center gap-2">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <span>{conflictError}</span>
           </div>
-          <button onClick={() => setConflictError(null)} className="cursor-pointer hover:opacity-70">
+          <Button variant="ghost" size="icon-xs" onClick={() => setConflictError(null)} aria-label="إغلاق">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-          </button>
-        </div>
+          </Button>
+        </Card>
       )}
 
       <div className="space-y-6">
         {/* بيانات القيد */}
-        <div className={cardClass} style={{ backgroundColor: 'var(--color-surface)', ...cardBorder }}>
-          <div className={cardHeader} style={{ borderColor: 'var(--color-outlineVariant)', backgroundColor: 'var(--color-surfaceContainerLow)' }}>
+        <Card variant="default">
+          <div className="px-6 py-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold" style={{ color: 'var(--color-onSurface)' }}>
                   {entry.entryNumber}
                   {entry.isSystemGenerated && (
-                    <span className="mr-2 text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ backgroundColor: 'var(--color-surfaceContainerHigh)', color: 'var(--color-onSurfaceVariant)' }}>نظام</span>
+                    <span className="mr-2 text-[10px] px-2 py-0.5 rounded-full font-bold bg-[var(--color-surfaceContainerHigh)] text-[var(--color-onSurfaceVariant)]">نظام</span>
                   )}
                 </h2>
                 <p className="text-sm mt-0.5" style={{ color: 'var(--color-onSurfaceVariant)' }}>{formatDate(entry.documentDate)}</p>
@@ -161,11 +157,11 @@ export function JournalEntryDetailPage() {
             {entry.postedByName && entry.postedAt && <p className="mt-2 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>سجل بواسطة: {entry.postedByName} — {formatDate(entry.postedAt)}</p>}
             {entry.cancelledByName && entry.cancelledAt && <p className="mt-2 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>ألغى بواسطة: {entry.cancelledByName} — {formatDate(entry.cancelledAt)}</p>}
           </div>
-        </div>
+        </Card>
 
         {/* الأسطر */}
-        <div className={cardClass} style={{ backgroundColor: 'var(--color-surface)', ...cardBorder }}>
-          <div className={cardHeader} style={{ borderColor: 'var(--color-outlineVariant)', backgroundColor: 'var(--color-surfaceContainerLow)' }}>
+        <Card variant="default">
+          <div className="px-6 py-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">
             <h2 className="text-base font-bold" style={{ color: 'var(--color-onSurface)' }}>الأسطر</h2>
           </div>
           <div className="p-6">
@@ -209,12 +205,12 @@ export function JournalEntryDetailPage() {
             )}
             <div className="mt-4"><BalanceIndicator totalDebit={entry.totalDebit} totalCredit={entry.totalCredit} /></div>
           </div>
-        </div>
+        </Card>
 
         {/* الإجراءات */}
         {actions.length > 0 && !entry.isSystemGenerated && (
-          <div className={cardClass} style={{ backgroundColor: 'var(--color-surface)', ...cardBorder }}>
-            <div className={cardHeader} style={{ borderColor: 'var(--color-outlineVariant)', backgroundColor: 'var(--color-surfaceContainerLow)' }}>
+          <Card variant="default">
+            <div className="px-6 py-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">
               <h2 className="text-base font-bold" style={{ color: 'var(--color-onSurface)' }}>الإجراءات</h2>
             </div>
             <div className="p-6">
@@ -224,51 +220,46 @@ export function JournalEntryDetailPage() {
                   const handler = handlerMap[action];
                   const allowed = hasPermission || checkPermission(permissionMap[action]);
                   return (
-                    <button key={action} type="button" onClick={handler} disabled={isLoading || !allowed}
-                      className="px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:shadow-sm"
-                      style={{
-                        backgroundColor: action === 'cancel' || action === 'reverse' ? 'var(--color-error-container)' : 'var(--color-primary)',
-                        color: action === 'cancel' || action === 'reverse' ? 'var(--color-error)' : 'var(--color-on-primary)',
-                      }}>
-                      {isLoading ? actionLoadingLabels[action] : actionLabels[action]}
-                    </button>
+                    <Button key={action} type="button" onClick={handler} disabled={isLoading || !allowed}
+                      variant={action === 'cancel' || action === 'reverse' ? 'destructive' : 'primary'}
+                      loading={isLoading}>
+                      {actionLabels[action]}
+                    </Button>
                   );
                 })}
               </div>
             </div>
-          </div>
+          </Card>
         )}
 
         {/* ربط العكس */}
         {entry.reversalOfId && (
-          <div className={cardClass} style={{ backgroundColor: 'var(--color-surface)', ...cardBorder }}>
+          <Card variant="default">
             <div className="p-6">
               <p className="text-sm" style={{ color: 'var(--color-onSurface)' }}>
                 هذا القيد عكس لـ <a href={`/accounting/journal-entries/${entry.reversalOfId}`} className="font-bold underline cursor-pointer" style={{ color: 'var(--color-link)' }}>القيد رقم {entry.reversalOfId}</a>
               </p>
               {entry.reversalReason && <p className="mt-2 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>السبب: {entry.reversalReason}</p>}
             </div>
-          </div>
+          </Card>
         )}
 
         {/* سجل الحالة */}
-        <div className={cardClass} style={{ backgroundColor: 'var(--color-surface)', ...cardBorder }}>
+        <Card variant="default">
           <div className="p-6"><StatusLogPanel documentType="JournalEntry" documentId={entry.id} /></div>
-        </div>
+        </Card>
 
         {/* الموافقات */}
         {(entry.entryStatus === 'Submitted' || entry.entryStatus === 'Approved') && (
-          <div className={cardClass} style={{ backgroundColor: 'var(--color-surface)', ...cardBorder }}>
+          <Card variant="default">
             <div className="p-6"><ApprovalsPanel documentType="JournalEntry" documentId={entry.id} /></div>
-          </div>
+          </Card>
         )}
       </div>
 
-      {showReverseDialog && (
-        <ReverseDialog entryId={entry.id} entryNumber={entry.entryNumber} lines={entry.lines}
-          onConfirm={handleReverseConfirm} onClose={() => setShowReverseDialog(false)}
-          isReversing={reverseMutation.isPending} error={reverseMutation.isError ? (reverseMutation.error as Error)?.message : undefined} />
-      )}
+      <ReverseDialog open={showReverseDialog} entryId={entry.id} entryNumber={entry.entryNumber} lines={entry.lines}
+        onConfirm={handleReverseConfirm} onClose={() => setShowReverseDialog(false)}
+        isReversing={reverseMutation.isPending} error={reverseMutation.isError ? (reverseMutation.error as Error)?.message : undefined} />
     </div>
   );
 }

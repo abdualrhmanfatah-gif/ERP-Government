@@ -377,6 +377,24 @@ public static class DependencyInjection
             options.AddPolicy(PermissionCodes.ClosingEntriesApprove, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.ClosingEntriesReverse, p => p.RequireAssertion(_ => true));
 
+            // ─── Revenue ─────────────────────────────────────────────
+            options.AddPolicy(PermissionCodes.ReceiptVouchersView, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ReceiptVouchersCreate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ReceiptVouchersSubmit, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ReceiptVouchersApprove, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ReceiptVouchersCancel, p => p.RequireAssertion(_ => true));
+
+            options.AddPolicy(PermissionCodes.DepositSlipsView, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DepositSlipsCreate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DepositSlipsUpdate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DepositSlipsApprove, p => p.RequireAssertion(_ => true));
+
+            // ─── Checks ────────────────────────────────────────────────
+            options.AddPolicy(PermissionCodes.ChecksView, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ChecksClear, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ChecksBounce, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ChecksReplace, p => p.RequireAssertion(_ => true));
+
             // ─── Reporting ────────────────────────────────────────────
             options.AddPolicy(PermissionCodes.ReportingViewBudgetExecution, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.ReportingViewRevenueCollections, p => p.RequireAssertion(_ => true));

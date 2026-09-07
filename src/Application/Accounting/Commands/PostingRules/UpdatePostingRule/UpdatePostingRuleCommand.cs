@@ -90,10 +90,10 @@ public class UpdatePostingRuleCommandHandler(
                 if (existingLine is not null)
                 {
                     existingLine.Sequence = lineDto.Sequence;
-                    existingLine.AccountSource = lineDto.AccountSource;
+                    existingLine.AccountSource = Enum.Parse<AccountSource>(lineDto.AccountSource);
                     existingLine.FixedAccountId = lineDto.FixedAccountId;
                     existingLine.DebitOrCredit = Enum.Parse<DebitOrCredit>(lineDto.DebitOrCredit);
-                    existingLine.AmountSource = lineDto.AmountSource;
+                    existingLine.AmountSource = Enum.Parse<AmountSource>(lineDto.AmountSource);
                     existingLine.FundDimensionRequired = lineDto.FundDimensionRequired;
                     existingLine.CostCenterDimensionRequired = lineDto.CostCenterDimensionRequired;
                     existingLine.ProjectDimensionRequired = lineDto.ProjectDimensionRequired;
@@ -106,10 +106,10 @@ public class UpdatePostingRuleCommandHandler(
                 {
                     PostingRuleId = entity.Id,
                     Sequence = lineDto.Sequence,
-                    AccountSource = lineDto.AccountSource,
+                    AccountSource = Enum.Parse<AccountSource>(lineDto.AccountSource),
                     FixedAccountId = lineDto.FixedAccountId,
                     DebitOrCredit = Enum.Parse<DebitOrCredit>(lineDto.DebitOrCredit),
-                    AmountSource = lineDto.AmountSource,
+                    AmountSource = Enum.Parse<AmountSource>(lineDto.AmountSource),
                     FundDimensionRequired = lineDto.FundDimensionRequired,
                     CostCenterDimensionRequired = lineDto.CostCenterDimensionRequired,
                     ProjectDimensionRequired = lineDto.ProjectDimensionRequired,

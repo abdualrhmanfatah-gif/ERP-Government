@@ -10663,11 +10663,134 @@ export class ChecksClient {
     }
 
     /**
+     * Get under-collection checks list
+     * @param status (optional) 
+     * @return OK
+     */
+    checksAll(from: Date, to: Date, status: CheckStatus | undefined): Promise<CheckDto[]> {
+        let url_ = this.baseUrl + "/api/Revenue/Checks?";
+        if (from === undefined || from === null)
+            throw new globalThis.Error("The parameter 'from' must be defined and cannot be null.");
+        else
+            url_ += "From=" + encodeURIComponent(from ? "" + from.toISOString() : "") + "&";
+        if (to === undefined || to === null)
+            throw new globalThis.Error("The parameter 'to' must be defined and cannot be null.");
+        else
+            url_ += "To=" + encodeURIComponent(to ? "" + to.toISOString() : "") + "&";
+        if (status === null)
+            throw new globalThis.Error("The parameter 'status' cannot be null.");
+        else if (status !== undefined)
+            url_ += "Status=" + encodeURIComponent("" + status) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processChecksAll(_response);
+        });
+    }
+
+    protected processChecksAll(response: Response): Promise<CheckDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(CheckDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<CheckDto[]>(null as any);
+    }
+
+    /**
+     * Get single check detail
+     * @return OK
+     */
+    checks(id: number): Promise<CheckDetailDto> {
+        let url_ = this.baseUrl + "/api/Revenue/Checks/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processChecks(_response);
+        });
+    }
+
+    protected processChecks(response: Response): Promise<CheckDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = CheckDetailDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<CheckDetailDto>(null as any);
+    }
+
+    /**
      * Clear a check (bank confirmation)
      * @return No Content
      */
     clear(id: number, body: ClearCheckCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Checks/{id}/clear";
+        let url_ = this.baseUrl + "/api/Revenue/Checks/{id}/clear";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -10720,7 +10843,7 @@ export class ChecksClient {
      * @return OK
      */
     bounce(id: number, body: BounceCheckCommand): Promise<number> {
-        let url_ = this.baseUrl + "/api/Checks/{id}/bounce";
+        let url_ = this.baseUrl + "/api/Revenue/Checks/{id}/bounce";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -10778,7 +10901,7 @@ export class ChecksClient {
      * @return No Content
      */
     replace(id: number, body: ReplaceCheckCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Checks/{id}/replace";
+        let url_ = this.baseUrl + "/api/Revenue/Checks/{id}/replace";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -10846,7 +10969,7 @@ export class DepositSlipsClient {
      * @return OK
      */
     depositSlipsAll(status: DepositSlipStatus | undefined, formType: FormType | undefined, fromDate: Date | undefined, toDate: Date | undefined, page: number, pageSize: number): Promise<DepositSlipDto[]> {
-        let url_ = this.baseUrl + "/api/DepositSlips?";
+        let url_ = this.baseUrl + "/api/Revenue/DepositSlips?";
         if (status === null)
             throw new globalThis.Error("The parameter 'status' cannot be null.");
         else if (status !== undefined)
@@ -10927,7 +11050,7 @@ export class DepositSlipsClient {
      * @return Created
      */
     depositSlipsPOST(body: CreateDepositSlipCommand): Promise<number> {
-        let url_ = this.baseUrl + "/api/DepositSlips";
+        let url_ = this.baseUrl + "/api/Revenue/DepositSlips";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -10982,7 +11105,7 @@ export class DepositSlipsClient {
      * @return OK
      */
     depositSlipsGET(id: number): Promise<DepositSlipDto> {
-        let url_ = this.baseUrl + "/api/DepositSlips/{id}";
+        let url_ = this.baseUrl + "/api/Revenue/DepositSlips/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -11035,7 +11158,7 @@ export class DepositSlipsClient {
      * @return OK
      */
     monthlyStatement(year: number, month: number, fundId: number): Promise<MonthlyStatementDto> {
-        let url_ = this.baseUrl + "/api/DepositSlips/monthly-statement?";
+        let url_ = this.baseUrl + "/api/Revenue/DepositSlips/monthly-statement?";
         if (year === undefined || year === null)
             throw new globalThis.Error("The parameter 'year' must be defined and cannot be null.");
         else
@@ -11097,7 +11220,7 @@ export class DepositSlipsClient {
      * @return No Content
      */
     addVoucher(id: number, body: AddVoucherToSlipCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/DepositSlips/{id}/add-voucher";
+        let url_ = this.baseUrl + "/api/Revenue/DepositSlips/{id}/add-voucher";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -11150,7 +11273,7 @@ export class DepositSlipsClient {
      * @return No Content
      */
     removeVoucher(id: number, body: RemoveVoucherFromSlipCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/DepositSlips/{id}/remove-voucher";
+        let url_ = this.baseUrl + "/api/Revenue/DepositSlips/{id}/remove-voucher";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -11203,7 +11326,7 @@ export class DepositSlipsClient {
      * @return No Content
      */
     approvePOST4(id: number, body: ApproveDepositSlipCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/DepositSlips/{id}/approve";
+        let url_ = this.baseUrl + "/api/Revenue/DepositSlips/{id}/approve";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -11265,17 +11388,22 @@ export class ReceiptVouchersClient {
     /**
      * Get all receipt vouchers
      * @param partyId (optional) 
+     * @param paymentMethodFilter (optional) 
      * @param status (optional) 
      * @param fromDate (optional) 
      * @param toDate (optional) 
      * @return OK
      */
-    receiptVouchersAll(partyId: number | undefined, status: ReceiptVoucherStatus | undefined, fromDate: Date | undefined, toDate: Date | undefined, page: number, pageSize: number): Promise<ReceiptVoucherDto[]> {
-        let url_ = this.baseUrl + "/api/ReceiptVouchers?";
+    receiptVouchersAll(partyId: number | undefined, paymentMethodFilter: PaymentMethod | undefined, status: ReceiptVoucherStatus | undefined, fromDate: Date | undefined, toDate: Date | undefined, page: number, pageSize: number): Promise<ReceiptVoucherDto[]> {
+        let url_ = this.baseUrl + "/api/Revenue/ReceiptVouchers?";
         if (partyId === null)
             throw new globalThis.Error("The parameter 'partyId' cannot be null.");
         else if (partyId !== undefined)
             url_ += "PartyId=" + encodeURIComponent("" + partyId) + "&";
+        if (paymentMethodFilter === null)
+            throw new globalThis.Error("The parameter 'paymentMethodFilter' cannot be null.");
+        else if (paymentMethodFilter !== undefined)
+            url_ += "PaymentMethodFilter=" + encodeURIComponent("" + paymentMethodFilter) + "&";
         if (status === null)
             throw new globalThis.Error("The parameter 'status' cannot be null.");
         else if (status !== undefined)
@@ -11351,8 +11479,8 @@ export class ReceiptVouchersClient {
      * Create a new receipt voucher
      * @return Created
      */
-    receiptVouchersPOST(body: CreateReceiptVoucherCommand): Promise<number> {
-        let url_ = this.baseUrl + "/api/ReceiptVouchers";
+    receiptVouchersPOST(body: CreateReceiptVoucherCommand): Promise<ReceiptVoucherDto> {
+        let url_ = this.baseUrl + "/api/Revenue/ReceiptVouchers";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -11371,15 +11499,14 @@ export class ReceiptVouchersClient {
         });
     }
 
-    protected processReceiptVouchersPOST(response: Response): Promise<number> {
+    protected processReceiptVouchersPOST(response: Response): Promise<ReceiptVoucherDto> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 201) {
             return response.text().then((_responseText) => {
             let result201: any = null;
             let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                result201 = resultData201 !== undefined ? resultData201 : null as any;
-    
+            result201 = ReceiptVoucherDto.fromJS(resultData201);
             return result201;
             });
         } else if (status === 400) {
@@ -11399,7 +11526,7 @@ export class ReceiptVouchersClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<number>(null as any);
+        return Promise.resolve<ReceiptVoucherDto>(null as any);
     }
 
     /**
@@ -11407,7 +11534,7 @@ export class ReceiptVouchersClient {
      * @return OK
      */
     receiptVouchersGET(id: number): Promise<ReceiptVoucherDto> {
-        let url_ = this.baseUrl + "/api/ReceiptVouchers/{id}";
+        let url_ = this.baseUrl + "/api/Revenue/ReceiptVouchers/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -11460,7 +11587,7 @@ export class ReceiptVouchersClient {
      * @return OK
      */
     byParty(partyIdPath: number, page: number, pageSize: number): Promise<ReceiptVoucherDto[]> {
-        let url_ = this.baseUrl + "/api/ReceiptVouchers/by-party/{partyId}?";
+        let url_ = this.baseUrl + "/api/Revenue/ReceiptVouchers/by-party/{partyId}?";
         if (partyIdPath === undefined || partyIdPath === null)
             throw new globalThis.Error("The parameter 'partyIdPath' must be defined.");
         url_ = url_.replace("{partyId}", encodeURIComponent("" + partyIdPath));
@@ -11528,7 +11655,7 @@ export class ReceiptVouchersClient {
      * @return OK
      */
     byPeriod(fromDate: Date, toDate: Date, page: number, pageSize: number): Promise<ReceiptVoucherDto[]> {
-        let url_ = this.baseUrl + "/api/ReceiptVouchers/by-period?";
+        let url_ = this.baseUrl + "/api/Revenue/ReceiptVouchers/by-period?";
         if (fromDate === undefined || fromDate === null)
             throw new globalThis.Error("The parameter 'fromDate' must be defined and cannot be null.");
         else
@@ -11601,7 +11728,7 @@ export class ReceiptVouchersClient {
      * @return No Content
      */
     submitPOST(id: number, body: SubmitReceiptVoucherCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/ReceiptVouchers/{id}/submit";
+        let url_ = this.baseUrl + "/api/Revenue/ReceiptVouchers/{id}/submit";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -11654,7 +11781,7 @@ export class ReceiptVouchersClient {
      * @return No Content
      */
     approvePOST5(id: number, body: ApproveReceiptVoucherCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/ReceiptVouchers/{id}/approve";
+        let url_ = this.baseUrl + "/api/Revenue/ReceiptVouchers/{id}/approve";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -11707,7 +11834,7 @@ export class ReceiptVouchersClient {
      * @return No Content
      */
     cancelPOST4(id: number, body: CancelReceiptVoucherCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/ReceiptVouchers/{id}/cancel";
+        let url_ = this.baseUrl + "/api/Revenue/ReceiptVouchers/{id}/cancel";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -13057,11 +13184,9 @@ export class TrialBalanceReportsClient {
     /**
      * Get trial balance report
      * @param fiscalPeriodId (optional) 
-     * @param fundId (optional) 
-     * @param projectId (optional) 
      * @return OK
      */
-    trialBalanceReports(fiscalYearId: number, fiscalPeriodId: number | undefined, fundId: number | undefined, projectId: number | undefined): Promise<TrialBalanceReportDto> {
+    trialBalanceReports(fiscalYearId: number, fiscalPeriodId: number | undefined): Promise<TrialBalanceReportDto> {
         let url_ = this.baseUrl + "/api/TrialBalanceReports?";
         if (fiscalYearId === undefined || fiscalYearId === null)
             throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
@@ -13071,14 +13196,6 @@ export class TrialBalanceReportsClient {
             throw new globalThis.Error("The parameter 'fiscalPeriodId' cannot be null.");
         else if (fiscalPeriodId !== undefined)
             url_ += "FiscalPeriodId=" + encodeURIComponent("" + fiscalPeriodId) + "&";
-        if (fundId === null)
-            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
-        else if (fundId !== undefined)
-            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
-        if (projectId === null)
-            throw new globalThis.Error("The parameter 'projectId' cannot be null.");
-        else if (projectId !== undefined)
-            url_ += "ProjectId=" + encodeURIComponent("" + projectId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {
@@ -13125,10 +13242,9 @@ export class TrialBalanceReportsClient {
 
     /**
      * Get ledger movement for an account
-     * @param fundId (optional) 
      * @return OK
      */
-    ledgerMovement(accountIdPath: number, fiscalYearId: number, fundId: number | undefined): Promise<LedgerMovementDto> {
+    ledgerMovement(accountIdPath: number, fiscalYearId: number): Promise<LedgerMovementDto> {
         let url_ = this.baseUrl + "/api/TrialBalanceReports/{accountId}/ledger-movement?";
         if (accountIdPath === undefined || accountIdPath === null)
             throw new globalThis.Error("The parameter 'accountIdPath' must be defined.");
@@ -13137,10 +13253,6 @@ export class TrialBalanceReportsClient {
             throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
         else
             url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
-        if (fundId === null)
-            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
-        else if (fundId !== undefined)
-            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {
@@ -13188,11 +13300,9 @@ export class TrialBalanceReportsClient {
     /**
      * Export trial balance report to Excel or PDF
      * @param fiscalPeriodId (optional) 
-     * @param fundId (optional) 
-     * @param projectId (optional) 
      * @return OK
      */
-    export6(format: string, fiscalYearId: number, fiscalPeriodId: number | undefined, fundId: number | undefined, projectId: number | undefined): Promise<void> {
+    export6(format: string, fiscalYearId: number, fiscalPeriodId: number | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/TrialBalanceReports/export?";
         if (format === undefined || format === null)
             throw new globalThis.Error("The parameter 'format' must be defined and cannot be null.");
@@ -13206,14 +13316,6 @@ export class TrialBalanceReportsClient {
             throw new globalThis.Error("The parameter 'fiscalPeriodId' cannot be null.");
         else if (fiscalPeriodId !== undefined)
             url_ += "FiscalPeriodId=" + encodeURIComponent("" + fiscalPeriodId) + "&";
-        if (fundId === null)
-            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
-        else if (fundId !== undefined)
-            url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
-        if (projectId === null)
-            throw new globalThis.Error("The parameter 'projectId' cannot be null.");
-        else if (projectId !== undefined)
-            url_ += "ProjectId=" + encodeURIComponent("" + projectId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {
@@ -17549,12 +17651,11 @@ export class AccountingBalancesClient {
     }
 
     /**
-     * Get account balances for a period
      * @param accountId (optional) 
      * @param currencyId (optional) 
      * @return OK
      */
-    accountingBalances(fiscalYearId: number, fiscalPeriodId: number, accountId: number | undefined, currencyId: number | undefined): Promise<AccountBalanceDto[]> {
+    accountingBalances(fiscalYearId: number, fiscalPeriodId: number, accountId: number | undefined, currencyId: number | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/AccountingBalances?";
         if (fiscalYearId === undefined || fiscalYearId === null)
             throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
@@ -17577,7 +17678,6 @@ export class AccountingBalancesClient {
         let options_: RequestInit = {
             method: "GET",
             headers: {
-                "Accept": "application/json"
             }
         };
 
@@ -17586,22 +17686,12 @@ export class AccountingBalancesClient {
         });
     }
 
-    protected processAccountingBalances(response: Response): Promise<AccountBalanceDto[]> {
+    protected processAccountingBalances(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(AccountBalanceDto.fromJS(item));
-            }
-            else {
-                result200 = null as any;
-            }
-            return result200;
+            return;
             });
         } else if (status === 400) {
             return response.text().then((_responseText) => {
@@ -17620,14 +17710,13 @@ export class AccountingBalancesClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<AccountBalanceDto[]>(null as any);
+        return Promise.resolve<void>(null as any);
     }
 
     /**
-     * Reconcile materialized balances against source JournalEntryLines
      * @return OK
      */
-    reconcileGET(fiscalYearId: number, fiscalPeriodId: number): Promise<ReconciliationResultDto> {
+    reconcileGET(fiscalYearId: number, fiscalPeriodId: number): Promise<void> {
         let url_ = this.baseUrl + "/api/AccountingBalances/reconcile?";
         if (fiscalYearId === undefined || fiscalYearId === null)
             throw new globalThis.Error("The parameter 'fiscalYearId' must be defined and cannot be null.");
@@ -17642,7 +17731,6 @@ export class AccountingBalancesClient {
         let options_: RequestInit = {
             method: "GET",
             headers: {
-                "Accept": "application/json"
             }
         };
 
@@ -17651,15 +17739,12 @@ export class AccountingBalancesClient {
         });
     }
 
-    protected processReconcileGET(response: Response): Promise<ReconciliationResultDto> {
+    protected processReconcileGET(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = ReconciliationResultDto.fromJS(resultData200);
-            return result200;
+            return;
             });
         } else if (status === 400) {
             return response.text().then((_responseText) => {
@@ -17678,12 +17763,11 @@ export class AccountingBalancesClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<ReconciliationResultDto>(null as any);
+        return Promise.resolve<void>(null as any);
     }
 
     /**
-     * Rebuild account balances from posted journal entries
-     * @return No Content
+     * @return OK
      */
     rebuild(body: RebuildAccountBalancesCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/AccountingBalances/rebuild";
@@ -17707,7 +17791,7 @@ export class AccountingBalancesClient {
     protected processRebuild(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
+        if (status === 200) {
             return response.text().then((_responseText) => {
             return;
             });
@@ -17732,8 +17816,7 @@ export class AccountingBalancesClient {
     }
 
     /**
-     * Finalize account balances for a period
-     * @return No Content
+     * @return OK
      */
     finalize(body: FinalizePeriodCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/AccountingBalances/finalize";
@@ -17757,7 +17840,7 @@ export class AccountingBalancesClient {
     protected processFinalize(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
+        if (status === 200) {
             return response.text().then((_responseText) => {
             return;
             });
@@ -17782,8 +17865,7 @@ export class AccountingBalancesClient {
     }
 
     /**
-     * Unfinalize account balances for a period
-     * @return No Content
+     * @return OK
      */
     unfinalize(body: UnfinalizePeriodCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/AccountingBalances/unfinalize";
@@ -17807,7 +17889,7 @@ export class AccountingBalancesClient {
     protected processUnfinalize(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
+        if (status === 200) {
             return response.text().then((_responseText) => {
             return;
             });
@@ -19925,134 +20007,227 @@ export class TemplatesClient {
         }
         return Promise.resolve<void>(null as any);
     }
-}
 
-export class AccountBalanceDto implements IAccountBalanceDto {
-    id?: number;
-    accountId?: number;
-    accountCode?: string;
-    accountName?: string;
-    fiscalYearId?: number;
-    fiscalYearName?: string;
-    fiscalPeriodId?: number;
-    periodName?: string;
-    periodStartDate?: Date;
-    periodEndDate?: Date;
-    currencyId?: number;
-    currencyCode?: string;
-    openingDebit?: number;
-    openingCredit?: number;
-    debit?: number;
-    credit?: number;
-    closingDebit?: number;
-    closingCredit?: number;
-    balanceDirection?: string;
-    isFinalized?: boolean;
-    finalizedAt?: Date | undefined;
+    /**
+     * Get template lines
+     * @return OK
+     */
+    linesAll3(id: number): Promise<JournalEntryTemplateLineDto[]> {
+        let url_ = this.baseUrl + "/api/Templates/{id}/lines";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
 
-    [key: string]: any;
-
-    constructor(data?: IAccountBalanceDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
             }
-        }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processLinesAll3(_response);
+        });
     }
 
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
+    protected processLinesAll3(response: Response): Promise<JournalEntryTemplateLineDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(JournalEntryTemplateLineDto.fromJS(item));
             }
-            this.id = _data["id"];
-            this.accountId = _data["accountId"];
-            this.accountCode = _data["accountCode"];
-            this.accountName = _data["accountName"];
-            this.fiscalYearId = _data["fiscalYearId"];
-            this.fiscalYearName = _data["fiscalYearName"];
-            this.fiscalPeriodId = _data["fiscalPeriodId"];
-            this.periodName = _data["periodName"];
-            this.periodStartDate = _data["periodStartDate"] ? new Date(_data["periodStartDate"].toString()) : undefined as any;
-            this.periodEndDate = _data["periodEndDate"] ? new Date(_data["periodEndDate"].toString()) : undefined as any;
-            this.currencyId = _data["currencyId"];
-            this.currencyCode = _data["currencyCode"];
-            this.openingDebit = _data["openingDebit"];
-            this.openingCredit = _data["openingCredit"];
-            this.debit = _data["debit"];
-            this.credit = _data["credit"];
-            this.closingDebit = _data["closingDebit"];
-            this.closingCredit = _data["closingCredit"];
-            this.balanceDirection = _data["balanceDirection"];
-            this.isFinalized = _data["isFinalized"];
-            this.finalizedAt = _data["finalizedAt"] ? new Date(_data["finalizedAt"].toString()) : undefined as any;
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
         }
+        return Promise.resolve<JournalEntryTemplateLineDto[]>(null as any);
     }
 
-    static fromJS(data: any): AccountBalanceDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new AccountBalanceDto();
-        result.init(data);
-        return result;
+    /**
+     * Create a template line
+     * @return OK
+     */
+    linesPOST4(id: number, body: CreateTemplateLineCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/Templates/{id}/lines";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processLinesPOST4(_response);
+        });
     }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
+    protected processLinesPOST4(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
         }
-        data["id"] = this.id;
-        data["accountId"] = this.accountId;
-        data["accountCode"] = this.accountCode;
-        data["accountName"] = this.accountName;
-        data["fiscalYearId"] = this.fiscalYearId;
-        data["fiscalYearName"] = this.fiscalYearName;
-        data["fiscalPeriodId"] = this.fiscalPeriodId;
-        data["periodName"] = this.periodName;
-        data["periodStartDate"] = this.periodStartDate ? formatDate(this.periodStartDate) : undefined as any;
-        data["periodEndDate"] = this.periodEndDate ? formatDate(this.periodEndDate) : undefined as any;
-        data["currencyId"] = this.currencyId;
-        data["currencyCode"] = this.currencyCode;
-        data["openingDebit"] = this.openingDebit;
-        data["openingCredit"] = this.openingCredit;
-        data["debit"] = this.debit;
-        data["credit"] = this.credit;
-        data["closingDebit"] = this.closingDebit;
-        data["closingCredit"] = this.closingCredit;
-        data["balanceDirection"] = this.balanceDirection;
-        data["isFinalized"] = this.isFinalized;
-        data["finalizedAt"] = this.finalizedAt ? this.finalizedAt.toISOString() : undefined as any;
-        return data;
+        return Promise.resolve<void>(null as any);
     }
-}
 
-export interface IAccountBalanceDto {
-    id?: number;
-    accountId?: number;
-    accountCode?: string;
-    accountName?: string;
-    fiscalYearId?: number;
-    fiscalYearName?: string;
-    fiscalPeriodId?: number;
-    periodName?: string;
-    periodStartDate?: Date;
-    periodEndDate?: Date;
-    currencyId?: number;
-    currencyCode?: string;
-    openingDebit?: number;
-    openingCredit?: number;
-    debit?: number;
-    credit?: number;
-    closingDebit?: number;
-    closingCredit?: number;
-    balanceDirection?: string;
-    isFinalized?: boolean;
-    finalizedAt?: Date | undefined;
+    /**
+     * Update a template line
+     * @return No Content
+     */
+    linesPUT2(id: number, lineId: number, body: UpdateTemplateLineCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/Templates/{id}/lines/{lineId}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (lineId === undefined || lineId === null)
+            throw new globalThis.Error("The parameter 'lineId' must be defined.");
+        url_ = url_.replace("{lineId}", encodeURIComponent("" + lineId));
+        url_ = url_.replace(/[?&]$/, "");
 
-    [key: string]: any;
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processLinesPUT2(_response);
+        });
+    }
+
+    protected processLinesPUT2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Remove a template line
+     * @return No Content
+     */
+    linesDELETE2(id: number, lineId: number): Promise<void> {
+        let url_ = this.baseUrl + "/api/Templates/{id}/lines/{lineId}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (lineId === undefined || lineId === null)
+            throw new globalThis.Error("The parameter 'lineId' must be defined.");
+        url_ = url_.replace("{lineId}", encodeURIComponent("" + lineId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processLinesDELETE2(_response);
+        });
+    }
+
+    protected processLinesDELETE2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
 }
 
 export class AccountDto implements IAccountDto {
@@ -25006,7 +25181,7 @@ export class CheckDetailDto implements ICheckDetailDto {
     checkNumber?: string;
     checkDate?: Date;
     amount?: number;
-    status?: string;
+    status?: CheckStatus;
     clearedAt?: Date | undefined;
 
     [key: string]: any;
@@ -25066,7 +25241,7 @@ export interface ICheckDetailDto {
     checkNumber?: string;
     checkDate?: Date;
     amount?: number;
-    status?: string;
+    status?: CheckStatus;
     clearedAt?: Date | undefined;
 
     [key: string]: any;
@@ -29058,6 +29233,82 @@ export interface ICreateTemplateCommand {
     [key: string]: any;
 }
 
+export class CreateTemplateLineCommand implements ICreateTemplateLineCommand {
+    templateId?: number;
+    accountId?: number;
+    description?: string | undefined;
+    currencyId?: number;
+    exchangeRate?: number;
+    debit?: number;
+    credit?: number;
+    costCenterId?: number | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: ICreateTemplateLineCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.templateId = _data["templateId"];
+            this.accountId = _data["accountId"];
+            this.description = _data["description"];
+            this.currencyId = _data["currencyId"];
+            this.exchangeRate = _data["exchangeRate"];
+            this.debit = _data["debit"];
+            this.credit = _data["credit"];
+            this.costCenterId = _data["costCenterId"];
+        }
+    }
+
+    static fromJS(data: any): CreateTemplateLineCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateTemplateLineCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["templateId"] = this.templateId;
+        data["accountId"] = this.accountId;
+        data["description"] = this.description;
+        data["currencyId"] = this.currencyId;
+        data["exchangeRate"] = this.exchangeRate;
+        data["debit"] = this.debit;
+        data["credit"] = this.credit;
+        data["costCenterId"] = this.costCenterId;
+        return data;
+    }
+}
+
+export interface ICreateTemplateLineCommand {
+    templateId?: number;
+    accountId?: number;
+    description?: string | undefined;
+    currencyId?: number;
+    exchangeRate?: number;
+    debit?: number;
+    credit?: number;
+    costCenterId?: number | undefined;
+
+    [key: string]: any;
+}
+
 export class CreateTransferRequest implements ICreateTransferRequest {
     budgetId!: number;
     sourceBudgetItemId!: number;
@@ -32707,6 +32958,10 @@ export class JournalEntryTemplateDto implements IJournalEntryTemplateDto {
     templateType?: string;
     isSystemTemplate?: boolean;
     isActive?: boolean;
+    lines?: JournalEntryTemplateLineDto[];
+    totalDebit?: number;
+    totalCredit?: number;
+    isBalanced?: boolean;
 
     [key: string]: any;
 
@@ -32733,6 +32988,14 @@ export class JournalEntryTemplateDto implements IJournalEntryTemplateDto {
             this.templateType = _data["templateType"];
             this.isSystemTemplate = _data["isSystemTemplate"];
             this.isActive = _data["isActive"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(JournalEntryTemplateLineDto.fromJS(item));
+            }
+            this.totalDebit = _data["totalDebit"];
+            this.totalCredit = _data["totalCredit"];
+            this.isBalanced = _data["isBalanced"];
         }
     }
 
@@ -32757,6 +33020,14 @@ export class JournalEntryTemplateDto implements IJournalEntryTemplateDto {
         data["templateType"] = this.templateType;
         data["isSystemTemplate"] = this.isSystemTemplate;
         data["isActive"] = this.isActive;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        data["totalDebit"] = this.totalDebit;
+        data["totalCredit"] = this.totalCredit;
+        data["isBalanced"] = this.isBalanced;
         return data;
     }
 }
@@ -32770,6 +33041,110 @@ export interface IJournalEntryTemplateDto {
     templateType?: string;
     isSystemTemplate?: boolean;
     isActive?: boolean;
+    lines?: JournalEntryTemplateLineDto[];
+    totalDebit?: number;
+    totalCredit?: number;
+    isBalanced?: boolean;
+
+    [key: string]: any;
+}
+
+export class JournalEntryTemplateLineDto implements IJournalEntryTemplateLineDto {
+    id?: number;
+    templateId?: number;
+    sequence?: number;
+    accountId?: number;
+    accountCode?: string;
+    accountName?: string;
+    description?: string | undefined;
+    currencyId?: number;
+    exchangeRate?: number;
+    debit?: number;
+    credit?: number;
+    costCenterId?: number | undefined;
+    costCenterName?: string | undefined;
+    rowVersion?: string;
+
+    [key: string]: any;
+
+    constructor(data?: IJournalEntryTemplateLineDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.templateId = _data["templateId"];
+            this.sequence = _data["sequence"];
+            this.accountId = _data["accountId"];
+            this.accountCode = _data["accountCode"];
+            this.accountName = _data["accountName"];
+            this.description = _data["description"];
+            this.currencyId = _data["currencyId"];
+            this.exchangeRate = _data["exchangeRate"];
+            this.debit = _data["debit"];
+            this.credit = _data["credit"];
+            this.costCenterId = _data["costCenterId"];
+            this.costCenterName = _data["costCenterName"];
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): JournalEntryTemplateLineDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new JournalEntryTemplateLineDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["templateId"] = this.templateId;
+        data["sequence"] = this.sequence;
+        data["accountId"] = this.accountId;
+        data["accountCode"] = this.accountCode;
+        data["accountName"] = this.accountName;
+        data["description"] = this.description;
+        data["currencyId"] = this.currencyId;
+        data["exchangeRate"] = this.exchangeRate;
+        data["debit"] = this.debit;
+        data["credit"] = this.credit;
+        data["costCenterId"] = this.costCenterId;
+        data["costCenterName"] = this.costCenterName;
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IJournalEntryTemplateLineDto {
+    id?: number;
+    templateId?: number;
+    sequence?: number;
+    accountId?: number;
+    accountCode?: string;
+    accountName?: string;
+    description?: string | undefined;
+    currencyId?: number;
+    exchangeRate?: number;
+    debit?: number;
+    credit?: number;
+    costCenterId?: number | undefined;
+    costCenterName?: string | undefined;
+    rowVersion?: string;
 
     [key: string]: any;
 }
@@ -35218,7 +35593,7 @@ export class ReceiptVoucherDto implements IReceiptVoucherDto {
     partyName?: string;
     paymentMethod?: PaymentMethod;
     paymentMethodName?: string;
-    receivedFrom?: string;
+    receivedFrom?: string | undefined;
     notes?: string | undefined;
     depositSlipId?: number | undefined;
     depositSlipNumber?: string | undefined;
@@ -35351,7 +35726,7 @@ export interface IReceiptVoucherDto {
     partyName?: string;
     paymentMethod?: PaymentMethod;
     paymentMethodName?: string;
-    receivedFrom?: string;
+    receivedFrom?: string | undefined;
     notes?: string | undefined;
     depositSlipId?: number | undefined;
     depositSlipNumber?: string | undefined;
@@ -35445,177 +35820,9 @@ export enum ReceiptVoucherStatus {
     Cancelled = "Cancelled",
 }
 
-export class ReconciliationDiscrepancyDto implements IReconciliationDiscrepancyDto {
-    accountId?: number;
-    accountCode?: string;
-    accountName?: string;
-    currencyId?: number;
-    currencyCode?: string;
-    materializedDebit?: number;
-    calculatedDebit?: number;
-    materializedCredit?: number;
-    calculatedCredit?: number;
-    debitDifference?: number;
-    creditDifference?: number;
-    discrepancyType?: string;
-
-    [key: string]: any;
-
-    constructor(data?: IReconciliationDiscrepancyDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.accountId = _data["accountId"];
-            this.accountCode = _data["accountCode"];
-            this.accountName = _data["accountName"];
-            this.currencyId = _data["currencyId"];
-            this.currencyCode = _data["currencyCode"];
-            this.materializedDebit = _data["materializedDebit"];
-            this.calculatedDebit = _data["calculatedDebit"];
-            this.materializedCredit = _data["materializedCredit"];
-            this.calculatedCredit = _data["calculatedCredit"];
-            this.debitDifference = _data["debitDifference"];
-            this.creditDifference = _data["creditDifference"];
-            this.discrepancyType = _data["discrepancyType"];
-        }
-    }
-
-    static fromJS(data: any): ReconciliationDiscrepancyDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new ReconciliationDiscrepancyDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["accountId"] = this.accountId;
-        data["accountCode"] = this.accountCode;
-        data["accountName"] = this.accountName;
-        data["currencyId"] = this.currencyId;
-        data["currencyCode"] = this.currencyCode;
-        data["materializedDebit"] = this.materializedDebit;
-        data["calculatedDebit"] = this.calculatedDebit;
-        data["materializedCredit"] = this.materializedCredit;
-        data["calculatedCredit"] = this.calculatedCredit;
-        data["debitDifference"] = this.debitDifference;
-        data["creditDifference"] = this.creditDifference;
-        data["discrepancyType"] = this.discrepancyType;
-        return data;
-    }
-}
-
-export interface IReconciliationDiscrepancyDto {
-    accountId?: number;
-    accountCode?: string;
-    accountName?: string;
-    currencyId?: number;
-    currencyCode?: string;
-    materializedDebit?: number;
-    calculatedDebit?: number;
-    materializedCredit?: number;
-    calculatedCredit?: number;
-    debitDifference?: number;
-    creditDifference?: number;
-    discrepancyType?: string;
-
-    [key: string]: any;
-}
-
 export enum ReconciliationLineType {
     Book = "Book",
     Statement = "Statement",
-}
-
-export class ReconciliationResultDto implements IReconciliationResultDto {
-    fiscalYearId?: number;
-    fiscalPeriodId?: number;
-    discrepancies?: ReconciliationDiscrepancyDto[];
-    isBalanced?: boolean;
-    totalAccountsChecked?: number;
-    discrepancyCount?: number;
-
-    [key: string]: any;
-
-    constructor(data?: IReconciliationResultDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.fiscalYearId = _data["fiscalYearId"];
-            this.fiscalPeriodId = _data["fiscalPeriodId"];
-            if (Array.isArray(_data["discrepancies"])) {
-                this.discrepancies = [] as any;
-                for (let item of _data["discrepancies"])
-                    this.discrepancies!.push(ReconciliationDiscrepancyDto.fromJS(item));
-            }
-            this.isBalanced = _data["isBalanced"];
-            this.totalAccountsChecked = _data["totalAccountsChecked"];
-            this.discrepancyCount = _data["discrepancyCount"];
-        }
-    }
-
-    static fromJS(data: any): ReconciliationResultDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new ReconciliationResultDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["fiscalYearId"] = this.fiscalYearId;
-        data["fiscalPeriodId"] = this.fiscalPeriodId;
-        if (Array.isArray(this.discrepancies)) {
-            data["discrepancies"] = [];
-            for (let item of this.discrepancies)
-                data["discrepancies"].push(item ? item.toJSON() : undefined as any);
-        }
-        data["isBalanced"] = this.isBalanced;
-        data["totalAccountsChecked"] = this.totalAccountsChecked;
-        data["discrepancyCount"] = this.discrepancyCount;
-        return data;
-    }
-}
-
-export interface IReconciliationResultDto {
-    fiscalYearId?: number;
-    fiscalPeriodId?: number;
-    discrepancies?: ReconciliationDiscrepancyDto[];
-    isBalanced?: boolean;
-    totalAccountsChecked?: number;
-    discrepancyCount?: number;
-
-    [key: string]: any;
 }
 
 export class RecordPaymentRequest implements IRecordPaymentRequest {
@@ -35858,6 +36065,7 @@ export enum RecurringEntryStatus {
     Active = "Active",
     Paused = "Paused",
     Completed = "Completed",
+    Cancelled = "Cancelled",
 }
 
 export enum RecurringFrequency {
@@ -36242,6 +36450,7 @@ export interface IReopenFiscalYearResponse {
 export class ReplaceCheckCommand implements IReplaceCheckCommand {
     checkId?: number;
     paymentMethod?: PaymentMethod;
+    voucherDate?: Date;
     checkDetails?: CreateCheckDto | undefined;
     rowVersion?: string;
 
@@ -36264,6 +36473,7 @@ export class ReplaceCheckCommand implements IReplaceCheckCommand {
             }
             this.checkId = _data["checkId"];
             this.paymentMethod = _data["paymentMethod"];
+            this.voucherDate = _data["voucherDate"] ? new Date(_data["voucherDate"].toString()) : undefined as any;
             this.checkDetails = _data["checkDetails"] ? CreateCheckDto.fromJS(_data["checkDetails"]) : undefined as any;
             this.rowVersion = _data["rowVersion"];
         }
@@ -36284,6 +36494,7 @@ export class ReplaceCheckCommand implements IReplaceCheckCommand {
         }
         data["checkId"] = this.checkId;
         data["paymentMethod"] = this.paymentMethod;
+        data["voucherDate"] = this.voucherDate ? formatDate(this.voucherDate) : undefined as any;
         data["checkDetails"] = this.checkDetails ? this.checkDetails.toJSON() : undefined as any;
         data["rowVersion"] = this.rowVersion;
         return data;
@@ -36293,6 +36504,7 @@ export class ReplaceCheckCommand implements IReplaceCheckCommand {
 export interface IReplaceCheckCommand {
     checkId?: number;
     paymentMethod?: PaymentMethod;
+    voucherDate?: Date;
     checkDetails?: CreateCheckDto | undefined;
     rowVersion?: string;
 
@@ -40453,6 +40665,90 @@ export interface IUpdateTemplateCommand {
     journalId?: number;
     templateType?: JournalEntryTemplateType | undefined;
     isSystemTemplate?: boolean;
+    rowVersion?: string;
+
+    [key: string]: any;
+}
+
+export class UpdateTemplateLineCommand implements IUpdateTemplateLineCommand {
+    id?: number;
+    templateId?: number;
+    accountId?: number;
+    description?: string | undefined;
+    currencyId?: number;
+    exchangeRate?: number;
+    debit?: number;
+    credit?: number;
+    costCenterId?: number | undefined;
+    rowVersion?: string;
+
+    [key: string]: any;
+
+    constructor(data?: IUpdateTemplateLineCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.templateId = _data["templateId"];
+            this.accountId = _data["accountId"];
+            this.description = _data["description"];
+            this.currencyId = _data["currencyId"];
+            this.exchangeRate = _data["exchangeRate"];
+            this.debit = _data["debit"];
+            this.credit = _data["credit"];
+            this.costCenterId = _data["costCenterId"];
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): UpdateTemplateLineCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateTemplateLineCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["templateId"] = this.templateId;
+        data["accountId"] = this.accountId;
+        data["description"] = this.description;
+        data["currencyId"] = this.currencyId;
+        data["exchangeRate"] = this.exchangeRate;
+        data["debit"] = this.debit;
+        data["credit"] = this.credit;
+        data["costCenterId"] = this.costCenterId;
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IUpdateTemplateLineCommand {
+    id?: number;
+    templateId?: number;
+    accountId?: number;
+    description?: string | undefined;
+    currencyId?: number;
+    exchangeRate?: number;
+    debit?: number;
+    credit?: number;
+    costCenterId?: number | undefined;
     rowVersion?: string;
 
     [key: string]: any;

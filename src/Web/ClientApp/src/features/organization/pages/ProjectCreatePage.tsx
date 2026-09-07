@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { ProjectForm } from '../components/ProjectForm';
+import { ProjectForm } from '@/components/OrganizationProjectForm';
 import { useProject, useCreateProject, useUpdateProject } from '../hooks';
 import type { CreateProjectCommand } from '../types';
 
