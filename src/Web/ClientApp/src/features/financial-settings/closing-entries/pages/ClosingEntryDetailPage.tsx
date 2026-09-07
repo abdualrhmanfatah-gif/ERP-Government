@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
-import { Button, Card, Loading, ConfirmDialog, Textarea } from '@/components/ui';
+import { Button, Card, Loading, ConfirmDialog, Textarea, EmptyState } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { useClosingEntryDetail, useApproveClosingEntry, useReverseClosingEntry } from '../../hooks/useClosingEntries';
@@ -23,7 +23,7 @@ export default function ClosingEntryDetailPage() {
   const [reverseReason, setReverseReason] = useState('');
 
   if (isLoading) return <Loading />;
-  if (!entry) return <div className="text-center py-12 text-[var(--color-on-surface-variant)]">قيد الإغلاق غير موجود</div>;
+  if (!entry) return <EmptyState message="قيد الإغلاق غير موجود" />;
 
   function handleApprove() {
     approveMutation.mutate(entryId, {

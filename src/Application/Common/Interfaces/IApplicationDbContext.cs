@@ -54,7 +54,6 @@ public interface IApplicationDbContext
     // Module 3: Organizational Structure
     DbSet<OrganizationalUnit> OrganizationalUnits { get; }
     DbSet<CostCenter> CostCenters { get; }
-    DbSet<CostCenterAccount> CostCenterAccounts { get; }
     DbSet<Project> Projects { get; }
     DbSet<Employee> Employees { get; }
 

@@ -4,7 +4,7 @@ import { notify } from '@/features/notifications/notify';
 import { Pencil, Save, X, Shield, Lock, Users as UsersIcon } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui';
+import { Card, EmptyState } from '@/components/ui';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
@@ -75,7 +75,7 @@ export function UserDetailPage() {
   }
 
   if (error || !user) {
-    return <div className="p-8 text-center text-[var(--color-on-surface-variant)]">المستخدم غير موجود</div>;
+    return <EmptyState message="المستخدم غير موجود" />;
   }
 
   const tabs = [

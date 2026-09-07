@@ -29,12 +29,7 @@ public class DeleteCostCenterCommandHandler(
         if (hasProjects)
             return Result.Failure(["Cannot delete cost center that has associated projects."]);
 
-        // Reject when accounts reference it
-        var hasAccounts = await context.CostCenterAccounts
-            .AnyAsync(x => x.CostCenterId == request.Id, cancellationToken);
-
-        if (hasAccounts)
-            return Result.Failure(["Cannot delete cost center that has associated accounts."]);
+        // Accounts no longer reference cost centers directly (CostCenterAccounts join table removed — DEP-026)
 
         context.CostCenters.Remove(entity);
         await context.SaveChangesAsync(cancellationToken);

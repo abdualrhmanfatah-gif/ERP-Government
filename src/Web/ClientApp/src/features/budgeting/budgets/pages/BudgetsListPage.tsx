@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBudgetsList } from '../../hooks/useBudgets';
 import { budgetStatusLabels, BudgetStatus, type BudgetFilters } from '../../shared/types';
-import { Button, Badge } from '@/components/ui';
+import { Page, Button, Badge } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus } from 'lucide-react';
 
@@ -30,15 +30,16 @@ export default function BudgetsListPage() {
   const { data: budgets, isLoading } = useBudgetsList(filters);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-[var(--color-on-surface)]">الموازنات</h1>
+    <Page
+      title="الموازنات"
+      actions={
         <Button variant="primary" size="sm" onClick={() => navigate('/budgeting/budgets/create')}>
           <Plus size={16} className="ms-1" />
           موازنة جديدة
         </Button>
-      </div>
-
+      }
+      loading={isLoading}
+    >
       <DataGrid
         columns={columns}
         data={budgets ?? []}
@@ -47,6 +48,6 @@ export default function BudgetsListPage() {
         rowKey={(row) => row.id}
         onRowClick={(row) => navigate(`/budgeting/budgets/${row.id}`)}
       />
-    </div>
+    </Page>
   );
 }

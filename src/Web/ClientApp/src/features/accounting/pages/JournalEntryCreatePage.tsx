@@ -102,15 +102,15 @@ export function JournalEntryCreatePage() {
   return (
     <div className="max-w-6xl mx-auto py-8 px-6" dir="rtl">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--color-on-surface)' }}>إنشاء قيد يومية</h1>
-        <p className="mt-1 text-sm" style={{ color: 'var(--color-on-surface-variant)' }}>أدخل بيانات القيد ثم أضف الأسطر</p>
+        <h1 className="text-2xl font-bold tracking-tight text-[var(--color-on-surface)]">إنشاء قيد يومية</h1>
+        <p className="mt-1 text-sm text-[var(--color-on-surface-variant)]">أدخل بيانات القيد ثم أضف الأسطر</p>
       </div>
 
       <form id="journal-entry-form" onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-6">
           <Card variant="default">
             <div className="px-6 py-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">
-              <h2 className="text-base font-bold" style={{ color: 'var(--color-on-surface)' }}>بيانات القيد</h2>
+              <h2 className="text-base font-bold text-[var(--color-on-surface)]">بيانات القيد</h2>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-2 gap-5">
@@ -176,7 +176,7 @@ export function JournalEntryCreatePage() {
           <Card variant="default">
             <div className="px-6 py-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold" style={{ color: 'var(--color-on-surface)' }}>أسطر القيد</h2>
+                <h2 className="text-base font-bold text-[var(--color-on-surface)]">أسطر القيد</h2>
                 {lines.length > 0 && (
                   <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-[var(--color-surface-container-high)] text-[var(--color-on-surface-variant)]">
                     {lines.length} أسطر

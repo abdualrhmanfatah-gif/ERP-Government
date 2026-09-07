@@ -103,14 +103,14 @@ export function PostingRuleFormPage() {
   return (
     <div className="max-w-4xl mx-auto py-8 px-6" dir="rtl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--color-onSurface)' }}>
+        <h1 className="text-2xl font-bold tracking-tight text-[var(--color-on-surface)]">
           {isEdit ? 'تعديل قاعدة الترحيل' : 'قاعدة ترحيل جديدة'}
         </h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card variant="default" padding="md">
-          <h2 className="text-sm font-bold" style={{ color: 'var(--color-onSurface)' }}>البيانات الأساسية</h2>
+          <h2 className="text-sm font-bold text-[var(--color-on-surface)]">البيانات الأساسية</h2>
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="اسم القاعدة"
@@ -148,13 +148,13 @@ export function PostingRuleFormPage() {
               onChange={(e) => setIsActive(e.target.checked)}
               className="rounded"
             />
-            <label className="text-sm font-bold" style={{ color: 'var(--color-onSurface)' }}>نشط</label>
+            <label className="text-sm font-bold text-[var(--color-on-surface)]">نشط</label>
           </div>
         </Card>
 
         <Card variant="default" padding="md">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold" style={{ color: 'var(--color-onSurface)' }}>بنود القاعدة</h2>
+            <h2 className="text-sm font-bold text-[var(--color-on-surface)]">بنود القاعدة</h2>
             <Button
               type="button"
               variant="secondary"
@@ -166,9 +166,9 @@ export function PostingRuleFormPage() {
           </div>
 
           {lines.map((line, idx) => (
-            <Card key={line._key} variant="flat" padding="sm" className="space-y-3 bg-[var(--color-surfaceContainerLow)] border-[var(--color-outlineVariant)]">
+            <Card key={line._key} variant="flat" padding="sm" className="space-y-3 bg-[var(--color-surface-container-low)] border-[var(--color-outline-variant)]">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>بند {idx + 1}</span>
+                <span className="text-xs font-bold text-[var(--color-on-surface-variant)]">بند {idx + 1}</span>
                 {lines.length > 1 && (
                   <Button
                     type="button"
@@ -210,15 +210,15 @@ export function PostingRuleFormPage() {
                 />
               </div>
               <div className="flex gap-4">
-                <label className="flex items-center gap-1 text-xs font-bold" style={{ color: 'var(--color-onSurface)' }}>
+                <label className="flex items-center gap-1 text-xs font-bold text-[var(--color-on-surface)]">
                   <input type="checkbox" checked={line.fundDimensionRequired ?? false} onChange={(e) => updateLine(line._key, 'fundDimensionRequired', e.target.checked)} />
                   الصندوق
                 </label>
-                <label className="flex items-center gap-1 text-xs font-bold" style={{ color: 'var(--color-onSurface)' }}>
+                <label className="flex items-center gap-1 text-xs font-bold text-[var(--color-on-surface)]">
                   <input type="checkbox" checked={line.costCenterDimensionRequired ?? false} onChange={(e) => updateLine(line._key, 'costCenterDimensionRequired', e.target.checked)} />
                   مركز التكلفة
                 </label>
-                <label className="flex items-center gap-1 text-xs font-bold" style={{ color: 'var(--color-onSurface)' }}>
+                <label className="flex items-center gap-1 text-xs font-bold text-[var(--color-on-surface)]">
                   <input type="checkbox" checked={line.projectDimensionRequired ?? false} onChange={(e) => updateLine(line._key, 'projectDimensionRequired', e.target.checked)} />
                   المشروع
                 </label>

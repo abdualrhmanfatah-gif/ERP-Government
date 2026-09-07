@@ -1,9 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Button } from '@/components/ui/Button';
-import { FilterBar, FilterSearch, FilterSelect } from '@/components/ui';
+import { Page, Button, FilterBar, FilterSearch, FilterSelect } from '@/components/ui';
 import { AccountGrid } from '@/components/AccountingAccountGrid';
 import { useAccountsList } from '../hooks/useAccountsList';
 import { useAccountGroups } from '../hooks/useAccountGroups';

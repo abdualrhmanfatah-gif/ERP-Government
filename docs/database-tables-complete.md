@@ -1,7 +1,7 @@
 # جداول قاعدة البيانات — Database Tables Complete Reference
 
 > **تاريخ آخر تحديث:** 2026-09-07
-> **عدد الجداول:** 107 جدول
+> **عدد الجداول:** 106 جدول
 
 ---
 
@@ -441,14 +441,7 @@
 | نشط | IsActive | bool | default true |
 | نسخة الصف | RowVersion | byte[] | |
 
-### 4.3 حسابات مراكز التكلفة — CostCenterAccounts
-
-| العمود | Column | النوع | القيود |
-|--------|--------|------|--------|
-| معرف مركز التكلفة | CostCenterId | int | FK→CostCenters (composite PK) |
-| معرف الحساب | AccountId | int | FK→Accounts (composite PK) |
-
-### 4.4 المشاريع — Projects
+### 4.3 المشاريع — Projects
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -464,7 +457,7 @@
 | نشط | IsActive | bool | default true |
 | نسخة الصف | RowVersion | byte[] | |
 
-### 4.5 الموظفون — Employees
+### 4.4 الموظفون — Employees
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|

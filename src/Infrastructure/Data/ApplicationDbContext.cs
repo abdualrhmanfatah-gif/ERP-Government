@@ -56,7 +56,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     // Module 3: Organizational Structure
     public DbSet<OrganizationalUnit> OrganizationalUnits => Set<OrganizationalUnit>();
     public DbSet<CostCenter> CostCenters => Set<CostCenter>();
-    public DbSet<CostCenterAccount> CostCenterAccounts => Set<CostCenterAccount>();
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<Employee> Employees => Set<Employee>();
 

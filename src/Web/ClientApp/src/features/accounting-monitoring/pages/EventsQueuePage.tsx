@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { usePendingEvents } from '../hooks/usePendingEvents';
-import { Select, Loading, Badge } from '@/components/ui';
+import { Select, Badge } from '@/components/ui';
+import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
+
+type EventRow = NonNullable<ReturnType<typeof usePendingEvents>['data']>[number];
 
 export function EventsQueuePage() {
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
@@ -11,9 +14,48 @@ export function EventsQueuePage() {
     eventType: eventTypeFilter,
   });
 
+  const columns: DataGridColumn<EventRow>[] = [
+    { key: 'id', header: 'المعرف' },
+    { key: 'eventType', header: 'نوع الحدث' },
+    {
+      key: 'source',
+      header: 'المصدر',
+      accessorFn: (event) => `${event.sourceTable} #${event.sourceId}`,
+    },
+    {
+      key: 'status',
+      header: 'الحالة',
+      render: (event) => (
+        <Badge
+          variant={
+            event.status === 'Failed'
+              ? 'error'
+              : event.status === 'Pending'
+              ? 'warning'
+              : 'success'
+          }
+        >
+          {event.status}
+        </Badge>
+      ),
+    },
+    {
+      key: 'errorMessage',
+      header: 'الخطأ',
+      cellClassName: 'text-[var(--color-error)]',
+      accessorFn: (event) => event.errorMessage ?? '-',
+    },
+    { key: 'retryCount', header: 'المحاولات' },
+    {
+      key: 'journalEntryId',
+      header: 'قيود يومية',
+      accessorFn: (event) => (event.journalEntryId ? `#${event.journalEntryId}` : '-'),
+    },
+  ];
+
   return (
     <div dir="rtl" className="p-6">
-      <h1 className="text-2xl font-bold mb-6" style={{ color: 'var(--color-onSurface)' }}>
+      <h1 className="text-2xl font-bold mb-6 text-[var(--color-on-surface)]">
         طابور الأحداث
       </h1>
 
@@ -25,8 +67,7 @@ export function EventsQueuePage() {
           options={[
             { value: '', label: 'جميع الحالات' },
             { value: 'Pending', label: 'معلق' },
-            { value: 'Processing', label: 'قيد المعالجة' },
-            { value: 'Posted', label: 'تم الترحيل' },
+            { value: 'Approved', label: 'معتمد' },
             { value: 'Failed', label: 'فشل' },
           ]}
           className="w-auto"
@@ -45,54 +86,13 @@ export function EventsQueuePage() {
         />
       </div>
 
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse" style={{ color: 'var(--color-onSurface)' }}>
-            <thead>
-              <tr style={{ backgroundColor: 'var(--color-surface)' }}>
-                <th className="border p-2 text-right">المعرف</th>
-                <th className="border p-2 text-right">نوع الحدث</th>
-                <th className="border p-2 text-right">المصدر</th>
-                <th className="border p-2 text-right">الحالة</th>
-                <th className="border p-2 text-right">الخطأ</th>
-                <th className="border p-2 text-right">المحاولات</th>
-                <th className="border p-2 text-right">قيود يومية</th>
-              </tr>
-            </thead>
-            <tbody>
-              {events?.map((event) => (
-                <tr key={event.id}>
-                  <td className="border p-2">{event.id}</td>
-                  <td className="border p-2">{event.eventType}</td>
-                  <td className="border p-2">{event.sourceTable} #{event.sourceId}</td>
-                  <td className="border p-2">
-                    <Badge
-                      variant={
-                        event.status === 'Failed'
-                          ? 'error'
-                          : event.status === 'Pending'
-                          ? 'warning'
-                          : 'success'
-                      }
-                    >
-                      {event.status}
-                    </Badge>
-                  </td>
-                  <td className="border p-2" style={{ color: 'var(--color-error)' }}>
-                    {event.errorMessage ?? '-'}
-                  </td>
-                  <td className="border p-2">{event.retryCount}</td>
-                  <td className="border p-2">
-                    {event.journalEntryId ? `#${event.journalEntryId}` : '-'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <DataGrid
+        columns={columns}
+        data={events ?? []}
+        loading={isLoading}
+        emptyMessage="لا توجد أحداث"
+        rowKey={(event) => event.id}
+      />
     </div>
   );
 }

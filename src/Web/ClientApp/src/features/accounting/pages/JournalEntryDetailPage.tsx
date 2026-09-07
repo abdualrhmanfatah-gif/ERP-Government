@@ -93,7 +93,7 @@ export function JournalEntryDetailPage() {
   if (isLoading) {
     return (
       <div className="max-w-6xl mx-auto py-16 px-6">
-        <div className="flex items-center justify-center gap-3" style={{ color: 'var(--color-onSurfaceVariant)' }}>
+        <div className="flex items-center justify-center gap-3 text-[var(--color-on-surface-variant)]">
           <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
           <span className="text-sm font-medium">جاري تحميل القيد...</span>
         </div>
@@ -104,10 +104,10 @@ export function JournalEntryDetailPage() {
   if (error || !entry) {
     return (
       <div className="max-w-6xl mx-auto py-16 px-6 text-center">
-        <svg className="mx-auto h-12 w-12 mb-4" style={{ color: 'var(--color-error)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="mx-auto h-12 w-12 mb-4 text-[var(--color-error)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
         </svg>
-        <p className="text-sm font-bold" style={{ color: 'var(--color-error)' }}>خطأ في تحميل القيد</p>
+        <p className="text-sm font-bold text-[var(--color-error)]">خطأ في تحميل القيد</p>
         <Button variant="link" onClick={() => navigate('/accounting/journal-entries')} className="mt-4">العودة للقائمة</Button>
       </div>
     );
@@ -135,58 +135,58 @@ export function JournalEntryDetailPage() {
           <div className="px-6 py-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold" style={{ color: 'var(--color-onSurface)' }}>
+                <h2 className="text-xl font-bold text-[var(--color-on-surface)]">
                   {entry.entryNumber}
                   {entry.isSystemGenerated && (
-                    <span className="mr-2 text-[10px] px-2 py-0.5 rounded-full font-bold bg-[var(--color-surfaceContainerHigh)] text-[var(--color-onSurfaceVariant)]">نظام</span>
+                    <span className="mr-2 text-[10px] px-2 py-0.5 rounded-full font-bold bg-[var(--color-surface-container-high)] text-[var(--color-on-surface-variant)]">نظام</span>
                   )}
                 </h2>
-                <p className="text-sm mt-0.5" style={{ color: 'var(--color-onSurfaceVariant)' }}>{formatDate(entry.documentDate)}</p>
+                <p className="text-sm mt-0.5 text-[var(--color-on-surface-variant)]">{formatDate(entry.documentDate)}</p>
               </div>
               <StatusBadge status={entry.entryStatus} />
             </div>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-3 gap-4 text-sm">
-              <div><span style={{ color: 'var(--color-onSurfaceVariant)' }}>الفترة:</span> <span className="font-bold" style={{ color: 'var(--color-onSurface)' }}>{entry.periodName || entry.periodId}</span></div>
-              <div><span style={{ color: 'var(--color-onSurfaceVariant)' }}>السنة المالية:</span> <span className="font-bold" style={{ color: 'var(--color-onSurface)' }}>{entry.fiscalYearName || entry.fiscalYearId}</span></div>
-              <div><span style={{ color: 'var(--color-onSurfaceVariant)' }}>اليومية:</span> <span className="font-bold" style={{ color: 'var(--color-onSurface)' }}>{entry.journalName || '-'}</span></div>
+              <div><span className="text-[var(--color-on-surface-variant)]">الفترة:</span> <span className="font-bold text-[var(--color-on-surface)]">{entry.periodName || entry.periodId}</span></div>
+              <div><span className="text-[var(--color-on-surface-variant)]">السنة المالية:</span> <span className="font-bold text-[var(--color-on-surface)]">{entry.fiscalYearName || entry.fiscalYearId}</span></div>
+              <div><span className="text-[var(--color-on-surface-variant)]">اليومية:</span> <span className="font-bold text-[var(--color-on-surface)]">{entry.journalName || '-'}</span></div>
             </div>
-            {entry.narration && <p className="mt-4 text-sm" style={{ color: 'var(--color-onSurface)' }}>{entry.narration}</p>}
-            {entry.ref && <p className="mt-2 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>المرجع: {entry.ref}</p>}
-            {entry.postedByName && entry.postedAt && <p className="mt-2 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>سجل بواسطة: {entry.postedByName} — {formatDate(entry.postedAt)}</p>}
-            {entry.cancelledByName && entry.cancelledAt && <p className="mt-2 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>ألغى بواسطة: {entry.cancelledByName} — {formatDate(entry.cancelledAt)}</p>}
+            {entry.narration && <p className="mt-4 text-sm text-[var(--color-on-surface)]">{entry.narration}</p>}
+            {entry.ref && <p className="mt-2 text-sm text-[var(--color-on-surface-variant)]">المرجع: {entry.ref}</p>}
+            {entry.postedByName && entry.postedAt && <p className="mt-2 text-sm text-[var(--color-on-surface-variant)]">سجل بواسطة: {entry.postedByName} — {formatDate(entry.postedAt)}</p>}
+            {entry.cancelledByName && entry.cancelledAt && <p className="mt-2 text-sm text-[var(--color-on-surface-variant)]">ألغى بواسطة: {entry.cancelledByName} — {formatDate(entry.cancelledAt)}</p>}
           </div>
         </Card>
 
         {/* الأسطر */}
         <Card variant="default">
           <div className="px-6 py-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">
-            <h2 className="text-base font-bold" style={{ color: 'var(--color-onSurface)' }}>الأسطر</h2>
+            <h2 className="text-base font-bold text-[var(--color-on-surface)]">الأسطر</h2>
           </div>
           <div className="p-6">
             {entry.lines.length > 0 ? (
-              <div className="overflow-x-auto rounded-lg border" style={{ borderColor: 'var(--color-outlineVariant)' }}>
-                <table className="min-w-full divide-y" style={{ borderColor: 'var(--color-outlineVariant)' }}>
+              <div className="overflow-x-auto rounded-lg border" style={{ borderColor: 'var(--color-outline-variant)' }}>
+                <table className="min-w-full divide-y" style={{ borderColor: 'var(--color-outline-variant)' }}>
                     <thead>
-                      <tr style={{ backgroundColor: 'var(--color-surfaceContainerLow)' }}>
-                        <th className="px-4 py-3 text-right text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>#</th>
-                        <th className="px-4 py-3 text-right text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>الحساب</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>مدين</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>دائن</th>
-                        <th className="px-4 py-3 text-right text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>الوصف</th>
-                        <th className="px-4 py-3 text-right text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>الأبعاد</th>
+                      <tr style={{ backgroundColor: 'var(--color-surface-container-low)' }}>
+                        <th className="px-4 py-3 text-start text-xs font-bold text-[var(--color-on-surface-variant)]">#</th>
+                        <th className="px-4 py-3 text-start text-xs font-bold text-[var(--color-on-surface-variant)]">الحساب</th>
+                        <th className="px-4 py-3 text-end text-xs font-bold text-[var(--color-on-surface-variant)]">مدين</th>
+                        <th className="px-4 py-3 text-end text-xs font-bold text-[var(--color-on-surface-variant)]">دائن</th>
+                        <th className="px-4 py-3 text-start text-xs font-bold text-[var(--color-on-surface-variant)]">الوصف</th>
+                        <th className="px-4 py-3 text-start text-xs font-bold text-[var(--color-on-surface-variant)]">الأبعاد</th>
                       </tr>
                     </thead>
-                  <tbody className="divide-y" style={{ borderColor: 'var(--color-outlineVariant)' }}>
+                  <tbody className="divide-y" style={{ borderColor: 'var(--color-outline-variant)' }}>
                     {entry.lines.map((line) => (
                       <tr key={line.id} style={{ backgroundColor: 'var(--color-surface)' }}>
-                        <td className="px-4 py-3 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>{line.sequence}</td>
-                        <td className="px-4 py-3 text-sm font-bold" style={{ color: 'var(--color-onSurface)' }}>{line.accountCode} - {line.accountName}</td>
-                        <td className="px-4 py-3 text-sm text-left tabular-nums font-bold" style={{ color: 'var(--color-onSurface)' }}>{line.debit > 0 ? line.debit.toLocaleString('ar-YE') : '-'}</td>
-                        <td className="px-4 py-3 text-sm text-left tabular-nums font-bold" style={{ color: 'var(--color-onSurface)' }}>{line.credit > 0 ? line.credit.toLocaleString('ar-YE') : '-'}</td>
-                        <td className="px-4 py-3 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>{line.description || '-'}</td>
-                        <td className="px-4 py-3 text-xs" style={{ color: 'var(--color-onSurfaceVariant)' }}>
+                        <td className="px-4 py-3 text-sm text-[var(--color-on-surface-variant)]">{line.sequence}</td>
+                        <td className="px-4 py-3 text-sm font-bold text-[var(--color-on-surface)]">{line.accountCode} - {line.accountName}</td>
+                        <td className="px-4 py-3 text-sm text-end tabular-nums font-bold text-[var(--color-on-surface)]">{line.debit > 0 ? line.debit.toLocaleString('ar-YE') : '-'}</td>
+                        <td className="px-4 py-3 text-sm text-end tabular-nums font-bold text-[var(--color-on-surface)]">{line.credit > 0 ? line.credit.toLocaleString('ar-YE') : '-'}</td>
+                        <td className="px-4 py-3 text-sm text-[var(--color-on-surface-variant)]">{line.description || '-'}</td>
+                        <td className="px-4 py-3 text-xs text-[var(--color-on-surface-variant)]">
                           {[
                             line.fundName && `صندوق: ${line.fundName}`,
                             line.projectName && `مشروع: ${line.projectName}`,
@@ -201,7 +201,7 @@ export function JournalEntryDetailPage() {
                 </table>
               </div>
             ) : (
-              <p className="text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>لا توجد أسطر</p>
+              <p className="text-sm text-[var(--color-on-surface-variant)]">لا توجد أسطر</p>
             )}
             <div className="mt-4"><BalanceIndicator totalDebit={entry.totalDebit} totalCredit={entry.totalCredit} /></div>
           </div>
@@ -211,7 +211,7 @@ export function JournalEntryDetailPage() {
         {actions.length > 0 && !entry.isSystemGenerated && (
           <Card variant="default">
             <div className="px-6 py-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">
-              <h2 className="text-base font-bold" style={{ color: 'var(--color-onSurface)' }}>الإجراءات</h2>
+              <h2 className="text-base font-bold text-[var(--color-on-surface)]">الإجراءات</h2>
             </div>
             <div className="p-6">
               <div className="flex flex-wrap gap-2">
@@ -236,10 +236,10 @@ export function JournalEntryDetailPage() {
         {entry.reversalOfId && (
           <Card variant="default">
             <div className="p-6">
-              <p className="text-sm" style={{ color: 'var(--color-onSurface)' }}>
-                هذا القيد عكس لـ <a href={`/accounting/journal-entries/${entry.reversalOfId}`} className="font-bold underline cursor-pointer" style={{ color: 'var(--color-link)' }}>القيد رقم {entry.reversalOfId}</a>
+              <p className="text-sm text-[var(--color-on-surface)]">
+                هذا القيد عكس لـ <a href={`/accounting/journal-entries/${entry.reversalOfId}`} className="font-bold underline cursor-pointer text-[var(--color-link)]">القيد رقم {entry.reversalOfId}</a>
               </p>
-              {entry.reversalReason && <p className="mt-2 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>السبب: {entry.reversalReason}</p>}
+              {entry.reversalReason && <p className="mt-2 text-sm text-[var(--color-on-surface-variant)]">السبب: {entry.reversalReason}</p>}
             </div>
           </Card>
         )}

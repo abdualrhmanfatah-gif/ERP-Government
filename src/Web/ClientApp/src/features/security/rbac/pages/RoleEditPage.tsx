@@ -3,7 +3,7 @@ import { notify } from '@/features/notifications/notify';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Loading } from '@/components/ui/Loading';
-import { Card } from '@/components/ui';
+import { Card, EmptyState } from '@/components/ui';
 import { RoleForm } from '@/components/SecurityRbacRoleForm';
 import { useRoles } from '../hooks';
 import { useUpdateRole } from '../hooks/useUpdateRole';
@@ -23,7 +23,7 @@ export function RoleEditPage() {
   }
 
   if (!role) {
-    return <div className="p-8 text-center text-[var(--color-on-surface-variant)]">الدور غير موجود</div>;
+    return <EmptyState message="الدور غير موجود" />;
   }
 
   const handleSubmit = async (data: CreateRoleCommand) => {

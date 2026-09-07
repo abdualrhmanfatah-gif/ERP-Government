@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Pencil } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { Tabs } from '@/components/ui/Tabs';
 import { Loading } from '@/components/ui/Loading';
 import { AccountDetail } from '@/components/AccountingAccountDetail';
@@ -32,14 +33,14 @@ export function AccountDetailPage() {
 
   if (!account) {
     return (
-      <div className="p-12 text-center">
-        الحساب غير موجود
-        <div className="mt-3">
+      <EmptyState
+        message="الحساب غير موجود"
+        action={
           <Button variant="outline" onClick={() => navigate('/accounting/accounts')}>
             العودة للقائمة
           </Button>
-        </div>
-      </div>
+        }
+      />
     );
   }
 

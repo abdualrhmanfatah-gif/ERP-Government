@@ -104,7 +104,7 @@ export default function MonthlyStatementPage() {
                   <span className="w-32">التاريخ</span>
                   <span className="flex-1">المستلم</span>
                   <span className="w-20">الطريقة</span>
-                  <span className="w-24 text-left">المبلغ</span>
+                  <span className="w-24 text-end">المبلغ</span>
                 </div>
                 {statement!.vouchers?.map((v: any) => (
                   <div key={v.id} className="flex gap-4 px-4 py-3 text-sm">
@@ -112,7 +112,7 @@ export default function MonthlyStatementPage() {
                     <span className="w-32">{new Date(v.receivedDate).toLocaleDateString('ar-YE')}</span>
                     <span className="flex-1">{v.receivedFrom}</span>
                     <span className="w-20">{v.paymentMethodLabel}</span>
-                    <span className="w-24 text-left">
+                    <span className="w-24 text-end">
                       <MoneyDisplay value={v.totalAmount ?? 0} />
                     </span>
                   </div>
@@ -130,14 +130,14 @@ export default function MonthlyStatementPage() {
                   <span className="w-24">رقم الشيك</span>
                   <span className="w-32">البنك</span>
                   <span className="flex-1">تاريخ التحصيل</span>
-                  <span className="w-24 text-left">المبلغ</span>
+                  <span className="w-24 text-end">المبلغ</span>
                 </div>
                 {statement!.clearings?.map((c: any, i: number) => (
                   <div key={i} className="flex gap-4 px-4 py-3 text-sm">
                     <span className="w-24 tabular-nums">{c.checkNumber}</span>
                     <span className="w-32">{c.bankName}</span>
                     <span className="flex-1">{c.clearedAt ? new Date(c.clearedAt).toLocaleDateString('ar-YE') : '—'}</span>
-                    <span className="w-24 text-left">
+                    <span className="w-24 text-end">
                       <MoneyDisplay value={c.amount ?? 0} />
                     </span>
                   </div>

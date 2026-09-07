@@ -5,13 +5,45 @@ import { FREQUENCY_LABELS, STATUS_LABELS } from '../shared/types';
 import type { RecurringEntryListFilters } from '../shared/client';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui';
-import { Loading } from '@/components/ui/Loading';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
+
+type EntryRow = NonNullable<ReturnType<typeof useRecurringEntries>['data']>[number];
 
 export default function RecurringEntriesListPage() {
   const navigate = useNavigate();
   const [filters, setFilters] = useState<RecurringEntryListFilters>({});
   const { data: entries, isLoading } = useRecurringEntries(filters);
+
+  const columns: DataGridColumn<EntryRow>[] = [
+    { key: 'entryNumber', header: 'رقم القيد', cellClassName: 'font-mono' },
+    { key: 'name', header: 'الاسم' },
+    { key: 'journalName', header: 'الدفتر' },
+    { key: 'frequency', header: 'الدورية', accessorFn: (e) => FREQUENCY_LABELS[e.frequency ?? ''] },
+    {
+      key: 'nextExecutionDate',
+      header: 'التاريخ القادم',
+      accessorFn: (e) => (e.nextExecutionDate ? new Date(e.nextExecutionDate).toLocaleDateString('ar-YE') : '-'),
+    },
+    {
+      key: 'status',
+      header: 'الحالة',
+      render: (entry) => (
+        <StatusBadge variant={entry.status === 'Active' ? 'active' : entry.status === 'Paused' ? 'draft' : 'closed'}>
+          {STATUS_LABELS[entry.status ?? '']}
+        </StatusBadge>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'إجراءات',
+      render: (entry) => (
+        <Button variant="ghost" size="sm" onClick={() => navigate(`/accounting/recurring-entries/${entry.id}`)}>
+          التفاصيل
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -45,48 +77,13 @@ export default function RecurringEntriesListPage() {
         />
       </div>
 
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b">
-              <th className="text-right p-3">رقم القيد</th>
-              <th className="text-right p-3">الاسم</th>
-              <th className="text-right p-3">الدفتر</th>
-              <th className="text-right p-3">الدورية</th>
-              <th className="text-right p-3">التاريخ القادم</th>
-              <th className="text-right p-3">الحالة</th>
-              <th className="text-right p-3">إجراءات</th>
-            </tr>
-          </thead>
-          <tbody>
-            {entries?.map((entry) => (
-              <tr key={entry.id} className="border-b hover:bg-[var(--color-surface-container-low)]">
-                <td className="p-3 font-mono">{entry.entryNumber}</td>
-                <td className="p-3">{entry.name}</td>
-                <td className="p-3">{entry.journalName}</td>
-                <td className="p-3">{FREQUENCY_LABELS[entry.frequency ?? '']}</td>
-                <td className="p-3">
-                  {entry.nextExecutionDate
-                    ? new Date(entry.nextExecutionDate).toLocaleDateString('ar-YE')
-                    : '-'}
-                </td>
-                <td className="p-3">
-                  <StatusBadge variant={entry.status === 'Active' ? 'active' : entry.status === 'Paused' ? 'draft' : 'closed'}>
-                    {STATUS_LABELS[entry.status ?? '']}
-                  </StatusBadge>
-                </td>
-                <td className="p-3">
-                  <Button variant="ghost" size="sm" onClick={() => navigate(`/accounting/recurring-entries/${entry.id}`)}>
-                    التفاصيل
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <DataGrid
+        columns={columns}
+        data={entries ?? []}
+        loading={isLoading}
+        emptyMessage="لا توجد جداول دورية"
+        rowKey={(entry) => entry.id}
+      />
     </div>
   );
 }

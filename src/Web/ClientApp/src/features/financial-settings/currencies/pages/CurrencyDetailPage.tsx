@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Button, Badge, Card, StatusBadge, Breadcrumb, Loading, FormField, Input, ConfirmDialog } from '@/components/ui';
+import { Button, Badge, Card, StatusBadge, Breadcrumb, Loading, FormField, Input, ConfirmDialog, EmptyState } from '@/components/ui';
 import { ArrowRight, Pencil, X, Check } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { useCurrencyDetail, useUpdateCurrency, useActivateCurrency, useDeactivateCurrency } from '../../hooks/useCurrencies';
@@ -37,12 +37,14 @@ export default function CurrencyDetailPage() {
 
   if (error || !currency) {
     return (
-      <div className="text-center py-12">
-        <p className="text-body-md text-[var(--color-on-surface-variant)]">العملة غير موجودة</p>
-        <Button variant="ghost" onClick={() => navigate('/financial-settings/currencies')} className="mt-4 cursor-pointer">
-          العودة للعملات
-        </Button>
-      </div>
+      <EmptyState
+        message="العملة غير موجودة"
+        action={
+          <Button variant="ghost" onClick={() => navigate('/financial-settings/currencies')} className="cursor-pointer">
+            العودة للعملات
+          </Button>
+        }
+      />
     );
   }
 
