@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFundDetail } from '../hooks/useFunds';
 import { fundTypeLabels, fundCategoryLabels } from '../../shared/types';
-import { Button, Badge, Card } from '@/components/ui';
+import { Button, Badge, Card, Loading } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 
 export default function FundDetailPage() {
@@ -12,7 +12,7 @@ export default function FundDetailPage() {
   const { data: fund, isLoading, error } = useFundDetail(fundId);
 
   if (isLoading) {
-    return <div className="p-6 text-center text-[var(--color-on-surface-variant)]">جاري التحميل...</div>;
+    return <Loading />;
   }
 
   if (error || !fund) {

@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { Loading } from '@/components/ui';
 import { OrgUnitForm } from '@/components/OrganizationOrgUnitForm';
 import { useOrganizationalUnit, useCreateOrgUnit, useUpdateOrgUnit } from '../hooks';
 import type { CreateOrgUnitCommand } from '../types';
@@ -39,7 +40,7 @@ export function OrgUnitEditPage() {
     navigate('/organization/units');
   };
 
-  if (isLoading) return <div className="p-4">جاري التحميل...</div>;
+  if (isLoading) return <Loading />;
   if (!orgUnit) return <div className="p-4">الوحدة غير موجودة</div>;
 
   return (

@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useCreateEncumbrance, useReverseEncumbrance, useEncumbranceAvailability } from '../../hooks/useEncumbrances';
 import { AvailabilityIndicator } from '@/components/BudgetingAvailabilityIndicator';
 import { encumbranceTypeLabels, EncumbranceType } from '../../shared/types';
-import { Button, Card } from '@/components/ui';
+import { Button, Card, Input, Select, Textarea } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 
 export default function EncumbranceCreatePage() {
@@ -119,102 +119,74 @@ export default function EncumbranceCreatePage() {
       <form onSubmit={handleSubmit} className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6">
         {showReversal ? (
           <div className="space-y-4">
-            <div>
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">رقم الالتزام المراد عكسه *</label>
-              <input
-                type="number"
-                value={form.reversalOfId || ''}
-                onChange={(e) => updateField('reversalOfId', Number(e.target.value))}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">سبب العكس *</label>
-              <textarea
-                value={form.reversalReason}
-                onChange={(e) => updateField('reversalReason', e.target.value)}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-                rows={3}
-              />
-              {errors.reversalReason && <p className="text-xs text-[var(--color-error)] mt-1">{errors.reversalReason}</p>}
-            </div>
+            <Input
+              label="رقم الالتزام المراد عكسه *"
+              type="number"
+              value={form.reversalOfId || ''}
+              onChange={(e) => updateField('reversalOfId', Number(e.target.value))}
+            />
+            <Textarea
+              label="سبب العكس *"
+              value={form.reversalReason}
+              onChange={(e) => updateField('reversalReason', e.target.value)}
+              rows={3}
+              error={errors.reversalReason || undefined}
+            />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">نوع الالتزام *</label>
-              <select
-                value={form.encumbranceType}
-                onChange={(e) => updateField('encumbranceType', Number(e.target.value))}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-              >
-                {Object.entries(encumbranceTypeLabels).map(([val, label]) => (
-                  <option key={val} value={val}>{label}</option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label="نوع الالتزام *"
+              value={form.encumbranceType}
+              onChange={(e) => updateField('encumbranceType', Number(e.target.value))}
+              options={Object.entries(encumbranceTypeLabels).map(([val, label]) => ({ value: val, label }))}
+            />
 
-            <div>
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">رقم التخصيص *</label>
-              <input
-                type="number"
-                value={form.appropriationId || ''}
-                onChange={(e) => updateField('appropriationId', Number(e.target.value))}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-              />
-              {errors.appropriationId && <p className="text-xs text-[var(--color-error)] mt-1">{errors.appropriationId}</p>}
-            </div>
+            <Input
+              label="رقم التخصيص *"
+              type="number"
+              value={form.appropriationId || ''}
+              onChange={(e) => updateField('appropriationId', Number(e.target.value))}
+              error={errors.appropriationId || undefined}
+            />
 
-            <div>
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">المبلغ *</label>
-              <input
-                type="number"
-                value={form.amount || ''}
-                onChange={(e) => updateField('amount', Number(e.target.value))}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-                min="0"
-                step="0.01"
-              />
-              {errors.amount && <p className="text-xs text-[var(--color-error)] mt-1">{errors.amount}</p>}
-            </div>
+            <Input
+              label="المبلغ *"
+              type="number"
+              value={form.amount || ''}
+              onChange={(e) => updateField('amount', Number(e.target.value))}
+              min="0"
+              step="0.01"
+              error={errors.amount || undefined}
+            />
 
-            <div>
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">تاريخ الالتزام *</label>
-              <input
-                type="date"
-                value={form.encumbranceDate}
-                onChange={(e) => updateField('encumbranceDate', e.target.value)}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-              />
-            </div>
+            <Input
+              label="تاريخ الالتزام *"
+              type="date"
+              value={form.encumbranceDate}
+              onChange={(e) => updateField('encumbranceDate', e.target.value)}
+            />
 
-            <div>
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">نوع المستند *</label>
-              <input
-                type="text"
-                value={form.documentType}
-                onChange={(e) => updateField('documentType', e.target.value)}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-              />
-              {errors.documentType && <p className="text-xs text-[var(--color-error)] mt-1">{errors.documentType}</p>}
-            </div>
+            <Input
+              label="نوع المستند *"
+              type="text"
+              value={form.documentType}
+              onChange={(e) => updateField('documentType', e.target.value)}
+              error={errors.documentType || undefined}
+            />
 
-            <div>
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">رقم المورد</label>
-              <input
-                type="number"
-                value={form.vendorId || ''}
-                onChange={(e) => updateField('vendorId', Number(e.target.value))}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-              />
-            </div>
+            <Input
+              label="رقم المورد"
+              type="number"
+              value={form.vendorId || ''}
+              onChange={(e) => updateField('vendorId', Number(e.target.value))}
+            />
 
             <div className="md:col-span-2">
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">الوصف</label>
-              <textarea
+              <Textarea
+                label="الوصف"
                 value={form.description}
                 onChange={(e) => updateField('description', e.target.value)}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
                 rows={3}
               />
             </div>
@@ -230,8 +202,12 @@ export default function EncumbranceCreatePage() {
             </Button>
           )}
           <Button variant="ghost" type="button" onClick={() => navigate(-1)}>إلغاء</Button>
-          <Button variant="primary" type="submit" disabled={createEncumbrance.isPending || reverseEncumbrance.isPending}>
-            {(createEncumbrance.isPending || reverseEncumbrance.isPending) ? 'جارٍ الحفظ...' : 'حفظ'}
+          <Button
+            variant="primary"
+            type="submit"
+            loading={createEncumbrance.isPending || reverseEncumbrance.isPending}
+          >
+            حفظ
           </Button>
         </div>
       </form>

@@ -204,6 +204,7 @@ public static class DependencyInjection
 
             options.AddPolicy(PermissionCodes.PaymentOrdersView, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PaymentOrdersCreate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.PaymentOrdersUpdate, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PaymentOrdersSubmit, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PaymentOrdersApprove, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PaymentOrdersReject, p => p.RequireAssertion(_ => true));

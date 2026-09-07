@@ -2,7 +2,7 @@
 // Reviewer display name resolved from users lookup (SC-002); contract DTO stays literal.
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Button, Badge, Card, Dialog, Loading, MoneyDisplay, EmptyState } from '@/components/ui';
+import { Button, Badge, Card, Dialog, Loading, MoneyDisplay, EmptyState, Textarea } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 import { useUserDetail } from '../../security/users/hooks/useUserDetail';
 import { notify } from '@/features/notifications/notify';
@@ -217,12 +217,11 @@ export default function ReceiptVoucherDetailPage() {
 
       <Dialog open={cancelOpen} onClose={() => setCancelOpen(false)} title="إلغاء السند — السبب مطلوب">
         <div className="space-y-4">
-          <textarea
+          <Textarea
             value={cancelReason}
             onChange={(e) => setCancelReason(e.target.value)}
             rows={3}
             placeholder="اذكر سبب الإلغاء..."
-            className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
           />
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => setCancelOpen(false)}>تراجع</Button>

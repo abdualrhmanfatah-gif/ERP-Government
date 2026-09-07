@@ -13873,6 +13873,59 @@ export class PaymentOrdersClient {
     }
 
     /**
+     * Update a draft payment order (header, lines and deductions are replaced)
+     * @return No Content
+     */
+    paymentOrdersPUT(id: number, body: UpdatePaymentOrderCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/PaymentOrders/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPaymentOrdersPUT(_response);
+        });
+    }
+
+    protected processPaymentOrdersPUT(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
      * Get computed totals for a payment order
      * @return OK
      */
@@ -15981,6 +16034,14 @@ export class DisbursementRequestsClient {
             return response.text().then((_responseText) => {
             return throwException("Bad Request", status, _responseText, _headers);
             });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -16026,6 +16087,14 @@ export class DisbursementRequestsClient {
             return response.text().then((_responseText) => {
             return throwException("Bad Request", status, _responseText, _headers);
             });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -16070,6 +16139,14 @@ export class DisbursementRequestsClient {
             return response.text().then((_responseText) => {
             return throwException("Bad Request", status, _responseText, _headers);
             });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -16113,6 +16190,14 @@ export class DisbursementRequestsClient {
         } else if (status === 400) {
             return response.text().then((_responseText) => {
             return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
@@ -16162,6 +16247,14 @@ export class DisbursementRequestsClient {
             return response.text().then((_responseText) => {
             return throwException("Bad Request", status, _responseText, _headers);
             });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -16210,6 +16303,14 @@ export class DisbursementRequestsClient {
             return response.text().then((_responseText) => {
             return throwException("Bad Request", status, _responseText, _headers);
             });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -16257,6 +16358,14 @@ export class DisbursementRequestsClient {
         } else if (status === 400) {
             return response.text().then((_responseText) => {
             return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
@@ -40354,6 +40463,342 @@ export interface IUpdatePartyRequest {
     email: string | undefined;
     address: string | undefined;
     notes: string | undefined;
+
+    [key: string]: any;
+}
+
+export class UpdatePaymentOrderCommand implements IUpdatePaymentOrderCommand {
+    id?: number;
+    rowVersion?: string;
+    paymentOrderDate?: Date;
+    dueDate?: Date | undefined;
+    paymentOrderType?: string;
+    vendorId?: number;
+    fundId?: number;
+    fiscalYearId?: number;
+    appropriationId?: number;
+    budgetClassificationId?: number | undefined;
+    costCenterId?: number | undefined;
+    projectId?: number | undefined;
+    purchaseOrderId?: number | undefined;
+    encumbranceId?: number | undefined;
+    currencyId?: number;
+    exchangeRate?: number | undefined;
+    amountGross?: number;
+    deductionAmount?: number;
+    paymentMethod?: PaymentMethod;
+    bankAccountId?: number | undefined;
+    beneficiaryName?: string;
+    beneficiaryIban?: string | undefined;
+    beneficiaryAccountNumber?: string | undefined;
+    beneficiaryBankName?: string | undefined;
+    notes?: string | undefined;
+    lines?: UpdatePaymentOrderLineDto[];
+    deductions?: UpdatePaymentOrderDeductionDto[];
+
+    [key: string]: any;
+
+    constructor(data?: IUpdatePaymentOrderCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.rowVersion = _data["rowVersion"];
+            this.paymentOrderDate = _data["paymentOrderDate"] ? new Date(_data["paymentOrderDate"].toString()) : undefined as any;
+            this.dueDate = _data["dueDate"] ? new Date(_data["dueDate"].toString()) : undefined as any;
+            this.paymentOrderType = _data["paymentOrderType"];
+            this.vendorId = _data["vendorId"];
+            this.fundId = _data["fundId"];
+            this.fiscalYearId = _data["fiscalYearId"];
+            this.appropriationId = _data["appropriationId"];
+            this.budgetClassificationId = _data["budgetClassificationId"];
+            this.costCenterId = _data["costCenterId"];
+            this.projectId = _data["projectId"];
+            this.purchaseOrderId = _data["purchaseOrderId"];
+            this.encumbranceId = _data["encumbranceId"];
+            this.currencyId = _data["currencyId"];
+            this.exchangeRate = _data["exchangeRate"];
+            this.amountGross = _data["amountGross"];
+            this.deductionAmount = _data["deductionAmount"];
+            this.paymentMethod = _data["paymentMethod"];
+            this.bankAccountId = _data["bankAccountId"];
+            this.beneficiaryName = _data["beneficiaryName"];
+            this.beneficiaryIban = _data["beneficiaryIban"];
+            this.beneficiaryAccountNumber = _data["beneficiaryAccountNumber"];
+            this.beneficiaryBankName = _data["beneficiaryBankName"];
+            this.notes = _data["notes"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(UpdatePaymentOrderLineDto.fromJS(item));
+            }
+            if (Array.isArray(_data["deductions"])) {
+                this.deductions = [] as any;
+                for (let item of _data["deductions"])
+                    this.deductions!.push(UpdatePaymentOrderDeductionDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): UpdatePaymentOrderCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdatePaymentOrderCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["rowVersion"] = this.rowVersion;
+        data["paymentOrderDate"] = this.paymentOrderDate ? this.paymentOrderDate.toISOString() : undefined as any;
+        data["dueDate"] = this.dueDate ? this.dueDate.toISOString() : undefined as any;
+        data["paymentOrderType"] = this.paymentOrderType;
+        data["vendorId"] = this.vendorId;
+        data["fundId"] = this.fundId;
+        data["fiscalYearId"] = this.fiscalYearId;
+        data["appropriationId"] = this.appropriationId;
+        data["budgetClassificationId"] = this.budgetClassificationId;
+        data["costCenterId"] = this.costCenterId;
+        data["projectId"] = this.projectId;
+        data["purchaseOrderId"] = this.purchaseOrderId;
+        data["encumbranceId"] = this.encumbranceId;
+        data["currencyId"] = this.currencyId;
+        data["exchangeRate"] = this.exchangeRate;
+        data["amountGross"] = this.amountGross;
+        data["deductionAmount"] = this.deductionAmount;
+        data["paymentMethod"] = this.paymentMethod;
+        data["bankAccountId"] = this.bankAccountId;
+        data["beneficiaryName"] = this.beneficiaryName;
+        data["beneficiaryIban"] = this.beneficiaryIban;
+        data["beneficiaryAccountNumber"] = this.beneficiaryAccountNumber;
+        data["beneficiaryBankName"] = this.beneficiaryBankName;
+        data["notes"] = this.notes;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        if (Array.isArray(this.deductions)) {
+            data["deductions"] = [];
+            for (let item of this.deductions)
+                data["deductions"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IUpdatePaymentOrderCommand {
+    id?: number;
+    rowVersion?: string;
+    paymentOrderDate?: Date;
+    dueDate?: Date | undefined;
+    paymentOrderType?: string;
+    vendorId?: number;
+    fundId?: number;
+    fiscalYearId?: number;
+    appropriationId?: number;
+    budgetClassificationId?: number | undefined;
+    costCenterId?: number | undefined;
+    projectId?: number | undefined;
+    purchaseOrderId?: number | undefined;
+    encumbranceId?: number | undefined;
+    currencyId?: number;
+    exchangeRate?: number | undefined;
+    amountGross?: number;
+    deductionAmount?: number;
+    paymentMethod?: PaymentMethod;
+    bankAccountId?: number | undefined;
+    beneficiaryName?: string;
+    beneficiaryIban?: string | undefined;
+    beneficiaryAccountNumber?: string | undefined;
+    beneficiaryBankName?: string | undefined;
+    notes?: string | undefined;
+    lines?: UpdatePaymentOrderLineDto[];
+    deductions?: UpdatePaymentOrderDeductionDto[];
+
+    [key: string]: any;
+}
+
+export class UpdatePaymentOrderDeductionDto implements IUpdatePaymentOrderDeductionDto {
+    deductionType?: DeductionType;
+    deductionCode?: string | undefined;
+    description?: string | undefined;
+    accountId?: number;
+    amount?: number;
+    deductionPercent?: number | undefined;
+    isMandatory?: boolean;
+    isTaxDeduction?: boolean;
+    taxAuthorityId?: number | undefined;
+    referenceNumber?: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IUpdatePaymentOrderDeductionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.deductionType = _data["deductionType"];
+            this.deductionCode = _data["deductionCode"];
+            this.description = _data["description"];
+            this.accountId = _data["accountId"];
+            this.amount = _data["amount"];
+            this.deductionPercent = _data["deductionPercent"];
+            this.isMandatory = _data["isMandatory"];
+            this.isTaxDeduction = _data["isTaxDeduction"];
+            this.taxAuthorityId = _data["taxAuthorityId"];
+            this.referenceNumber = _data["referenceNumber"];
+        }
+    }
+
+    static fromJS(data: any): UpdatePaymentOrderDeductionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdatePaymentOrderDeductionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["deductionType"] = this.deductionType;
+        data["deductionCode"] = this.deductionCode;
+        data["description"] = this.description;
+        data["accountId"] = this.accountId;
+        data["amount"] = this.amount;
+        data["deductionPercent"] = this.deductionPercent;
+        data["isMandatory"] = this.isMandatory;
+        data["isTaxDeduction"] = this.isTaxDeduction;
+        data["taxAuthorityId"] = this.taxAuthorityId;
+        data["referenceNumber"] = this.referenceNumber;
+        return data;
+    }
+}
+
+export interface IUpdatePaymentOrderDeductionDto {
+    deductionType?: DeductionType;
+    deductionCode?: string | undefined;
+    description?: string | undefined;
+    accountId?: number;
+    amount?: number;
+    deductionPercent?: number | undefined;
+    isMandatory?: boolean;
+    isTaxDeduction?: boolean;
+    taxAuthorityId?: number | undefined;
+    referenceNumber?: string | undefined;
+
+    [key: string]: any;
+}
+
+export class UpdatePaymentOrderLineDto implements IUpdatePaymentOrderLineDto {
+    lineType?: PaymentOrderLineType;
+    description?: string | undefined;
+    accountId?: number;
+    amount?: number;
+    taxAmount?: number | undefined;
+    fundId?: number | undefined;
+    appropriationId?: number | undefined;
+    organizationUnitId?: number | undefined;
+    costCenterId?: number | undefined;
+    projectId?: number | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IUpdatePaymentOrderLineDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.lineType = _data["lineType"];
+            this.description = _data["description"];
+            this.accountId = _data["accountId"];
+            this.amount = _data["amount"];
+            this.taxAmount = _data["taxAmount"];
+            this.fundId = _data["fundId"];
+            this.appropriationId = _data["appropriationId"];
+            this.organizationUnitId = _data["organizationUnitId"];
+            this.costCenterId = _data["costCenterId"];
+            this.projectId = _data["projectId"];
+        }
+    }
+
+    static fromJS(data: any): UpdatePaymentOrderLineDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdatePaymentOrderLineDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["lineType"] = this.lineType;
+        data["description"] = this.description;
+        data["accountId"] = this.accountId;
+        data["amount"] = this.amount;
+        data["taxAmount"] = this.taxAmount;
+        data["fundId"] = this.fundId;
+        data["appropriationId"] = this.appropriationId;
+        data["organizationUnitId"] = this.organizationUnitId;
+        data["costCenterId"] = this.costCenterId;
+        data["projectId"] = this.projectId;
+        return data;
+    }
+}
+
+export interface IUpdatePaymentOrderLineDto {
+    lineType?: PaymentOrderLineType;
+    description?: string | undefined;
+    accountId?: number;
+    amount?: number;
+    taxAmount?: number | undefined;
+    fundId?: number | undefined;
+    appropriationId?: number | undefined;
+    organizationUnitId?: number | undefined;
+    costCenterId?: number | undefined;
+    projectId?: number | undefined;
 
     [key: string]: any;
 }

@@ -1,5 +1,6 @@
 using ERP_Government.Application.Payments.Common.DTOs;
 using ERP_Government.Application.Payments.Commands.PaymentOrders.CreatePaymentOrder;
+using ERP_Government.Application.Payments.Commands.PaymentOrders.UpdatePaymentOrder;
 using ERP_Government.Application.Payments.Commands.PaymentOrders.SubmitPaymentOrder;
 using ERP_Government.Application.Payments.Commands.PaymentOrders.ApprovePaymentOrder;
 using ERP_Government.Application.Payments.Commands.PaymentOrders.RejectPaymentOrder;
@@ -65,6 +66,11 @@ public class PaymentOrders : IEndpointGroup
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
             .RequireAuthorization(PermissionCodes.PaymentOrdersVoid);
+
+        groupBuilder.MapPut("/{id:int}", UpdatePaymentOrder)
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status400BadRequest)
+            .RequireAuthorization(PermissionCodes.PaymentOrdersUpdate);
     }
 
     [EndpointSummary("Get all payment orders")]
@@ -96,6 +102,21 @@ public class PaymentOrders : IEndpointGroup
         [FromServices] ISender sender,
         [FromBody] CreatePaymentOrderCommand command)
     {
+        var result = await sender.Send(command);
+        if (!result.Succeeded)
+            return Results.BadRequest(result.Errors);
+        return Results.NoContent();
+    }
+
+    [EndpointSummary("Update a draft payment order (header, lines and deductions are replaced)")]
+    public static async Task<IResult> UpdatePaymentOrder(
+        [FromServices] ISender sender,
+        int id,
+        [FromBody] UpdatePaymentOrderCommand command)
+    {
+        if (id != command.Id)
+            return Results.BadRequest("ID mismatch.");
+
         var result = await sender.Send(command);
         if (!result.Succeeded)
             return Results.BadRequest(result.Errors);
