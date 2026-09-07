@@ -32,6 +32,7 @@ export { Grid } from './Grid';
 export { Input } from './Input';
 export { Loading, Skeleton } from './Loading';
 export { MoneyDisplay } from './MoneyDisplay';
+export { Page } from './Page';
 export { PageHeader } from './PageHeader';
 export { PageShell } from './PageShell';
 export { Pagination } from './Pagination';

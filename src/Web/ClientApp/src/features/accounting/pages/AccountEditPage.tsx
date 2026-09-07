@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { Button, Loading } from '@/components/ui';
+import { Button, Loading, EmptyState } from '@/components/ui';
 import { AccountForm } from '@/components/AccountingAccountForm';
 import { useAccountDetail } from '../hooks/useAccountDetail';
 import { useUpdateAccount } from '../hooks/useUpdateAccount';
@@ -23,14 +23,14 @@ export function AccountEditPage() {
 
   if (!account) {
     return (
-      <div className="p-12 text-center">
-        الحساب غير موجود
-        <div className="mt-3">
+      <EmptyState
+        message="الحساب غير موجود"
+        action={
           <Button variant="outline" onClick={() => navigate('/accounting/accounts')}>
             العودة للقائمة
           </Button>
-        </div>
-      </div>
+        }
+      />
     );
   }
 

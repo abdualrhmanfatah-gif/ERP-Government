@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Loading } from '@/components/ui/Loading';
-import { Card, Input } from '@/components/ui';
+import { Card, Input, EmptyState } from '@/components/ui';
 import { useRoles, useRolePermissions, useAssignRolePermission, useRemoveRolePermission, usePermissions } from '../hooks';
 
 interface AssignedPermission {
@@ -66,7 +66,7 @@ export function RoleDetailPage() {
   }
 
   if (!role) {
-    return <div className="p-8 text-center text-[var(--color-on-surface-variant)]">الدور غير موجود</div>;
+    return <EmptyState message="الدور غير موجود" />;
   }
 
   const columns: DataGridColumn<AssignedPermission>[] = [

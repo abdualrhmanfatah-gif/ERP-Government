@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Button, Card, Loading, ConfirmDialog } from '@/components/ui';
+import { Button, Card, Loading, ConfirmDialog, EmptyState } from '@/components/ui';
 import { ArrowRight, Unlock, Lock, CalendarPlus, FolderOpen, X } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { FiscalYearStatusBadge } from '@/components/FinancialSettingsFiscalYearStatusBadge';
@@ -31,7 +31,7 @@ export default function FiscalYearDetailPage() {
   const [confirmAction, setConfirmAction] = useState<'open' | 'close' | null>(null);
 
   if (fyLoading || periodsLoading) return <Loading />;
-  if (!fy) return <div className="text-center py-12 text-[var(--color-on-surface-variant)]">السنة المالية غير موجودة</div>;
+  if (!fy) return <EmptyState message="السنة المالية غير موجودة" />;
 
   function handleOpen() {
     openMutation.mutate(fiscalYearId, {
@@ -142,13 +142,13 @@ export default function FiscalYearDetailPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[var(--color-border-container)] bg-[var(--color-surface-container)]">
-                  <th className="px-4 py-3 text-right font-semibold text-[var(--color-on-surface)]">رقم الفترة</th>
-                  <th className="px-4 py-3 text-right font-semibold text-[var(--color-on-surface)]">الاسم</th>
-                  <th className="px-4 py-3 text-right font-semibold text-[var(--color-on-surface)]">تاريخ البداية</th>
-                  <th className="px-4 py-3 text-right font-semibold text-[var(--color-on-surface)]">تاريخ النهاية</th>
-                  <th className="px-4 py-3 text-right font-semibold text-[var(--color-on-surface)]">الحالة</th>
+                  <th className="px-4 py-3 text-start font-semibold text-[var(--color-on-surface)]">رقم الفترة</th>
+                  <th className="px-4 py-3 text-start font-semibold text-[var(--color-on-surface)]">الاسم</th>
+                  <th className="px-4 py-3 text-start font-semibold text-[var(--color-on-surface)]">تاريخ البداية</th>
+                  <th className="px-4 py-3 text-start font-semibold text-[var(--color-on-surface)]">تاريخ النهاية</th>
+                  <th className="px-4 py-3 text-start font-semibold text-[var(--color-on-surface)]">الحالة</th>
                   {fy.status !== 'HardClosed' && (
-                    <th className="px-4 py-3 text-right font-semibold text-[var(--color-on-surface)] w-[100px]">إجراءات</th>
+                    <th className="px-4 py-3 text-start font-semibold text-[var(--color-on-surface)] w-[100px]">إجراءات</th>
                   )}
                 </tr>
               </thead>

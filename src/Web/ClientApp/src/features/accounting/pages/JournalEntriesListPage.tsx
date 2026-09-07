@@ -25,7 +25,7 @@ const columns: DataGridColumn<JournalEntryDto>[] = [
       <span className="flex items-center gap-2">
         {row.entryNumber}
         {row.isSystemGenerated && (
-          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-[var(--color-surfaceContainerHigh)] text-[var(--color-onSurfaceVariant)]">نظام</span>
+          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-[var(--color-surface-container-high)] text-[var(--color-on-surface-variant)]">نظام</span>
         )}
       </span>
     ),
@@ -87,8 +87,8 @@ export function JournalEntriesListPage() {
     <div className="max-w-6xl mx-auto py-8 px-6" dir="rtl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--color-onSurface)' }}>قيود اليومية</h1>
-          <p className="mt-1 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>إدارة ومراجعة قيود اليومية المحاسبية</p>
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--color-on-surface)]">قيود اليومية</h1>
+          <p className="mt-1 text-sm text-[var(--color-on-surface-variant)]">إدارة ومراجعة قيود اليومية المحاسبية</p>
         </div>
         <Button variant="primary" onClick={() => navigate('/accounting/journal-entries/create')}>+ قيد جديد</Button>
       </div>

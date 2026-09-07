@@ -65,7 +65,6 @@ public class ApplicationDbContextInitialiser
         await SeedSecurityDataAsync();
         await SeedFinancialSettingsDataAsync();
         await SeedOrganizationDataAsync();
-        await SeedCostCenterAccountsDataAsync();
         await SeedAccountingDataAsync();
         await SeedJournalsDataAsync();
         await SeedBudgetingDataAsync();
@@ -343,15 +342,5 @@ public class ApplicationDbContextInitialiser
     {
         // TODO: Recreate seed data in Phase 2 (T017)
         await Task.CompletedTask;
-    }
-
-    private async Task SeedCostCenterAccountsDataAsync()
-    {
-        if (!_context.CostCenterAccounts.Any())
-        {
-            var mappings = CostCenterAccountSeedData.GetMappings();
-            _context.CostCenterAccounts.AddRange(mappings);
-            await _context.SaveChangesAsync();
-        }
     }
 }

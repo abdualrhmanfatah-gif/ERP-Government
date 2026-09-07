@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { Loading } from '@/components/ui';
+import { Loading, EmptyState } from '@/components/ui';
 import { ProjectForm } from '@/components/OrganizationProjectForm';
 import { useProject, useCreateProject, useUpdateProject } from '../hooks';
 import type { CreateProjectCommand } from '../types';
@@ -46,7 +46,7 @@ export function ProjectEditPage() {
   };
 
   if (isLoading) return <Loading />;
-  if (!project) return <div className="p-4">المشروع غير موجود</div>;
+  if (!project) return <EmptyState message="المشروع غير موجود" />;
 
   return (
     <div>

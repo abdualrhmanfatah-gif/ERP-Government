@@ -7,7 +7,7 @@ import {
   useCancelRecurringEntry,
 } from '../hooks/useRecurringEntries';
 import { FREQUENCY_LABELS, STATUS_LABELS } from '../shared/types';
-import { Button, Textarea, Loading, Badge, Dialog } from '@/components/ui';
+import { Button, Textarea, Loading, Badge, Dialog, EmptyState } from '@/components/ui';
 
 export default function RecurringEntryDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -23,7 +23,7 @@ export default function RecurringEntryDetailPage() {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   if (isLoading) return <Loading />;
-  if (!entry) return <div className="text-center py-8">الجدول غير موجود</div>;
+  if (!entry) return <EmptyState message="الجدول غير موجود" />;
 
   const canPause = entry.status === 'Active';
   const canResume = entry.status === 'Paused';

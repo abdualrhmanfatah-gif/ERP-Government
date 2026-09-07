@@ -3,6 +3,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Loading } from '@/components/ui/Loading';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { TemplateForm } from '@/components/AccountingTemplateForm';
 import { TemplateLinesSection } from '@/components/AccountingTemplateLinesSection';
 import { useTemplateById } from '../../hooks/useTemplateById';
@@ -24,14 +25,14 @@ export function TemplateEditPage() {
 
   if (!template) {
     return (
-      <div className="p-12 text-center">
-        القالب غير موجود
-        <div className="mt-3">
+      <EmptyState
+        message="القالب غير موجود"
+        action={
           <Button variant="outline" onClick={() => navigate('/accounting/templates')}>
             العودة للقائمة
           </Button>
-        </div>
-      </div>
+        }
+      />
     );
   }
 
@@ -66,7 +67,7 @@ export function TemplateEditPage() {
       />
       <Card variant="default">
         <div className="px-6 py-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">
-          <h2 className="text-base font-bold" style={{ color: 'var(--color-onSurface)' }}>أسطر القالب</h2>
+          <h2 className="text-base font-bold text-[var(--color-on-surface)]">أسطر القالب</h2>
         </div>
         <div className="p-6">
           <TemplateLinesSection templateId={templateId!} lines={(template as unknown as { lines?: unknown[] }).lines ?? []} />

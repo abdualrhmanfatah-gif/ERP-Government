@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, PageHeader, MoneyDisplay, Badge, Loading, EmptyState, Input } from '@/components/ui';
+import { Button, PageHeader, MoneyDisplay, Badge, Loading, EmptyState, Input, Dialog } from '@/components/ui';
 import { notify } from '@/features/notifications/notify';
 import { DepositSlipsClient, FormType, DepositSlipStatus } from '../../../web-api-client';
 import { useEligibleVouchers } from '../hooks/useEligibleVouchers';
@@ -173,91 +173,92 @@ export default function DepositSlipDetailPage() {
       )}
 
       {/* Add voucher picker */}
-      {showAddPicker && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-background rounded-lg p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold mb-4">إضافة سند</h3>
-            {eligible.length === 0 ? (
-              <EmptyState message="لا توجد سندات مؤهلة" />
-            ) : (
-              <div className="space-y-2">
-                {eligible.map((v) => (
-                  <Button
-                    key={v.id}
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => addVoucherMutation.mutate(v.id ?? 0)}
-                  >
-                    <span className="font-medium">{v.voucherNumber}</span>
-                    <span className="text-muted-foreground text-sm">{v.receivedFrom}</span>
-                    <span className="ms-auto">
-                      <MoneyDisplay value={v.totalAmount ?? 0} />
-                    </span>
-                  </Button>
-                ))}
-              </div>
-            )}
-            <Button variant="outline" className="mt-4 w-full" onClick={() => setShowAddPicker(false)}>
-              إلغاء
-            </Button>
+      <Dialog
+        open={showAddPicker}
+        onClose={() => setShowAddPicker(false)}
+        title="إضافة سند"
+        footer={
+          <Button variant="outline" className="w-full" onClick={() => setShowAddPicker(false)}>
+            إلغاء
+          </Button>
+        }
+      >
+        {eligible.length === 0 ? (
+          <EmptyState message="لا توجد سندات مؤهلة" />
+        ) : (
+          <div className="space-y-2">
+            {eligible.map((v) => (
+              <Button
+                key={v.id}
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => addVoucherMutation.mutate(v.id ?? 0)}
+              >
+                <span className="font-medium">{v.voucherNumber}</span>
+                <span className="text-muted-foreground text-sm">{v.receivedFrom}</span>
+                <span className="ms-auto">
+                  <MoneyDisplay value={v.totalAmount ?? 0} />
+                </span>
+              </Button>
+            ))}
           </div>
-        </div>
-      )}
+        )}
+      </Dialog>
 
       {/* Remove voucher dialog */}
-      {removeTarget != null && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-background rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4">إزالة سند</h3>
-            <Input
-              label="السبب (إلزامي)"
-              value={removeReason}
-              onChange={(e) => setRemoveReason(e.target.value)}
-              placeholder="سبب الإزالة..."
-            />
-            <div className="flex gap-2">
-              <Button
-                onClick={() => removeVoucherMutation.mutate()}
-                disabled={!removeReason.trim() || removeVoucherMutation.isPending}
-              >
-                تأكيد الإزالة
-              </Button>
-              <Button variant="outline" onClick={() => { setRemoveTarget(null); setRemoveReason(''); }}>
-                إلغاء
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Dialog
+        open={removeTarget != null}
+        onClose={() => { setRemoveTarget(null); setRemoveReason(''); }}
+        title="إزالة سند"
+        footer={
+          <>
+            <Button
+              onClick={() => removeVoucherMutation.mutate()}
+              disabled={!removeReason.trim()}
+              loading={removeVoucherMutation.isPending}
+            >
+              تأكيد الإزالة
+            </Button>
+            <Button variant="outline" onClick={() => { setRemoveTarget(null); setRemoveReason(''); }}>
+              إلغاء
+            </Button>
+          </>
+        }
+      >
+        <Input
+          label="السبب (إلزامي)"
+          value={removeReason}
+          onChange={(e) => setRemoveReason(e.target.value)}
+          placeholder="سبب الإزالة..."
+        />
+      </Dialog>
 
       {/* Approve dialog — US3 */}
-      {showApproveDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-background rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4">اعتماد بطاقة الإيداع</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              سيتم اعتماد البطاقة بشكل نهائي. لا يمكن التراجع.
-            </p>
-            <Input
-              label="سبب الاعتماد (اختياري)"
-              value={approveReason}
-              onChange={(e) => setApproveReason(e.target.value)}
-              placeholder="سبب الاعتماد..."
-            />
-            <div className="flex gap-2">
-              <Button
-                onClick={() => approveMutation.mutate()}
-                disabled={approveMutation.isPending}
-              >
-                {approveMutation.isPending ? 'جاري الاعتماد...' : 'تأكيد الاعتماد'}
-              </Button>
-              <Button variant="outline" onClick={() => { setShowApproveDialog(false); setApproveReason(''); }}>
-                إلغاء
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Dialog
+        open={showApproveDialog}
+        onClose={() => { setShowApproveDialog(false); setApproveReason(''); }}
+        title="اعتماد بطاقة الإيداع"
+        footer={
+          <>
+            <Button onClick={() => approveMutation.mutate()} loading={approveMutation.isPending}>
+              تأكيد الاعتماد
+            </Button>
+            <Button variant="outline" onClick={() => { setShowApproveDialog(false); setApproveReason(''); }}>
+              إلغاء
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-muted-foreground mb-4">
+          سيتم اعتماد البطاقة بشكل نهائي. لا يمكن التراجع.
+        </p>
+        <Input
+          label="سبب الاعتماد (اختياري)"
+          value={approveReason}
+          onChange={(e) => setApproveReason(e.target.value)}
+          placeholder="سبب الاعتماد..."
+        />
+      </Dialog>
     </div>
   );
 }

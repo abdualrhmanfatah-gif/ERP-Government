@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { Button, Loading } from '@/components/ui';
+import { Button, Loading, EmptyState } from '@/components/ui';
 import { JournalForm } from '@/components/AccountingJournalForm';
 import { useJournalById } from '../../hooks/useJournalById';
 import { useUpdateJournal } from '../../hooks/useUpdateJournal';
@@ -24,14 +24,14 @@ export function JournalEditPage() {
 
   if (!journal) {
     return (
-      <div className="p-12 text-center">
-        الدفتر غير موجود
-        <div className="mt-3">
+      <EmptyState
+        message="الدفتر غير موجود"
+        action={
           <Button variant="outline" onClick={() => navigate('/accounting/journals')}>
             العودة للقائمة
           </Button>
-        </div>
-      </div>
+        }
+      />
     );
   }
 
