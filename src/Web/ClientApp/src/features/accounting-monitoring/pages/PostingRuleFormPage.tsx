@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { usePostingRule, useCreatePostingRule, useUpdatePostingRule } from '../hooks/usePostingRules';
 import { notify } from '@/features/notifications/notify';
 import type { PostingRuleLineDto } from '../shared/types';
-import { Button, Card, Input, Select } from '@/components/ui';
+import { Button, Card, Input, Select, Loading } from '@/components/ui';
 
 interface LineForm extends Partial<PostingRuleLineDto> {
   _key: number;
@@ -94,9 +94,9 @@ export function PostingRuleFormPage() {
 
   if (isEdit && loadingExisting) {
     return (
-      <div className="max-w-4xl mx-auto py-8 px-6" dir="rtl">
-        <div className="p-8 text-center text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>جاري التحميل...</div>
-      </div>
+        <div className="max-w-4xl mx-auto py-8 px-6" dir="rtl">
+          <Loading />
+        </div>
     );
   }
 

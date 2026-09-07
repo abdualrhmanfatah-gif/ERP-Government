@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Bell } from 'lucide-react';
+import { Button } from '@/components/ui';
 import { useUnreadCount } from './hooks';
 import { NotificationDropdown } from './NotificationDropdown';
 
@@ -20,12 +21,13 @@ export function NotificationBell() {
 
   return (
     <div ref={ref} className="relative">
-      <button
-        type="button"
-        className="p-3 min-w-11 min-h-11 rounded-lg hover:bg-[var(--color-surface-container-high)] transition-colors relative"
+      <Button
+        variant="ghost"
+        size="icon"
         aria-label={`الإشعارات${data && data.count > 0 ? ` — ${data.count} إشعار غير مقروء` : ''}`}
         aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
+        className="relative"
       >
         <Bell size={18} />
         {data && data.count > 0 ? (
@@ -36,7 +38,7 @@ export function NotificationBell() {
             {data.count}
           </span>
         ) : null}
-      </button>
+      </Button>
       {isOpen ? (
         <NotificationDropdown onClose={() => setIsOpen(false)} />
       ) : null}

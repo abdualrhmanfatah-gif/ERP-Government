@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { usePendingEvents } from '../hooks/usePendingEvents';
+import { Select, Loading } from '@/components/ui';
 
 export function EventsQueuePage() {
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
@@ -17,31 +18,35 @@ export function EventsQueuePage() {
       </h1>
 
       <div className="flex gap-4 mb-6">
-        <select
+        <Select
+          label="الحالة"
           value={statusFilter ?? ''}
           onChange={(e) => setStatusFilter(e.target.value || undefined)}
-          className="border rounded px-3 py-2"
-        >
-          <option value="">جميع الحالات</option>
-          <option value="Pending">معلق</option>
-          <option value="Processing">قيد المعالجة</option>
-          <option value="Posted">تم الترحيل</option>
-          <option value="Failed">فشل</option>
-        </select>
-        <select
+          options={[
+            { value: '', label: 'جميع الحالات' },
+            { value: 'Pending', label: 'معلق' },
+            { value: 'Processing', label: 'قيد المعالجة' },
+            { value: 'Posted', label: 'تم الترحيل' },
+            { value: 'Failed', label: 'فشل' },
+          ]}
+          className="w-auto"
+        />
+        <Select
+          label="نوع الحدث"
           value={eventTypeFilter ?? ''}
           onChange={(e) => setEventTypeFilter(e.target.value || undefined)}
-          className="border rounded px-3 py-2"
-        >
-          <option value="">جميع الأنواع</option>
-          <option value="PaymentExecution">تنفيذ دفعة</option>
-          <option value="ReceiptCollection">تحصيل</option>
-          <option value="DepositClearing">تسوية إيداع</option>
-        </select>
+          options={[
+            { value: '', label: 'جميع الأنواع' },
+            { value: 'PaymentExecution', label: 'تنفيذ دفعة' },
+            { value: 'ReceiptCollection', label: 'تحصيل' },
+            { value: 'DepositClearing', label: 'تسوية إيداع' },
+          ]}
+          className="w-auto"
+        />
       </div>
 
       {isLoading ? (
-        <p>جاري التحميل...</p>
+        <Loading />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full border-collapse" style={{ color: 'var(--color-onSurface)' }}>

@@ -1,5 +1,5 @@
 import { usePostingRules, useDeletePostingRule } from '../hooks/usePostingRules';
-import { Button, Badge } from '@/components/ui';
+import { Button, Badge, Loading } from '@/components/ui';
 
 export function PostingRulesListPage() {
   const { data: rules, isLoading } = usePostingRules();
@@ -18,7 +18,7 @@ export function PostingRulesListPage() {
       </h1>
 
       {isLoading ? (
-        <p>جاري التحميل...</p>
+        <Loading />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full border-collapse" style={{ color: 'var(--color-onSurface)' }}>

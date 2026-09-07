@@ -51,6 +51,7 @@ public class EndpointAuthorizationTests
     {
         var expected = new Dictionary<string, (string[] Methods, string Policy)>
         {
+            ["/api/PaymentOrders/{id:int}"] = (["PUT"], "PaymentOrders.Update"),
             ["/api/PaymentOrders/{id:int}/submit"] = (["POST"], "PaymentOrders.Submit"),
             ["/api/PaymentOrders/{id:int}/approve"] = (["POST"], "PaymentOrders.Approve"),
             ["/api/PaymentOrders/{id:int}/reject"] = (["POST"], "PaymentOrders.Reject"),
@@ -79,7 +80,7 @@ public class EndpointAuthorizationTests
         var actual = endpoints
             .Select(e => new
             {
-                Raw = e.RoutePattern.RawText!,
+                Raw = e.RoutePattern.RawText!.TrimEnd('/'),
                 Methods = e.Metadata.OfType<IHttpMethodMetadata>()
                     .SelectMany(m => m.HttpMethods).ToArray(),
                 Policies = e.Metadata.OfType<IAuthorizeData>()
@@ -87,13 +88,16 @@ public class EndpointAuthorizationTests
             })
             .ToList();
 
-        foreach (var (raw, (methods, policy)) in expected)
+        foreach (var (rawKey, (methods, policy)) in expected)
         {
+            var raw = rawKey.TrimEnd('/');
             var matches = actual
                 .Where(a => a.Raw == raw && a.Methods.Intersect(methods).Any())
                 .ToList();
 
-            matches.Count.ShouldBe(1, $"Route {string.Join('/', methods)} {raw} should exist exactly once.");
+            var dump = string.Join("\n", actual.Select(a => $"{string.Join('/', a.Methods)} {a.Raw} -> [{string.Join(", ", a.Policies)}]"));
+            matches.Count.ShouldBe(1,
+                $"Route {string.Join('/', methods)} {raw} should exist exactly once.\nActual routes:\n{dump}");
             matches[0].Policies.ShouldContain(policy,
                 $"Route {string.Join('/', methods)} {raw} must require policy {policy}.");
         }
