@@ -2,15 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { notify } from '@/features/notifications/notify';
 import { Pencil, Save, X, Shield, Lock, Users as UsersIcon } from 'lucide-react';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Button } from '@/components/ui/Button';
-import { Card, EmptyState } from '@/components/ui';
-import { StatusBadge } from '@/components/ui/StatusBadge';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { FormField } from '@/components/ui/FormField';
-import { Tabs } from '@/components/ui/Tabs';
-import { Skeleton } from '@/components/ui/Loading';
+import { Page, Button, Card, EmptyState, StatusBadge, Input, Select, FormField, Tabs, Skeleton } from '@/components/ui';
 import { useUserDetail, useUpdateUser } from '../hooks';
 import { useOrganizationalUnits } from '../../../organization/hooks';
 import { RolesTab } from '@/components/SecurityUsersRolesTab';
@@ -86,38 +78,37 @@ export function UserDetailPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={user.login}
-        description={isEditing ? 'تعديل بيانات المستخدم' : `تفاصيل المستخدم — ${user.departmentName ?? '—'}`}
-        actions={
-          <div className="flex gap-2">
-            {user.isActive ? (
-              <Button variant="ghost" size="sm" onClick={() => setShowDeactivate(true)}>
-                تعطيل
+    <Page
+      title={user.login}
+      description={isEditing ? 'تعديل بيانات المستخدم' : `تفاصيل المستخدم — ${user.departmentName ?? '—'}`}
+      actions={
+        <div className="flex gap-2">
+          {user.isActive ? (
+            <Button variant="ghost" size="sm" onClick={() => setShowDeactivate(true)}>
+              تعطيل
+            </Button>
+          ) : (
+            <Button variant="ghost" size="sm" onClick={() => setShowReactivate(true)}>
+              تنشيط
+            </Button>
+          )}
+          {isEditing ? (
+            <>
+              <Button variant="primary" size="sm" icon={<Save size={14} />} onClick={handleSave} loading={updateUser.isPending}>
+                حفظ
               </Button>
-            ) : (
-              <Button variant="ghost" size="sm" onClick={() => setShowReactivate(true)}>
-                تنشيط
+              <Button variant="ghost" size="sm" icon={<X size={14} />} onClick={() => setIsEditing(false)}>
+                إلغاء
               </Button>
-            )}
-            {isEditing ? (
-              <>
-                <Button variant="primary" size="sm" icon={<Save size={14} />} onClick={handleSave} loading={updateUser.isPending}>
-                  حفظ
-                </Button>
-                <Button variant="ghost" size="sm" icon={<X size={14} />} onClick={() => setIsEditing(false)}>
-                  إلغاء
-                </Button>
-              </>
-            ) : (
-              <Button variant="ghost" size="sm" icon={<Pencil size={14} />} onClick={startEdit}>
-                تعديل
-              </Button>
-            )}
-          </div>
-        }
-      />
+            </>
+          ) : (
+            <Button variant="ghost" size="sm" icon={<Pencil size={14} />} onClick={startEdit}>
+              تعديل
+            </Button>
+          )}
+        </div>
+      }
+    >
 
       <div className="flex flex-wrap gap-3 items-center">
         <StatusBadge variant={user.isActive ? 'active' : 'draft'}>
@@ -190,6 +181,6 @@ export function UserDetailPage() {
 
       <DeactivateUserDialog open={showDeactivate} onClose={() => setShowDeactivate(false)} userId={userId} userName={user.login} />
       <ReactivateUserDialog open={showReactivate} onClose={() => setShowReactivate(false)} userId={userId} userName={user.login} />
-    </div>
+    </Page>
   );
 }

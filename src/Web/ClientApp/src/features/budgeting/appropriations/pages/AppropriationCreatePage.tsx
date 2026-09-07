@@ -4,7 +4,7 @@ import { useCreateAppropriation, useCreateTransfer } from '../../hooks/useApprop
 import { useBudgetItemsTree } from '../../hooks/useBudgetItems';
 import { AvailabilityIndicator } from '@/components/BudgetingAvailabilityIndicator';
 import { appropriationTypeLabels, AppropriationType } from '../../shared/types';
-import { Button, Input, Select } from '@/components/ui';
+import { Page, Button, Input, Select } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 
 export default function AppropriationCreatePage() {
@@ -88,14 +88,15 @@ export default function AppropriationCreatePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
+    <Page
+      title="تخصيص جديد"
+      maxWidth="sm"
+      actions={
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="العودة">
           <ArrowRight size={18} />
         </Button>
-        <h1 className="text-xl font-semibold text-[var(--color-on-surface)]">تخصيص جديد</h1>
-      </div>
-
+      }
+    >
       {form.budgetItemId > 0 && (
         <AvailabilityIndicator budgetItemId={form.budgetItemId} />
       )}
@@ -165,6 +166,6 @@ export default function AppropriationCreatePage() {
           </Button>
         </div>
       </form>
-    </div>
+    </Page>
   );
 }

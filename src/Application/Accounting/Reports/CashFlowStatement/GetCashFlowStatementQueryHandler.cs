@@ -17,26 +17,6 @@ public class GetCashFlowStatementQueryHandler(
             var startDate = DateOnly.TryParse(request.StartDate, out var s) ? s : DateOnly.FromDateTime(DateTime.Today.AddMonths(-1));
             var endDate = DateOnly.TryParse(request.EndDate, out var e) ? e : DateOnly.FromDateTime(DateTime.Today);
 
-            // Get cash flow mapping rules
-            var mappingRules = await context.CashFlowMappingRules
-                .Where(r => r.IsActive)
-                .ToListAsync(cancellationToken);
-
-            if (mappingRules.Count == 0)
-            {
-                var warningResult = new CashFlowStatementDto
-                {
-                    StartDate = startDate,
-                    EndDate = endDate,
-                    Currency = "YER",
-                    Warning = "لم يتم تكوين قواعد تصنيف التدفقات النقدية",
-                    Reconciled = false,
-                    GeneratedAt = DateTimeOffset.UtcNow,
-                };
-                await auditService.LogAsync("CashFlowStatement", request, "Screen", true, cancellationToken: cancellationToken);
-                return warningResult;
-            }
-
             // Get all posted JournalEntryLines in period with account groups
             var journalEntryLines = await context.JournalEntryLines
                 .Include(ml => ml.JournalEntry)
@@ -63,13 +43,13 @@ public class GetCashFlowStatementQueryHandler(
 
             var openingCash = openingBalances.Sum(ml => ml.Debit - ml.Credit);
 
-            // Classify by mapping rules
+            // Classify by account group type (cash accounts excluded — they are the statement's subject)
             var operating = BuildSection("الأنشطة التشغيلية", "Operating Activities",
-                journalEntryLines, mappingRules, CashFlowSectionType.Operating);
+                journalEntryLines, CashFlowSectionType.Operating);
             var investing = BuildSection("أنشطة الاستثمار", "Investing Activities",
-                journalEntryLines, mappingRules, CashFlowSectionType.Investing);
+                journalEntryLines, CashFlowSectionType.Investing);
             var financing = BuildSection("أنشطة التمويل", "Financing Activities",
-                journalEntryLines, mappingRules, CashFlowSectionType.Financing);
+                journalEntryLines, CashFlowSectionType.Financing);
 
             var netChange = operating.Total + investing.Total + financing.Total;
             var closingCash = openingCash + netChange;
@@ -114,16 +94,19 @@ public class GetCashFlowStatementQueryHandler(
         string titleAr,
         string title,
         List<Domain.Accounting.Entities.JournalEntryLine> journalEntryLines,
-        List<Domain.Accounting.Entities.CashFlowMappingRule> mappingRules,
         CashFlowSectionType sectionType)
     {
-        var accountGroupIds = mappingRules
-            .Where(r => r.Section == sectionType)
-            .Select(r => r.AccountGroupId)
-            .ToList();
+        IReadOnlyList<AccountGroupType> sectionTypes = sectionType switch
+        {
+            CashFlowSectionType.Operating => [AccountGroupType.Revenue, AccountGroupType.Expense],
+            CashFlowSectionType.Investing => [AccountGroupType.Asset],
+            CashFlowSectionType.Financing => [AccountGroupType.Equity, AccountGroupType.Liability],
+            _ => [],
+        };
 
         var sectionLines = journalEntryLines
-            .Where(ml => accountGroupIds.Contains(ml.Account.AccountGroupId))
+            .Where(ml => !ml.Account.IsReconcilable
+                      && sectionTypes.Contains(ml.Account.AccountGroup.Type))
             .ToList();
 
         var items = sectionLines

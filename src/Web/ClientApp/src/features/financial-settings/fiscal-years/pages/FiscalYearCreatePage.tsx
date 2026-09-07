@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card, Input } from '@/components/ui';
+import { Page, Button, Card, Input } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { useCreateFiscalYear } from '../../hooks/useFiscalYears';
@@ -44,14 +44,15 @@ export default function FiscalYearCreatePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center gap-3">
+    <Page
+      title="سنة مالية جديدة"
+      maxWidth="sm"
+      actions={
         <Button variant="ghost" size="icon" onClick={() => navigate('/financial-settings/fiscal-years')} className="cursor-pointer">
           <ArrowRight size={18} />
         </Button>
-        <h1 className="text-headline-sm sm:text-headline-md font-bold text-[var(--color-on-surface)]">سنة مالية جديدة</h1>
-      </div>
-
+      }
+    >
       <Card className="bg-[var(--color-surface-container-lowest)]">
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
@@ -94,6 +95,6 @@ export default function FiscalYearCreatePage() {
           </div>
         </form>
       </Card>
-    </div>
+    </Page>
   );
 }

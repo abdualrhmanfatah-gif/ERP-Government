@@ -2,12 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Plus, Trash2 } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Button } from '@/components/ui/Button';
-import { StatusBadge } from '@/components/ui/StatusBadge';
-import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
-import { Loading } from '@/components/ui/Loading';
-import { Card, Input, EmptyState } from '@/components/ui';
+import { Page, Button, StatusBadge, DataGrid, type DataGridColumn, Loading, Card, Input, EmptyState } from '@/components/ui';
 import { useRoles, useRolePermissions, useAssignRolePermission, useRemoveRolePermission, usePermissions } from '../hooks';
 
 interface AssignedPermission {
@@ -88,22 +83,20 @@ export function RoleDetailPage() {
   ];
 
   return (
-    <div>
-      <PageHeader
-        title={role.name}
-        description={role.description || `كود: ${role.code}`}
-        actions={
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate(`/security/roles/${roleId}/edit`)}>
-              تعديل
-            </Button>
-            <Button variant="ghost" onClick={() => navigate('/security/roles')}>
-              رجوع
-            </Button>
-          </div>
-        }
-      />
-
+    <Page
+      title={role.name}
+      description={role.description || `كود: ${role.code}`}
+      actions={
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate(`/security/roles/${roleId}/edit`)}>
+            تعديل
+          </Button>
+          <Button variant="ghost" onClick={() => navigate('/security/roles')}>
+            رجوع
+          </Button>
+        </div>
+      }
+    >
       <div className="space-y-6">
         <Card>
           <div className="grid grid-cols-2 gap-4 text-sm">
@@ -178,6 +171,6 @@ export function RoleDetailPage() {
           />
         </div>
       </div>
-    </div>
+    </Page>
   );
 }

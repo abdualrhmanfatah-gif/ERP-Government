@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Button, FilterBar, FilterSearch, FilterSelect, Switch, ConfirmDialog, Loading } from '@/components/ui';
+import { Page, Button, FilterBar, FilterSearch, FilterSelect, Switch, ConfirmDialog } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Eye } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
@@ -71,24 +71,23 @@ export default function ExchangeRatesListPage() {
   ];
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-headline-sm sm:text-headline-md font-bold text-[var(--color-on-surface)]">أسعار الصرف</h1>
-          <p className="text-body-sm text-[var(--color-on-surface-variant)] mt-1">إدارة أسعار الصرف بين العملات</p>
-        </div>
-        {canCreate && (
-          <Button onClick={() => navigate('/financial-settings/exchange-rates/new')} icon={<Plus size={16} />} className="self-start sm:self-auto cursor-pointer shadow-sm hover:shadow transition-shadow">
+    <Page
+      title="أسعار الصرف"
+      description="إدارة أسعار الصرف بين العملات"
+      actions={
+        canCreate && (
+          <Button onClick={() => navigate('/financial-settings/exchange-rates/new')} icon={<Plus size={16} />} className="cursor-pointer shadow-sm hover:shadow transition-shadow">
             سعر صرف جديد
           </Button>
-        )}
-      </div>
-
-      <FilterBar hasFilters={!!search || !!rateTypeFilter} onClear={() => { setSearch(''); setRateTypeFilter(''); }}>
-        <FilterSearch value={search} onChange={setSearch} placeholder="بحث بالعملة..." />
-        <FilterSelect value={rateTypeFilter} onChange={setRateTypeFilter} options={rateTypeOptions} placeholder="نوع السعر" label="نوع السعر" />
-      </FilterBar>
-
+        )
+      }
+      toolbar={
+        <FilterBar hasFilters={!!search || !!rateTypeFilter} onClear={() => { setSearch(''); setRateTypeFilter(''); }}>
+          <FilterSearch value={search} onChange={setSearch} placeholder="بحث بالعملة..." />
+          <FilterSelect value={rateTypeFilter} onChange={setRateTypeFilter} options={rateTypeOptions} placeholder="نوع السعر" label="نوع السعر" />
+        </FilterBar>
+      }
+    >
       <DataGrid
         columns={columns}
         data={filtered}
@@ -105,6 +104,6 @@ export default function ExchangeRatesListPage() {
         message={confirmToggle?.isActive ? 'هل تريد تعطيل هذا السعر؟' : 'هل تريد تنشيط هذا السعر؟'}
         loading={activateMutation.isPending || deactivateMutation.isPending}
       />
-    </div>
+    </Page>
   );
 }

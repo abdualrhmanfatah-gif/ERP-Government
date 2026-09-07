@@ -4,7 +4,7 @@ import { useCreateBudget } from '../../hooks/useBudgets';
 import { useBudgetTypesList } from '../../hooks/useBudgetTypes';
 import { useFundsList } from '../../hooks/useFunds';
 import { useFiscalYearsList } from '../../../financial-settings/hooks/useFiscalYears';
-import { Button, Input, Select, Textarea } from '@/components/ui';
+import { Page, Button, Input, Select, Textarea } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 
 export default function BudgetCreatePage() {
@@ -67,14 +67,15 @@ export default function BudgetCreatePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
+    <Page
+      title="موازنة جديدة"
+      maxWidth="sm"
+      actions={
         <Button variant="ghost" size="icon" onClick={() => navigate('/budgeting/budgets')} aria-label="العودة">
           <ArrowRight size={18} />
         </Button>
-        <h1 className="text-xl font-semibold text-[var(--color-on-surface)]">موازنة جديدة</h1>
-      </div>
-
+      }
+    >
       <form onSubmit={handleSubmit} className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Input
@@ -167,6 +168,6 @@ export default function BudgetCreatePage() {
           </Button>
         </div>
       </form>
-    </div>
+    </Page>
   );
 }

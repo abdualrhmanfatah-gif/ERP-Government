@@ -5,7 +5,7 @@ import { getExcludedDescendantIds } from '../utils/classification-utils';
 import { usePermission } from '../../../../shared/hooks/usePermission';
 import { BUDGET_PERMISSIONS } from '../../../../shared/constants/permissions';
 import { ChevronRight, ChevronLeft, Plus, Pencil } from 'lucide-react';
-import { FilterBar, FilterSearch, FilterSelect, Dialog, Switch, ConfirmDialog, Button, Input, Select } from '../../../../components/ui';
+import { Page, FilterBar, FilterSearch, FilterSelect, Dialog, Switch, ConfirmDialog, Button, Input, Select } from '../../../../components/ui';
 import { notify } from '@/features/notifications/notify';
 
 export function normalizeTree(
@@ -392,55 +392,36 @@ export default function ClassificationsListPage() {
     [editItem, selectedParentId, formIsActive, createMutation, updateMutation, handleCloseDialog],
   );
 
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-[var(--color-surface-container)] rounded w-48" />
-          <div className="h-4 bg-[var(--color-surface-container)] rounded w-full" />
-          <div className="h-4 bg-[var(--color-surface-container)] rounded w-3/4" />
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-6 text-center">
-        <p className="text-[var(--color-error)]">خطأ في تحميل التصنيفات</p>
-        <Button variant="link" onClick={() => window.location.reload()} className="mt-2">
-          إعادة المحاولة
-        </Button>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-6 space-y-4" dir="rtl">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[var(--color-on-surface)]">التصنيفات المالية</h1>
-        {canCreate && (
+    <Page
+      title="التصنيفات المالية"
+      loading={isLoading}
+      error={error ? 'خطأ في تحميل التصنيفات' : undefined}
+      onRetry={error ? () => window.location.reload() : undefined}
+      actions={
+        canCreate ? (
           <Button variant="primary" onClick={handleOpenCreate} icon={<Plus size={16} />}>
             إضافة تصنيف جديد
           </Button>
-        )}
-      </div>
-
-      <FilterBar hasFilters={!!(search || isActiveFilter !== 'All')} onClear={() => { setSearch(''); setIsActiveFilter('All'); }}>
-        <FilterSearch value={search} onChange={setSearch} placeholder="بحث بالكود أو الاسم..." />
-        <FilterSelect
-          value={isActiveFilter}
-          onChange={setIsActiveFilter}
-          options={[
-            { value: 'All', label: 'الكل' },
-            { value: 'active', label: 'نشط' },
-            { value: 'inactive', label: 'معطل' },
-          ]}
-          placeholder="الحالة"
-          label="الحالة"
-        />
-      </FilterBar>
-
+        ) : undefined
+      }
+      toolbar={
+        <FilterBar hasFilters={!!(search || isActiveFilter !== 'All')} onClear={() => { setSearch(''); setIsActiveFilter('All'); }}>
+          <FilterSearch value={search} onChange={setSearch} placeholder="بحث بالكود أو الاسم..." />
+          <FilterSelect
+            value={isActiveFilter}
+            onChange={setIsActiveFilter}
+            options={[
+              { value: 'All', label: 'الكل' },
+              { value: 'active', label: 'نشط' },
+              { value: 'inactive', label: 'معطل' },
+            ]}
+            placeholder="الحالة"
+            label="الحالة"
+          />
+        </FilterBar>
+      }
+    >
       {tree.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-[var(--color-on-surface-variant)]">لا توجد تصنيفات بعد</p>
@@ -521,6 +502,6 @@ export default function ClassificationsListPage() {
         title="تأكيد تغيير الحالة"
         loading={toggleMutation.isPending}
       />
-    </div>
+    </Page>
   );
 }

@@ -1,7 +1,5 @@
 import { Plus, Pencil, Trash2 } from 'lucide-react';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { DataGrid } from '@/components/ui/DataGrid';
-import { Button } from '@/components/ui/Button';
+import { Page, DataGrid, Button } from '@/components/ui';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { CostCenterDialog } from '@/components/OrganizationCostCenterDialog';
@@ -70,16 +68,15 @@ export function CostCentersListPage() {
   };
 
   return (
-    <div>
-      <PageHeader
-        title="إدارة مراكز التكلفة"
-        description="إضافة وتعديل وحذف مراكز التكلفة"
-        actions={
-          <Button variant="primary" size="sm" icon={<Plus size={16} />} onClick={openCreateDialog}>
-            مركز تكلفة جديد
-          </Button>
-        }
-      />
+    <Page
+      title="إدارة مراكز التكلفة"
+      description="إضافة وتعديل وحذف مراكز التكلفة"
+      actions={
+        <Button variant="primary" size="sm" icon={<Plus size={16} />} onClick={openCreateDialog}>
+          مركز تكلفة جديد
+        </Button>
+      }
+    >
       <DataGrid
         columns={[
           { key: 'code', header: 'الكود', width: 120, render: (r) => <span dir="ltr">{r.code}</span> },
@@ -137,6 +134,6 @@ export function CostCentersListPage() {
         confirmLabel="حذف"
         loading={deleteMutation.isPending}
       />
-    </div>
+    </Page>
   );
 }

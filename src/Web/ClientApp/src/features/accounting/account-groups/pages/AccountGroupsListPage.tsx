@@ -2,13 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Power, PowerOff, Eye, Pencil } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { DataGrid } from '@/components/ui/DataGrid';
-import { Button } from '@/components/ui/Button';
-import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { Input } from '@/components/ui/Input';
-import { FilterBar, FilterSelect, Loading } from '@/components/ui';
-import { StatusBadge } from '@/components/ui/StatusBadge';
+import { Page, DataGrid, Button, ConfirmDialog, Input, FilterBar, FilterSelect, Loading, StatusBadge } from '@/components/ui';
 import { GroupTree } from '@/components/AccountingGroupTree';
 import { AccountGroupForm } from '@/components/AccountingAccountGroupForm';
 import { useAccountGroupsList } from '../hooks/useAccountGroupsList';
@@ -83,15 +77,19 @@ export function AccountGroupsListPage() {
   const items = data?.items ?? [];
 
   return (
-    <div className="space-y-4 p-4">
-      <PageHeader title="مجموعات الحسابات" description="إدارة هرمية لتصنيف دليل الحسابات (5 مستويات كحد أقصى)" actions={canCreate && <Button onClick={()=>setShowCreate(true)}><Plus className="h-4 w-4" />إنشاء مجموعة</Button>} />
-      <FilterBar>
-        <Input placeholder="بحث بالكود أو الاسم..." value={search} onChange={(e)=>{setSearch(e.target.value); setPage(1);}} className="max-w-sm" />
-        <FilterSelect label="النوع" value={filterType} onChange={(v: string)=>{setFilterType(v); setPage(1);}} options={[{value:'All',label:'الكل'},{value:'Asset',label:'أصل'},{value:'Liability',label:'التزام'},{value:'Equity',label:'حقوق ملكية'},{value:'Revenue',label:'إيراد'},{value:'Expense',label:'مصروف'}]} />
-        <FilterSelect label="الحالة" value={filterActive} onChange={(v: string)=>{setFilterActive(v); setPage(1);}} options={[{value:'All',label:'الكل'},{value:'active',label:'نشط'},{value:'inactive',label:'معطل'}]} />
-      </FilterBar>
-
-      {isLoading && <Loading />}
+    <Page
+      title="مجموعات الحسابات"
+      description="إدارة هرمية لتصنيف دليل الحسابات (5 مستويات كحد أقصى)"
+      actions={canCreate && <Button onClick={()=>setShowCreate(true)}><Plus className="h-4 w-4" />إنشاء مجموعة</Button>}
+      toolbar={
+        <FilterBar>
+          <Input placeholder="بحث بالكود أو الاسم..." value={search} onChange={(e)=>{setSearch(e.target.value); setPage(1);}} className="max-w-sm" />
+          <FilterSelect label="النوع" value={filterType} onChange={(v: string)=>{setFilterType(v); setPage(1);}} options={[{value:'All',label:'الكل'},{value:'Asset',label:'أصل'},{value:'Liability',label:'التزام'},{value:'Equity',label:'حقوق ملكية'},{value:'Revenue',label:'إيراد'},{value:'Expense',label:'مصروف'}]} />
+          <FilterSelect label="الحالة" value={filterActive} onChange={(v: string)=>{setFilterActive(v); setPage(1);}} options={[{value:'All',label:'الكل'},{value:'active',label:'نشط'},{value:'inactive',label:'معطل'}]} />
+        </FilterBar>
+      }
+      loading={isLoading}
+    >
       {error && <p className="text-sm text-[var(--color-error)]">خطأ في التحميل</p>}
 
       {isTreeMode ? (
@@ -142,6 +140,6 @@ export function AccountGroupsListPage() {
         confirmLabel={confirmToggle?.isActive ? 'تعطيل' : 'تفعيل'}
         destructive={!!confirmToggle?.isActive}
       />
-    </div>
+    </Page>
   );
 }

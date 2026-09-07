@@ -1,6 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Button, Loading, EmptyState } from '@/components/ui';
+import { Page, Button, EmptyState } from '@/components/ui';
 import { JournalForm } from '@/components/AccountingJournalForm';
 import { useJournalById } from '../../hooks/useJournalById';
 import { useUpdateJournal } from '../../hooks/useUpdateJournal';
@@ -17,10 +16,6 @@ export function JournalEditPage() {
   const journalId = id ? Number(id) : null;
   const { data: journal, isLoading } = useJournalById(journalId);
   const { mutateAsync, isPending } = useUpdateJournal();
-
-  if (isLoading) {
-    return <Loading />;
-  }
 
   if (!journal) {
     return (
@@ -58,14 +53,13 @@ export function JournalEditPage() {
   };
 
   return (
-    <div>
-      <PageHeader title={`تعديل الدفتر: ${journal.name}`} description={`الرمز: ${journal.code}`} />
+    <Page title={`تعديل الدفتر: ${journal.name}`} description={`الرمز: ${journal.code}`} maxWidth="sm" loading={isLoading}>
       <JournalForm
         initialData={journal}
         onSubmit={handleSubmit}
         loading={isPending}
         lockedFields={lockedFieldsWhenUsed}
       />
-    </div>
+    </Page>
   );
 }

@@ -1,7 +1,7 @@
 // Monthly statement — US4: month + fund selectors, summary, vouchers + clearings tables
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { PageHeader, MoneyDisplay, Loading, EmptyState, Input, Select } from '@/components/ui';
+import { MoneyDisplay, Loading, EmptyState, Input, Select, Page } from '@/components/ui';
 import { DepositSlipsClient, FundsClient } from '../../../web-api-client';
 
 const slipClient = new DepositSlipsClient();
@@ -31,8 +31,7 @@ export default function MonthlyStatementPage() {
   );
 
   return (
-    <div className="space-y-6" dir="rtl">
-      <PageHeader title="كشف حساب شهري" />
+    <Page title="كشف حساب شهري">
 
       <div className="flex gap-4 items-end">
         <Input
@@ -147,6 +146,6 @@ export default function MonthlyStatementPage() {
           )}
         </>
       )}
-    </div>
+    </Page>
   );
 }

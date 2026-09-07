@@ -1,11 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { StatusBadge } from '@/components/ui/StatusBadge';
-import { DataGrid } from '@/components/ui/DataGrid';
+import { Page, StatusBadge, DataGrid, Button, Card, Skeleton } from '@/components/ui';
 import { AuditTimeline } from '@/components/ui/AuditTimeline';
-import { Button } from '@/components/ui/Button';
-import { Skeleton } from '@/components/ui/Loading';
-import { Card } from '@/components/ui';
 import { useAccountGroupDetail } from '../hooks/useAccountGroupDetail';
 import { useToggleAccountGroupActive } from '../hooks/useToggleAccountGroupActive';
 import { usePermission } from '@/shared/hooks/usePermission';
@@ -29,23 +24,8 @@ export function AccountGroupDetailPage() {
 
   const { hasPermission: canEdit } = usePermission(PERMISSIONS.Accounting.ChartOfAccounts.Edit);
 
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <Skeleton variant="table" lines={6} />
-      </div>
-    );
-  }
-
   if (!data) {
-    return (
-      <div className="p-6 text-center">
-        <p className="text-sm text-[var(--color-on-surface-variant)]">المجموعة غير موجودة</p>
-        <Button variant="ghost" className="mt-2" onClick={() => navigate('/accounting/account-groups')}>
-          العودة للقائمة
-        </Button>
-      </div>
-    );
+    return <Page title="" loading={isLoading} />;
   }
 
   const g = data.group;
@@ -118,30 +98,30 @@ export function AccountGroupDetailPage() {
   ];
 
   return (
-    <div className="space-y-6 p-6">
-      <PageHeader
-        title={`${g.code} — ${g.name}`}
-        description={`المستوى ${g.level} • النوع ${g.type} • الرصيد ${g.normalBalance}`}
-        actions={
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate('/accounting/account-groups')}>
-              <ArrowRight size={16} className="ms-1" />
-              رجوع
+    <Page
+      title={`${g.code} — ${g.name}`}
+      description={`المستوى ${g.level} • النوع ${g.type} • الرصيد ${g.normalBalance}`}
+      actions={
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate('/accounting/account-groups')}>
+            <ArrowRight size={16} className="ms-1" />
+            رجوع
+          </Button>
+          {canEdit && (
+            <Button onClick={() => setShowEdit(true)}>تعديل</Button>
+          )}
+          {canEdit && (
+            <Button
+              variant={g.isActive ? 'destructive' : 'default'}
+              onClick={() => setConfirmToggle(true)}
+            >
+              {g.isActive ? 'تعطيل' : 'تفعيل'}
             </Button>
-            {canEdit && (
-              <Button onClick={() => setShowEdit(true)}>تعديل</Button>
-            )}
-            {canEdit && (
-              <Button
-                variant={g.isActive ? 'destructive' : 'default'}
-                onClick={() => setConfirmToggle(true)}
-              >
-                {g.isActive ? 'تعطيل' : 'تفعيل'}
-              </Button>
-            )}
-          </div>
-        }
-      />
+          )}
+        </div>
+      }
+      loading={isLoading}
+    >
 
       {/* ═══ Basic Info Card ═══ */}
       <Card className="p-6">

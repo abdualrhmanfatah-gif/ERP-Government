@@ -2,10 +2,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { Textarea } from '@/components/ui/Textarea';
+import { Button, Input, Select, Textarea, Page } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { partiesClient } from '../../parties/shared/client';
@@ -99,13 +96,10 @@ export default function CreateReceiptVoucherPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/treasury/receipt-vouchers')} aria-label="العودة">
-          <ArrowRight size={18} />
-        </Button>
-        <h1 className="text-xl font-semibold text-[var(--color-on-surface)]">سند قبض جديد</h1>
-      </div>
+    <Page title="سند قبض جديد">
+      <Button variant="ghost" size="icon" onClick={() => navigate('/treasury/receipt-vouchers')} aria-label="العودة" className="mb-4">
+        <ArrowRight size={18} />
+      </Button>
 
       <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -202,6 +196,6 @@ export default function CreateReceiptVoucherPage() {
           </Button>
         </div>
       </form>
-    </div>
+    </Page>
   );
 }

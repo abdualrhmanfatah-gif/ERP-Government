@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
-import { Button, Switch, FilterBar, FilterSearch, FilterSelect, Dialog, ConfirmDialog, Badge, Input, Textarea, Select } from '@/components/ui';
+import { Page, Button, Switch, FilterBar, FilterSearch, FilterSelect, Dialog, ConfirmDialog, Badge, Input, Textarea, Select } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Pencil } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
@@ -142,34 +142,36 @@ export default function BudgetTypesListPage() {
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-[var(--color-on-surface)]">أنواع الميزانيات</h1>
-        {canManage && (
+    <Page
+      title="أنواع الميزانيات"
+      loading={isLoading}
+      actions={
+        canManage ? (
           <Button onClick={handleCreate} icon={<Plus size={16} />}>
             إضافة نوع ميزانية
           </Button>
-        )}
-      </div>
-
-      <FilterBar hasFilters={hasFilters} onClear={handleClearFilters}>
-        <FilterSearch value={search} onChange={setSearch} placeholder="بحث بالكود أو الاسم..." />
-        <FilterSelect
-          value={controlMethodFilter}
-          onChange={setControlMethodFilter}
-          options={controlMethodOptions}
-          placeholder="طريقة التحكم"
-          label="طريقة التحكم"
-        />
-        <FilterSelect
-          value={isActiveFilter}
-          onChange={setIsActiveFilter}
-          options={isActiveOptions}
-          placeholder="الحالة"
-          label="الحالة"
-        />
-      </FilterBar>
-
+        ) : undefined
+      }
+      toolbar={
+        <FilterBar hasFilters={hasFilters} onClear={handleClearFilters}>
+          <FilterSearch value={search} onChange={setSearch} placeholder="بحث بالكود أو الاسم..." />
+          <FilterSelect
+            value={controlMethodFilter}
+            onChange={setControlMethodFilter}
+            options={controlMethodOptions}
+            placeholder="طريقة التحكم"
+            label="طريقة التحكم"
+          />
+          <FilterSelect
+            value={isActiveFilter}
+            onChange={setIsActiveFilter}
+            options={isActiveOptions}
+            placeholder="الحالة"
+            label="الحالة"
+          />
+        </FilterBar>
+      }
+    >
       <div className="flex items-center gap-2 text-sm text-[var(--color-on-surface-variant)]">
         <span>{filtered.length} نتيجة</span>
         {items.length > 0 && <span>({items.length} إجمالي)</span>}
@@ -246,6 +248,6 @@ export default function BudgetTypesListPage() {
         title={confirmToggle?.isActive ? 'تعطيل نوع الميزانية' : 'تنشيط نوع الميزانية'}
         loading={toggleMutation.isPending}
       />
-    </div>
+    </Page>
   );
 }

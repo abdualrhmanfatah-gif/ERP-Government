@@ -1,7 +1,7 @@
 # جداول قاعدة البيانات — Database Tables Complete Reference
 
 > **تاريخ آخر تحديث:** 2026-09-07
-> **عدد الجداول:** 106 جدول
+> **عدد الجداول:** 105 جداول
 
 ---
 
@@ -475,7 +475,7 @@
 
 ---
 
-## 5. المحاسبة — Accounting (14)
+## 5. المحاسبة — Accounting (13)
 
 ### 5.1 مجموعات الحسابات — AccountGroups
 
@@ -701,17 +701,6 @@
 | رسالة الخطأ | ErrorMessage | string? | |
 | المُشغِّل | TriggeredBy | string | default "Scheduler" |
 | نسخة صف | RowVersion | byte[] | |
-
-### 5.14 قواعد تعيين التدفق النقدي — CashFlowMappingRules
-
-| العمود | Column | النوع | القيود |
-|--------|--------|------|--------|
-| المعرف | Id | int | PK |
-| معرف مجموعة الحسابات | AccountGroupId | int | FK→AccountGroups |
-| القسم | Section | enum (CashFlowSectionType) | |
-| الوصف | Description | string? | |
-| نشط | IsActive | bool | default true |
-| نسخة صف | RowVersion | byte[]? | |
 
 ---
 

@@ -12,7 +12,7 @@ import { EntryLinesEditor, type EntryLine } from '@/components/AccountingEntryLi
 import { FiscalYearIndicator } from '@/components/AccountingFiscalYearIndicator';
 import { MoveEntryType } from '../../../web-api-client';
 import { notify } from '@/features/notifications/notify';
-import { Button, Card, Input, Select, Textarea } from '@/components/ui';
+import { Page, Button, Card, Input, Select, Textarea } from '@/components/ui';
 
 const headerSchema = z.object({
   documentDate: z.string().min(1, 'التاريخ مطلوب'),
@@ -100,12 +100,7 @@ export function JournalEntryCreatePage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-6" dir="rtl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--color-on-surface)]">إنشاء قيد يومية</h1>
-        <p className="mt-1 text-sm text-[var(--color-on-surface-variant)]">أدخل بيانات القيد ثم أضف الأسطر</p>
-      </div>
-
+    <Page title="إنشاء قيد يومية" description="أدخل بيانات القيد ثم أضف الأسطر" maxWidth="lg">
       <form id="journal-entry-form" onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-6">
           <Card variant="default">
@@ -199,6 +194,6 @@ export function JournalEntryCreatePage() {
           إلغاء
         </Button>
       </div>
-    </div>
+    </Page>
   );
 }

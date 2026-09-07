@@ -17,7 +17,7 @@ import { usePermission } from '@/shared/hooks/usePermission';
 import { LifecycleActions, type LifecycleAction } from '@/components/BudgetingLifecycleActions';
 import { ApprovalHistoryPanel } from '@/components/BudgetingApprovalHistoryPanel';
 import { AvailabilityIndicator } from '@/components/BudgetingAvailabilityIndicator';
-import { Button, Badge, Card } from '@/components/ui';
+import { Page, Button, Badge, Card } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 
 const appropriationActions: Record<string, LifecycleAction[]> = {
@@ -106,36 +106,23 @@ export default function AppropriationDetailPage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="p-6 space-y-4">
-        <div className="h-8 w-64 rounded bg-[var(--color-surface-container)] animate-pulse" />
-        <div className="h-48 rounded-lg bg-[var(--color-surface-container)] animate-pulse" />
-      </div>
-    );
-  }
-
-  if (!appropriation) {
-    return <div className="p-6 text-center text-[var(--color-error)]">لم يتم العثور على التخصيص</div>;
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/budgeting/appropriations')} aria-label="العودة">
-          <ArrowRight size={18} />
-        </Button>
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-[var(--color-on-surface)]">{appropriation.appropriationNumber}</h1>
-            <Badge>{appropriationStatusLabels[appropriation.status]}</Badge>
-          </div>
-          <p className="text-sm text-[var(--color-on-surface-variant)]">
-            {appropriationTypeLabels[appropriation.appropriationType]}
-          </p>
+    <Page
+      title={appropriation?.appropriationNumber ?? ''}
+      description={appropriation ? appropriationTypeLabels[appropriation.appropriationType] : undefined}
+      loading={isLoading}
+      error={!isLoading && !appropriation ? 'لم يتم العثور على التخصيص' : undefined}
+      breadcrumbs={[{ label: 'التخصيصات', path: '/budgeting/appropriations' }, { label: appropriation?.appropriationNumber ?? '' }]}
+      actions={
+        <div className="flex items-center gap-2">
+          {appropriation && <Badge>{appropriationStatusLabels[appropriation.status]}</Badge>}
+          <Button variant="ghost" size="icon" onClick={() => navigate('/budgeting/appropriations')} aria-label="العودة">
+            <ArrowRight size={18} />
+          </Button>
         </div>
-      </div>
-
+      }
+    >
+      {!appropriation ? null : (<>
       <Card className="bg-[var(--color-surface-container-lowest)]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
@@ -190,6 +177,7 @@ export default function AppropriationDetailPage() {
         decisions={[appropriation.latestApproval].filter(Boolean)}
         title="سجل اعتمادات التخصيص"
       />
-    </div>
+    </>)}
+    </Page>
   );
 }

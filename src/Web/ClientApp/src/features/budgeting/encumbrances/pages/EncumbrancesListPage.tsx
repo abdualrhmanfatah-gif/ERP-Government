@@ -4,7 +4,7 @@ import { encumbranceTypeLabels, encumbranceStatusLabels, EncumbranceStatus } fro
 import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { LifecycleActions, type LifecycleAction } from '@/components/BudgetingLifecycleActions';
-import { Button, Badge } from '@/components/ui';
+import { Page, Button, Badge } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, RotateCcw } from 'lucide-react';
 
@@ -86,15 +86,16 @@ export default function EncumbrancesListPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-[var(--color-on-surface)]">الالتزامات</h1>
+    <Page
+      title="الالتزامات"
+      loading={isLoading}
+      actions={
         <Button variant="primary" size="sm" onClick={() => navigate('/budgeting/encumbrances/create')}>
           <Plus size={16} className="ms-1" />
           التزام جديد
         </Button>
-      </div>
-
+      }
+    >
       <DataGrid
         columns={columns}
         data={encumbrances ?? []}
@@ -102,6 +103,6 @@ export default function EncumbrancesListPage() {
         emptyMessage="لا توجد التزامات بعد"
         rowKey={(row) => row.id}
       />
-    </div>
+    </Page>
   );
 }

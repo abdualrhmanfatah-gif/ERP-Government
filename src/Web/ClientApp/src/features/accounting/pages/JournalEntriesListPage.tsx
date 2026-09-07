@@ -84,15 +84,12 @@ export function JournalEntriesListPage() {
   }, [entries, searchQuery]);
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-6" dir="rtl">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--color-on-surface)]">قيود اليومية</h1>
-          <p className="mt-1 text-sm text-[var(--color-on-surface-variant)]">إدارة ومراجعة قيود اليومية المحاسبية</p>
-        </div>
-        <Button variant="primary" onClick={() => navigate('/accounting/journal-entries/create')}>+ قيد جديد</Button>
-      </div>
-
+    <Page
+      title="قيود اليومية"
+      description="إدارة ومراجعة قيود اليومية المحاسبية"
+      actions={<Button variant="primary" onClick={() => navigate('/accounting/journal-entries/create')}>+ قيد جديد</Button>}
+      loading={isLoading}
+    >
       <Card variant="default">
         <div className="px-6 py-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">
           <div className="flex items-center justify-between gap-4">
@@ -116,6 +113,6 @@ export function JournalEntriesListPage() {
           onRowClick={(row) => navigate(`/accounting/journal-entries/${row.id}`)}
         />
       </Card>
-    </div>
+    </Page>
   );
 }

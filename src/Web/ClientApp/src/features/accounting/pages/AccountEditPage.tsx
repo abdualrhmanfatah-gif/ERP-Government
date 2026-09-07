@@ -1,6 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Button, Loading, EmptyState } from '@/components/ui';
+import { Page, Button, EmptyState } from '@/components/ui';
 import { AccountForm } from '@/components/AccountingAccountForm';
 import { useAccountDetail } from '../hooks/useAccountDetail';
 import { useUpdateAccount } from '../hooks/useUpdateAccount';
@@ -16,10 +15,6 @@ export function AccountEditPage() {
   const { mutateAsync, isPending } = useUpdateAccount();
   const { data: groups = [] } = useAccountGroups();
   const { data: allAccounts = [] } = useAccountsList();
-
-  if (isLoading) {
-    return <Loading />;
-  }
 
   if (!account) {
     return (
@@ -57,8 +52,7 @@ export function AccountEditPage() {
   };
 
   return (
-    <div>
-      <PageHeader title={`تعديل الحساب: ${account.name}`} description={`الرمز: ${account.code}`} />
+    <Page title={`تعديل الحساب: ${account.name}`} description={`الرمز: ${account.code}`} maxWidth="sm" loading={isLoading}>
       <AccountForm
         initialData={account}
         accountGroups={groups}
@@ -66,6 +60,6 @@ export function AccountEditPage() {
         onSubmit={handleSubmit}
         loading={isPending}
       />
-    </div>
+    </Page>
   );
 }

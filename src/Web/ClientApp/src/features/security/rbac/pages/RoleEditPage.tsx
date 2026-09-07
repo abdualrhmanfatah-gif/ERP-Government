@@ -1,9 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { notify } from '@/features/notifications/notify';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Button } from '@/components/ui/Button';
-import { Loading } from '@/components/ui/Loading';
-import { Card, EmptyState } from '@/components/ui';
+import { Page, Button, Loading, Card, EmptyState } from '@/components/ui';
 import { RoleForm } from '@/components/SecurityRbacRoleForm';
 import { useRoles } from '../hooks';
 import { useUpdateRole } from '../hooks/useUpdateRole';
@@ -38,16 +35,16 @@ export function RoleEditPage() {
   };
 
   return (
-    <div>
-      <PageHeader
-        title={`تعديل الدور: ${role.name}`}
-        description="تعديل بيانات الدور"
-        actions={
-          <Button variant="ghost" onClick={() => navigate('/security/roles')}>
-            إلغاء
-          </Button>
-        }
-      />
+    <Page
+      title={`تعديل الدور: ${role.name}`}
+      description="تعديل بيانات الدور"
+      maxWidth="md"
+      actions={
+        <Button variant="ghost" onClick={() => navigate('/security/roles')}>
+          إلغاء
+        </Button>
+      }
+    >
       <Card className="max-w-2xl">
         <RoleForm
           initialData={role}
@@ -57,6 +54,6 @@ export function RoleEditPage() {
           loading={updateMutation.isPending}
         />
       </Card>
-    </div>
+    </Page>
   );
 }

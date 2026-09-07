@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Button, Switch, FilterBar, FilterSearch, ConfirmDialog, Loading } from '@/components/ui';
+import { Page, Button, Switch, FilterBar, FilterSearch, ConfirmDialog } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Eye } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
@@ -66,23 +66,22 @@ export default function CurrenciesListPage() {
   ];
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-headline-sm sm:text-headline-md font-bold text-[var(--color-on-surface)]">العملات</h1>
-          <p className="text-body-sm text-[var(--color-on-surface-variant)] mt-1">إدارة العملات ودعمها</p>
-        </div>
-        {canCreate && (
-          <Button onClick={() => navigate('/financial-settings/currencies/new')} icon={<Plus size={16} />} className="self-start sm:self-auto cursor-pointer shadow-sm hover:shadow transition-shadow">
+    <Page
+      title="العملات"
+      description="إدارة العملات ودعمها"
+      actions={
+        canCreate && (
+          <Button onClick={() => navigate('/financial-settings/currencies/new')} icon={<Plus size={16} />} className="cursor-pointer shadow-sm hover:shadow transition-shadow">
             عملة جديدة
           </Button>
-        )}
-      </div>
-
-      <FilterBar hasFilters={!!search} onClear={() => setSearch('')}>
-        <FilterSearch value={search} onChange={setSearch} placeholder="بحث بالكود أو الاسم..." />
-      </FilterBar>
-
+        )
+      }
+      toolbar={
+        <FilterBar hasFilters={!!search} onClear={() => setSearch('')}>
+          <FilterSearch value={search} onChange={setSearch} placeholder="بحث بالكود أو الاسم..." />
+        </FilterBar>
+      }
+    >
       <DataGrid
         columns={columns}
         data={filtered}
@@ -99,6 +98,6 @@ export default function CurrenciesListPage() {
         message={confirmToggle?.isActive ? `هل تريد تعطيل العملة ${confirmToggle?.code}؟` : `هل تريد تنشيط العملة ${confirmToggle?.code}؟`}
         loading={activateMutation.isPending || deactivateMutation.isPending}
       />
-    </div>
+    </Page>
   );
 }

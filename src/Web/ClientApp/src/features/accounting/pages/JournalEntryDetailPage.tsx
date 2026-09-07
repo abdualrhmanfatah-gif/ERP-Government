@@ -14,7 +14,7 @@ import { BalanceIndicator } from '@/components/AccountingBalanceIndicator';
 import { ReverseDialog } from '@/components/AccountingReverseDialog';
 import { ApprovalsPanel } from '@/components/DocumentsApprovalsPanel';
 import { StatusLogPanel } from '@/components/DocumentsStatusLogPanel';
-import { Button, Card } from '@/components/ui';
+import { Page, Button, Card } from '@/components/ui';
 function formatDate(value: unknown): string {
   if (!value) return '';
   if (typeof value === 'string') return value;
@@ -90,33 +90,14 @@ export function JournalEntryDetailPage() {
     post: () => handleAction('post'), reverse: () => handleAction('reverse'), cancel: () => handleAction('cancel'),
   };
 
-  if (isLoading) {
-    return (
-      <div className="max-w-6xl mx-auto py-16 px-6">
-        <div className="flex items-center justify-center gap-3 text-[var(--color-on-surface-variant)]">
-          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
-          <span className="text-sm font-medium">جاري تحميل القيد...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !entry) {
-    return (
-      <div className="max-w-6xl mx-auto py-16 px-6 text-center">
-        <svg className="mx-auto h-12 w-12 mb-4 text-[var(--color-error)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-        </svg>
-        <p className="text-sm font-bold text-[var(--color-error)]">خطأ في تحميل القيد</p>
-        <Button variant="link" onClick={() => navigate('/accounting/journal-entries')} className="mt-4">العودة للقائمة</Button>
-      </div>
-    );
+  if (!entry) {
+    return <Page title="" loading={isLoading} error={error ? 'خطأ في تحميل القيد' : undefined} />;
   }
 
   const actions = getActionsForStatus(entry.entryStatus);
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-6" dir="rtl">
+    <Page title={entry.entryNumber} description={formatDate(entry.documentDate)} loading={isLoading} error={error ? 'خطأ في تحميل القيد' : undefined}>
       {conflictError && (
         <Card variant="default" padding="sm" className="mb-6 text-sm flex items-center justify-between bg-[var(--color-error-container)] text-[var(--color-error)]">
           <div className="flex items-center gap-2">
@@ -260,6 +241,6 @@ export function JournalEntryDetailPage() {
       <ReverseDialog open={showReverseDialog} entryId={entry.id} entryNumber={entry.entryNumber} lines={entry.lines}
         onConfirm={handleReverseConfirm} onClose={() => setShowReverseDialog(false)}
         isReversing={reverseMutation.isPending} error={reverseMutation.isError ? (reverseMutation.error as Error)?.message : undefined} />
-    </div>
+    </Page>
   );
 }
