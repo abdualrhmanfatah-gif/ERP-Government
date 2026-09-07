@@ -19,7 +19,7 @@ import {
 } from '../../shared/types';
 import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
 import { usePermission } from '@/shared/hooks/usePermission';
-import { LifecycleActions, type LifecycleAction } from '../../components/LifecycleActions';
+import { LifecycleActions, type LifecycleAction } from '@/components/BudgetingLifecycleActions';
 import { Button, Badge } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { FilterSelect } from '@/components/ui/FilterSelect';
@@ -98,13 +98,13 @@ export default function AppropriationsListPage() {
     {
       header: 'رقم التخصيص',
       cell: (row) => (
-        <button
-          type="button"
-          className="font-mono text-[var(--color-primary)] hover:underline"
+        <Button
+          variant="link"
+          className="font-mono"
           onClick={() => navigate(`/budgeting/appropriations/${row.id}`)}
         >
           {row.appropriationNumber}
-        </button>
+        </Button>
       ),
     },
     { header: 'النوع', cell: (row) => <Badge variant="outline">{appropriationTypeLabels[row.appropriationType]}</Badge> },

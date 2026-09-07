@@ -39,12 +39,6 @@ internal class GetTrialBalanceReportQueryHandler(IApplicationDbContext dbContext
             .Where(l => l.JournalEntry.FiscalYearId == request.FiscalYearId
                      && l.JournalEntry.EntryStatus == EntryStatus.Posted);
 
-        if (request.FundId.HasValue)
-            query = query.Where(l => l.FundId == request.FundId.Value);
-
-        if (request.ProjectId.HasValue)
-            query = query.Where(l => l.ProjectId == request.ProjectId.Value);
-
         var allLines = await query.ToListAsync(cancellationToken);
 
         // Lines within the reporting period (up to periodEndDate)
@@ -59,12 +53,6 @@ internal class GetTrialBalanceReportQueryHandler(IApplicationDbContext dbContext
             .Where(l => accountIdSet.Contains(l.AccountId)
                      && l.JournalEntry.EntryStatus == EntryStatus.Posted
                      && l.JournalEntry.DocumentDate < yearStartDate);
-
-        if (request.FundId.HasValue)
-            openingQuery = openingQuery.Where(l => l.FundId == request.FundId.Value);
-
-        if (request.ProjectId.HasValue)
-            openingQuery = openingQuery.Where(l => l.ProjectId == request.ProjectId.Value);
 
         var openingLines = await openingQuery.ToListAsync(cancellationToken);
 

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-type BadgeVariant = 'draft' | 'pending' | 'approved' | 'active' | 'closed' | 'posted' | 'reversed' | 'cancelled' | 'locked' | 'overBudget' | 'unbalanced';
+export type BadgeVariant = 'draft' | 'pending' | 'approved' | 'active' | 'closed' | 'posted' | 'reversed' | 'cancelled' | 'locked' | 'overBudget' | 'unbalanced';
 type BadgeSize = 'sm' | 'md';
 
 interface StatusBadgeProps {

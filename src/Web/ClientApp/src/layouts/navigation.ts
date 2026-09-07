@@ -22,6 +22,12 @@ export const moduleGroups: ModuleGroup[] = [
       { path: '/accounting/account-groups', label: 'مجموعات الحسابات', permission: 'Accounting.ChartOfAccounts.Read' },
       { path: '/accounting/accounts', label: 'الحسابات', permission: 'Accounting.ChartOfAccounts.Read' },
       { path: '/accounting/journal-entries', label: 'قيود اليومية', permission: 'Accounting.JournalEntries.Read' },
+      { path: '/accounting/journals', label: 'دفاتر اليومية', permission: 'Accounting.Journals.Read' },
+      { path: '/accounting/templates', label: 'قوالب القيود', permission: 'Accounting.Templates.Read' },
+      { path: '/accounting/recurring-entries', label: 'القيود الدورية', permission: 'Accounting.RecurringEntries.Read' },
+      { path: '/accounting/balances', label: 'أرصدة الحسابات', permission: 'Accounting.Balances.Read' },
+      { path: '/accounting/events', label: 'طابور الأحداث', permission: 'Accounting.AccountingEvents.Read' },
+      { path: '/accounting/posting-rules', label: 'قواعد الترحيل', permission: 'Accounting.PostingRules.Read' },
     ],
   },
   {
@@ -55,6 +61,15 @@ export const moduleGroups: ModuleGroup[] = [
       { path: '/budgeting/budgets', label: 'الموازنات', permission: 'Budgets.View' },
       { path: '/budgeting/appropriations', label: 'التخصيصات', permission: 'Appropriations.View' },
       { path: '/budgeting/encumbrances', label: 'الالتزامات', permission: 'Encumbrances.View' },
+    ],
+  },
+  {
+    label: 'الخزينة',
+    items: [
+      { path: '/treasury/receipt-vouchers', label: 'سندات القبض', permission: 'ReceiptVouchers.View' },
+      { path: '/treasury/deposit-slips', label: 'بطاقات الإيداع', permission: 'DepositSlips.View' },
+      { path: '/treasury/checks', label: 'الشيكات', permission: 'Checks.View' },
+      { path: '/treasury/monthly-statement', label: 'كشف حساب شهري', permission: 'Statements.View' },
     ],
   },
   {

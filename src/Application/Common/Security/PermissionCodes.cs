@@ -227,13 +227,14 @@ public static class PermissionCodes
     // ─── DepositSlips ────────────────────────────────────────────────
     public const string DepositSlipsView = "DepositSlips.View";
     public const string DepositSlipsCreate = "DepositSlips.Create";
-    public const string DepositSlipsManage = "DepositSlips.Manage";
+    public const string DepositSlipsUpdate = "DepositSlips.Update";
     public const string DepositSlipsApprove = "DepositSlips.Approve";
 
     // ─── Checks ──────────────────────────────────────────────────────
     public const string ChecksView = "Checks.View";
     public const string ChecksClear = "Checks.Clear";
     public const string ChecksBounce = "Checks.Bounce";
+    public const string ChecksReplace = "Checks.Replace";
 
     // ─── Assets ───────────────────────────────────────────────────────
     public const string AssetsView = "Assets.View";

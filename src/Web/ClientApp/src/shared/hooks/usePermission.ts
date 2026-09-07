@@ -50,6 +50,8 @@ type PolicyString =
   | 'Accounting.JournalEntries.Read' | 'Accounting.JournalEntries.Create' | 'Accounting.JournalEntries.Submit'
   | 'Accounting.JournalEntries.Approve' | 'Accounting.JournalEntries.Post' | 'Accounting.JournalEntries.Reverse'
   | 'Accounting.JournalEntries.UpdateLines' | 'Accounting.JournalEntries.Cancel'
+  | 'Accounting.Balances.Read' | 'Accounting.Balances.Finalize' | 'Accounting.Balances.Unfinalize'
+  | 'Accounting.Balances.Rebuild'
   | 'Accounting.Reports.BalanceSheet' | 'Accounting.Reports.IncomeStatement'
   | 'Accounting.Reports.GeneralLedger' | 'Accounting.Reports.CashFlow'
   | 'Accounting.Reports.Export' | 'Accounting.Reports.Print';
@@ -93,6 +95,7 @@ const STUB_GRANTED_POLICIES: Set<string> = new Set(
     Encumbrances: ['View', 'Create', 'Submit', 'Approve', 'Activate', 'Release', 'Close', 'Cancel', 'Reverse'],
     Parties: ['View', 'Create', 'Update'],
     'Accounting.ChartOfAccounts': ['Read', 'Create', 'Edit'],
+    'Accounting.Balances': ['Read', 'Finalize', 'Unfinalize', 'Rebuild'],
     'Accounting.JournalEntries': ['Read', 'Create', 'Submit', 'Approve', 'Post', 'Reverse', 'UpdateLines', 'Cancel'],
     'Accounting.Reports': ['BalanceSheet', 'IncomeStatement', 'GeneralLedger', 'CashFlow', 'Export', 'Print'],
   }).flatMap(([module, actions]) => actions.map(action => `${module}.${action}`))

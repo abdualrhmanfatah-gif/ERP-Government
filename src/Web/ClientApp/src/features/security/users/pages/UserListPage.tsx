@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { FilterBar, FilterSearch, FilterSelect } from '@/components/ui';
 import { useUsers } from '../hooks';
-import { CreateUserDialog } from '../components/CreateUserDialog';
+import { CreateUserDialog } from '@/components/SecurityUsersCreateDialog';
 
 export function UserListPage() {
   const navigate = useNavigate();

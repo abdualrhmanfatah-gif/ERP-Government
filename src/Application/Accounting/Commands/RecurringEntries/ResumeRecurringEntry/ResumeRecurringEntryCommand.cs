@@ -1,4 +1,5 @@
 ﻿using ERP_Government.Application.Common.Security;
+using ERP_Government.Application.Parties.Common;
 using ERP_Government.Domain.Accounting.Enums;
 
 namespace ERP_Government.Application.Accounting.Commands.RecurringEntries.ResumeRecurringEntry;
@@ -11,27 +12,37 @@ public class ResumeRecurringEntryCommand : IRequest<Result>
 }
 
 public class ResumeRecurringEntryCommandHandler(
-    IApplicationDbContext context) : IRequestHandler<ResumeRecurringEntryCommand, Result>
+    IApplicationDbContext context,
+    IUser currentUser,
+    IDocumentStatusLogger statusLogger) : IRequestHandler<ResumeRecurringEntryCommand, Result>
 {
     public async Task<Result> Handle(
         ResumeRecurringEntryCommand request,
         CancellationToken cancellationToken)
     {
+        if (currentUser.Id is not int userId)
+            return Result.Failure(["User identity is required for this operation."]);
+
         var entity = await context.RecurringEntries
             .FindAsync(request.Id, cancellationToken);
 
         if (entity is null)
             return Result.Failure(["Recurring entry not found."]);
 
-        // Validate lifecycle: only Paused can be resumed
         if (entity.Status != RecurringEntryStatus.Paused)
             return Result.Failure(["Only paused recurring entries can be resumed."]);
 
-        // Update status
+        var previousStatus = entity.Status;
         entity.Status = RecurringEntryStatus.Active;
 
-        // Note: No backdated entries are created during pause period
-        // unless the recurring rule explicitly states otherwise
+        await statusLogger.LogAsync(
+            "RecurringEntry",
+            entity.Id,
+            previousStatus.ToString(),
+            RecurringEntryStatus.Active.ToString(),
+            userId,
+            null,
+            cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
 

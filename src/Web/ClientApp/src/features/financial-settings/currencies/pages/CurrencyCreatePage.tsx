@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, FormField, Input } from '@/components/ui';
+import { Button, Card, FormField, Input } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { useCreateCurrency } from '../../hooks/useCurrencies';
-import { Iso4217Picker } from '../components/Iso4217Picker';
+import { Iso4217Picker } from '@/components/FinancialSettingsIso4217Picker';
 import type { Iso4217CodeDto } from '../../shared/types';
 
 export default function CurrencyCreatePage() {
@@ -55,7 +55,7 @@ export default function CurrencyCreatePage() {
         <h1 className="text-headline-sm sm:text-headline-md font-bold text-[var(--color-on-surface)]">عملة جديدة</h1>
       </div>
 
-      <div className="rounded-xl border border-[var(--color-border-container)] bg-[var(--color-surface-container-lowest)] p-6">
+      <Card className="bg-[var(--color-surface-container-lowest)]">
         <form onSubmit={handleSubmit} className="space-y-4">
           <Iso4217Picker
             onSelect={(code) => {
@@ -124,7 +124,7 @@ export default function CurrencyCreatePage() {
             </Button>
           </div>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }

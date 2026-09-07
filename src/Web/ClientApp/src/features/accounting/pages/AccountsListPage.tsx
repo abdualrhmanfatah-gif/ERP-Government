@@ -4,7 +4,7 @@ import { Plus } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { FilterBar, FilterSearch, FilterSelect } from '@/components/ui';
-import { AccountGrid } from '../components/AccountGrid';
+import { AccountGrid } from '@/components/AccountingAccountGrid';
 import { useAccountsList } from '../hooks/useAccountsList';
 import { useAccountGroups } from '../hooks/useAccountGroups';
 

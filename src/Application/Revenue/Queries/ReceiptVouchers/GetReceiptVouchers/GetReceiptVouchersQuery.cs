@@ -8,6 +8,7 @@ namespace ERP_Government.Application.Revenue.Queries.ReceiptVouchers.GetReceiptV
 public class GetReceiptVouchersQuery : IRequest<Result<List<ReceiptVoucherDto>>>
 {
     public int? PartyId { get; init; }
+    public PaymentMethod? PaymentMethodFilter { get; init; }
     public ReceiptVoucherStatus? Status { get; init; }
     public DateOnly? FromDate { get; init; }
     public DateOnly? ToDate { get; init; }
@@ -26,10 +27,14 @@ public class GetReceiptVouchersQueryHandler(
             .Include(v => v.Party)
             .Include(v => v.Lines)
             .Include(v => v.Checks)
+            .Include(v => v.DepositSlip)
             .AsQueryable();
 
         if (request.PartyId.HasValue)
             query = query.Where(v => v.PartyId == request.PartyId.Value);
+
+        if (request.PaymentMethodFilter.HasValue)
+            query = query.Where(v => v.PaymentMethod == request.PaymentMethodFilter.Value);
 
         if (request.Status.HasValue)
             query = query.Where(v => v.Status == request.Status.Value);
@@ -56,6 +61,7 @@ public class GetReceiptVouchersQueryHandler(
                 ReceivedFrom = v.ReceivedFrom,
                 Notes = v.Notes,
                 DepositSlipId = v.DepositSlipId,
+                DepositSlipNumber = v.DepositSlip != null ? v.DepositSlip.SlipNumber : null,
                 Status = v.Status,
                 StatusName = v.Status.ToString(),
                 TotalAmount = v.Lines.Sum(l => l.Amount),

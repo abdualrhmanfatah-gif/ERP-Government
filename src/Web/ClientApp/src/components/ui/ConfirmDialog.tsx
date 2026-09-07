@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Dialog } from './Dialog';
 import { Button } from './Button';
 
@@ -10,6 +11,7 @@ interface ConfirmDialogProps {
   confirmLabel?: string;
   destructive?: boolean;
   loading?: boolean;
+  icon?: ReactNode;
 }
 
 export function ConfirmDialog({
@@ -21,6 +23,7 @@ export function ConfirmDialog({
   confirmLabel = 'تأكيد',
   destructive = false,
   loading = false,
+  icon,
 }: ConfirmDialogProps) {
   return (
     <Dialog
@@ -43,7 +46,16 @@ export function ConfirmDialog({
         </>
       }
     >
-      <p className="m-0 text-sm leading-relaxed text-[var(--color-on-surface-variant)]">{message}</p>
+      {icon ? (
+        <div className="flex items-start gap-3">
+          <span className={destructive ? 'text-[var(--color-error)]' : 'text-[var(--color-primary)]'} aria-hidden="true">
+            {icon}
+          </span>
+          <p className="m-0 text-sm leading-relaxed text-[var(--color-on-surface-variant)]">{message}</p>
+        </div>
+      ) : (
+        <p className="m-0 text-sm leading-relaxed text-[var(--color-on-surface-variant)]">{message}</p>
+      )}
     </Dialog>
   );
 }

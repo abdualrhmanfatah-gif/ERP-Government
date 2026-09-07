@@ -27,9 +27,6 @@ public class CreateDepositSlipCommandHandler(
         if (user.Id is not int userId)
             return Result<int>.Failure(new[] { "User identity is required for this operation." });
 
-        if (request.VoucherIds.Count == 0)
-            return Result<int>.Failure(new[] { "At least one voucher is required." });
-
         if (request.SlipDate > DateOnly.FromDateTime(DateTime.Today))
             return Result<int>.Failure(new[] { "Slip date cannot be in the future." });
 
@@ -46,21 +43,20 @@ public class CreateDepositSlipCommandHandler(
         if (vouchers.Any(v => v.DepositSlipId.HasValue))
             return Result<int>.Failure(new[] { "One or more vouchers are already part of a deposit slip." });
 
-        var latestVoucherDate = vouchers.Max(v => v.VoucherDate);
-        if (request.SlipDate < latestVoucherDate)
-            return Result<int>.Failure(new[] { "Slip date must be on or after the latest voucher date." });
+        if (vouchers.Count > 0)
+        {
+            var latestVoucherDate = vouchers.Max(v => v.VoucherDate);
+            if (request.SlipDate < latestVoucherDate)
+                return Result<int>.Failure(new[] { "Slip date must be on or after the latest voucher date." });
+        }
 
         foreach (var voucher in vouchers)
         {
-            var hasCheck = await context.Checks.AnyAsync(c => c.ReceiptVoucherId == voucher.Id, cancellationToken);
-            var isCheckVoucher = hasCheck || voucher.PaymentMethod == PaymentMethod.Check;
-            var isCashVoucher = !isCheckVoucher;
+            if (request.FormType == FormType.Form47 && voucher.PaymentMethod != PaymentMethod.Cash)
+                return Result<int>.Failure(new[] { $"Voucher {voucher.VoucherNumber} is not a cash voucher and cannot be added to a Form 47 (cash-only) slip." });
 
-            if (request.FormType == FormType.Form47 && isCheckVoucher)
-                return Result<int>.Failure(new[] { $"Voucher {voucher.VoucherNumber} contains checks and cannot be added to a Form 47 (cash-only) slip." });
-
-            if (request.FormType == FormType.Form48 && isCashVoucher)
-                return Result<int>.Failure(new[] { $"Voucher {voucher.VoucherNumber} is cash-only and cannot be added to a Form 48 (checks-only) slip." });
+            if (request.FormType == FormType.Form48 && voucher.PaymentMethod != PaymentMethod.Check)
+                return Result<int>.Failure(new[] { $"Voucher {voucher.VoucherNumber} is not a check voucher and cannot be added to a Form 48 (checks-only) slip." });
         }
 
         var slipNumber = await sequenceService.GenerateNextNumberAsync("DepositSlip", cancellationToken);
@@ -110,12 +106,11 @@ public class CreateDepositSlipCommandValidator : AbstractValidator<CreateDeposit
     public CreateDepositSlipCommandValidator()
     {
         RuleFor(x => x.SlipDate)
-            .NotEmpty().WithMessage("Slip date is required.");
+            .NotEmpty().WithMessage("Slip date is required.")
+            .LessThanOrEqualTo(DateOnly.FromDateTime(DateTime.Today))
+            .WithMessage("Slip date cannot be in the future.");
 
         RuleFor(x => x.FormType)
             .IsInEnum().WithMessage("Invalid form type.");
-
-        RuleFor(x => x.VoucherIds)
-            .NotEmpty().WithMessage("At least one voucher is required.");
     }
 }

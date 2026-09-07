@@ -8,7 +8,7 @@ using ERP_Government.Domain.Security.Entities;
 namespace ERP_Government.Application.Revenue.Commands.ReceiptVouchers.CreateReceiptVoucher;
 
 [Authorize(Policy = PermissionCodes.ReceiptVouchersCreate)]
-public class CreateReceiptVoucherCommand : IRequest<Result<int>>
+public class CreateReceiptVoucherCommand : IRequest<Result<ReceiptVoucherDto>>
 {
     public DateOnly VoucherDate { get; init; }
     public int PartyId { get; init; }
@@ -22,41 +22,45 @@ public class CreateReceiptVoucherCommand : IRequest<Result<int>>
 public class CreateReceiptVoucherCommandHandler(
     IApplicationDbContext context,
     IDocumentSequenceService sequenceService,
-    IUser user) : IRequestHandler<CreateReceiptVoucherCommand, Result<int>>
+    IUser user) : IRequestHandler<CreateReceiptVoucherCommand, Result<ReceiptVoucherDto>>
 {
-    public async Task<Result<int>> Handle(
+    public async Task<Result<ReceiptVoucherDto>> Handle(
         CreateReceiptVoucherCommand request,
         CancellationToken cancellationToken)
     {
         if (user.Id is not int userId)
-            return Result<int>.Failure(new[] { "User identity is required for this operation." });
+            return Result<ReceiptVoucherDto>.Failure(new[] { "User identity is required for this operation." });
 
         if (request.Lines.Count == 0)
-            return Result<int>.Failure(new[] { "At least one line is required." });
+            return Result<ReceiptVoucherDto>.Failure(new[] { "At least one line is required." });
 
         if (request.Lines.Any(l => l.Amount <= 0))
-            return Result<int>.Failure(new[] { "Each line amount must be greater than zero." });
+            return Result<ReceiptVoucherDto>.Failure(new[] { "Each line amount must be greater than zero." });
 
         var party = await context.Parties.FindAsync(request.PartyId, cancellationToken);
         if (party is null || !party.IsActive)
-            return Result<int>.Failure(new[] { "Party not found or inactive." });
+            return Result<ReceiptVoucherDto>.Failure(new[] { "Party not found or inactive." });
 
         if (request.PaymentMethod == PaymentMethod.Check && request.Checks.Count == 0)
-            return Result<int>.Failure(new[] { "At least one check is required for check payments." });
+            return Result<ReceiptVoucherDto>.Failure(new[] { "At least one check is required for check payments." });
 
         if (request.PaymentMethod == PaymentMethod.Cash && request.Checks.Count > 0)
-            return Result<int>.Failure(new[] { "Check details are not allowed for cash payments." });
+            return Result<ReceiptVoucherDto>.Failure(new[] { "Check details are not allowed for cash payments." });
+
+        var totalAmount = request.Lines.Sum(l => l.Amount);
+        if (request.Checks.Sum(c => c.Amount) > totalAmount)
+            return Result<ReceiptVoucherDto>.Failure(new[] { "The sum of check amounts exceeds the voucher total." });
 
         if (request.Checks.Count > 0)
         {
             foreach (var check in request.Checks)
             {
                 if (check.Amount <= 0)
-                    return Result<int>.Failure(new[] { "Check amount must be greater than zero." });
+                    return Result<ReceiptVoucherDto>.Failure(new[] { "Check amount must be greater than zero." });
                 if (string.IsNullOrWhiteSpace(check.BankName))
-                    return Result<int>.Failure(new[] { "Bank name is required for checks." });
+                    return Result<ReceiptVoucherDto>.Failure(new[] { "Bank name is required for checks." });
                 if (string.IsNullOrWhiteSpace(check.CheckNumber))
-                    return Result<int>.Failure(new[] { "Check number is required." });
+                    return Result<ReceiptVoucherDto>.Failure(new[] { "Check number is required." });
             }
         }
 
@@ -118,10 +122,69 @@ public class CreateReceiptVoucherCommandHandler(
         }
         catch (DbUpdateConcurrencyException)
         {
-            return Result<int>.Failure(new[] { "Voucher was modified by another user. Please refresh and try again." });
+            return Result<ReceiptVoucherDto>.Failure(new[] { "Voucher was modified by another user. Please refresh and try again." });
         }
 
-        return Result<int>.Success(voucher.Id);
+        return Result<ReceiptVoucherDto>.Success(await MapVoucherAsync(voucher.Id, cancellationToken));
+    }
+
+    private async Task<ReceiptVoucherDto> MapVoucherAsync(int voucherId, CancellationToken cancellationToken)
+    {
+        var saved = await context.ReceiptVouchers
+            .Include(v => v.Party)
+            .Include(v => v.Lines)
+            .Include(v => v.Checks)
+            .FirstAsync(v => v.Id == voucherId, cancellationToken);
+
+        return new ReceiptVoucherDto
+        {
+            Id = saved.Id,
+            VoucherNumber = saved.VoucherNumber,
+            VoucherDate = saved.VoucherDate,
+            PartyId = saved.PartyId,
+            PartyName = saved.Party?.NameAr ?? string.Empty,
+            PaymentMethod = saved.PaymentMethod,
+            PaymentMethodName = saved.PaymentMethod.ToString(),
+            ReceivedFrom = saved.ReceivedFrom,
+            Notes = saved.Notes,
+            DepositSlipId = saved.DepositSlipId,
+            DepositSlipNumber = saved.DepositSlip?.SlipNumber,
+            Status = saved.Status,
+            StatusName = saved.Status.ToString(),
+            TotalAmount = saved.Lines.Sum(l => l.Amount),
+            SubmittedById = saved.SubmittedById,
+            SubmittedAt = saved.SubmittedAt,
+            ReviewedById = saved.ReviewedById,
+            ReviewedAt = saved.ReviewedAt,
+            CancellationReason = saved.CancellationReason,
+            RowVersion = saved.RowVersion,
+            Created = saved.Created,
+            CreatedBy = saved.CreatedBy,
+            LastModified = saved.LastModified,
+            LastModifiedBy = saved.LastModifiedBy,
+            Lines = saved.Lines.Select(l => new ReceiptVoucherLineDto
+            {
+                Id = l.Id,
+                ReceiptVoucherId = l.ReceiptVoucherId,
+                RevenueAccountId = l.RevenueAccountId,
+                Amount = l.Amount,
+                Description = l.Description
+            }).ToList(),
+            Checks = saved.Checks.Select(c => new CheckDto
+            {
+                Id = c.Id,
+                ReceiptVoucherId = c.ReceiptVoucherId,
+                BankName = c.BankName,
+                CheckNumber = c.CheckNumber,
+                CheckDate = c.CheckDate,
+                Amount = c.Amount,
+                Status = c.Status,
+                StatusName = c.Status.ToString(),
+                ClearedAt = c.ClearedAt,
+                BouncedAt = c.BouncedAt,
+                ReplacementVoucherId = c.ReplacementVoucherId
+            }).ToList()
+        };
     }
 }
 
@@ -142,7 +205,6 @@ public class CreateReceiptVoucherCommandValidator : AbstractValidator<CreateRece
             .IsInEnum().WithMessage("Invalid payment method.");
 
         RuleFor(x => x.ReceivedFrom)
-            .NotEmpty().WithMessage("Received from is required.")
             .MaximumLength(200).WithMessage("Received from must not exceed 200 characters.");
 
         RuleFor(x => x.Notes)

@@ -65,6 +65,12 @@ export const PERMISSIONS = {
       UpdateLines: 'Accounting.JournalEntries.UpdateLines',
       Cancel: 'Accounting.JournalEntries.Cancel',
     },
+    Balances: {
+      Read: 'Accounting.Balances.Read',
+      Finalize: 'Accounting.Balances.Finalize',
+      Unfinalize: 'Accounting.Balances.Unfinalize',
+      Rebuild: 'Accounting.Balances.Rebuild',
+    },
     Reports: {
       ViewBalanceSheet: 'Accounting.Reports.BalanceSheet',
       ViewIncomeStatement: 'Accounting.Reports.IncomeStatement',
@@ -276,6 +282,21 @@ export const BUDGET_PERMISSIONS = {
     Reverse: 'Encumbrances.Reverse',
   },
 } as const;
+
+// ─── Revenue / Treasury (TRE-01) ───────────────────────────────────
+
+export const RECEIPT_VOUCHER_PERMISSIONS = {
+  ReceiptVouchers: {
+    View: 'ReceiptVouchers.View',
+    Create: 'ReceiptVouchers.Create',
+    Submit: 'ReceiptVouchers.Submit',
+    Approve: 'ReceiptVouchers.Approve',
+    Cancel: 'ReceiptVouchers.Cancel',
+  },
+} as const;
+
+export type TreasuryPermission =
+  | typeof RECEIPT_VOUCHER_PERMISSIONS.ReceiptVouchers[keyof typeof RECEIPT_VOUCHER_PERMISSIONS.ReceiptVouchers];
 
 export type BudgetPermission =
   | typeof BUDGET_PERMISSIONS.BudgetTypes[keyof typeof BUDGET_PERMISSIONS.BudgetTypes]

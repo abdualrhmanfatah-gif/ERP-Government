@@ -1,4 +1,5 @@
 ﻿using ERP_Government.Application.Common.Security;
+using ERP_Government.Application.Parties.Common;
 using ERP_Government.Domain.Accounting.Enums;
 
 namespace ERP_Government.Application.Accounting.Commands.RecurringEntries.PauseRecurringEntry;
@@ -12,24 +13,37 @@ public class PauseRecurringEntryCommand : IRequest<Result>
 }
 
 public class PauseRecurringEntryCommandHandler(
-    IApplicationDbContext context) : IRequestHandler<PauseRecurringEntryCommand, Result>
+    IApplicationDbContext context,
+    IUser currentUser,
+    IDocumentStatusLogger statusLogger) : IRequestHandler<PauseRecurringEntryCommand, Result>
 {
     public async Task<Result> Handle(
         PauseRecurringEntryCommand request,
         CancellationToken cancellationToken)
     {
+        if (currentUser.Id is not int userId)
+            return Result.Failure(["User identity is required for this operation."]);
+
         var entity = await context.RecurringEntries
             .FindAsync(request.Id, cancellationToken);
 
         if (entity is null)
             return Result.Failure(["Recurring entry not found."]);
 
-        // Validate lifecycle: only Active can be paused
         if (entity.Status != RecurringEntryStatus.Active)
             return Result.Failure(["Only active recurring entries can be paused."]);
 
-        // Update status
+        var previousStatus = entity.Status;
         entity.Status = RecurringEntryStatus.Paused;
+
+        await statusLogger.LogAsync(
+            "RecurringEntry",
+            entity.Id,
+            previousStatus.ToString(),
+            RecurringEntryStatus.Paused.ToString(),
+            userId,
+            request.Reason,
+            cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
 

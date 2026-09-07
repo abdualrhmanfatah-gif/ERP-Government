@@ -10,6 +10,6 @@ export type {
   AttachmentsPanelProps,
 } from './types';
 
-export { ApprovalsPanel } from '../components/ApprovalsPanel';
-export { StatusLogPanel } from '../components/StatusLogPanel';
-export { AttachmentsPanel } from '../components/AttachmentsPanel';
+export { ApprovalsPanel } from '@/components/DocumentsApprovalsPanel';
+export { StatusLogPanel } from '@/components/DocumentsStatusLogPanel';
+export { AttachmentsPanel } from '@/components/DocumentsAttachmentsPanel';

@@ -4,7 +4,7 @@ import { DataGrid } from '@/components/ui/DataGrid';
 import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { CostCenterDialog } from '../components/CostCenterDialog';
+import { CostCenterDialog } from '@/components/OrganizationCostCenterDialog';
 import { useCostCenters, useCostCenter, useCreateCostCenter, useUpdateCostCenter, useDeleteCostCenter } from '../hooks';
 import { useState } from 'react';
 import { notify } from '@/features/notifications/notify';

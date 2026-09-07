@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useJournalEntriesList } from '../hooks/useJournalEntries';
-import { StatusBadge } from '../components/StatusBadge';
+import { StatusBadge } from '@/components/AccountingStatusBadge';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import type { JournalEntryDto } from '../shared/client';
+import { Button, Card, Input } from '@/components/ui';
 
 const statusFilters = [
   { key: '', label: 'الكل' },
@@ -89,28 +90,20 @@ export function JournalEntriesListPage() {
           <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--color-onSurface)' }}>قيود اليومية</h1>
           <p className="mt-1 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>إدارة ومراجعة قيود اليومية المحاسبية</p>
         </div>
-        <button onClick={() => navigate('/accounting/journal-entries/create')}
-          className="px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 cursor-pointer hover:shadow-md"
-          style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)' }}>+ قيد جديد</button>
+        <Button variant="primary" onClick={() => navigate('/accounting/journal-entries/create')}>+ قيد جديد</Button>
       </div>
 
-      <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-outlineVariant)' }}>
-        <div className="px-6 py-4 border-b" style={{ borderColor: 'var(--color-outlineVariant)', backgroundColor: 'var(--color-surfaceContainerLow)' }}>
+      <Card variant="default">
+        <div className="px-6 py-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">
           <div className="flex items-center justify-between gap-4">
             <div className="flex flex-wrap gap-2">
               {statusFilters.map((sf) => (
-                <button key={sf.key} type="button" onClick={() => setStatusFilter(sf.key)}
-                  className="px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer hover:shadow-sm"
-                  style={{
-                    backgroundColor: statusFilter === sf.key ? 'var(--color-primary)' : 'var(--color-surface)',
-                    color: statusFilter === sf.key ? 'var(--color-on-primary)' : 'var(--color-onSurface)',
-                    borderColor: statusFilter === sf.key ? 'transparent' : 'var(--color-outlineVariant)',
-                  }}>{sf.label}</button>
+                <Button key={sf.key} type="button" variant={statusFilter === sf.key ? 'primary' : 'ghost'} size="sm" onClick={() => setStatusFilter(sf.key)}>
+                  {sf.label}
+                </Button>
               ))}
             </div>
-            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="بحث برقم القيد..."
-              className="w-64 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] focus:border-[var(--color-focus-ring)] transition-colors duration-200"
-              style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-onSurface)', borderColor: 'var(--color-outlineVariant)' }} />
+            <Input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="بحث برقم القيد..." className="w-64" />
           </div>
         </div>
 
@@ -122,7 +115,7 @@ export function JournalEntriesListPage() {
           rowKey={(row) => row.id}
           onRowClick={(row) => navigate(`/accounting/journal-entries/${row.id}`)}
         />
-      </div>
+      </Card>
     </div>
   );
 }

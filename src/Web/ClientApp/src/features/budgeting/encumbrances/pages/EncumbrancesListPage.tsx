@@ -3,7 +3,7 @@ import { useEncumbrancesList, useSubmitEncumbrance, useApproveEncumbrance, useAc
 import { encumbranceTypeLabels, encumbranceStatusLabels, EncumbranceStatus } from '../../shared/types';
 import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
 import { usePermission } from '@/shared/hooks/usePermission';
-import { LifecycleActions, type LifecycleAction } from '../../components/LifecycleActions';
+import { LifecycleActions, type LifecycleAction } from '@/components/BudgetingLifecycleActions';
 import { Button, Badge } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, RotateCcw } from 'lucide-react';

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePartiesList, useTogglePartyActive } from '../hooks/useParties';
 import { PartyType, PARTY_TYPE_LABELS, type PartyFilters } from '../shared/types';
 import { usePermission } from '@/shared/hooks/usePermission';
-import { Button, Badge } from '@/components/ui';
+import { Button, Badge, Card, Input, Select } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Search } from 'lucide-react';
 
@@ -53,12 +53,12 @@ export default function PartiesListPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold text-[var(--color-on-surface)]">الأطراف</h1>
         </div>
-        <div className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6 text-center">
+        <Card className="bg-[var(--color-surface-container-lowest)] text-center">
           <p className="text-sm text-[var(--color-error)]">حدث خطأ أثناء تحميل الأطراف</p>
           <Button variant="ghost" size="sm" onClick={() => refetch()} className="mt-2">
             إعادة المحاولة
           </Button>
-        </div>
+        </Card>
       </div>
     );
   }
@@ -92,34 +92,36 @@ export default function PartiesListPage() {
       <div className="flex gap-3 items-center">
         <div className="relative flex-1 max-w-md">
           <Search size={16} className="absolute end-3 top-1/2 -translate-y-1/2 text-[var(--color-on-surface-variant)]" />
-          <input
+          <Input
             type="text"
             placeholder="بحث بالاسم أو الرقم الضريبي"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 pe-9 text-sm"
+            className="pe-9"
           />
         </div>
-        <select
+        <Select
+          label="النوع"
           value={filters.partyType ?? ''}
           onChange={(e) => handleTypeFilter(e.target.value ? Number(e.target.value) as PartyType : undefined)}
-          className="rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-        >
-          <option value="">كل الأنواع</option>
-          {partyTypeOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
-        <select
+          options={[
+            { value: '', label: 'كل الأنواع' },
+            ...partyTypeOptions.map((opt) => ({ value: String(opt.value), label: opt.label })),
+          ]}
+          className="w-auto"
+        />
+        <Select
+          label="الحالة"
           value={filters.isActive === undefined ? '' : String(filters.isActive)}
           onChange={(e) => handleActiveFilter(e.target.value === '' ? undefined : e.target.value === 'true')}
-          className="rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-        >
-          <option value="">الكل</option>
-          <option value="true">نشط</option>
-          <option value="false">غير نشط</option>
-        </select>
+          options={[
+            { value: '', label: 'الكل' },
+            { value: 'true', label: 'نشط' },
+            { value: 'false', label: 'غير نشط' },
+          ]}
+          className="w-auto"
+        />
       </div>
 
       <DataGrid

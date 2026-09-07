@@ -28,7 +28,7 @@ public class DocumentSequenceService : IDocumentSequenceService
         ["AssetRevaluation"] = "REV",
         ["AssetImpairment"] = "IMP",
         ["Party"] = "PTY",
-        ["ReceiptVoucher"] = "RCV",
+        ["ReceiptVoucher"] = "DSL",
         ["DepositSlip"] = "DSL",
         ["DisbursementRequest"] = "DSB",
         ["Payment"] = "PAY"

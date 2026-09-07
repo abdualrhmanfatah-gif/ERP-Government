@@ -4,6 +4,7 @@ import { notify } from '@/features/notifications/notify';
 import { Pencil, Save, X, Shield, Lock, Users as UsersIcon } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
@@ -12,12 +13,12 @@ import { Tabs } from '@/components/ui/Tabs';
 import { Skeleton } from '@/components/ui/Loading';
 import { useUserDetail, useUpdateUser } from '../hooks';
 import { useOrganizationalUnits } from '../../../organization/hooks';
-import { RolesTab } from '../components/RolesTab';
-import { PermissionsTab } from '../components/PermissionsTab';
-import { SessionsTab } from '../components/SessionsTab';
-import { AuditTab } from '../components/AuditTab';
-import { DeactivateUserDialog } from '../components/DeactivateUserDialog';
-import { ReactivateUserDialog } from '../components/ReactivateUserDialog';
+import { RolesTab } from '@/components/SecurityUsersRolesTab';
+import { PermissionsTab } from '@/components/SecurityUsersPermissionsTab';
+import { SessionsTab } from '@/components/SecurityUsersSessionsTab';
+import { AuditTab } from '@/components/SecurityUsersAuditTab';
+import { DeactivateUserDialog } from '@/components/SecurityUsersDeactivateDialog';
+import { ReactivateUserDialog } from '@/components/SecurityUsersReactivateDialog';
 
 export function UserDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -155,7 +156,7 @@ export function UserDetailPage() {
           />
         </div>
       ) : (
-        <div className="bg-[var(--color-surface)] rounded-lg border border-[var(--color-border-container)] p-4">
+        <Card className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
             <div className="space-y-1">
               <span className="text-[var(--color-on-surface-variant)] block">الاسم</span>
@@ -182,7 +183,7 @@ export function UserDetailPage() {
               <span className="font-medium">{user.createdBy ?? '—'}</span>
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
       <Tabs tabs={tabs} />

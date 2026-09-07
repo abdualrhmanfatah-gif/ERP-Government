@@ -85,10 +85,10 @@ public class CreatePostingRuleCommandHandler(
             {
                 PostingRuleId = entity.Id,
                 Sequence = lineDto.Sequence,
-                AccountSource = lineDto.AccountSource,
+                AccountSource = Enum.Parse<Domain.Accounting.Enums.AccountSource>(lineDto.AccountSource),
                 FixedAccountId = lineDto.FixedAccountId,
                 DebitOrCredit = Enum.Parse<Domain.Accounting.Enums.DebitOrCredit>(lineDto.DebitOrCredit),
-                AmountSource = lineDto.AmountSource,
+                AmountSource = Enum.Parse<Domain.Accounting.Enums.AmountSource>(lineDto.AmountSource),
                 FundDimensionRequired = lineDto.FundDimensionRequired,
                 CostCenterDimensionRequired = lineDto.CostCenterDimensionRequired,
                 ProjectDimensionRequired = lineDto.ProjectDimensionRequired,

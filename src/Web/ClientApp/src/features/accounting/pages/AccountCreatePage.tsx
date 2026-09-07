@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { AccountForm } from '../components/AccountForm';
+import { AccountForm } from '@/components/AccountingAccountForm';
 import { useCreateAccount } from '../hooks/useCreateAccount';
 import { useAccountGroups } from '../hooks/useAccountGroups';
 import { useAccountsList } from '../hooks/useAccountsList';

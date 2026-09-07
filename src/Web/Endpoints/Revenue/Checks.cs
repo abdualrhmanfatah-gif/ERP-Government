@@ -1,4 +1,6 @@
 using ERP_Government.Application.Revenue.Common.DTOs;
+using ERP_Government.Application.Revenue.Queries.Checks.GetChecks;
+using ERP_Government.Application.Revenue.Queries.Checks.GetCheckById;
 using ERP_Government.Application.Revenue.Commands.Checks.ClearCheck;
 using ERP_Government.Application.Revenue.Commands.Checks.BounceCheck;
 using ERP_Government.Application.Revenue.Commands.Checks.ReplaceCheck;
@@ -10,8 +12,18 @@ namespace ERP_Government.Web.Endpoints.Revenue;
 
 public class Checks : IEndpointGroup
 {
+    public static string? RoutePrefix => "/api/Revenue/Checks";
+
     public static void Map(RouteGroupBuilder groupBuilder)
     {
+        groupBuilder.MapGet("/", GetChecks)
+            .Produces<List<CheckDto>>()
+            .RequireAuthorization(PermissionCodes.ChecksView);
+
+        groupBuilder.MapGet("/{id:int}", GetCheckById)
+            .Produces<CheckDetailDto>()
+            .RequireAuthorization(PermissionCodes.ChecksView);
+
         groupBuilder.MapPost("/{id:int}/clear", ClearCheck)
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
@@ -25,7 +37,29 @@ public class Checks : IEndpointGroup
         groupBuilder.MapPost("/{id:int}/replace", ReplaceCheck)
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
-            .RequireAuthorization(PermissionCodes.ChecksClear);
+            .RequireAuthorization(PermissionCodes.ChecksReplace);
+    }
+
+    [EndpointSummary("Get under-collection checks list")]
+    public static async Task<IResult> GetChecks(
+        [FromServices] ISender sender,
+        [AsParameters] GetChecksQuery query)
+    {
+        var result = await sender.Send(query);
+        if (!result.Succeeded)
+            return Results.BadRequest(result.Errors);
+        return Results.Ok(result.Value);
+    }
+
+    [EndpointSummary("Get single check detail")]
+    public static async Task<IResult> GetCheckById(
+        [FromServices] ISender sender,
+        int id)
+    {
+        var result = await sender.Send(new GetCheckByIdQuery { Id = id });
+        if (!result.Succeeded)
+            return Results.BadRequest(result.Errors);
+        return Results.Ok(result.Value);
     }
 
     [EndpointSummary("Clear a check (bank confirmation)")]

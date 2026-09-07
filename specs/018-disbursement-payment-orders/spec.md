@@ -25,6 +25,21 @@ This spec adds the final payment-execution layer: a DisbursementRequest that gat
 - Q: Which user roles are authorized to cancel an approved but unpaid disbursement request? → A: Any user holding the disbursement permission.
 - Q: How should concurrent disbursement requests competing for the same budget item be handled? → A: Point-in-time budget check with optimistic concurrency; Blocking control catches overruns.
 
+### Session 2026-09-08 — Contract alignment check (PAY-01/PAY-02)
+
+Verified as-built code against the PAY contract (specs PAY-01/PAY-02, group payments). As-built implementation was aligned to this spec; three deviations from the PAY contract are documented here as binding as-built behavior:
+
+- Q: Which approver must hold the AccountsManager or AuthorizingOfficer role? → A (as-built, kept): the FIRST approver (step 1). Implementation: ApproveDisbursementRequestCommand.cs:52-68. The PAY-02 contract states the SECOND approver must be role-qualified — recorded as a documented deviation, not silently changed.
+- Q: When does the budget availability gate run? → A (as-built, kept): at request CREATION (CreateDisbursementRequestCommand runs BudgetAvailabilityService; Blocking + insufficient ⇒ rejected at create). The PAY-02 contract places the Blocking reject at submit — recorded as a documented deviation.
+- Q: Is the request status after payment "Paid" or "Disbursed"? → A: Disbursed (matches DisbursementRequestStatus enum and PAY-02 contract). Spec prose corrected below; the payment order itself still transitions to Paid (PaymentOrderStatus enum).
+
+Code gaps discovered by the check (tracked as follow-up tasks in tasks.md):
+
+- DisbursementRequests endpoints (`src/Web/Endpoints/DisbursementRequests/DisbursementRequests.cs`) have NO RequireAuthorization — the DisbursementRequests.* permission codes exist (PermissionCodes.cs:186-191) but are not bound to routes.
+- PaymentOrders.Update permission code and an Update payment-order command (edit Draft only) do not exist; PAY-01 FR-001/BR-2 require them.
+- PAY-01 contract routes (`/api/Payments/PaymentOrders`, `/api/Payments/DisbursementRequests`) deviate from the as-built `/api/{ClassName}` convention (`/api/PaymentOrders`, `/api/DisbursementRequests`) — AGENTS.md binding convention wins; contract route table marked deviating.
+- Void semantics: as-built `VoidPaymentOrderCommand` allows voiding ONLY Paid orders (reversal semantics, VoidPaymentOrderCommand.cs:27). PAY-01 contract lifecycle expects void of unpaid Approved/SentToTreasury orders, blocked for partially paid (OQ-N1). Out of scope for 018 (payment-order lifecycle is PAY-01); flagged for the PAY-01 owner.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Create Disbursement Request Against Approved Payment Order (Priority: P1)
@@ -87,7 +102,7 @@ Once a disbursement request is fully approved, the payment is executed: the paym
 
 2. **Given** a disbursement request is Approved and payment is executed, **When** the payment is recorded, **Then** a domain event is raised that triggers ledger posting via the AccountingEvent pipeline, creating a balanced journal entry with the correct debit and credit lines.
 
-3. **Given** a disbursement request is Approved, **When** the payment is executed, **Then** the disbursement request status transitions to Paid and the linked payment order status transitions to Paid.
+3. **Given** a disbursement request is Approved, **When** the payment is executed, **Then** the disbursement request status transitions to Disbursed and the linked payment order status transitions to Paid.
 
 4. **Given** a disbursement request is not in Approved status, **When** payment execution is attempted, **Then** the system rejects execution with an error indicating the request must be approved first.
 
@@ -157,7 +172,7 @@ A disbursement register report lists disbursement requests and their associated 
 
 - **FR-010**: System MUST trigger ledger posting via the domain event pipeline when a payment is executed. The journal entry MUST be balanced and follow the existing posting rules.
 
-- **FR-011**: System MUST transition the disbursement request status to Paid and the payment order status to Paid upon successful payment execution.
+- **FR-011**: System MUST transition the disbursement request status to Disbursed and the payment order status to Paid upon successful payment execution.
 
 - **FR-012**: System MUST generate a disbursement register report filterable by period, fund, and status, showing request and payment details with totals.
 
@@ -175,7 +190,7 @@ A disbursement register report lists disbursement requests and their associated 
 
 ### Key Entities
 
-- **DisbursementRequest**: Represents a request to disburse funds against an approved payment order. Key attributes: request number (unique, sequential), status (Draft, Pending Approval, Approved, Rejected, Cancelled, Paid, Invalidated), linked PaymentOrderId (unique — 1:1), requested amount (equals payment order net total), budget availability snapshot at creation, dual-approval flag. Relationships: exactly one to one PaymentOrder; contains ApprovalHistory records; may have one Payment.
+- **DisbursementRequest**: Represents a request to disburse funds against an approved payment order. Key attributes: request number (unique, sequential), status (Draft, Pending Approval, Approved, Rejected, Cancelled, Disbursed, Invalidated), linked PaymentOrderId (unique — 1:1), requested amount (equals payment order net total), budget availability snapshot at creation, dual-approval flag. Relationships: exactly one to one PaymentOrder; contains ApprovalHistory records; may have one Payment.
 
 - **Payment**: Represents the executed payment. Key attributes: payment method, reference number, amount, execution timestamp, status (Completed, Failed). Relationships: belongs to a DisbursementRequest; linked to a PaymentOrder; triggers AccountingEvent for ledger posting.
 

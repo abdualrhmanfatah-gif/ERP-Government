@@ -1,3 +1,4 @@
+using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Domain.Revenue.Entities;
 using ERP_Government.Domain.Revenue.Enums;
@@ -36,6 +37,19 @@ public class ApproveDepositSlipCommandHandler(
         if (slip.Status != DepositSlipStatus.Draft)
             return Result.Failure(new[] { "Only Draft slips can be approved." });
 
+        if (slip.ReceiptVouchers.Count == 0)
+            return Result.Failure(new[] { "Cannot approve a deposit slip with no members." });
+
+        var cancelledMembers = slip.ReceiptVouchers
+            .Where(v => v.Status != ReceiptVoucherStatus.Approved)
+            .ToList();
+
+        if (cancelledMembers.Count > 0)
+        {
+            var numbers = string.Join(", ", cancelledMembers.Select(v => v.VoucherNumber));
+            return Result.Failure(new[] { $"Cannot approve: the following members are no longer approved ({numbers})." });
+        }
+
         slip.Status = DepositSlipStatus.Approved;
         slip.ApprovedById = userId;
         slip.ApprovedAt = DateTimeOffset.UtcNow;
@@ -60,7 +74,7 @@ public class ApproveDepositSlipCommandHandler(
         {
             foreach (var voucher in slip.ReceiptVouchers)
             {
-                foreach (var check in voucher.Checks.Where(c => c.Status == CheckStatus.UnderCollection))
+                foreach (var check in voucher.Checks.Where(c => c.Status != CheckStatus.UnderCollection))
                 {
                     check.Status = CheckStatus.UnderCollection;
                 }

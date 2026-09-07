@@ -5,6 +5,7 @@ import { DataGrid } from '@/components/ui/DataGrid';
 import { AuditTimeline } from '@/components/ui/AuditTimeline';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Loading';
+import { Card } from '@/components/ui';
 import { useAccountGroupDetail } from '../hooks/useAccountGroupDetail';
 import { useToggleAccountGroupActive } from '../hooks/useToggleAccountGroupActive';
 import { usePermission } from '@/shared/hooks/usePermission';
@@ -12,7 +13,7 @@ import { PERMISSIONS } from '@/shared/constants/permissions';
 import { notify } from '@/features/notifications/notify';
 import { useState } from 'react';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { AccountGroupForm } from '../components/AccountGroupForm';
+import { AccountGroupForm } from '@/components/AccountingAccountGroupForm';
 import { useUpdateAccountGroup } from '../hooks/useUpdateAccountGroup';
 import { ArrowRight, Layers, BookOpen, Shield } from 'lucide-react';
 
@@ -143,7 +144,7 @@ export function AccountGroupDetailPage() {
       />
 
       {/* ═══ Basic Info Card ═══ */}
-      <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border-container)] p-6">
+      <Card className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <div className="flex items-center justify-center size-8 rounded-lg bg-[var(--color-primary-container)]">
             <BookOpen size={16} className="text-[var(--color-on-primary-container)]" />
@@ -187,12 +188,10 @@ export function AccountGroupDetailPage() {
             <span className="text-base">{g.description ?? '—'}</span>
           </div>
         </div>
-      </div>
-
-   
+      </Card>
 
       {/* ═══ Children Section ═══ */}
-      <section className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border-container)] p-6">
+      <Card className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <div className="flex items-center justify-center size-8 rounded-lg bg-[var(--color-primary-container)]">
             <Layers size={16} className="text-[var(--color-on-primary-container)]" />
@@ -208,10 +207,10 @@ export function AccountGroupDetailPage() {
         ) : (
           <DataGrid data={data.children} rowKey={(row) => row.id} columns={childColumns} />
         )}
-      </section>
+      </Card>
 
       {/* ═══ Accounts Section ═══ */}
-      <section className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border-container)] p-6">
+      <Card className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <div className="flex items-center justify-center size-8 rounded-lg bg-[var(--color-primary-container)]">
             <BookOpen size={16} className="text-[var(--color-on-primary-container)]" />
@@ -227,8 +226,7 @@ export function AccountGroupDetailPage() {
         ) : (
           <DataGrid data={data.accounts} rowKey={(row) => row.id} columns={accountColumns} />
         )}
-      </section>
-
+      </Card>
    
 
       <ConfirmDialog

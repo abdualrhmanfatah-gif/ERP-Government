@@ -6,12 +6,12 @@ import { useBudgetItemFormFields } from '../../hooks/useBudgetItemFormFields';
 import { budgetStatusLabels, BudgetStatus } from '../../shared/types';
 import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
 import { usePermission } from '@/shared/hooks/usePermission';
-import { BudgetItemTree } from '../../components/BudgetItemTree';
-import { LifecycleActions, type LifecycleAction } from '../../components/LifecycleActions';
-import { ApprovalHistoryPanel } from '../../components/ApprovalHistoryPanel';
-import { MonthlyPlanEditor } from '../../monthly-plan/components/MonthlyPlanEditor';
-import { ExecutionDrillDown } from '../../execution/components/ExecutionDrillDown';
-import { Button, Badge, Switch } from '@/components/ui';
+import { BudgetItemTree } from '@/components/BudgetingBudgetItemTree';
+import { LifecycleActions, type LifecycleAction } from '@/components/BudgetingLifecycleActions';
+import { ApprovalHistoryPanel } from '@/components/BudgetingApprovalHistoryPanel';
+import { MonthlyPlanEditor } from '@/components/BudgetingMonthlyPlanEditor';
+import { ExecutionDrillDown } from '@/components/BudgetingExecutionDrillDown';
+import { Button, Badge, Card, Switch, Input, Select, Textarea } from '@/components/ui';
 import { ArrowRight, Plus, Calendar, BarChart3 } from 'lucide-react';
 
 const budgetActions: Record<string, LifecycleAction[]> = {
@@ -140,7 +140,7 @@ export default function BudgetDetailPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6">
+      <Card className="bg-[var(--color-surface-container-lowest)]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <span className="block text-xs text-[var(--color-on-surface-variant)] mb-1">الصندوق</span>
@@ -155,7 +155,7 @@ export default function BudgetDetailPage() {
             <span className="block text-sm">{budget.effectiveFrom?.toLocaleDateString('ar-EG')}</span>
           </div>
         </div>
-      </div>
+      </Card>
 
       {!isTerminal && (
         <LifecycleActions
@@ -167,31 +167,33 @@ export default function BudgetDetailPage() {
       )}
 
       <div className="flex gap-1 border-b border-[var(--color-outline-variant)]">
-        <button
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+        <Button
+          variant="ghost"
+          onClick={() => setActiveTab('items')}
+          className={`border-b-2 rounded-none ${
             activeTab === 'items'
               ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
               : 'border-transparent text-[var(--color-on-surface-variant)] hover:text-[var(--color-on-surface)]'
           }`}
-          onClick={() => setActiveTab('items')}
         >
           بنود الموازنة
-        </button>
-        <button
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+        </Button>
+        <Button
+          variant="ghost"
+          onClick={() => setActiveTab('execution')}
+          className={`border-b-2 rounded-none ${
             activeTab === 'execution'
               ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
               : 'border-transparent text-[var(--color-on-surface-variant)] hover:text-[var(--color-on-surface)]'
           }`}
-          onClick={() => setActiveTab('execution')}
         >
           <BarChart3 size={14} className="ms-1 inline" />
           التنفيذ
-        </button>
+        </Button>
       </div>
 
       {activeTab === 'items' && (
-        <div className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-4">
+        <Card padding="sm" className="bg-[var(--color-surface-container-lowest)]">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold">بنود الموازنة</h2>
             {isDraft && (
@@ -205,68 +207,63 @@ export default function BudgetDetailPage() {
           {showAddItem && (
             <div className="mb-4 p-3 rounded bg-[var(--color-surface-container)] space-y-3">
               <div className="flex gap-2">
-                <input
+                <Input
                   type="text"
                   placeholder="كود البند"
                   value={newItemCode}
                   onChange={(e) => setNewItemCode(e.target.value)}
-                  className="rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-2 py-1 text-sm w-24"
+                  className="w-24"
                 />
-                <input
+                <Input
                   type="text"
                   placeholder="اسم البند"
                   value={newItemName}
                   onChange={(e) => setNewItemName(e.target.value)}
-                  className="flex-1 rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-2 py-1 text-sm"
+                  className="flex-1"
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <select
-                  value={newFundId}
+                <Select
+                  value={String(newFundId)}
                   onChange={(e) => setNewFundId(Number(e.target.value))}
-                  className="rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-2 py-1 text-sm"
-                >
-                  <option value={0}>الصندوق...</option>
-                  {fundOptions.map((f) => (
-                    <option key={f.id} value={f.id}>{f.label}</option>
-                  ))}
-                </select>
-                <select
-                  value={newAccountId}
+                  label="الصندوق"
+                  options={[
+                    { value: '0', label: 'الصندوق...' },
+                    ...fundOptions.map((f) => ({ value: String(f.id), label: f.label })),
+                  ]}
+                />
+                <Select
+                  value={String(newAccountId)}
                   onChange={(e) => setNewAccountId(Number(e.target.value))}
-                  className="rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-2 py-1 text-sm"
-                >
-                  <option value={0}>الحساب...</option>
-                  {accountOptions.map((a) => (
-                    <option key={a.id} value={a.id}>{a.label}</option>
-                  ))}
-                </select>
-                <select
-                  value={newCostCenterId}
+                  label="الحساب"
+                  options={[
+                    { value: '0', label: 'الحساب...' },
+                    ...accountOptions.map((a) => ({ value: String(a.id), label: a.label })),
+                  ]}
+                />
+                <Select
+                  value={String(newCostCenterId)}
                   onChange={(e) => setNewCostCenterId(Number(e.target.value))}
-                  className="rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-2 py-1 text-sm"
-                >
-                  <option value={0}>مركز التكلفة...</option>
-                  {costCenterOptions.map((cc) => (
-                    <option key={cc.id} value={cc.id}>{cc.label}</option>
-                  ))}
-                </select>
-                <select
-                  value={newClassificationId}
+                  label="مركز التكلفة"
+                  options={[
+                    { value: '0', label: 'مركز التكلفة...' },
+                    ...costCenterOptions.map((cc) => ({ value: String(cc.id), label: cc.label })),
+                  ]}
+                />
+                <Select
+                  value={String(newClassificationId)}
                   onChange={(e) => setNewClassificationId(Number(e.target.value))}
-                  className="rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-2 py-1 text-sm"
-                >
-                  <option value={0}>التصنيف...</option>
-                  {classificationOptions.map((c) => (
-                    <option key={c.id} value={c.id}>{c.label}</option>
-                  ))}
-                </select>
+                  label="التصنيف"
+                  options={[
+                    { value: '0', label: 'التصنيف...' },
+                    ...classificationOptions.map((c) => ({ value: String(c.id), label: c.label })),
+                  ]}
+                />
               </div>
-              <textarea
+              <Textarea
                 placeholder="ملاحظات"
                 value={newRemarks}
                 onChange={(e) => setNewRemarks(e.target.value)}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-2 py-1 text-sm"
                 rows={2}
               />
               <div className="flex items-center gap-4">
@@ -301,7 +298,7 @@ export default function BudgetDetailPage() {
               />
             </div>
           )}
-        </div>
+        </Card>
       )}
 
       {activeTab === 'execution' && (

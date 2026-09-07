@@ -78,15 +78,15 @@ export const budgetControlMethodLabels: Record<BudgetControlMethod, string> = {
   [BudgetControlMethod.Blocking]: 'حجب',
 };
 
-export const fundTypeLabels: Record<FundType, string> = {
-  [FundType.General]: 'عام',
-  [FundType.Special]: 'خاص',
-  [FundType.Project]: 'مشروع',
+export const fundTypeLabels: Record<string, string> = {
+  General: 'عام',
+  Special: 'خاص',
+  Project: 'مشروع',
 };
 
-export const fundCategoryLabels: Record<FundCategory, string> = {
-  [FundCategory.Operating]: 'تشغيلي',
-  [FundCategory.Capital]: 'رأسمالي',
+export const fundCategoryLabels: Record<string, string> = {
+  Operating: 'تشغيلي',
+  Capital: 'رأسمالي',
 };
 
 export const budgetStatusLabels: Record<BudgetStatus, string> = {

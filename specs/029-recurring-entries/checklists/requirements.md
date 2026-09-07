@@ -2,7 +2,7 @@
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-09-07
-**Feature**: [spec.md](../spec.md)
+**Feature**: [spec.md](spec.md)
 
 ## Content Quality
 
@@ -31,6 +31,7 @@
 
 ## Notes
 
-- Validation passed. All 16/16 items passing.
-- OQ1 (cancel status), OQ2 (background engine scope), OQ3 (missing amount) — all resolved via clarifications or documented as out-of-scope.
-- Spec ready for `/speckit.plan`.
+- All items pass. Spec is ready for `/speckit.plan`.
+- OQ1 resolved: Cancelled added as 4th enum value.
+- OQ3 resolved: reject creation if neither schedule nor template provides amount.
+- OQ2 remains open (background engine out of scope per spec).

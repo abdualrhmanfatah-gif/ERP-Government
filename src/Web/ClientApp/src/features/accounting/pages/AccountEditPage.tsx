@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { Button } from '@/components/ui/Button';
-import { AccountForm } from '../components/AccountForm';
+import { Button, Loading } from '@/components/ui';
+import { AccountForm } from '@/components/AccountingAccountForm';
 import { useAccountDetail } from '../hooks/useAccountDetail';
 import { useUpdateAccount } from '../hooks/useUpdateAccount';
 import { useAccountGroups } from '../hooks/useAccountGroups';
@@ -18,7 +18,7 @@ export function AccountEditPage() {
   const { data: allAccounts = [] } = useAccountsList();
 
   if (isLoading) {
-    return <div role="status" aria-busy="true" className="p-12 text-center">جاري التحميل...</div>;
+    return <Loading />;
   }
 
   if (!account) {

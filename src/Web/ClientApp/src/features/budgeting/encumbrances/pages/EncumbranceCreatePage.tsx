@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useCreateEncumbrance, useReverseEncumbrance, useEncumbranceAvailability } from '../../hooks/useEncumbrances';
-import { AvailabilityIndicator } from '../../components/AvailabilityIndicator';
+import { AvailabilityIndicator } from '@/components/BudgetingAvailabilityIndicator';
 import { encumbranceTypeLabels, EncumbranceType } from '../../shared/types';
-import { Button } from '@/components/ui';
+import { Button, Card } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 
 export default function EncumbranceCreatePage() {
@@ -97,7 +97,7 @@ export default function EncumbranceCreatePage() {
       )}
 
       {encumbranceAvailability && (
-        <div className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-4">
+        <Card padding="sm" className="bg-[var(--color-surface-container-lowest)]">
           <div className="flex items-center justify-between text-sm">
             <span className="text-[var(--color-on-surface-variant)]">المتوفر للالتزام</span>
             <span className="font-mono text-[var(--color-primary)]">
@@ -107,7 +107,7 @@ export default function EncumbranceCreatePage() {
           {encumbranceAvailability.warning && (
             <p className="text-xs text-[var(--color-warning)] mt-2">{encumbranceAvailability.warning}</p>
           )}
-        </div>
+        </Card>
       )}
 
       {!showReversal && (

@@ -8,5 +8,4 @@ public record GetLedgerMovementQuery : IRequest<LedgerMovementDto>
 {
     public int AccountId { get; init; }
     public int FiscalYearId { get; init; }
-    public int? FundId { get; init; }
 }

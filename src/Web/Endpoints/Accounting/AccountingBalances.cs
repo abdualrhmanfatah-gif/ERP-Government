@@ -1,10 +1,11 @@
-using ERP_Government.Application.Accounting.Commands.Balances.FinalizePeriod;
+using ERP_Government.Application.Accounting.Commands.AccountBalances.Finalize;
+using ERP_Government.Application.Accounting.Commands.AccountBalances.Unfinalize;
 using ERP_Government.Application.Accounting.Commands.Balances.RebuildAccountBalances;
-using ERP_Government.Application.Accounting.Commands.Balances.UnfinalizePeriod;
 using ERP_Government.Application.Accounting.Common;
 using ERP_Government.Application.Accounting.Queries.Balances.GetAccountBalances;
 using ERP_Government.Application.Accounting.Queries.Balances.ReconcileBalances;
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,78 +13,67 @@ namespace ERP_Government.Web.Endpoints.Accounting;
 
 public class AccountingBalances : IEndpointGroup
 {
-    public static void Map(RouteGroupBuilder groupBuilder)
+    public static void Map(RouteGroupBuilder group)
     {
-        groupBuilder.MapGet("/", GetAccountBalances)
-            .Produces<List<AccountBalanceDto>>()
+        group.MapGet("/", GetAccountBalances)
             .RequireAuthorization(PermissionCodes.BalancesRead);
 
-        groupBuilder.MapGet("/reconcile", ReconcileBalances)
-            .Produces<ReconciliationResultDto>()
+        group.MapGet("/reconcile", ReconcileBalances)
             .RequireAuthorization(PermissionCodes.BalancesRead);
 
-        groupBuilder.MapPost("/rebuild", RebuildAccountBalances)
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status400BadRequest)
+        group.MapPost("/rebuild", RebuildAccountBalances)
             .RequireAuthorization(PermissionCodes.BalancesRebuild);
 
-        groupBuilder.MapPost("/finalize", FinalizePeriod)
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status400BadRequest)
+        group.MapPost("/finalize", FinalizePeriod)
             .RequireAuthorization(PermissionCodes.BalancesFinalize);
 
-        groupBuilder.MapPost("/unfinalize", UnfinalizePeriod)
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status400BadRequest)
+        group.MapPost("/unfinalize", UnfinalizePeriod)
             .RequireAuthorization(PermissionCodes.BalancesUnfinalize);
     }
 
-    [EndpointSummary("Get account balances for a period")]
-    public static async Task<List<AccountBalanceDto>> GetAccountBalances(
+    private static async Task<IResult> GetAccountBalances(
         [FromServices] ISender sender,
         [AsParameters] GetAccountBalancesQuery query)
     {
-        return await sender.Send(query);
+        var result = await sender.Send(query);
+        return Results.Ok(result);
     }
 
-    [EndpointSummary("Reconcile materialized balances against source JournalEntryLines")]
-    public static async Task<ReconciliationResultDto> ReconcileBalances(
+    private static async Task<IResult> ReconcileBalances(
         [FromServices] ISender sender,
         [AsParameters] ReconcileBalancesQuery query)
     {
-        return await sender.Send(query);
+        var result = await sender.Send(query);
+        return Results.Ok(result);
     }
 
-    [EndpointSummary("Rebuild account balances from posted journal entries")]
-    public static async Task<IResult> RebuildAccountBalances(
+    private static async Task<IResult> RebuildAccountBalances(
         [FromServices] ISender sender,
-        [FromBody] RebuildAccountBalancesCommand command)
+        RebuildAccountBalancesCommand command)
     {
         var result = await sender.Send(command);
-        if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
-        return Results.NoContent();
+        return result.Succeeded
+            ? Results.Ok(new { success = true, message = "تم إعادة بناء الأرصدة بنجاح" })
+            : Results.BadRequest(new { success = false, errors = result.Errors });
     }
 
-    [EndpointSummary("Finalize account balances for a period")]
-    public static async Task<IResult> FinalizePeriod(
+    private static async Task<IResult> FinalizePeriod(
         [FromServices] ISender sender,
-        [FromBody] FinalizePeriodCommand command)
+        FinalizePeriodCommand command)
     {
         var result = await sender.Send(command);
-        if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
-        return Results.NoContent();
+        return result.Succeeded
+            ? Results.Ok(new { success = true, message = "تم إغلاق الفترة" })
+            : Results.BadRequest(new { success = false, errors = result.Errors });
     }
 
-    [EndpointSummary("Unfinalize account balances for a period")]
-    public static async Task<IResult> UnfinalizePeriod(
+    private static async Task<IResult> UnfinalizePeriod(
         [FromServices] ISender sender,
-        [FromBody] UnfinalizePeriodCommand command)
+        UnfinalizePeriodCommand command)
     {
         var result = await sender.Send(command);
-        if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
-        return Results.NoContent();
+        return result.Succeeded
+            ? Results.Ok(new { success = true, message = "تم فتح الفترة" })
+            : Results.BadRequest(new { success = false, errors = result.Errors });
     }
 }

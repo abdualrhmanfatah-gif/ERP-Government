@@ -14,6 +14,8 @@ namespace ERP_Government.Web.Endpoints.Revenue;
 
 public class DepositSlips : IEndpointGroup
 {
+    public static string? RoutePrefix => "/api/Revenue/DepositSlips";
+
     public static void Map(RouteGroupBuilder groupBuilder)
     {
         groupBuilder.MapGet("/", GetDepositSlips)
@@ -26,7 +28,7 @@ public class DepositSlips : IEndpointGroup
 
         groupBuilder.MapGet("/monthly-statement", GetMonthlyStatement)
             .Produces<MonthlyStatementDto>()
-            .RequireAuthorization(PermissionCodes.ReceiptVouchersView);
+            .RequireAuthorization(PermissionCodes.DepositSlipsView);
 
         groupBuilder.MapPost("/", CreateDepositSlip)
             .Produces<int>(StatusCodes.Status201Created)
@@ -36,12 +38,12 @@ public class DepositSlips : IEndpointGroup
         groupBuilder.MapPost("/{id:int}/add-voucher", AddVoucherToSlip)
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
-            .RequireAuthorization(PermissionCodes.DepositSlipsManage);
+            .RequireAuthorization(PermissionCodes.DepositSlipsUpdate);
 
         groupBuilder.MapPost("/{id:int}/remove-voucher", RemoveVoucherFromSlip)
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
-            .RequireAuthorization(PermissionCodes.DepositSlipsManage);
+            .RequireAuthorization(PermissionCodes.DepositSlipsUpdate);
 
         groupBuilder.MapPost("/{id:int}/approve", ApproveDepositSlip)
             .Produces(StatusCodes.Status204NoContent)

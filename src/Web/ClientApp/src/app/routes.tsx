@@ -9,6 +9,15 @@ import { AccountEditPage } from '../features/accounting/pages/AccountEditPage';
 import { JournalEntriesListPage } from '../features/accounting/pages/JournalEntriesListPage';
 import { JournalEntryCreatePage } from '../features/accounting/pages/JournalEntryCreatePage';
 import { JournalEntryDetailPage } from '../features/accounting/pages/JournalEntryDetailPage';
+import { JournalsListPage } from '../features/accounting/journals/pages/JournalsListPage';
+import { JournalCreatePage } from '../features/accounting/journals/pages/JournalCreatePage';
+import { JournalEditPage } from '../features/accounting/journals/pages/JournalEditPage';
+import { TemplatesListPage } from '../features/accounting/templates/pages/TemplatesListPage';
+import { TemplateCreatePage } from '../features/accounting/templates/pages/TemplateCreatePage';
+import { TemplateEditPage } from '../features/accounting/templates/pages/TemplateEditPage';
+import { AccountBalancesPage } from '../features/accounting-monitoring/pages/AccountBalancesPage';
+import { EventsQueuePage } from '../features/accounting-monitoring/pages/EventsQueuePage';
+import { PostingRulesListPage } from '../features/accounting-monitoring/pages/PostingRulesListPage';
 
 import { RolesListPage } from '../features/security/rbac/pages/RolesListPage';
 import { RoleCreatePage } from '../features/security/rbac/pages/RoleCreatePage';
@@ -50,13 +59,17 @@ import PartiesListPage from '../features/parties/pages/PartiesListPage';
 import PartyCreatePage from '../features/parties/pages/PartyCreatePage';
 import PartyDetailPage from '../features/parties/pages/PartyDetailPage';
 import BudgetsListPage from '../features/budgeting/budgets/pages/BudgetsListPage';
-import BudgetDetailPage from '../features/budgeting/budgets/pages/BudgetDetailPage';
+import { ReceiptVouchersListPage, CreateReceiptVoucherPage, ReceiptVoucherDetailPage, DepositSlipsListPage, CreateDepositSlipPage, DepositSlipDetailPage, MonthlyStatementPage } from '../features/treasury';
+import ChecksListPage from '../features/treasury/checks/pages/ChecksListPage';import BudgetDetailPage from '../features/budgeting/budgets/pages/BudgetDetailPage';
 import BudgetCreatePage from '../features/budgeting/budgets/pages/BudgetCreatePage';
 import AppropriationsListPage from '../features/budgeting/appropriations/pages/AppropriationsListPage';
 import AppropriationCreatePage from '../features/budgeting/appropriations/pages/AppropriationCreatePage';
 import AppropriationDetailPage from '../features/budgeting/appropriations/pages/AppropriationDetailPage';
 import EncumbrancesListPage from '../features/budgeting/encumbrances/pages/EncumbrancesListPage';
 import EncumbranceCreatePage from '../features/budgeting/encumbrances/pages/EncumbranceCreatePage';
+import { RecurringEntriesListPage } from '../features/accounting/recurring-entries';
+import { RecurringEntryDetailPage } from '../features/accounting/recurring-entries';
+import RecurringEntryCreatePage from '../features/accounting/recurring-entries/pages/RecurringEntryCreatePage';
 
 export interface RouteConfig {
   path: string;
@@ -126,6 +139,82 @@ export const AppRoutes: RouteConfig[] = [
     path: '/accounting/journal-entries/:id',
     element: <JournalEntryDetailPage />,
     label: 'تفاصيل القيد',
+    protected: true,
+  },
+  // Accounting — Journals (ACC-03)
+  {
+    path: '/accounting/journals',
+    element: <JournalsListPage />,
+    label: 'دفاتر اليومية',
+    protected: true,
+  },
+  {
+    path: '/accounting/journals/create',
+    element: <JournalCreatePage />,
+    label: 'دفتر جديد',
+    protected: true,
+  },
+  {
+    path: '/accounting/journals/:id',
+    element: <JournalEditPage />,
+    label: 'تعديل الدفتر',
+    protected: true,
+  },
+  // Accounting — Templates (ACC-03)
+  {
+    path: '/accounting/templates',
+    element: <TemplatesListPage />,
+    label: 'قوالب القيود',
+    protected: true,
+  },
+  {
+    path: '/accounting/templates/create',
+    element: <TemplateCreatePage />,
+    label: 'قالب جديد',
+    protected: true,
+  },
+  {
+    path: '/accounting/templates/:id',
+    element: <TemplateEditPage />,
+    label: 'تعديل القالب',
+    protected: true,
+  },
+  // Accounting — Recurring Entries (ACC-04)
+  {
+    path: '/accounting/recurring-entries',
+    element: <RecurringEntriesListPage />,
+    label: 'القيود الدورية',
+    protected: true,
+  },
+  {
+    path: '/accounting/recurring-entries/new',
+    element: <RecurringEntryCreatePage />,
+    label: 'جدول دوري جديد',
+    protected: true,
+  },
+  {
+    path: '/accounting/recurring-entries/:id',
+    element: <RecurringEntryDetailPage />,
+    label: 'تفاصيل الجدول الدوري',
+    protected: true,
+  },
+  // Accounting — Monitoring (ACC-05)
+  {
+    path: '/accounting/balances',
+    element: <AccountBalancesPage />,
+    label: 'أرصدة الحسابات',
+    protected: true,
+  },
+  {
+    path: '/accounting/events',
+    element: <EventsQueuePage />,
+    label: 'طابور الأحداث',
+    protected: true,
+  },
+  {
+    path: '/accounting/posting-rules',
+    element: <PostingRulesListPage />,
+    label: 'قواعد الترحيل',
     protected: true,
   },
   {
@@ -405,6 +494,57 @@ export const AppRoutes: RouteConfig[] = [
     path: '/financial-settings/closing-entries/:id',
     element: <ClosingEntryDetailPage />,
     label: 'تفاصيل قيد الإغلاق',
+    protected: true,
+  },
+  // Treasury — Receipt Vouchers (TRE-01)
+  {
+    path: '/treasury/receipt-vouchers',
+    element: <ReceiptVouchersListPage />,
+    label: 'سندات القبض',
+    protected: true,
+  },
+  {
+    path: '/treasury/receipt-vouchers/create',
+    element: <CreateReceiptVoucherPage />,
+    label: 'سند قبض جديد',
+    protected: true,
+  },
+  {
+    path: '/treasury/receipt-vouchers/:id',
+    element: <ReceiptVoucherDetailPage />,
+    label: 'تفاصيل سند القبض',
+    protected: true,
+  },
+  // Treasury — Deposit Slips (TRE-02)
+  {
+    path: '/treasury/deposit-slips',
+    element: <DepositSlipsListPage />,
+    label: 'بطاقات الإيداع',
+    protected: true,
+  },
+  {
+    path: '/treasury/deposit-slips/create',
+    element: <CreateDepositSlipPage />,
+    label: 'إنشاء بطاقة إيداع',
+    protected: true,
+  },
+  {
+    path: '/treasury/deposit-slips/:id',
+    element: <DepositSlipDetailPage />,
+    label: 'تفاصيل بطاقة الإيداع',
+    protected: true,
+  },
+  {
+    path: '/treasury/monthly-statement',
+    element: <MonthlyStatementPage />,
+    label: 'كشف حساب شهري',
+    protected: true,
+  },
+  // Treasury — Checks (TRE-03)
+  {
+    path: '/treasury/checks',
+    element: <ChecksListPage />,
+    label: 'الشيكات',
     protected: true,
   },
 ];

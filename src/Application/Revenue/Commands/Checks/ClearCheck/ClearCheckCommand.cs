@@ -1,4 +1,5 @@
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Application.Revenue.Common;
 using ERP_Government.Domain.Revenue.Entities;
 using ERP_Government.Domain.Revenue.Enums;
 using ERP_Government.Domain.Security.Entities;
@@ -24,20 +25,28 @@ public class ClearCheckCommandHandler(
         if (user.Id is not int userId)
             return Result.Failure(new[] { "User identity is required for this operation." });
 
-        var check = await context.Checks.FindAsync(request.Id, cancellationToken);
+        var check = await context.Checks
+            .Include(c => c.ReceiptVoucher)
+            .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
         if (check is null)
-            return Result.Failure(new[] { "Check not found."});
+            return Result.Failure(new[] { "Check not found." });
 
         if (check.Status != CheckStatus.UnderCollection)
-            return Result.Failure(new[] { "Only Under-Collection checks can be cleared."});
+            return Result.Failure(new[] { "Only Under-Collection checks can be cleared." });
+
+        if (check.ReceiptVoucher is null)
+            return Result.Failure(new[] { "Source voucher not found." });
+
+        if (check.ReceiptVoucher.Status == ReceiptVoucherStatus.Cancelled)
+            return Result.Failure(new[] { "Cannot clear a check whose source voucher is cancelled." });
+
+        var (dateValid, dateError) = CheckDateValidator.ValidateClearedAt(check.CheckDate, request.ClearedAt);
+        if (!dateValid)
+            return Result.Failure(new[] { dateError! });
 
         check.Status = CheckStatus.Cleared;
         check.ClearedAt = request.ClearedAt;
         check.RowVersion = request.RowVersion;
-
-        var voucher = await context.ReceiptVouchers
-            .Include(v => v.Party)
-            .FirstOrDefaultAsync(v => v.Id == check.ReceiptVoucherId, cancellationToken);
 
         check.AddDomainEvent(new Domain.Events.Revenue.CheckCleared
         {
@@ -65,7 +74,7 @@ public class ClearCheckCommandHandler(
         }
         catch (DbUpdateConcurrencyException)
         {
-            return Result.Failure(new[] { "Check was modified by another user. Please refresh and try again."});
+            return Result.Failure(new[] { "Check was modified by another user. Please refresh and try again." });
         }
 
         return Result.Success();

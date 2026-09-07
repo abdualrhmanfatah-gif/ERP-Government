@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
-import { Button, Switch, FilterBar, FilterSearch, FilterSelect, Dialog, ConfirmDialog, Badge } from '@/components/ui';
+import { Button, Switch, FilterBar, FilterSearch, FilterSelect, Dialog, ConfirmDialog, Badge, Input, Select, Textarea } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Pencil, Eye } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
@@ -47,8 +47,8 @@ export default function FundsListPage() {
         const q = search.toLowerCase();
         if (!item.fundNumber.toLowerCase().includes(q) && !item.fundName.toLowerCase().includes(q) && !item.legalAuthority.toLowerCase().includes(q)) return false;
       }
-      if (fundTypeFilter && Number(fundTypeFilter) !== item.fundType) return false;
-      if (fundCategoryFilter && Number(fundCategoryFilter) !== item.fundCategory) return false;
+      if (fundTypeFilter && fundTypeFilter !== item.fundType) return false;
+      if (fundCategoryFilter && fundCategoryFilter !== item.fundCategory) return false;
       if (isActiveFilter && (isActiveFilter === 'true') !== item.isActive) return false;
       return true;
     });
@@ -185,40 +185,14 @@ export default function FundsListPage() {
         }
       >
         <form id="fund-form" onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="fundNumber" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">رقم الصندوق *</label>
-            <input id="fundNumber" name="fundNumber" type="text" required defaultValue={editItem?.fundNumber} className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]" />
-          </div>
-          <div>
-            <label htmlFor="fundName" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">اسم الصندوق *</label>
-            <input id="fundName" name="fundName" type="text" required defaultValue={editItem?.fundName} className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]" />
-          </div>
+          <Input id="fundNumber" name="fundNumber" type="text" required defaultValue={editItem?.fundNumber} label="رقم الصندوق" />
+          <Input id="fundName" name="fundName" type="text" required defaultValue={editItem?.fundName} label="اسم الصندوق" />
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="fundType" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">النوع *</label>
-              <select id="fundType" name="fundType" required defaultValue={editItem?.fundType} className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]">
-                {Object.entries(fundTypeLabels).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="fundCategory" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">الفئة *</label>
-              <select id="fundCategory" name="fundCategory" required defaultValue={editItem?.fundCategory} className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]">
-                {Object.entries(fundCategoryLabels).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-            </div>
+            <Select id="fundType" name="fundType" required defaultValue={String(editItem?.fundType ?? '')} label="النوع" options={Object.entries(fundTypeLabels).map(([value, label]) => ({ value, label }))} />
+            <Select id="fundCategory" name="fundCategory" required defaultValue={String(editItem?.fundCategory ?? '')} label="الفئة" options={Object.entries(fundCategoryLabels).map(([value, label]) => ({ value, label }))} />
           </div>
-          <div>
-            <label htmlFor="legalAuthority" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">الجهة القانونية *</label>
-            <input id="legalAuthority" name="legalAuthority" type="text" required defaultValue={editItem?.legalAuthority} className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]" />
-          </div>
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">الوصف</label>
-            <textarea id="description" name="description" rows={3} defaultValue={editItem?.description} className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]" />
-          </div>
+          <Input id="legalAuthority" name="legalAuthority" type="text" required defaultValue={editItem?.legalAuthority} label="الجهة القانونية" />
+          <Textarea id="description" name="description" rows={3} defaultValue={editItem?.description} label="الوصف" />
         </form>
       </Dialog>
 

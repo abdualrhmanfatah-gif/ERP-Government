@@ -15,6 +15,8 @@ namespace ERP_Government.Web.Endpoints.Revenue;
 
 public class ReceiptVouchers : IEndpointGroup
 {
+    public static string? RoutePrefix => "/api/Revenue/ReceiptVouchers";
+
     public static void Map(RouteGroupBuilder groupBuilder)
     {
         groupBuilder.MapGet("/", GetReceiptVouchers)
@@ -34,7 +36,7 @@ public class ReceiptVouchers : IEndpointGroup
             .RequireAuthorization(PermissionCodes.ReceiptVouchersView);
 
         groupBuilder.MapPost("/", CreateReceiptVoucher)
-            .Produces<int>(StatusCodes.Status201Created)
+            .Produces<ReceiptVoucherDto>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .RequireAuthorization(PermissionCodes.ReceiptVouchersCreate);
 
@@ -110,9 +112,9 @@ public class ReceiptVouchers : IEndpointGroup
         [FromBody] CreateReceiptVoucherCommand command)
     {
         var result = await sender.Send(command);
-        if (!result.Succeeded)
+        if (!result.Succeeded || result.Value is null)
             return Results.BadRequest(result.Errors);
-        return Results.Created($"/api/ReceiptVouchers/{result.Value}", result.Value);
+        return Results.Created($"/api/Revenue/ReceiptVouchers/{result.Value.Id}", result.Value);
     }
 
     [EndpointSummary("Submit receipt voucher for review")]

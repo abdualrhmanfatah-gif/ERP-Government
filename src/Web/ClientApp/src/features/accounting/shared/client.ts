@@ -1,6 +1,8 @@
-import { JournalEntriesClient } from '../../../web-api-client';
+import { JournalEntriesClient, JournalsClient, TemplatesClient } from '../../../web-api-client';
 
 export const journalEntriesClient = new JournalEntriesClient();
+export const journalsClient = new JournalsClient();
+export const templatesClient = new TemplatesClient();
 
 export interface JournalEntryListFilters {
   entryStatus?: string;

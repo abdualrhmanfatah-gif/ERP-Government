@@ -1,6 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { journalEntriesClient as client } from '../shared/client';
-import type { CreateJournalEntryLineCommand, UpdateJournalEntryLineCommand } from '../types';
+import { CreateJournalEntryLineCommand, UpdateJournalEntryLineCommand } from '../../../web-api-client';
+import type {
+  CreateJournalEntryLineCommand as CreateJournalEntryLineData,
+  UpdateJournalEntryLineCommand as UpdateJournalEntryLineData,
+} from '../types';
 
 export function useCreateJournalEntryLine() {
   const queryClient = useQueryClient();
@@ -11,8 +15,25 @@ export function useCreateJournalEntryLine() {
       command,
     }: {
       journalEntryId: number;
-      command: CreateJournalEntryLineCommand;
-    }) => client.linesPOST3(journalEntryId, command),
+      command: CreateJournalEntryLineData;
+    }) =>
+      client.linesPOST3(
+        journalEntryId,
+        new CreateJournalEntryLineCommand({
+          accountId: command.accountId,
+          description: command.description ?? undefined,
+          currencyId: command.currencyId,
+          exchangeRate: command.exchangeRate,
+          debit: command.debit,
+          credit: command.credit,
+          costCenterId: command.costCenterId ?? undefined,
+          fundId: command.fundId ?? undefined,
+          projectId: command.projectId ?? undefined,
+          budgetItemId: command.budgetItemId ?? undefined,
+          encumbranceId: command.encumbranceId ?? undefined,
+          paymentOrderId: command.paymentOrderId ?? undefined,
+        }),
+      ),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: ['journalEntry', variables.journalEntryId],
@@ -32,8 +53,29 @@ export function useUpdateJournalEntryLine() {
     }: {
       journalEntryId: number;
       lineId: number;
-      command: UpdateJournalEntryLineCommand;
-    }) => client.linesPUT(journalEntryId, lineId, command),
+      command: UpdateJournalEntryLineData;
+    }) =>
+      client.linesPUT(
+        journalEntryId,
+        lineId,
+        new UpdateJournalEntryLineCommand({
+          id: command.id,
+          journalEntryId: command.journalEntryId,
+          accountId: command.accountId,
+          description: command.description ?? undefined,
+          currencyId: command.currencyId,
+          exchangeRate: command.exchangeRate,
+          debit: command.debit,
+          credit: command.credit,
+          costCenterId: command.costCenterId ?? undefined,
+          fundId: command.fundId ?? undefined,
+          projectId: command.projectId ?? undefined,
+          budgetItemId: command.budgetItemId ?? undefined,
+          encumbranceId: command.encumbranceId ?? undefined,
+          paymentOrderId: command.paymentOrderId ?? undefined,
+          rowVersion: command.rowVersion,
+        }),
+      ),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: ['journalEntry', variables.journalEntryId],

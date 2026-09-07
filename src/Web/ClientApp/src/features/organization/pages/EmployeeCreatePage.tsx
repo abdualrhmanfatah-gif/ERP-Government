@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { EmployeeForm } from '../components/EmployeeForm';
+import { EmployeeForm } from '@/components/OrganizationEmployeeForm';
 import { useEmployee, useCreateEmployee, useUpdateEmployee } from '../hooks';
 import type { CreateEmployeeCommand, UpdateEmployeeCommand } from '../types';
 

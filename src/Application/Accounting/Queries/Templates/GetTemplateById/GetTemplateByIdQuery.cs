@@ -24,6 +24,21 @@ public class GetTemplateByIdQueryHandler(
         if (entity is null)
             return null;
 
-        return mapper.Map<JournalEntryTemplateDto>(entity);
+        var dto = mapper.Map<JournalEntryTemplateDto>(entity);
+
+        var lines = await context.JournalEntryTemplateLines
+            .Include(x => x.Account)
+            .Include(x => x.CostCenter)
+            .Where(x => x.TemplateId == request.Id)
+            .OrderBy(x => x.Sequence)
+            .ToListAsync(cancellationToken);
+
+        var lineDtos = mapper.Map<List<JournalEntryTemplateLineDto>>(lines);
+
+        dto.Lines = lineDtos;
+        dto.TotalDebit = lineDtos.Sum(x => x.Debit);
+        dto.TotalCredit = lineDtos.Sum(x => x.Credit);
+
+        return dto;
     }
 }

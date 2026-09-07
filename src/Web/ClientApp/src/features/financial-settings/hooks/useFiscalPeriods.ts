@@ -6,7 +6,7 @@ export function useFiscalPeriodsList(fiscalYearId: number) {
   return useQuery({
     queryKey: financialSettingsKeys.fiscalPeriods.list(fiscalYearId),
     queryFn: () => fiscalPeriodsClient.list(fiscalYearId),
-    enabled: Number.isFinite(fiscalYearId),
+    enabled: Number.isFinite(fiscalYearId) && fiscalYearId > 0,
   });
 }
 

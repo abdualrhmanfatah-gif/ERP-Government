@@ -3,11 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useParty, useUpdateParty, useTogglePartyActive, usePartyDocuments } from '../hooks/useParties';
 import { PartyType, PARTY_TYPE_LABELS, type UpdatePartyCommand } from '../shared/types';
 import { usePermission } from '@/shared/hooks/usePermission';
-import { Button, Badge } from '@/components/ui';
+import { Button, Badge, Card, Input, Select, Textarea } from '@/components/ui';
 import { ArrowRight, Edit, Save, X } from 'lucide-react';
-import { ApprovalsPanel } from '@/features/documents/components/ApprovalsPanel';
-import { StatusLogPanel } from '@/features/documents/components/StatusLogPanel';
-import { AttachmentsPanel } from '@/features/documents/components/AttachmentsPanel';
+import { ApprovalsPanel } from '@/components/DocumentsApprovalsPanel';
+import { StatusLogPanel } from '@/components/DocumentsStatusLogPanel';
+import { AttachmentsPanel } from '@/components/DocumentsAttachmentsPanel';
 
 export default function PartyDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -138,91 +138,80 @@ export default function PartyDetailPage() {
         </div>
       )}
 
-      <div className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6">
+      <Card className="bg-[var(--color-surface-container-lowest)]">
         <h2 className="text-sm font-semibold mb-4">بيانات الطرف</h2>
         {isEditing && editForm ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">النوع</label>
-              <select
-                value={editForm.partyType}
+              <Select
+                label="النوع"
+                value={String(editForm.partyType)}
                 onChange={(e) => setEditForm({ ...editForm, partyType: Number(e.target.value) as PartyType })}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-              >
-                {Object.entries(PARTY_TYPE_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
+                options={Object.entries(PARTY_TYPE_LABELS).map(([value, label]) => ({ value, label }))}
+              />
             </div>
             <div>
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">الاسم بالعربية *</label>
-              <input
+              <Input
+                label="الاسم بالعربية *"
                 type="text"
                 value={editForm.nameAr}
                 onChange={(e) => setEditForm({ ...editForm, nameAr: e.target.value })}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
+                required
               />
             </div>
             <div>
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">الاسم بالإنجليزية</label>
-              <input
+              <Input
+                label="الاسم بالإنجليزية"
                 type="text"
                 value={editForm.nameEn ?? ''}
                 onChange={(e) => setEditForm({ ...editForm, nameEn: e.target.value || undefined })}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">الرقم الضريبي</label>
-              <input
+              <Input
+                label="الرقم الضريبي"
                 type="text"
                 value={editForm.taxNumber ?? ''}
                 onChange={(e) => setEditForm({ ...editForm, taxNumber: e.target.value || undefined })}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">الهوية الوطنية</label>
-              <input
+              <Input
+                label="الهوية الوطنية"
                 type="text"
                 value={editForm.nationalId ?? ''}
                 onChange={(e) => setEditForm({ ...editForm, nationalId: e.target.value || undefined })}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">الهاتف</label>
-              <input
+              <Input
+                label="الهاتف"
                 type="text"
                 value={editForm.phone ?? ''}
                 onChange={(e) => setEditForm({ ...editForm, phone: e.target.value || undefined })}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">البريد الإلكتروني</label>
-              <input
+              <Input
+                label="البريد الإلكتروني"
                 type="email"
                 value={editForm.email ?? ''}
                 onChange={(e) => setEditForm({ ...editForm, email: e.target.value || undefined })}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">العنوان</label>
-              <input
+              <Input
+                label="العنوان"
                 type="text"
                 value={editForm.address ?? ''}
                 onChange={(e) => setEditForm({ ...editForm, address: e.target.value || undefined })}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">ملاحظات</label>
-              <textarea
+              <Textarea
+                label="ملاحظات"
                 value={editForm.notes ?? ''}
                 onChange={(e) => setEditForm({ ...editForm, notes: e.target.value || undefined })}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
                 rows={3}
               />
             </div>
@@ -265,13 +254,13 @@ export default function PartyDetailPage() {
             )}
           </div>
         )}
-      </div>
+      </Card>
 
       <ApprovalsPanel documentType="Party" documentId={partyId} />
       <StatusLogPanel documentType="Party" documentId={partyId} />
       <AttachmentsPanel documentType="Party" documentId={partyId} showGate={false} />
 
-      <div className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6">
+      <Card className="bg-[var(--color-surface-container-lowest)]">
         <h2 className="text-sm font-semibold mb-4">المستندات ذات الصلة</h2>
         {!documents || documents.length === 0 ? (
           <p className="text-sm text-[var(--color-on-surface-variant)]">لا توجد مستندات ذات صلة</p>
@@ -308,7 +297,7 @@ export default function PartyDetailPage() {
             </table>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Button, Badge, StatusBadge, Breadcrumb, Loading, FormField, Input, ConfirmDialog } from '@/components/ui';
+import { Button, Badge, Card, StatusBadge, Breadcrumb, Loading, FormField, Input, ConfirmDialog } from '@/components/ui';
 import { ArrowRight, Pencil, X, Check } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { useCurrencyDetail, useUpdateCurrency, useActivateCurrency, useDeactivateCurrency } from '../../hooks/useCurrencies';
@@ -124,7 +124,7 @@ export default function CurrencyDetailPage() {
         <Breadcrumb items={breadcrumbs} />
       </div>
 
-      <div className="rounded-xl border border-[var(--color-border-container)] bg-[var(--color-surface-container-lowest)] p-6">
+      <Card className="bg-[var(--color-surface-container-lowest)]">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <h1 className="text-headline-sm sm:text-headline-md font-bold text-[var(--color-on-surface)]">
@@ -231,10 +231,10 @@ export default function CurrencyDetailPage() {
             </div>
           </div>
         )}
-      </div>
+      </Card>
 
       {!isEditing && (
-        <div className="rounded-xl border border-[var(--color-border-container)] bg-[var(--color-surface-container-lowest)] p-6">
+        <Card className="bg-[var(--color-surface-container-lowest)]">
           <h2 className="text-headline-sm font-bold text-[var(--color-on-surface)] mb-4">سجل التدقيق</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -254,7 +254,7 @@ export default function CurrencyDetailPage() {
               <p className="text-body-md text-[var(--color-on-surface)] mt-1">{currency.modifiedAt || '—'}</p>
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
       <ConfirmDialog

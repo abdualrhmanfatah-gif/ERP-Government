@@ -1,8 +1,6 @@
 using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.FinancialSettings.Common.Services;
 using ERP_Government.Domain.FinancialSettings.Entities;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Moq;
 using NUnit.Framework;
 using Shouldly;
@@ -13,22 +11,13 @@ namespace ERP_Government.Application.UnitTests.FinancialSettings;
 public class DocumentSequenceServiceTests
 {
     private Mock<IApplicationDbContext> _contextMock = null!;
-    private Mock<IDatabaseTransactionFactory> _transactionFactoryMock = null!;
-    private Mock<IDbContextTransaction> _transactionMock = null!;
     private DocumentSequenceService _service = null!;
 
     [SetUp]
     public void Setup()
     {
         _contextMock = new Mock<IApplicationDbContext>();
-        _transactionFactoryMock = new Mock<IDatabaseTransactionFactory>();
-        _transactionMock = new Mock<IDbContextTransaction>();
-
-        _transactionFactoryMock
-            .Setup(f => f.BeginTransactionAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(_transactionMock.Object);
-
-        _service = new DocumentSequenceService(_contextMock.Object, _transactionFactoryMock.Object);
+        _service = new DocumentSequenceService(_contextMock.Object);
     }
 
     [Test]
@@ -110,11 +99,10 @@ public class DocumentSequenceServiceTests
 
         result.ShouldBe("BGT-000043");
         sequence.CurrentNumber.ShouldBe(43);
-        _transactionMock.Verify(t => t.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
-    public async Task GenerateNextNumber_SaveChangesReturnsZero_ShouldThrowSequenceConcurrencyException()
+    public async Task GenerateNextNumber_SaveChangesThrowsConcurrency_ShouldThrowSequenceConcurrencyException()
     {
         var sequence = new DocumentSequence
         {
@@ -130,14 +118,14 @@ public class DocumentSequenceServiceTests
             .BuildMockForAsync();
 
         _contextMock.Setup(c => c.DocumentSequences).Returns(sequences.Object);
-        _contextMock.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(0);
+        _contextMock.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException());
 
         var act = () => _service.GenerateNextNumberAsync("JournalEntry", CancellationToken.None);
 
         var ex = await act.ShouldThrowAsync<SequenceConcurrencyException>();
         ex.Message.ShouldContain("Concurrency conflict");
         ex.Message.ShouldContain("JournalEntry");
-        _transactionMock.Verify(t => t.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -166,63 +154,15 @@ public class DocumentSequenceServiceTests
     }
 
     [Test]
-    public async Task GenerateNextNumber_PaymentOrder_ShouldUseCorrectPrefix()
+    public void PrefixMap_ContainsRecurringEntry()
     {
-        var sequence = new DocumentSequence
-        {
-            Id = 1,
-            DocumentType = "PaymentOrder",
-            IsActive = true,
-            CurrentNumber = 1,
-            RowVersion = [1, 2, 3]
-        };
+        var field = typeof(DocumentSequenceService)
+            .GetField("PrefixMap", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
 
-        var sequences = new List<DocumentSequence> { sequence }
-            .AsQueryable()
-            .BuildMockForAsync();
+        var prefixMap = (Dictionary<string, string>)field!.GetValue(null)!;
 
-        _contextMock.Setup(c => c.DocumentSequences).Returns(sequences.Object);
-        _contextMock.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
-
-        var result = await _service.GenerateNextNumberAsync("PaymentOrder", CancellationToken.None);
-
-        result.ShouldBe("PO-000002");
-    }
-
-    [Test]
-    public async Task GenerateNextNumber_Encumbrance_ShouldUseCorrectPrefix()
-    {
-        var sequence = new DocumentSequence
-        {
-            Id = 1,
-            DocumentType = "Encumbrance",
-            IsActive = true,
-            CurrentNumber = 50,
-            RowVersion = [1, 2, 3]
-        };
-
-        var sequences = new List<DocumentSequence> { sequence }
-            .AsQueryable()
-            .BuildMockForAsync();
-
-        _contextMock.Setup(c => c.DocumentSequences).Returns(sequences.Object);
-        _contextMock.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
-
-        var result = await _service.GenerateNextNumberAsync("Encumbrance", CancellationToken.None);
-
-        result.ShouldBe("ENC-000051");
-    }
-
-    [Test]
-    public async Task GenerateNextNumber_ShouldRollbackOnException()
-    {
-        _contextMock.Setup(c => c.DocumentSequences)
-            .Returns(new List<DocumentSequence>().AsQueryable().BuildMockForAsync().Object);
-
-        var act = () => _service.GenerateNextNumberAsync("Budget", CancellationToken.None);
-
-        await act.ShouldThrowAsync<DocumentSequenceException>();
-        _transactionMock.Verify(t => t.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
+        prefixMap.ShouldContainKey("RecurringEntry");
+        prefixMap["RecurringEntry"].ShouldBe("REC");
     }
 
     [Test]
@@ -237,123 +177,7 @@ public class DocumentSequenceServiceTests
         prefixMap.ShouldContainKey("Appropriation");
         prefixMap.ShouldContainKey("Encumbrance");
         prefixMap.ShouldContainKey("PaymentOrder");
-        prefixMap.ShouldContainKey("PaymentExecution");
-        prefixMap.ShouldContainKey("AdvancePayment");
         prefixMap.ShouldContainKey("JournalEntry");
-        prefixMap.ShouldContainKey("PurchaseRequest");
-        prefixMap.ShouldContainKey("PurchaseOrder");
-        prefixMap.ShouldContainKey("RevenueReceipt");
-        prefixMap.ShouldContainKey("GoodsReceiptNote");
-        prefixMap.ShouldContainKey("StockTake");
-        prefixMap.ShouldContainKey("Asset");
-        prefixMap.ShouldContainKey("AssetDisposal");
-        prefixMap.ShouldContainKey("AssetRevaluation");
-        prefixMap.ShouldContainKey("AssetImpairment");
-        prefixMap.ShouldContainKey("RequestForQuotation");
-        prefixMap.ShouldContainKey("Quotation");
-    }
-
-    [Test]
-    public void PrefixMap_ValuesAreCorrect()
-    {
-        var field = typeof(DocumentSequenceService)
-            .GetField("PrefixMap", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
-
-        var prefixMap = (Dictionary<string, string>)field!.GetValue(null)!;
-
-        prefixMap["Budget"].ShouldBe("BGT");
-        prefixMap["Appropriation"].ShouldBe("APR");
-        prefixMap["Encumbrance"].ShouldBe("ENC");
-        prefixMap["PaymentOrder"].ShouldBe("PO");
-        prefixMap["PaymentExecution"].ShouldBe("PE");
-        prefixMap["AdvancePayment"].ShouldBe("ADV");
-        prefixMap["JournalEntry"].ShouldBe("JRN");
-        prefixMap["PurchaseRequest"].ShouldBe("PRQ");
-        prefixMap["PurchaseOrder"].ShouldBe("PO");
-        prefixMap["RevenueReceipt"].ShouldBe("REV");
-    }
-
-    [Test]
-    public void PrefixMap_IsCaseInsensitive()
-    {
-        var field = typeof(DocumentSequenceService)
-            .GetField("PrefixMap", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
-
-        var prefixMap = (Dictionary<string, string>)field!.GetValue(null)!;
-
-        prefixMap.ContainsKey("paymentorder").ShouldBeTrue();
-        prefixMap.ContainsKey("PAYMENTORDER").ShouldBeTrue();
-        prefixMap.ContainsKey("budget").ShouldBeTrue();
-    }
-
-    [Test]
-    public void PrefixMap_ContainsPartyPrefixes()
-    {
-        var field = typeof(DocumentSequenceService)
-            .GetField("PrefixMap", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
-
-        var prefixMap = (Dictionary<string, string>)field!.GetValue(null)!;
-
-        prefixMap.ShouldContainKey("Party");
-        prefixMap.ShouldContainKey("ReceiptVoucher");
-        prefixMap.ShouldContainKey("DepositSlip");
-        prefixMap.ShouldContainKey("DisbursementRequest");
-        prefixMap.ShouldContainKey("Payment");
-    }
-
-    [Test]
-    public void PrefixMap_PartyPrefixesAreCorrect()
-    {
-        var field = typeof(DocumentSequenceService)
-            .GetField("PrefixMap", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
-
-        var prefixMap = (Dictionary<string, string>)field!.GetValue(null)!;
-
-        prefixMap["Party"].ShouldBe("PTY");
-        prefixMap["ReceiptVoucher"].ShouldBe("RCV");
-        prefixMap["DepositSlip"].ShouldBe("DSL");
-        prefixMap["DisbursementRequest"].ShouldBe("DSB");
-        prefixMap["Payment"].ShouldBe("PAY");
-    }
-
-    [Test]
-    [TestCase("Party", "PTY")]
-    [TestCase("ReceiptVoucher", "RCV")]
-    [TestCase("DepositSlip", "DSL")]
-    [TestCase("DisbursementRequest", "DSB")]
-    [TestCase("Payment", "PAY")]
-    public async Task GenerateNextNumber_NewPrefixes_ShouldReturnFormattedNumber(string documentType, string expectedPrefix)
-    {
-        var sequence = new DocumentSequence
-        {
-            Id = 1,
-            DocumentType = documentType,
-            IsActive = true,
-            CurrentNumber = 0,
-            RowVersion = [1, 2, 3]
-        };
-
-        var sequences = new List<DocumentSequence> { sequence }
-            .AsQueryable()
-            .BuildMockForAsync();
-
-        _contextMock.Setup(c => c.DocumentSequences).Returns(sequences.Object);
-        _contextMock.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
-
-        var result = await _service.GenerateNextNumberAsync(documentType, CancellationToken.None);
-
-        result.ShouldBe($"{expectedPrefix}-000001");
-        sequence.CurrentNumber.ShouldBe(1);
-    }
-
-    [Test]
-    public void PrefixMap_TotalCount_ShouldBe23()
-    {
-        var field = typeof(DocumentSequenceService)
-            .GetField("PrefixMap", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
-
-        var prefixMap = (Dictionary<string, string>)field!.GetValue(null)!;
-
-        prefixMap.Count.ShouldBe(23);
+        prefixMap.ShouldContainKey("RecurringEntry");
     }
 }

@@ -14,10 +14,10 @@ import {
 import { appropriationTypeLabels, appropriationStatusLabels, AppropriationStatus } from '../../shared/types';
 import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
 import { usePermission } from '@/shared/hooks/usePermission';
-import { LifecycleActions, type LifecycleAction } from '../../components/LifecycleActions';
-import { ApprovalHistoryPanel } from '../../components/ApprovalHistoryPanel';
-import { AvailabilityIndicator } from '../../components/AvailabilityIndicator';
-import { Button, Badge } from '@/components/ui';
+import { LifecycleActions, type LifecycleAction } from '@/components/BudgetingLifecycleActions';
+import { ApprovalHistoryPanel } from '@/components/BudgetingApprovalHistoryPanel';
+import { AvailabilityIndicator } from '@/components/BudgetingAvailabilityIndicator';
+import { Button, Badge, Card } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 
 const appropriationActions: Record<string, LifecycleAction[]> = {
@@ -136,7 +136,7 @@ export default function AppropriationDetailPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6">
+      <Card className="bg-[var(--color-surface-container-lowest)]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <span className="block text-xs text-[var(--color-on-surface-variant)] mb-1">المبلغ</span>
@@ -175,7 +175,7 @@ export default function AppropriationDetailPage() {
             <span className="block text-sm">{new Date(appropriation.created).toLocaleDateString('ar-EG')}</span>
           </div>
         </div>
-      </div>
+      </Card>
 
       <AvailabilityIndicator budgetItemId={appropriation.budgetItemId} />
 
