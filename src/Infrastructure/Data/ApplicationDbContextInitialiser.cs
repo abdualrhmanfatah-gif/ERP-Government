@@ -160,13 +160,6 @@ public class ApplicationDbContextInitialiser
             await _context.SaveChangesAsync();
         }
 
-        if (!_context.SoDMatrix.Any())
-        {
-            var sod = SoDMatrixSeedData.GetSoDMatrix();
-            _context.SoDMatrix.AddRange(sod);
-            await _context.SaveChangesAsync();
-        }
-
         if (!_context.ApprovalRules.Any())
         {
             var approvalRules = ApprovalRuleSeedData.GetApprovalRules();

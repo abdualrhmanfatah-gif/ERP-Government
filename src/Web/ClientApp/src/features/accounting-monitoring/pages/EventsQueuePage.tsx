@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { usePendingEvents } from '../hooks/usePendingEvents';
-import { Select, Loading } from '@/components/ui';
+import { Select, Loading, Badge } from '@/components/ui';
 
 export function EventsQueuePage() {
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
@@ -68,20 +68,17 @@ export function EventsQueuePage() {
                   <td className="border p-2">{event.eventType}</td>
                   <td className="border p-2">{event.sourceTable} #{event.sourceId}</td>
                   <td className="border p-2">
-                    <span
-                      className="px-2 py-1 rounded text-sm"
-                      style={{
-                        backgroundColor:
-                          event.status === 'Failed'
-                            ? 'var(--color-error)'
-                            : event.status === 'Pending'
-                            ? 'var(--color-statusPending)'
-                            : 'var(--color-statusApproved)',
-                        color: 'white',
-                      }}
+                    <Badge
+                      variant={
+                        event.status === 'Failed'
+                          ? 'error'
+                          : event.status === 'Pending'
+                          ? 'warning'
+                          : 'success'
+                      }
                     >
                       {event.status}
-                    </span>
+                    </Badge>
                   </td>
                   <td className="border p-2" style={{ color: 'var(--color-error)' }}>
                     {event.errorMessage ?? '-'}

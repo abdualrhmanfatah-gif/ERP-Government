@@ -7,7 +7,7 @@ import {
   useCancelRecurringEntry,
 } from '../hooks/useRecurringEntries';
 import { FREQUENCY_LABELS, STATUS_LABELS } from '../shared/types';
-import { Button, Textarea, Loading } from '@/components/ui';
+import { Button, Textarea, Loading, Badge, Dialog } from '@/components/ui';
 
 export default function RecurringEntryDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -62,7 +62,7 @@ export default function RecurringEntryDetailPage() {
             ← رجوع
           </Button>
           <h1 className="text-2xl font-bold">{entry.name}</h1>
-          <p className="text-gray-500">{entry.entryNumber}</p>
+          <p className="text-muted-foreground">{entry.entryNumber}</p>
         </div>
         <div className="flex gap-2">
           {canPause && (
@@ -88,27 +88,27 @@ export default function RecurringEntryDetailPage() {
           <h2 className="text-lg font-semibold">التفاصيل</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm text-gray-500">الدفتر</label>
+              <label className="text-sm text-muted-foreground">الدفتر</label>
               <p>{entry.journalName}</p>
             </div>
             <div>
-              <label className="text-sm text-gray-500">القالب</label>
+              <label className="text-sm text-muted-foreground">القالب</label>
               <p>{entry.templateName ?? 'بدون قالب'}</p>
             </div>
             <div>
-              <label className="text-sm text-gray-500">الدورية</label>
+              <label className="text-sm text-muted-foreground">الدورية</label>
               <p>{FREQUENCY_LABELS[entry.frequency ?? '']}</p>
             </div>
             <div>
-              <label className="text-sm text-gray-500">المبلغ</label>
+              <label className="text-sm text-muted-foreground">المبلغ</label>
               <p>{entry.amount?.toLocaleString('ar-YE') ?? '-'}</p>
             </div>
             <div>
-              <label className="text-sm text-gray-500">تاريخ البداية</label>
+              <label className="text-sm text-muted-foreground">تاريخ البداية</label>
               <p>{new Date(entry.startDate!).toLocaleDateString('ar-YE')}</p>
             </div>
             <div>
-              <label className="text-sm text-gray-500">تاريخ النهاية</label>
+              <label className="text-sm text-muted-foreground">تاريخ النهاية</label>
               <p>
                 {entry.endDate
                   ? new Date(entry.endDate).toLocaleDateString('ar-YE')
@@ -122,7 +122,7 @@ export default function RecurringEntryDetailPage() {
           <h2 className="text-lg font-semibold">التوليد</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm text-gray-500">التاريخ القادم</label>
+              <label className="text-sm text-muted-foreground">التاريخ القادم</label>
               <p>
                 {entry.nextExecutionDate
                   ? new Date(entry.nextExecutionDate).toLocaleDateString('ar-YE')
@@ -130,7 +130,7 @@ export default function RecurringEntryDetailPage() {
               </p>
             </div>
             <div>
-              <label className="text-sm text-gray-500">آخر تنفيذ</label>
+              <label className="text-sm text-muted-foreground">آخر تنفيذ</label>
               <p>
                 {entry.lastExecutedAt
                   ? new Date(entry.lastExecutedAt).toLocaleString('ar-YE')
@@ -138,25 +138,25 @@ export default function RecurringEntryDetailPage() {
               </p>
             </div>
             <div>
-              <label className="text-sm text-gray-500">الحالة</label>
+              <label className="text-sm text-muted-foreground">الحالة</label>
               <p>
-                <span
-                  className={`px-2 py-1 rounded text-sm ${
+                <Badge
+                  variant={
                     entry.status === 'Active'
-                      ? 'bg-green-100 text-green-800'
+                      ? 'success'
                       : entry.status === 'Paused'
-                      ? 'bg-yellow-100 text-yellow-800'
+                      ? 'warning'
                       : entry.status === 'Cancelled'
-                      ? 'bg-red-100 text-red-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}
+                      ? 'danger'
+                      : 'default'
+                  }
                 >
                   {STATUS_LABELS[entry.status ?? '']}
-                </span>
+                </Badge>
               </p>
             </div>
             <div>
-              <label className="text-sm text-gray-500">القيد المولد</label>
+              <label className="text-sm text-muted-foreground">القيد المولد</label>
               <p>
                 {entry.generatedJournalEntryId ? (
                   <Button
@@ -168,7 +168,7 @@ export default function RecurringEntryDetailPage() {
                     عرض القيد
                   </Button>
                 ) : (
-                  <span className="text-gray-400">لم يتم التوليد بعد</span>
+                  <span className="text-muted-foreground">لم يتم التوليد بعد</span>
                 )}
               </p>
             </div>
@@ -176,52 +176,52 @@ export default function RecurringEntryDetailPage() {
         </div>
       </div>
 
-      {showPauseDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96">
-            <h3 className="text-lg font-semibold mb-4">إيقاف الجدول</h3>
-            <Textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="سبب الإيقاف (اختياري)"
-              rows={3}
-              className="mb-4"
-            />
-            <div className="flex gap-2 justify-end">
-              <Button variant="ghost" onClick={() => setShowPauseDialog(false)}>
-                إلغاء
-              </Button>
-              <Button variant="outline" onClick={handlePause}>
-                إيقاف
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Dialog
+        open={showPauseDialog}
+        onClose={() => setShowPauseDialog(false)}
+        title="إيقاف الجدول"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setShowPauseDialog(false)}>
+              إلغاء
+            </Button>
+            <Button variant="outline" onClick={handlePause} loading={pauseMutation.isPending}>
+              إيقاف
+            </Button>
+          </>
+        }
+      >
+        <Textarea
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="سبب الإيقاف (اختياري)"
+          rows={3}
+        />
+      </Dialog>
 
-      {showCancelDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96">
-            <h3 className="text-lg font-semibold mb-4">إلغاء الجدول</h3>
-            <p className="text-red-600 mb-4">هذا الإجراء لا يمكن التراجع عنه</p>
-            <Textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="سبب الإلغاء (اختياري)"
-              rows={3}
-              className="mb-4"
-            />
-            <div className="flex gap-2 justify-end">
-              <Button variant="ghost" onClick={() => setShowCancelDialog(false)}>
-                رجوع
-              </Button>
-              <Button variant="destructive" onClick={handleCancel}>
-                إلغاء الجدول
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Dialog
+        open={showCancelDialog}
+        onClose={() => setShowCancelDialog(false)}
+        title="إلغاء الجدول"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setShowCancelDialog(false)}>
+              رجوع
+            </Button>
+            <Button variant="destructive" onClick={handleCancel} loading={cancelMutation.isPending}>
+              إلغاء الجدول
+            </Button>
+          </>
+        }
+      >
+        <p className="text-[var(--color-error)] mb-4">هذا الإجراء لا يمكن التراجع عنه</p>
+        <Textarea
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="سبب الإلغاء (اختياري)"
+          rows={3}
+        />
+      </Dialog>
     </div>
   );
 }

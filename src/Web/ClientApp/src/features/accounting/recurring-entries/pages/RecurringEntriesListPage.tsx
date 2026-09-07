@@ -62,7 +62,7 @@ export default function RecurringEntriesListPage() {
           </thead>
           <tbody>
             {entries?.map((entry) => (
-              <tr key={entry.id} className="border-b hover:bg-gray-50">
+              <tr key={entry.id} className="border-b hover:bg-[var(--color-surface-container-low)]">
                 <td className="p-3 font-mono">{entry.entryNumber}</td>
                 <td className="p-3">{entry.name}</td>
                 <td className="p-3">{entry.journalName}</td>
