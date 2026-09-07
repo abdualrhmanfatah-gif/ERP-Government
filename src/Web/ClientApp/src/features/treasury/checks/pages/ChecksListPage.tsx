@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { FilterSelect } from '@/components/ui/FilterSelect';
+import { FormField } from '@/components/ui/FormField';
+import { Input } from '@/components/ui/Input';
 import { Plus } from 'lucide-react';
 import { TreasuryChecksClearDialog } from '@/components/TreasuryChecksClearDialog';
 import { TreasuryChecksBounceDialog } from '@/components/TreasuryChecksBounceDialog';
@@ -128,24 +130,22 @@ export default function ChecksListPage() {
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <label className="text-sm">من</label>
-          <input
+        <FormField label="من" htmlFor="checks-from-date" className="w-auto">
+          <Input
+            id="checks-from-date"
             type="date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
-            className="border rounded px-2 py-1 text-sm"
           />
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="text-sm">إلى</label>
-          <input
+        </FormField>
+        <FormField label="إلى" htmlFor="checks-to-date" className="w-auto">
+          <Input
+            id="checks-to-date"
             type="date"
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
-            className="border rounded px-2 py-1 text-sm"
           />
-        </div>
+        </FormField>
         <FilterSelect
           value={statusFilter}
           onChange={setStatusFilter}

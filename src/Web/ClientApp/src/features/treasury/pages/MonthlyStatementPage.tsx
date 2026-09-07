@@ -1,7 +1,7 @@
 // Monthly statement — US4: month + fund selectors, summary, vouchers + clearings tables
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { PageHeader, MoneyDisplay, Loading, EmptyState } from '@/components/ui';
+import { PageHeader, MoneyDisplay, Loading, EmptyState, Input, Select } from '@/components/ui';
 import { DepositSlipsClient, FundsClient } from '../../../web-api-client';
 
 const slipClient = new DepositSlipsClient();
@@ -35,44 +35,27 @@ export default function MonthlyStatementPage() {
       <PageHeader title="كشف حساب شهري" />
 
       <div className="flex gap-4 items-end">
-        <div>
-          <label className="block text-sm font-medium mb-1">السنة</label>
-          <input
-            type="number"
-            value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
-            className="border rounded px-3 py-2 w-24"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">الشهر</label>
-          <select
-            value={month}
-            onChange={(e) => setMonth(Number(e.target.value))}
-            className="border rounded px-3 py-2"
-          >
-            {Array.from({ length: 12 }, (_, i) => (
-              <option key={i + 1} value={i + 1}>
-                {i + 1}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">الصندوق</label>
-          <select
-            value={fundId ?? ''}
-            onChange={(e) => setFundId(e.target.value ? Number(e.target.value) : undefined)}
-            className="border rounded px-3 py-2"
-          >
-            <option value="">— اختر الصندوق —</option>
-            {funds.map((f: any) => (
-              <option key={f.id} value={f.id}>
-                {f.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Input
+          label="السنة"
+          type="number"
+          value={year}
+          onChange={(e) => setYear(Number(e.target.value))}
+        />
+        <Select
+          label="الشهر"
+          value={month}
+          onChange={(e) => setMonth(Number(e.target.value))}
+          options={Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) }))}
+        />
+        <Select
+          label="الصندوق"
+          value={fundId ?? ''}
+          onChange={(e) => setFundId(e.target.value ? Number(e.target.value) : undefined)}
+          options={[
+            { value: '', label: '— اختر الصندوق —' },
+            ...funds.map((f: any) => ({ value: String(f.id), label: f.name })),
+          ]}
+        />
       </div>
 
       {fundId == null ? (

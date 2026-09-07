@@ -37,7 +37,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<SecurityPermission> SecurityPermissions => Set<SecurityPermission>();
     public DbSet<UserPermission> UserPermissions => Set<UserPermission>();
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
-    public DbSet<FieldSecurityPolicy> FieldSecurityPolicies => Set<FieldSecurityPolicy>();
     public DbSet<ApprovalDelegation> ApprovalDelegations => Set<ApprovalDelegation>();
     public DbSet<SoDMatrix> SoDMatrix => Set<SoDMatrix>();
     public DbSet<SecurityAuditLog> SecurityAuditLogs => Set<SecurityAuditLog>();

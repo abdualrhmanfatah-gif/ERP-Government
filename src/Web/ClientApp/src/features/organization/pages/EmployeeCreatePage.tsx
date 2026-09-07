@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { Loading } from '@/components/ui';
 import { EmployeeForm } from '@/components/OrganizationEmployeeForm';
 import { useEmployee, useCreateEmployee, useUpdateEmployee } from '../hooks';
 import type { CreateEmployeeCommand, UpdateEmployeeCommand } from '../types';
@@ -39,7 +40,7 @@ export function EmployeeEditPage() {
     navigate('/organization/employees');
   };
 
-  if (isLoading) return <div className="p-4">جاري التحميل...</div>;
+  if (isLoading) return <Loading />;
   if (!employee) return <div className="p-4">الموظف غير موجود</div>;
 
   return (

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, PageHeader, MoneyDisplay, Badge, Loading, EmptyState } from '@/components/ui';
+import { Button, PageHeader, MoneyDisplay, Badge, Loading, EmptyState, Input } from '@/components/ui';
 import { notify } from '@/features/notifications/notify';
 import { DepositSlipsClient, FormType, DepositSlipStatus } from '../../../web-api-client';
 import { useEligibleVouchers } from '../hooks/useEligibleVouchers';
@@ -182,17 +182,18 @@ export default function DepositSlipDetailPage() {
             ) : (
               <div className="space-y-2">
                 {eligible.map((v) => (
-                  <button
+                  <Button
                     key={v.id}
-                    className="w-full text-right flex items-center gap-3 px-4 py-3 border rounded hover:bg-muted/50"
+                    variant="ghost"
+                    className="w-full justify-start"
                     onClick={() => addVoucherMutation.mutate(v.id ?? 0)}
                   >
                     <span className="font-medium">{v.voucherNumber}</span>
                     <span className="text-muted-foreground text-sm">{v.receivedFrom}</span>
-                    <span className="mr-auto">
+                    <span className="ms-auto">
                       <MoneyDisplay value={v.totalAmount ?? 0} />
                     </span>
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}
@@ -208,11 +209,10 @@ export default function DepositSlipDetailPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-background rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold mb-4">إزالة سند</h3>
-            <label className="block text-sm font-medium mb-1">السبب (إلزامي)</label>
-            <input
+            <Input
+              label="السبب (إلزامي)"
               value={removeReason}
               onChange={(e) => setRemoveReason(e.target.value)}
-              className="w-full border rounded px-3 py-2 mb-4"
               placeholder="سبب الإزالة..."
             />
             <div className="flex gap-2">
@@ -238,11 +238,10 @@ export default function DepositSlipDetailPage() {
             <p className="text-sm text-muted-foreground mb-4">
               سيتم اعتماد البطاقة بشكل نهائي. لا يمكن التراجع.
             </p>
-            <label className="block text-sm font-medium mb-1">سبب الاعتماد (اختياري)</label>
-            <input
+            <Input
+              label="سبب الاعتماد (اختياري)"
               value={approveReason}
               onChange={(e) => setApproveReason(e.target.value)}
-              className="w-full border rounded px-3 py-2 mb-4"
               placeholder="سبب الاعتماد..."
             />
             <div className="flex gap-2">

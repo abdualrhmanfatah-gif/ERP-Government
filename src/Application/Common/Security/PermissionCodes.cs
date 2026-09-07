@@ -175,6 +175,7 @@ public static class PermissionCodes
 
     public const string PaymentOrdersView = "PaymentOrders.View";
     public const string PaymentOrdersCreate = "PaymentOrders.Create";
+    public const string PaymentOrdersUpdate = "PaymentOrders.Update";
     public const string PaymentOrdersSubmit = "PaymentOrders.Submit";
     public const string PaymentOrdersApprove = "PaymentOrders.Approve";
     public const string PaymentOrdersReject = "PaymentOrders.Reject";

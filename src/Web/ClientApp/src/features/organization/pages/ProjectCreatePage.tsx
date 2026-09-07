@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { Loading } from '@/components/ui';
 import { ProjectForm } from '@/components/OrganizationProjectForm';
 import { useProject, useCreateProject, useUpdateProject } from '../hooks';
 import type { CreateProjectCommand } from '../types';
@@ -44,7 +45,7 @@ export function ProjectEditPage() {
     navigate('/organization/projects');
   };
 
-  if (isLoading) return <div className="p-4">جاري التحميل...</div>;
+  if (isLoading) return <Loading />;
   if (!project) return <div className="p-4">المشروع غير موجود</div>;
 
   return (

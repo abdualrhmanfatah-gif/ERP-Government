@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, PageHeader, MoneyDisplay, EmptyState, Loading } from '@/components/ui';
+import { Button, PageHeader, MoneyDisplay, EmptyState, Loading, Input, Select } from '@/components/ui';
 import { notify } from '@/features/notifications/notify';
 import { DepositSlipsClient, FormType } from '../../../web-api-client';
 import { useEligibleVouchers } from '../hooks/useEligibleVouchers';
@@ -60,34 +60,23 @@ export default function CreateDepositSlipPage() {
       <PageHeader title="إنشاء بطاقة إيداع" />
 
       <div className="flex gap-4 items-end">
-        <div>
-          <label className="block text-sm font-medium mb-1">نوع البطاقة</label>
-          <select
-            value={formType}
-            onChange={(e) => {
-              setFormType(e.target.value as FormType);
-              setSelectedIds([]);
-            }}
-            className="border rounded px-3 py-2"
-          >
-            {Object.entries(formTypeLabels).map(([val, label]) => (
-              <option key={val} value={val}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="نوع البطاقة"
+          value={formType}
+          onChange={(e) => {
+            setFormType(e.target.value as FormType);
+            setSelectedIds([]);
+          }}
+          options={Object.entries(formTypeLabels).map(([val, label]) => ({ value: val, label }))}
+        />
 
-        <div>
-          <label className="block text-sm font-medium mb-1">تاريخ البطاقة</label>
-          <input
-            type="date"
-            value={slipDate}
-            onChange={(e) => setSlipDate(e.target.value)}
-            max={new Date().toISOString().slice(0, 10)}
-            className="border rounded px-3 py-2"
-          />
-        </div>
+        <Input
+          label="تاريخ البطاقة"
+          type="date"
+          value={slipDate}
+          onChange={(e) => setSlipDate(e.target.value)}
+          max={new Date().toISOString().slice(0, 10)}
+        />
       </div>
 
       {isLoading ? (
@@ -134,9 +123,9 @@ export default function CreateDepositSlipPage() {
           </div>
             <Button
               onClick={() => createMutation.mutate()}
-              disabled={createMutation.isPending}
+              loading={createMutation.isPending}
             >
-              {createMutation.isPending ? 'جاري الإنشاء...' : 'إنشاء البطاقة'}
+              إنشاء البطاقة
             </Button>
           </div>
         </>
