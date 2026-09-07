@@ -1,7 +1,7 @@
 # جداول قاعدة البيانات — Database Tables Complete Reference
 
 > **تاريخ آخر تحديث:** 2026-09-07
-> **عدد الجداول:** 108 جدول
+> **عدد الجداول:** 107 جدول
 
 ---
 
@@ -222,20 +222,7 @@
 | السبب | Reason | string? | |
 | نسخة الصف | RowVersion | byte[] | |
 
-### 2.8 مصفوفة فصل الصلاحيات — SoDMatrix
-
-| العمود | Column | النوع | القيود |
-|--------|--------|------|--------|
-| المعرف | Id | int | PK |
-| معرف الصلاحية أ | PermissionAId | int | FK→SecurityPermissions |
-| معرف الصلاحية ب | PermissionBId | int | FK→SecurityPermissions |
-| مستوى الخطورة | RiskLevel | enum (RiskLevel) | |
-| الإجراء عند المخالفة | ActionOnViolation | enum (ActionOnViolation) | |
-| الوصف | Description | string? | |
-| نشط | IsActive | bool | default true |
-| نسخة الصف | RowVersion | byte[] | |
-
-### 2.9 سجلات التدقيق الأمنية — SecurityAuditLogs
+### 2.8 سجلات التدقيق الأمنية — SecurityAuditLogs
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -254,7 +241,7 @@
 | القيم الجديدة | NewValues | string? | |
 | الوقت | Timestamp | DateTimeOffset | |
 
-### 2.10 قواعد الاعتماد — ApprovalRules
+### 2.9 قواعد الاعتماد — ApprovalRules
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -269,7 +256,7 @@
 | نشط | IsActive | bool | default true |
 | نسخة الصف | RowVersion | byte[] | |
 
-### 2.11 سجل الاعتمادات — ApprovalHistory
+### 2.10 سجل الاعتمادات — ApprovalHistory
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -286,7 +273,7 @@
 | لقطة التقييم | EvaluationSnapshot | string? | |
 | نسخة الصف | RowVersion | byte[] | |
 
-### 2.12 المرفقات — Attachments
+### 2.11 المرفقات — Attachments
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -305,7 +292,7 @@
 | تاريخ الإنشاء | CreatedAt | DateTimeOffset | |
 | نسخة الصف | RowVersion | byte[] | |
 
-### 2.13 سجلات حالة المستندات — DocumentStatusLogs
+### 2.12 سجلات حالة المستندات — DocumentStatusLogs
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -318,7 +305,7 @@
 | وقت التغيير | ChangedAt | DateTimeOffset | |
 | السبب | Reason | string? | |
 
-### 2.14 متطلبات المرفقات — DocumentAttachmentRequirements
+### 2.13 متطلبات المرفقات — DocumentAttachmentRequirements
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -330,7 +317,7 @@
 | نشط | IsActive | bool | default true |
 | نسخة الصف | RowVersion | byte[] | |
 
-### 2.15 الإشعارات — Notifications
+### 2.14 الإشعارات — Notifications
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -345,7 +332,7 @@
 | مقروء | IsRead | bool | |
 | وقت القراءة | ReadAt | DateTimeOffset? | |
 
-### 2.16 آثار التدقيق — AuditTrails
+### 2.15 آثار التدقيق — AuditTrails
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|

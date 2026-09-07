@@ -131,7 +131,7 @@ Frontend code does not use TDD or frontend automated tests. Backend testing requ
 - Login: POST /api/Users/login → { token, userId, role }. Passwords: ASP.NET Identity PasswordHasher (User.PasswordHash). Lockout: 5 failed attempts → 15 min. Token claims: NameIdentifier, Name, Role (single role code) + permission claims loaded from RolePermissions.
 - Single role per user: User.RoleId → SecurityRole (one role only — binding). Never introduce multi-role.
 - Every endpoint declares its permission: .RequireAuthorization(PermissionCodes.X) on the route OR [Authorize(Policy = PermissionCodes.X)]. Codes live in src/Application/Common/Security/PermissionCodes.cs — format {Module}.{Action}. Add new codes there + register the policy in src/Web/DependencyInjection.cs.
-- RBAC model: SecurityRole / RolePermission / SecurityPermission (+ UserPermission overrides); SoDMatrix, FieldSecurityPolicy, RecordRule — src/Domain/Security/Entities.
+- RBAC model: SecurityRole / RolePermission / SecurityPermission (+ UserPermission overrides); SoDMatrix, FieldSecurityPolicy, RecordRule removed (DEP-026) — src/Domain/Security/Entities.
 - Approval authorization: IApprovalService + IApprovalRuleEvaluationService (src/Application/Security/Common). Every approval decision recorded via ApprovalHistory only — never inline.
 - Audit: SecurityAuditLog + AuditTrail (append-only).
 - KNOWN DEV STATE: all policies are currently registered as RequireAssertion(_ => true) — open placeholder, RBAC enforcement wiring is pending tracked work. Do NOT treat endpoints as access-controlled yet; do NOT remove placeholder registrations inside feature specs; keep new policies consistent until the enforcement spec lands.

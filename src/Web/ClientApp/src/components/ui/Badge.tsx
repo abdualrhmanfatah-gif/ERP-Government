@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-type BadgeVariant = 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'outline';
+type BadgeVariant = 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'error' | 'outline';
 
 interface BadgeProps {
   variant?: BadgeVariant;
@@ -16,6 +16,7 @@ const variantClasses: Record<BadgeVariant, string> = {
   success: 'bg-status-approved-bg text-status-approved-fg',
   warning: 'bg-status-pending-bg text-status-pending-fg',
   danger: 'bg-status-cancelled-bg text-status-cancelled-fg',
+  error: 'bg-[var(--color-error)] text-[var(--color-on-error)]',
   outline: 'border border-[var(--color-outline)] text-[var(--color-on-surface)]',
 };
 
