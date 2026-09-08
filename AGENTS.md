@@ -63,7 +63,7 @@ Maintenance: when a newer better exemplar lands (e.g. ReceiptVouchers after trea
 - Money: decimal(23,2). NO stored computed columns — totals computed in queries/handlers.
 - Document numbering: IDocumentSequenceService (src/Application/FinancialSettings/Common/Services/) — {PREFIX}-{D6}, allocated in the same transaction, number at Draft creation.
 - Approvals/status: ApprovalHistory + DocumentStatusLog (append-only) via IDocumentStatusLogger — never inline approval columns.
-- Ledger posting: domain event → AccountingEvent (unique SourceTable+SourceId+EventType) → PostingRules → JournalEntry + lines.
+- Ledger posting: domain event → PostingRules → JournalEntry + lines (AccountingEvents staging removed, DEP-026; balances computed live from JournalEntryLines).
 - Availability: BudgetAvailabilityService (src/Application/Budgeting/Common/) — item-level net appropriations − open encumbrances.
 
 ## Frontend Architecture

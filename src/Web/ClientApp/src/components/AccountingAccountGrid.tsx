@@ -4,6 +4,7 @@ import type { AccountDto } from '@/features/accounting/types';
 import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Loading } from '@/components/ui/Loading';
 
 interface TreeNode {
   data: AccountDto;
@@ -291,11 +292,7 @@ export function AccountGrid({ data, loading, error, onRetry }: AccountGridProps)
   }, [tree, expanded, focusedId, toggle, navigate]);
 
   if (loading) {
-    return (
-      <div role="status" aria-busy="true" className="p-12 text-center text-[var(--color-on-surface-variant)]">
-        جاري التحميل...
-      </div>
-    );
+    return <Loading />;
   }
 
   if (error) {

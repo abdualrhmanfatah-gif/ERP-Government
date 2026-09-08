@@ -4,7 +4,7 @@ import { useJournalEntriesList } from '../hooks/useJournalEntries';
 import { StatusBadge } from '@/components/AccountingStatusBadge';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import type { JournalEntryDto } from '../shared/client';
-import { Button, Card, Input } from '@/components/ui';
+import { Button, Card, Input, Badge } from '@/components/ui';
 
 const statusFilters = [
   { key: '', label: 'الكل' },
@@ -25,7 +25,7 @@ const columns: DataGridColumn<JournalEntryDto>[] = [
       <span className="flex items-center gap-2">
         {row.entryNumber}
         {row.isSystemGenerated && (
-          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-[var(--color-surface-container-high)] text-[var(--color-on-surface-variant)]">نظام</span>
+          <Badge variant="default">نظام</Badge>
         )}
       </span>
     ),

@@ -17,7 +17,6 @@ public class JournalEntry : BaseAuditableEntity
     public int PeriodId { get; set; }
     public int FiscalYearId { get; set; }
     public string? Narration { get; set; }
-    public int? SourceEventId { get; set; }
     public int? ReversalOfId { get; set; }
     public string? ReversalReason { get; set; }
     public int? PostedById { get; set; }
@@ -32,7 +31,6 @@ public class JournalEntry : BaseAuditableEntity
 
     // Same-module FKs
     public Journal? Journal { get; set; }
-    public AccountingEvent? SourceEvent { get; set; }
 
     // Cross-module FKs (Module 1)
     public FiscalPeriod? Period { get; set; }

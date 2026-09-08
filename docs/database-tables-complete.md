@@ -1,7 +1,7 @@
 # جداول قاعدة البيانات — Database Tables Complete Reference
 
 > **تاريخ آخر تحديث:** 2026-09-07
-> **عدد الجداول:** 102 جدول
+> **عدد الجداول:** 101 جدول
 
 ---
 
@@ -460,7 +460,7 @@
 
 ---
 
-## 5. المحاسبة — Accounting (11)
+## 5. المحاسبة — Accounting (10)
 
 ### 5.1 مجموعات الحسابات — AccountGroups
 
@@ -526,7 +526,6 @@
 | معرف الفترة | PeriodId | int | FK→FiscalPeriods |
 | معرف السنة المالية | FiscalYearId | int | FK→FiscalYears |
 | البيان | Narration | string? | |
-| معرف الحدث المصدر | SourceEventId | int? | FK→AccountingEvents |
 | معرف القيد المُلغى | ReversalOfId | int? | FK→self |
 | سبب الإلغاء | ReversalReason | string? | |
 | معرف المُرحِّل | PostedById | int? | FK→Users |
@@ -557,23 +556,7 @@
 | نشط | IsActive | bool | default true |
 | نسخة الصف | RowVersion | byte[] | |
 
-### 5.6 الأحداث المحاسبية — AccountingEvents
-
-| العمود | Column | النوع | القيود |
-|--------|--------|------|--------|
-| المعرف | Id | int | PK |
-| نوع الحدث | EventType | enum (EventType) | |
-| نوع المستند المصدر | SourceDocumentType | string | |
-| معرف المستند المصدر | SourceDocumentId | int | |
-| الحالة | Status | enum (EventStatus) | default Pending |
-| معرف قيد اليومية | JournalEntryId | int? | FK→JournalEntries |
-| فئة الحدث | EventCategory | enum (EventCategory) | |
-| رسالة الخطأ | ErrorMessage | string? | |
-| وقت المعالجة | ProcessedAt | DateTimeOffset? | |
-| عدد المحاولات | RetryCount | int | |
-| نسخة الصف | RowVersion | byte[] | |
-
-### 5.7 قواعد الترحيل — PostingRules
+### 5.6 قواعد الترحيل — PostingRules
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -585,7 +568,7 @@
 | نشط | IsActive | bool | default true |
 | نسخة صف | RowVersion | byte[] | |
 
-### 5.8 أسطر قواعد الترحيل — PostingRuleLines
+### 5.7 أسطر قواعد الترحيل — PostingRuleLines
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -602,7 +585,7 @@
 | نشط | IsActive | bool | default true |
 | نسخة صف | RowVersion | byte[] | |
 
-### 5.9 قوالب قيود اليومية — JournalEntryTemplates
+### 5.8 قوالب قيود اليومية — JournalEntryTemplates
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -615,7 +598,7 @@
 | نشط | IsActive | bool | default true |
 | نسخة صف | RowVersion | byte[] | |
 
-### 5.10 أسطر القوالب — JournalEntryTemplateLines
+### 5.9 أسطر القوالب — JournalEntryTemplateLines
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -631,7 +614,7 @@
 | معرف مركز التكلفة | CostCenterId | int? | FK→CostCenters |
 | نسخة صف | RowVersion | byte[] | |
 
-### 5.11 القيود الدورية — RecurringEntries
+### 5.10 القيود الدورية — RecurringEntries
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|

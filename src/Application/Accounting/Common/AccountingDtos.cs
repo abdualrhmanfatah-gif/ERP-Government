@@ -213,29 +213,6 @@ public class JournalEntryLineDto
     }
 }
 
-// T006 — AccountingEventDto
-public class AccountingEventDto
-{
-    public int Id { get; init; }
-    public string EventType { get; init; } = string.Empty;
-    public string SourceTable { get; init; } = string.Empty;
-    public int SourceId { get; init; }
-    public string Status { get; init; } = string.Empty;
-    public int? JournalEntryId { get; init; }
-    public string? ErrorMessage { get; init; }
-    public DateTimeOffset? ProcessedAt { get; init; }
-    public int RetryCount { get; init; }
-
-    private class Mapping : Profile
-    {
-        public Mapping()
-        {
-            CreateMap<AccountingEvent, AccountingEventDto>()
-                .ForMember(d => d.Status, opt => opt.MapFrom(s => s.Status.ToString()));
-        }
-    }
-}
-
 // T007 — PostingRuleDto
 public class PostingRuleDto
 {

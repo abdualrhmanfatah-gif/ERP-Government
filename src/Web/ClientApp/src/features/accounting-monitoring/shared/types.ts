@@ -1,17 +1,3 @@
-}
-
-export interface AccountingEventDto {
-  id: number;
-  eventType: string;
-  sourceTable: string;
-  sourceId: number;
-  status: string;
-  journalEntryId: number | null;
-  errorMessage: string | null;
-  processedAt: string | null;
-  retryCount: number;
-}
-
 export interface PostingRuleDto {
   id: number;
   name: string;

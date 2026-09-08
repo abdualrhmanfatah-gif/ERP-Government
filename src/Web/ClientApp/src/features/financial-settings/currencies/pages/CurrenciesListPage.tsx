@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Page, Button, Switch, FilterBar, FilterSearch, ConfirmDialog } from '@/components/ui';
+import { Page, Button, Switch, FilterBar, FilterSearch, ConfirmDialog, Badge, StatusBadge } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Eye } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
@@ -52,12 +52,12 @@ export default function CurrenciesListPage() {
     { header: 'الاسم', cell: (row) => row.name },
     { header: 'الرمز', cell: (row) => row.symbol },
     { header: 'الكسور', align: 'start', cell: (row) => row.decimalPlaces },
-    { header: 'العملة الأساسية', cell: (row) => row.isBase && <span className="text-xs font-medium text-[var(--color-primary)] bg-[var(--color-primary-container)] px-2 py-0.5 rounded-full">أساسية</span> },
+    { header: 'العملة الأساسية', cell: (row) => row.isBase && <Badge variant="primary">أساسية</Badge> },
     {
       header: 'الحالة',
       cell: (row) => canCreate
         ? <Switch checked={row.isActive} onChange={() => handleToggle(row)} label={row.isActive ? 'نشط' : 'معطل'} />
-        : <span className={row.isActive ? 'text-[var(--color-success)]' : 'text-[var(--color-error)]'}>{row.isActive ? 'نشط' : 'معطل'}</span>,
+        : <StatusBadge variant={row.isActive ? 'active' : 'closed'}>{row.isActive ? 'نشط' : 'معطل'}</StatusBadge>,
     },
     {
       header: 'إجراءات',

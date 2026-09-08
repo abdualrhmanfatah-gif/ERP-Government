@@ -15,7 +15,6 @@ import { JournalEditPage } from '../features/accounting/journals/pages/JournalEd
 import { TemplatesListPage } from '../features/accounting/templates/pages/TemplatesListPage';
 import { TemplateCreatePage } from '../features/accounting/templates/pages/TemplateCreatePage';
 import { TemplateEditPage } from '../features/accounting/templates/pages/TemplateEditPage';
-import { EventsQueuePage } from '../features/accounting-monitoring/pages/EventsQueuePage';
 import { PostingRulesListPage } from '../features/accounting-monitoring/pages/PostingRulesListPage';
 
 import { RolesListPage } from '../features/security/rbac/pages/RolesListPage';
@@ -198,12 +197,6 @@ export const AppRoutes: RouteConfig[] = [
     protected: true,
   },
   // Accounting — Monitoring (ACC-05)
-  {
-    path: '/accounting/events',
-    element: <EventsQueuePage />,
-    label: 'طابور الأحداث',
-    protected: true,
-  },
   {
     path: '/accounting/posting-rules',
     element: <PostingRulesListPage />,

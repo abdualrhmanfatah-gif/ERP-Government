@@ -74,12 +74,7 @@ public static class PermissionCodes
     public const string RecurringEntriesResume = "Accounting.RecurringEntries.Resume";
     public const string RecurringEntriesCancel = "Accounting.RecurringEntries.Cancel";
 
-    public const string AccountingEventsRead = "Accounting.AccountingEvents.Read";
 
-    public const string BalancesRebuild = "Accounting.Balances.Rebuild";
-    public const string BalancesFinalize = "Accounting.Balances.Finalize";
-    public const string BalancesUnfinalize = "Accounting.Balances.Unfinalize";
-    public const string BalancesRead = "Accounting.Balances.Read";
 
     // ─── Budgeting ────────────────────────────────────────────────────
     public const string FundsView = "Funds.View";

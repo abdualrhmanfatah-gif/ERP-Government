@@ -50,8 +50,6 @@ type PolicyString =
   | 'Accounting.JournalEntries.Read' | 'Accounting.JournalEntries.Create' | 'Accounting.JournalEntries.Submit'
   | 'Accounting.JournalEntries.Approve' | 'Accounting.JournalEntries.Post' | 'Accounting.JournalEntries.Reverse'
   | 'Accounting.JournalEntries.UpdateLines' | 'Accounting.JournalEntries.Cancel'
-  | 'Accounting.Balances.Read' | 'Accounting.Balances.Finalize' | 'Accounting.Balances.Unfinalize'
-  | 'Accounting.Balances.Rebuild'
   | 'Accounting.Reports.BalanceSheet' | 'Accounting.Reports.IncomeStatement'
   | 'Accounting.Reports.GeneralLedger' | 'Accounting.Reports.CashFlow'
   | 'Accounting.Reports.Export' | 'Accounting.Reports.Print';

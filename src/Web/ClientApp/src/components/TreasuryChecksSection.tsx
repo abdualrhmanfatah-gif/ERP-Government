@@ -1,6 +1,6 @@
 // Checks section — rendered/required only when payment method = Check (FR-003).
 import { Plus, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button, FormField, Input } from '@/components/ui';
 import type { CheckFormRow } from '@/features/treasury/shared/types';
 
 interface ChecksSectionProps {
@@ -44,48 +44,45 @@ export function ChecksSection({ visible, rows, disabled, onChange, error }: Chec
           className="grid grid-cols-1 md:grid-cols-5 gap-3 rounded border border-[var(--color-outline-variant)] p-3"
           data-testid={`check-row-${index}`}
         >
-          <div>
-            <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">البنك *</label>
-            <input
+          <FormField label="البنك" htmlFor={`bankName-${index}`} required>
+            <Input
+              id={`bankName-${index}`}
               type="text"
               value={row.bankName}
               disabled={disabled}
               onChange={(e) => updateRow(index, { bankName: e.target.value })}
-              className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
             />
-          </div>
-          <div>
-            <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">رقم الشيك *</label>
-            <input
+          </FormField>
+          <FormField label="رقم الشيك" htmlFor={`checkNumber-${index}`} required>
+            <Input
+              id={`checkNumber-${index}`}
               type="text"
               value={row.checkNumber}
               disabled={disabled}
               onChange={(e) => updateRow(index, { checkNumber: e.target.value })}
-              className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
             />
-          </div>
-          <div>
-            <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">تاريخ الشيك *</label>
-            <input
+          </FormField>
+          <FormField label="تاريخ الشيك" htmlFor={`checkDate-${index}`} required>
+            <Input
+              id={`checkDate-${index}`}
               type="date"
               value={row.checkDate}
               disabled={disabled}
               onChange={(e) => updateRow(index, { checkDate: e.target.value })}
-              className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
             />
-          </div>
-          <div>
-            <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">المبلغ *</label>
-            <input
+          </FormField>
+          <FormField label="المبلغ" htmlFor={`amount-${index}`} required>
+            <Input
+              id={`amount-${index}`}
               type="number"
               min={0}
               step="0.01"
               value={row.amount}
               disabled={disabled}
               onChange={(e) => updateRow(index, { amount: Number(e.target.value) })}
-              className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm tabular-nums"
+              className="tabular-nums"
             />
-          </div>
+          </FormField>
           <div className="flex items-end">
             <Button
               type="button"

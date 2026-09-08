@@ -16,8 +16,6 @@
 |-------|-----------|------------|-----------|
 | `JournalEntries` | `ReversalOfMoveId` | `ReversalOfId` | T014 |
 | `JournalEntryLines` | `MoveId` | `JournalEntryId` | T014 |
-| `AccountingEvents` | `SourceTable` | `SourceDocumentType` | T043 |
-| `AccountingEvents` | `SourceId` | `SourceDocumentId` | T043 |
 | `PaymentOrders` | `MoveId` | `JournalEntryId` | T035 |
 | `RecurringEntries` | `GeneratedMoveId` | `GeneratedJournalEntryId` | T014 |
 | `Appropriations` | `MoveId` | `JournalEntryId` | T014 |
@@ -47,8 +45,7 @@
 
 ## New Columns
 
-### AccountingEvents (T043)
-- `JournalEntryId` (nullable FK → JournalEntries)
+> **RETIRED (DEP-026)**: AccountingEvents table + JournalEntries.SourceEventId removed (spec 042). Balances computed live from JournalEntryLines (spec 041).
 
 ### JournalEntryLines (T024)
 - `FundId` (nullable FK → Funds)
@@ -59,7 +56,6 @@
 
 ## New Constraints
 
-- `AccountingEvents`: Unique index on `(EventType, SourceDocumentType, SourceDocumentId)` where `Status = Posted` (T043)
 - `JournalEntryLines`: CHECK constraint `Debit > 0 XOR Credit > 0` (T014)
 - `JournalEntries`: CHECK constraint `EntryStatus IN (0,1,2,3,4,5)` (T014)
 
@@ -88,7 +84,6 @@
 | `AccountingCoreRefactor` | T014 | Rename tables, rename columns, EntryStatus string→enum, CHECK constraints |
 | `AddAnalyticDimensions` | T024 | Add 5 nullable FK columns to JournalEntryLines |
 | `StripPaymentOrderAggregates` | T035 | Drop stored aggregate/approval columns from PaymentOrder* |
-| `ExtendAccountingEvent` | T043 | Add JournalEntryId FK, rename columns, unique constraint, EventType string→enum |
 | `ExtendPaymentMethod` | T049 | Renumber Other 5→6 for InKind insertion (if data migration needed) |
 
 ---

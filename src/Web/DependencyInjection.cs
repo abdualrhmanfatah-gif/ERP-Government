@@ -102,12 +102,7 @@ public static class DependencyInjection
             options.AddPolicy(PermissionCodes.RecurringEntriesResume, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.RecurringEntriesCancel, p => p.RequireAssertion(_ => true));
 
-            options.AddPolicy(PermissionCodes.AccountingEventsRead, p => p.RequireAssertion(_ => true));
 
-            options.AddPolicy(PermissionCodes.BalancesRebuild, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.BalancesFinalize, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.BalancesUnfinalize, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.BalancesRead, p => p.RequireAssertion(_ => true));
 
             // ─── Accounting Reports ────────────────────────────────────
             options.AddPolicy(PermissionCodes.ViewBalanceSheet, p => p.RequireAssertion(_ => true));

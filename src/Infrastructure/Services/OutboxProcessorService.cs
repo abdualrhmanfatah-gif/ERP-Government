@@ -44,9 +44,6 @@ public class OutboxProcessorService : BackgroundService
         _logger.LogInformation("OutboxProcessorService starting. PollInterval={Interval}ms, BatchSize={Batch}, MaxRetries={Retries}",
             _options.PollIntervalMs, _options.BatchSize, _options.MaxRetries);
 
-        // Orphan recovery: reset stale Processing events on startup
-        await ResetStaleProcessingEventsAsync(stoppingToken);
-
         while (!stoppingToken.IsCancellationRequested)
         {
             try
@@ -166,25 +163,4 @@ public class OutboxProcessorService : BackgroundService
         return BackoffSchedule[index];
     }
 
-    private async Task ResetStaleProcessingEventsAsync(CancellationToken cancellationToken)
-    {
-        using var scope = _serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
-
-        var cutoff = DateTimeOffset.UtcNow.AddMinutes(-5);
-        var staleEvents = await context.AccountingEvents
-            .Where(e => e.Status == Domain.Accounting.Enums.EventStatus.Posted && e.LastModified < cutoff)
-            .ToListAsync(cancellationToken);
-
-        if (staleEvents.Count > 0)
-        {
-            foreach (var evt in staleEvents)
-            {
-                evt.Status = Domain.Accounting.Enums.EventStatus.Pending;
-                evt.LastModified = DateTimeOffset.UtcNow;
-            }
-            await context.SaveChangesAsync(cancellationToken);
-            _logger.LogInformation("Orphan recovery: reset {Count} stale Processing events to Pending", staleEvents.Count);
-        }
-    }
 }
