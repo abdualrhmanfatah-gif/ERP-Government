@@ -49,7 +49,6 @@ public class RecurringEntryProcessor : IBackgroundJob
     {
         using var scope = _serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
-        var executionLogService = new RecurringEntryExecutionLogService(context);
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
@@ -74,7 +73,7 @@ public class RecurringEntryProcessor : IBackgroundJob
                 _logger.LogDebug("Processing recurring entry {EntryNumber} (ID: {Id})",
                     entry.EntryNumber, entry.Id);
 
-                var result = await ProcessEntryAsync(entry, executionLogService, context, today, cancellationToken);
+                var result = await ProcessEntryAsync(entry, context, today, cancellationToken);
 
                 switch (result)
                 {
@@ -104,18 +103,12 @@ public class RecurringEntryProcessor : IBackgroundJob
 
     private async Task<ProcessResult> ProcessEntryAsync(
         RecurringEntry entry,
-        RecurringEntryExecutionLogService executionLogService,
         IApplicationDbContext context,
         DateOnly today,
         CancellationToken cancellationToken)
     {
-        // Step 1: Idempotency check — skip if already processed successfully for this date
-        if (await executionLogService.HasSuccessfulLogAsync(entry.Id, entry.NextExecutionDate, cancellationToken))
-        {
-            _logger.LogDebug("Skipping recurring entry {EntryNumber} — already processed for {Date}",
-                entry.EntryNumber, entry.NextExecutionDate);
-            return ProcessResult.Skipped;
-        }
+        // Idempotency: dueEntries selection (NextExecutionDate <= today) + advancement on success
+        // guarantees a successful entry is not reprocessed — no execution log required (DEP-026)
 
         // Step 2: Validate template and journal
         var template = entry.TemplateId.HasValue
@@ -176,9 +169,7 @@ public class RecurringEntryProcessor : IBackgroundJob
             return ProcessResult.Skipped;
         }
 
-        // Step 4: Create execution log (Status=Created)
-        var log = await executionLogService.CreateLogAsync(
-            entry.Id, entry.NextExecutionDate, "Scheduler", cancellationToken);
+        // Step 4 (revised): execution log removed (DEP-026) — JournalEntry is the record of success
 
         try
         {
@@ -223,8 +214,7 @@ public class RecurringEntryProcessor : IBackgroundJob
 
             await context.SaveChangesAsync(cancellationToken); // Save JournalEntryLines
 
-            // Step 8: Update execution log to Success
-            await executionLogService.UpdateLogSuccessAsync(log.Id, journalEntry.Id, cancellationToken);
+            // Step 8 (revised): execution log removed (DEP-026)
 
             // Step 9: Update RecurringEntry
             entry.LastExecutedAt = DateTime.UtcNow;
@@ -247,17 +237,8 @@ public class RecurringEntryProcessor : IBackgroundJob
         }
         catch (Exception ex)
         {
-            // Step 11: Log failure — update execution log to Failed
+            // Step 11: failure is logged to the application log only — execution log table removed (DEP-026)
             _logger.LogError(ex, "Failed to process recurring entry {EntryNumber}", entry.EntryNumber);
-
-            try
-            {
-                await executionLogService.UpdateLogFailedAsync(log.Id, ex.Message, cancellationToken);
-            }
-            catch (Exception logEx)
-            {
-                _logger.LogError(logEx, "Failed to update execution log for entry {EntryNumber}", entry.EntryNumber);
-            }
 
             // NextExecutionDate is NOT advanced — entry remains due for retry
             return ProcessResult.Failed;

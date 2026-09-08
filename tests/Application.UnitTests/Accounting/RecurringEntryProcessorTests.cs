@@ -255,27 +255,7 @@ namespace ERP_Government.Application.UnitTests.Accounting
         }
 
         // ===================== US2: Execution History and Audit Trail =====================
-
-        [Test]
-        public async Task Execute_Success_CreatesExecutionLogWithCorrectStatus()
-        {
-            await SeedTemplate();
-            await SeedTemplateLines();
-
-            var entry = CreateEntry(nextExec: DateOnly.FromDateTime(DateTime.UtcNow));
-            _dbContext.RecurringEntries.Add(entry);
-            await _dbContext.SaveChangesAsync();
-
-            await _processor.ExecuteAsync(CancellationToken.None);
-
-            var logs = await _dbContext.RecurringEntryExecutionLogs.ToListAsync();
-            logs.ShouldNotBeEmpty();
-            logs[0].RecurringEntryId.ShouldBe(entry.Id);
-            logs[0].Status.ShouldBe(RecurringEntryExecutionStatus.Success);
-            logs[0].TriggeredBy.ShouldBe("Scheduler");
-            logs[0].CompletedAt.ShouldNotBeNull();
-            logs[0].GeneratedJournalEntryId.ShouldNotBeNull();
-        }
+        // (execution log removed per DEP-026 — success is recorded via GeneratedJournalEntryId/LastExecutedAt)
 
         [Test]
         public async Task Execute_Success_UpdatesLastExecutedAtAndGeneratedJournalEntryId()
@@ -311,54 +291,12 @@ namespace ERP_Government.Application.UnitTests.Accounting
             var journalEntriesAfterFirst = await _dbContext.JournalEntries.CountAsync();
             journalEntriesAfterFirst.ShouldBe(1);
 
-            // Re-query entry to get updated NextExecutionDate (now in the future)
-            var updatedEntry = await _dbContext.RecurringEntries.FindAsync(entry.Id);
-            updatedEntry!.NextExecutionDate = DateOnly.FromDateTime(DateTime.UtcNow); // Reset to today
-            await _dbContext.SaveChangesAsync();
-
-            // Add a successful log for today to simulate prior success
-            _dbContext.RecurringEntryExecutionLogs.Add(new RecurringEntryExecutionLog
-            {
-                RecurringEntryId = entry.Id,
-                ExecutionDate = DateOnly.FromDateTime(DateTime.UtcNow),
-                Status = RecurringEntryExecutionStatus.Success,
-                GeneratedJournalEntryId = 1,
-                TriggeredBy = "Scheduler"
-            });
-            await _dbContext.SaveChangesAsync();
+            // Re-query: NextExecutionDate advanced past today by first run — second run finds nothing due
 
             // Second run — should skip
             await _processor.ExecuteAsync(CancellationToken.None);
             var journalEntriesAfterSecond = await _dbContext.JournalEntries.CountAsync();
             journalEntriesAfterSecond.ShouldBe(1); // No new JournalEntry created
-        }
-
-        [Test]
-        public async Task Execute_FailedLogExists_RetriesEntry()
-        {
-            await SeedTemplate();
-            await SeedTemplateLines();
-
-            var entry = CreateEntry(nextExec: DateOnly.FromDateTime(DateTime.UtcNow));
-            _dbContext.RecurringEntries.Add(entry);
-            await _dbContext.SaveChangesAsync();
-
-            // Add a failed log for today
-            _dbContext.RecurringEntryExecutionLogs.Add(new RecurringEntryExecutionLog
-            {
-                RecurringEntryId = entry.Id,
-                ExecutionDate = DateOnly.FromDateTime(DateTime.UtcNow),
-                Status = RecurringEntryExecutionStatus.Failed,
-                ErrorMessage = "Previous error",
-                TriggeredBy = "Scheduler"
-            });
-            await _dbContext.SaveChangesAsync();
-
-            // Run — should retry (failed log doesn't block)
-            await _processor.ExecuteAsync(CancellationToken.None);
-
-            var journalEntries = await _dbContext.JournalEntries.CountAsync();
-            journalEntries.ShouldBe(1); // New JournalEntry created
         }
 
         // ===================== US4: Failure Isolation =====================
@@ -512,11 +450,6 @@ namespace ERP_Government.Application.UnitTests.Accounting
 
             var journalEntries = await _dbContext.JournalEntries.CountAsync();
             journalEntries.ShouldBe(0);
-
-            // Execution log should show failure
-            var logs = await _dbContext.RecurringEntryExecutionLogs.ToListAsync();
-            logs.ShouldNotBeEmpty();
-            logs.Any(l => l.Status == RecurringEntryExecutionStatus.Failed).ShouldBeTrue();
 
             // NextExecutionDate should NOT be advanced
             var updated = await _dbContext.RecurringEntries.FindAsync(entry.Id);
@@ -757,14 +690,7 @@ namespace ERP_Government.Application.UnitTests.Accounting
                 .ToListAsync();
             dueEntries.Count.ShouldBe(1, "Should find 1 due entry");
 
-            // 2. Check idempotency
-            var hasLog = await _dbContext.RecurringEntryExecutionLogs
-                .AnyAsync(l => l.RecurringEntryId == entry.Id
-                            && l.ExecutionDate == today
-                            && l.Status == RecurringEntryExecutionStatus.Success);
-            hasLog.ShouldBeFalse("Should have no successful log");
-
-            // 3. Check template
+            // 2. Check template
             var template = await _dbContext.JournalEntryTemplates
                 .FirstOrDefaultAsync(t => t.Id == entry.TemplateId!.Value && t.IsActive);
             template.ShouldNotBeNull("Template should exist");
@@ -799,12 +725,6 @@ namespace ERP_Government.Application.UnitTests.Accounting
 
             var journalEntries = await _dbContext.JournalEntries.ToListAsync();
             TestContext.Out.WriteLine($"JournalEntries count after processor: {journalEntries.Count}");
-            var logs = await _dbContext.RecurringEntryExecutionLogs.ToListAsync();
-            TestContext.Out.WriteLine($"Logs count: {logs.Count}");
-            foreach (var log in logs)
-            {
-                TestContext.Out.WriteLine($"  Log: Status={log.Status}, Error={log.ErrorMessage}");
-            }
         }
     }
 }
