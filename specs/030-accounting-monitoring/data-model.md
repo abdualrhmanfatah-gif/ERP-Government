@@ -1,5 +1,7 @@
 # Data Model: ACC-05 — مراقبة المحاسبة (Accounting Monitoring)
 
+> **RETIRED (DEP-026, spec 041)**: AccountBalance entity/endpoints removed. Balances computed live from JournalEntryLines. Remaining sections below document PostingRules/AccountingEvents as they stood; AccountingEvents retired separately (spec 042).
+
 ## Entities
 
 ### AccountBalance (existing — no schema change)

@@ -1,5 +1,5 @@
 import { useMonthlyPlan } from '@/features/budgeting/hooks/useMonthlyPlan';
-import { Button, Badge } from '@/components/ui';
+import { Button, Badge, Input } from '@/components/ui';
 import { Copy, Save } from 'lucide-react';
 
 const MONTH_NAMES = [
@@ -43,11 +43,11 @@ export function MonthlyPlanEditor({ budgetItemId, appropriatedTotal }: MonthlyPl
         {MONTH_NAMES.map((name, i) => (
           <div key={i} className="space-y-1">
             <label className="block text-[10px] text-[var(--color-on-surface-variant)] text-center">{name}</label>
-            <input
+            <Input
               type="number"
               value={months[i] || ''}
               onChange={(e) => setMonth(i, Number(e.target.value) || 0)}
-              className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-1 py-1 text-xs text-center font-mono"
+              className="text-center font-mono text-xs"
               min="0"
               step="0.01"
             />

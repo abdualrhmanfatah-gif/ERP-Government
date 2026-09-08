@@ -48,25 +48,29 @@ function TreeNode({
         style={{ paddingInlineStart: `${depth * 1.25 + 0.5}rem` }}
       >
         {hasChildren ? (
-          <button
+          <Button
+            variant="ghost"
+            size="icon-xs"
             type="button"
             aria-label={expanded ? 'طي' : 'توسيع'}
             onClick={() => setExpanded((v) => !v)}
             className="w-5 shrink-0 text-center"
           >
             {expanded ? '▾' : '▸'}
-          </button>
+          </Button>
         ) : (
           <span className="w-5 shrink-0" aria-hidden="true" />
         )}
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           type="button"
           className="flex-1 text-start"
           onClick={() => node.id !== undefined && onSelect?.(node.id)}
         >
           <span className="font-medium">{node.itemCode}</span>
           <span className="ms-2 text-[var(--color-on-surface-variant)]">{node.itemName}</span>
-        </button>
+        </Button>
         <span className="text-xs text-[var(--color-on-surface-variant)]">مستوى {node.level}</span>
         {node.isActive === false ? <StatusBadge variant="closed" size="sm">معطل</StatusBadge> : null}
         {canEdit && node.id !== undefined ? (

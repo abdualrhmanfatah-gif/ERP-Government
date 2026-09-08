@@ -66,23 +66,12 @@ export default function PartyDetailPage() {
     await toggleActive.mutateAsync();
   }
 
-  if (isLoading) {
-    return (
-      <div className="p-6 space-y-4">
-        <div className="h-8 w-64 rounded bg-[var(--color-surface-container)] animate-pulse" />
-        <div className="h-48 rounded-lg bg-[var(--color-surface-container)] animate-pulse" />
-      </div>
-    );
-  }
-
-  if (!party) {
-    return <div className="p-6 text-center text-[var(--color-error)]">لم يتم العثور على الطرف</div>;
-  }
-
   return (
     <Page
-      title={party.nameAr}
-      description={party.partyCode}
+      title={party?.nameAr ?? ''}
+      description={party?.partyCode}
+      loading={isLoading}
+      error={!party && !isLoading ? 'لم يتم العثور على الطرف' : undefined}
       actions={
         <div className="flex gap-2">
           <Button variant="ghost" size="icon" onClick={() => navigate('/parties')} aria-label="العودة">

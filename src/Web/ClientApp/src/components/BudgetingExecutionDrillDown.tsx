@@ -5,7 +5,7 @@ import { useBudgetItemsTree } from '@/features/budgeting/hooks/useBudgetItems';
 import { useAppropriationsList } from '@/features/budgeting/hooks/useAppropriations';
 import { useEncumbrancesList } from '@/features/budgeting/hooks/useEncumbrances';
 import { budgetStatusLabels, appropriationTypeLabels, encumbranceTypeLabels } from '@/features/budgeting/shared/types';
-import { Badge } from '@/components/ui';
+import { Badge, Button } from '@/components/ui';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
 interface ExecutionDrillDownProps {
@@ -88,8 +88,10 @@ export function ExecutionDrillDown({ budgetId }: ExecutionDrillDownProps) {
 
               return (
                 <div key={item.id}>
-                  <button
-                    className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-[var(--color-surface-variant)] rounded text-start"
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-start"
                     onClick={() => toggleItem(item.id)}
                   >
                     {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -97,7 +99,7 @@ export function ExecutionDrillDown({ budgetId }: ExecutionDrillDownProps) {
                     <span className="flex-1">{item.itemName}</span>
                     <span className="font-mono text-xs">{itemTotal.toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</span>
                     <Badge variant="outline">{itemApps.length}</Badge>
-                  </button>
+                  </Button>
 
                   {isExpanded && itemApps.length > 0 && (
                     <div className="mr-8 space-y-1">
@@ -108,8 +110,10 @@ export function ExecutionDrillDown({ budgetId }: ExecutionDrillDownProps) {
 
                         return (
                           <div key={app.id}>
-                            <button
-                              className="flex items-center gap-2 w-full px-3 py-1.5 text-sm hover:bg-[var(--color-surface-variant)] rounded text-start"
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-start"
                               onClick={() => toggleAppropriation(app.id)}
                             >
                               {isAppExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
@@ -118,7 +122,7 @@ export function ExecutionDrillDown({ budgetId }: ExecutionDrillDownProps) {
                               <span className="flex-1" />
                               <span className="font-mono text-xs">{app.amount.toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</span>
                               <Badge variant="outline">{appEncumbrances.length}</Badge>
-                            </button>
+                            </Button>
 
                             {isAppExpanded && appEncumbrances.length > 0 && (
                               <div className="mr-8 space-y-1">

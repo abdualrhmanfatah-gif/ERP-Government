@@ -3,6 +3,7 @@ import type { JournalEntryLineDto } from '@/features/accounting/types';
 import { Dialog } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
 import { FormField } from '@/components/ui/FormField';
+import { Textarea } from '@/components/ui/Textarea';
 
 interface ReverseDialogProps {
   open: boolean;
@@ -17,28 +18,28 @@ interface ReverseDialogProps {
 
 function ReverseEntryPreview({ lines }: { lines: JournalEntryLineDto[] }) {
   return (
-    <div className="rounded-lg border p-3" style={{ borderColor: 'var(--color-outlineVariant)' }}>
-      <p className="text-xs font-bold mb-2" style={{ color: 'var(--color-onSurfaceVariant)' }}>
+    <div className="rounded-lg border p-3 border-[var(--color-outline-variant)]">
+      <p className="text-xs font-bold mb-2 text-[var(--color-on-surface-variant)]">
         معاينة القيد العكسي (Counter-Entry Preview)
       </p>
       <table className="w-full text-xs">
         <thead>
           <tr>
-            <th className="text-right py-1" style={{ color: 'var(--color-onSurfaceVariant)' }}>الحساب</th>
-            <th className="text-left py-1" style={{ color: 'var(--color-onSurfaceVariant)' }}>مدين</th>
-            <th className="text-left py-1" style={{ color: 'var(--color-onSurfaceVariant)' }}>دائن</th>
+            <th className="text-right py-1 text-[var(--color-on-surface-variant)]">الحساب</th>
+            <th className="text-left py-1 text-[var(--color-on-surface-variant)]">مدين</th>
+            <th className="text-left py-1 text-[var(--color-on-surface-variant)]">دائن</th>
           </tr>
         </thead>
         <tbody>
           {lines.map((line) => (
-            <tr key={line.id} className="border-t" style={{ borderColor: 'var(--color-outlineVariant)' }}>
-              <td className="py-1" style={{ color: 'var(--color-onSurface)' }}>
+            <tr key={line.id} className="border-t border-[var(--color-outline-variant)]">
+              <td className="py-1 text-[var(--color-on-surface)]">
                 {line.accountCode} - {line.accountName}
               </td>
-              <td className="py-1 text-left tabular-nums" style={{ color: 'var(--color-onSurface)' }}>
+              <td className="py-1 text-left tabular-nums text-[var(--color-on-surface)]">
                 {line.credit > 0 ? line.credit.toLocaleString('ar-YE') : '-'}
               </td>
-              <td className="py-1 text-left tabular-nums" style={{ color: 'var(--color-onSurface)' }}>
+              <td className="py-1 text-left tabular-nums text-[var(--color-on-surface)]">
                 {line.debit > 0 ? line.debit.toLocaleString('ar-YE') : '-'}
               </td>
             </tr>
@@ -86,19 +87,13 @@ export function ReverseDialog({
       </p>
 
       <FormField label="سبب العكس" required error={error}>
-        <textarea
+        <Textarea
           ref={textareaRef}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           maxLength={500}
           rows={3}
           aria-required="true"
-          className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2"
-          style={{
-            backgroundColor: 'var(--color-surface)',
-            color: 'var(--color-onSurface)',
-            borderColor: 'var(--color-outlineVariant)',
-          }}
           placeholder="خطأ في التسجيل"
         />
       </FormField>

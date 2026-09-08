@@ -62,7 +62,6 @@ public interface IApplicationDbContext
     DbSet<Journal> Journals { get; }
     DbSet<JournalEntry> JournalEntries { get; }
     DbSet<JournalEntryLine> JournalEntryLines { get; }
-    DbSet<AccountBalance> AccountBalances { get; }
     DbSet<AccountingEvent> AccountingEvents { get; }
     DbSet<PostingRule> PostingRules { get; }
     DbSet<PostingRuleLine> PostingRuleLines { get; }

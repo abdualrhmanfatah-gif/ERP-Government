@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useApprovals } from '@/features/documents/hooks/useDocuments';
 import type { ApprovalsPanelProps } from '@/features/documents/shared/types';
-import { Badge } from '@/components/ui';
+import { Badge, Button } from '@/components/ui';
 
 const decisionVariants: Record<string, 'success' | 'danger' | 'warning' | 'default'> = {
   Approved: 'success',
@@ -25,25 +25,23 @@ export function ApprovalsPanel({ documentType, documentId }: ApprovalsPanelProps
     return (
       <div className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-4">
         <p className="text-sm text-[var(--color-error)]">حدث خطأ أثناء تحميل الاعتمادات</p>
-        <button
-          onClick={() => refetch()}
-          className="mt-2 text-sm text-[var(--color-link)] underline"
-        >
+        <Button variant="link" size="sm" onClick={() => refetch()} className="mt-2">
           إعادة المحاولة
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)]">
-      <button
+      <Button
+        variant="ghost"
         className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-[var(--color-on-surface)]"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <span>اعتمادات</span>
         <span className="text-[var(--color-on-surface-variant)]">{isExpanded ? '▲' : '▼'}</span>
-      </button>
+      </Button>
       {isExpanded && (
         <div className="px-4 pb-4">
           {!approvals || approvals.length === 0 ? (

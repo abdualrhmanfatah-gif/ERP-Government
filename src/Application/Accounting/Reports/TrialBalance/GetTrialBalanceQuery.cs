@@ -23,23 +23,33 @@ public class GetTrialBalanceQueryHandler(
     {
         try
         {
-            var balances = await context.AccountBalances
+            // Live aggregation from posted JournalEntryLines (DEP-026 — AccountBalances removed)
+            var lines = await context.JournalEntryLines
+                .Include(x => x.JournalEntry)
                 .Include(x => x.Account)
                     .ThenInclude(a => a.AccountGroup)
-                .Include(x => x.FiscalYear)
-                .Include(x => x.FiscalPeriod)
-                .Include(x => x.Currency)
-                .Where(x => x.FiscalYearId == request.FiscalYearId
-                         && x.FiscalPeriodId == request.FiscalPeriodId)
-                .OrderBy(x => x.Account.Code)
+                .Where(x => x.JournalEntry.EntryStatus == EntryStatus.Posted
+                         && x.JournalEntry.FiscalYearId == request.FiscalYearId
+                         && x.JournalEntry.PeriodId == request.FiscalPeriodId)
                 .ToListAsync(cancellationToken);
 
-            var currencyCode = balances.FirstOrDefault()?.Currency?.Code ?? "YER";
-            var fiscalYearName = balances.FirstOrDefault()?.FiscalYear?.Name ?? string.Empty;
-            var periodName = balances.FirstOrDefault()?.FiscalPeriod?.Name ?? string.Empty;
+            var fiscalYearName = await context.FiscalYears
+                .Where(f => f.Id == request.FiscalYearId)
+                .Select(f => f.Name)
+                .FirstOrDefaultAsync(cancellationToken) ?? string.Empty;
+            var periodName = await context.FiscalPeriods
+                .Where(p => p.Id == request.FiscalPeriodId)
+                .Select(p => p.Name)
+                .FirstOrDefaultAsync(cancellationToken) ?? string.Empty;
 
-            var sections = balances
-                .GroupBy(x => x.Account.AccountGroup)
+            var perAccount = lines
+                .GroupBy(x => x.Account)
+                .ToList();
+
+            var currencyCode = "YER";
+
+            var sections = perAccount
+                .GroupBy(x => x.Key.AccountGroup)
                 .OrderBy(g => g.Key.Code)
                 .Select(g => new ReportSection
                 {
@@ -47,18 +57,18 @@ public class GetTrialBalanceQueryHandler(
                     TitleEn = g.Key.Name,
                     Lines = g.Select(x => new ReportLine
                     {
-                        AccountCode = x.Account.Code,
-                        AccountName = x.Account.Name,
-                        Debit = x.ClosingDebit,
-                        Credit = x.ClosingCredit,
-                        Balance = x.ClosingDebit - x.ClosingCredit,
+                        AccountCode = x.Key.Code,
+                        AccountName = x.Key.Name,
+                        Debit = x.Sum(l => l.Debit),
+                        Credit = x.Sum(l => l.Credit),
+                        Balance = x.Sum(l => l.Debit) - x.Sum(l => l.Credit),
                     }).ToList(),
-                    Total = g.Sum(x => x.ClosingDebit - x.ClosingCredit),
+                    Total = g.Sum(x => x.Sum(l => l.Debit) - x.Sum(l => l.Credit)),
                 })
                 .ToList();
 
-            var totalDebit = balances.Sum(x => x.ClosingDebit);
-            var totalCredit = balances.Sum(x => x.ClosingCredit);
+            var totalDebit = perAccount.Sum(x => x.Sum(l => l.Debit));
+            var totalCredit = perAccount.Sum(x => x.Sum(l => l.Credit));
 
             var result = new TrialBalanceDto
             {

@@ -2,6 +2,7 @@ import { useFundsList } from '@/features/budgeting/hooks/useFunds';
 import { useProjects } from '@/features/organization/hooks/useProjects';
 import { useEncumbrancesList } from '@/features/budgeting/hooks/useEncumbrances';
 import { useQuery } from '@tanstack/react-query';
+import { Select } from '@/components/ui/Select';
 import {
   BudgetsClient,
   PaymentOrdersClient,
@@ -28,14 +29,6 @@ interface DimensionPickersProps {
   onChange: (dimensions: DimensionValues) => void;
   className?: string;
 }
-
-const selectClass =
-  'w-full px-2 py-1.5 rounded border text-xs focus:outline-none focus:ring-1 transition-colors duration-200';
-const selectStyle = {
-  backgroundColor: 'var(--color-surface)',
-  color: 'var(--color-onSurface)',
-  borderColor: 'var(--color-outlineVariant)',
-};
 
 function useAllBudgetItems() {
   return useQuery({
@@ -82,86 +75,51 @@ export function DimensionPickers({ value, onChange, className = '' }: DimensionP
 
   return (
     <div className={`grid grid-cols-5 gap-2 ${className}`}>
-      <div>
-        <label className="block text-[10px] font-bold mb-0.5" style={{ color: 'var(--color-onSurfaceVariant)' }}>
-          الصندوق
-        </label>
-        <select
-          value={value.fundId ?? ''}
-          onChange={(e) => update('fundId', e.target.value ? Number(e.target.value) : null)}
-          className={selectClass}
-          style={selectStyle}
-        >
-          <option value="">—</option>
-          {funds.map((f: FundDto) => (
-            <option key={f.id} value={f.id}>{f.fundNumber} - {f.fundName}</option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="block text-[10px] font-bold mb-0.5" style={{ color: 'var(--color-onSurfaceVariant)' }}>
-          المشروع
-        </label>
-        <select
-          value={value.projectId ?? ''}
-          onChange={(e) => update('projectId', e.target.value ? Number(e.target.value) : null)}
-          className={selectClass}
-          style={selectStyle}
-        >
-          <option value="">—</option>
-          {projects.map((p: ProjectDto) => (
-            <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="block text-[10px] font-bold mb-0.5" style={{ color: 'var(--color-onSurfaceVariant)' }}>
-          البند
-        </label>
-        <select
-          value={value.budgetItemId ?? ''}
-          onChange={(e) => update('budgetItemId', e.target.value ? Number(e.target.value) : null)}
-          className={selectClass}
-          style={selectStyle}
-        >
-          <option value="">—</option>
-          {budgetItems.map((bi: BudgetItemDto) => (
-            <option key={bi.id} value={bi.id}>{bi.code} - {bi.name}</option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="block text-[10px] font-bold mb-0.5" style={{ color: 'var(--color-onSurfaceVariant)' }}>
-          الالتزام
-        </label>
-        <select
-          value={value.encumbranceId ?? ''}
-          onChange={(e) => update('encumbranceId', e.target.value ? Number(e.target.value) : null)}
-          className={selectClass}
-          style={selectStyle}
-        >
-          <option value="">—</option>
-          {encumbrances.map((en: EncumbranceListItemDto) => (
-            <option key={en.id} value={en.id}>{en.encumbranceNumber}</option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="block text-[10px] font-bold mb-0.5" style={{ color: 'var(--color-onSurfaceVariant)' }}>
-          أمر الدفع
-        </label>
-        <select
-          value={value.paymentOrderId ?? ''}
-          onChange={(e) => update('paymentOrderId', e.target.value ? Number(e.target.value) : null)}
-          className={selectClass}
-          style={selectStyle}
-        >
-          <option value="">—</option>
-          {paymentOrders.map((po: PaymentOrderDto) => (
-            <option key={po.id} value={po.id}>{po.paymentOrderNumber}</option>
-          ))}
-        </select>
-      </div>
+      <Select
+        label="الصندوق"
+        value={value.fundId ?? ''}
+        onChange={(e) => update('fundId', e.target.value ? Number(e.target.value) : null)}
+        options={[
+          { value: '', label: '—' },
+          ...funds.map((f: FundDto) => ({ value: String(f.id), label: `${f.fundNumber} - ${f.fundName}` })),
+        ]}
+      />
+      <Select
+        label="المشروع"
+        value={value.projectId ?? ''}
+        onChange={(e) => update('projectId', e.target.value ? Number(e.target.value) : null)}
+        options={[
+          { value: '', label: '—' },
+          ...projects.map((p: ProjectDto) => ({ value: String(p.id), label: `${p.code} - ${p.name}` })),
+        ]}
+      />
+      <Select
+        label="البند"
+        value={value.budgetItemId ?? ''}
+        onChange={(e) => update('budgetItemId', e.target.value ? Number(e.target.value) : null)}
+        options={[
+          { value: '', label: '—' },
+          ...budgetItems.map((bi: BudgetItemDto) => ({ value: String(bi.id), label: `${bi.code} - ${bi.name}` })),
+        ]}
+      />
+      <Select
+        label="الالتزام"
+        value={value.encumbranceId ?? ''}
+        onChange={(e) => update('encumbranceId', e.target.value ? Number(e.target.value) : null)}
+        options={[
+          { value: '', label: '—' },
+          ...encumbrances.map((en: EncumbranceListItemDto) => ({ value: String(en.id), label: en.encumbranceNumber })),
+        ]}
+      />
+      <Select
+        label="أمر الدفع"
+        value={value.paymentOrderId ?? ''}
+        onChange={(e) => update('paymentOrderId', e.target.value ? Number(e.target.value) : null)}
+        options={[
+          { value: '', label: '—' },
+          ...paymentOrders.map((po: PaymentOrderDto) => ({ value: String(po.id), label: po.paymentOrderNumber })),
+        ]}
+      />
     </div>
   );
 }

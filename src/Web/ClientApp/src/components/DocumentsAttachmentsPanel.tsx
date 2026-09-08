@@ -2,6 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { useAttachments, useAttachmentRequirements, useAttachmentGateCheck, useUploadAttachment, useDeleteAttachment } from '@/features/documents/hooks/useDocuments';
 import type { AttachmentsPanelProps } from '@/features/documents/shared/types';
 import { Button } from '@/components/ui';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { Select } from '@/components/ui/Select';
+import { Input } from '@/components/ui/Input';
 import { Upload, Trash2, FileText } from 'lucide-react';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -72,25 +75,23 @@ export function AttachmentsPanel({ documentType, documentId, showGate = false, o
     return (
       <div className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-4">
         <p className="text-sm text-[var(--color-error)]">حدث خطأ أثناء تحميل المرفقات</p>
-        <button
-          onClick={() => refetch()}
-          className="mt-2 text-sm text-[var(--color-link)] underline"
-        >
+        <Button variant="link" size="sm" onClick={() => refetch()} className="mt-2">
           إعادة المحاولة
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)]">
-      <button
+      <Button
+        variant="ghost"
         className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-[var(--color-on-surface)]"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <span>المرفقات</span>
         <span className="text-[var(--color-on-surface-variant)]">{isExpanded ? '▲' : '▼'}</span>
-      </button>
+      </Button>
       {isExpanded && (
         <div className="px-4 pb-4">
           {showGate && missingTypes.length > 0 && (
@@ -116,32 +117,23 @@ export function AttachmentsPanel({ documentType, documentId, showGate = false, o
 
           {showUpload && (
             <div className="mb-4 p-3 rounded bg-[var(--color-surface-container)] space-y-3">
-              <div>
-                <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">نوع المرفق</label>
-                <select
-                  value={selectedType}
-                  onChange={(e) => setSelectedType(e.target.value)}
-                  className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-                >
-                  <option value="">اختر النوع</option>
-                  {requirements?.map((r) => (
-                    <option key={r.attachmentTypeCode} value={r.attachmentTypeCode}>
-                      {r.titleAr} {r.isMandatory ? '(مطلوب)' : ''}
-                    </option>
-                  ))}
-                  <option value="OTHER">أخرى</option>
-                </select>
-              </div>
+              <Select
+                label="نوع المرفق"
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                options={[
+                  { value: '', label: 'اختر النوع' },
+                  ...(requirements?.map((r) => ({ value: r.attachmentTypeCode, label: `${r.titleAr} ${r.isMandatory ? '(مطلوب)' : ''}` })) ?? []),
+                  { value: 'OTHER', label: 'أخرى' },
+                ]}
+              />
               {selectedType === 'OTHER' && (
-                <div>
-                  <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">نوع مخصص</label>
-                  <input
-                    type="text"
-                    value={customType}
-                    onChange={(e) => setCustomType(e.target.value)}
-                    className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-                  />
-                </div>
+                <Input
+                  label="نوع مخصص"
+                  type="text"
+                  value={customType}
+                  onChange={(e) => setCustomType(e.target.value)}
+                />
               )}
               <div>
                 <input
@@ -186,15 +178,14 @@ export function AttachmentsPanel({ documentType, documentId, showGate = false, o
           )}
 
           {deleteId !== null && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-              <div className="bg-[var(--color-surface)] rounded-lg p-6 max-w-sm w-full mx-4">
-                <p className="text-sm mb-4">هل أنت متأكد من حذف هذا المرفق؟</p>
-                <div className="flex gap-2 justify-end">
-                  <Button variant="danger" size="sm" onClick={handleDelete} disabled={deleteMutation.isPending}>حذف</Button>
-                  <Button variant="ghost" size="sm" onClick={() => setDeleteId(null)}>إلغاء</Button>
-                </div>
-              </div>
-            </div>
+            <ConfirmDialog
+              open={deleteId !== null}
+              onClose={() => setDeleteId(null)}
+              onConfirm={handleDelete}
+              title="حذف المرفق"
+              message="هل أنت متأكد من حذف هذا المرفق؟"
+              loading={deleteMutation.isPending}
+            />
           )}
         </div>
       )}

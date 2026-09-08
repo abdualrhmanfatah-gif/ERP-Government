@@ -25,7 +25,6 @@ export const moduleGroups: ModuleGroup[] = [
       { path: '/accounting/journals', label: 'دفاتر اليومية', permission: 'Accounting.Journals.Read' },
       { path: '/accounting/templates', label: 'قوالب القيود', permission: 'Accounting.Templates.Read' },
       { path: '/accounting/recurring-entries', label: 'القيود الدورية', permission: 'Accounting.RecurringEntries.Read' },
-      { path: '/accounting/balances', label: 'أرصدة الحسابات', permission: 'Accounting.Balances.Read' },
       { path: '/accounting/events', label: 'طابور الأحداث', permission: 'Accounting.AccountingEvents.Read' },
       { path: '/accounting/posting-rules', label: 'قواعد الترحيل', permission: 'Accounting.PostingRules.Read' },
     ],

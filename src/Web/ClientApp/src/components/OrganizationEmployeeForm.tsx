@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { useOrganizationalUnits } from '@/features/organization/hooks';
 import type { EmployeeDto, CreateEmployeeCommand, UpdateEmployeeCommand } from '@/features/organization/types';
 
@@ -43,104 +45,79 @@ export function EmployeeForm({ initialData, isEdit, onSubmit, serverError, loadi
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {serverError && (
-        <div className="p-3 bg-[var(--color-error-container)] text-[var(--color-on-error-container)] rounded-lg text-sm">{serverError}</div>
+        <div role="alert" className="p-3 bg-[var(--color-error-container)] text-[var(--color-on-error-container)] rounded-lg text-sm">{serverError}</div>
       )}
 
-      <div>
-        <label htmlFor="employeeNumber" className="block text-sm font-medium text-[var(--color-on-surface)] mb-1">رقم الموظف <span aria-hidden="true" className="text-[var(--color-error)]">*</span></label>
-        <input
-          id="employeeNumber"
-          type="text"
-          value={employeeNumber}
-          onChange={(e) => setEmployeeNumber(e.target.value)}
-          disabled={isEdit}
-          required
-          maxLength={50}
-          className="w-full px-3 py-2 border border-[var(--color-border-container)] rounded-lg bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50"
-          dir="ltr"
-        />
-      </div>
+      <Input
+        label="رقم الموظف"
+        id="employeeNumber"
+        type="text"
+        value={employeeNumber}
+        onChange={(e) => setEmployeeNumber(e.target.value)}
+        disabled={isEdit}
+        required
+        maxLength={50}
+        dir="ltr"
+      />
 
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-[var(--color-on-surface)] mb-1">الاسم <span aria-hidden="true" className="text-[var(--color-error)]">*</span></label>
-        <input
-          id="name"
+      <Input
+        label="الاسم"
+        id="name"
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+        maxLength={200}
+      />
+
+      <Select
+        label="الوحدة التنظيمية"
+        id="organizationalUnitId"
+        value={organizationalUnitId}
+        onChange={(e) => setOrganizationalUnitId(e.target.value)}
+        required
+        options={[
+          { value: '', label: '— اختر —' },
+          ...orgUnits.map((u) => ({ value: String(u.id), label: u.name })),
+        ]}
+      />
+
+      <div className="grid grid-cols-2 gap-4">
+        <Input
+          label="المسمى الوظيفي"
+          id="jobTitle"
           type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={jobTitle}
+          onChange={(e) => setJobTitle(e.target.value)}
           required
           maxLength={200}
-          className="w-full px-3 py-2 border border-[var(--color-border-container)] rounded-lg bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        />
+        <Input
+          label="الدرجة الوظيفية"
+          id="jobGrade"
+          type="text"
+          value={jobGrade}
+          onChange={(e) => setJobGrade(e.target.value)}
+          maxLength={50}
         />
       </div>
 
-      <div>
-        <label htmlFor="organizationalUnitId" className="block text-sm font-medium text-[var(--color-on-surface)] mb-1">الوحدة التنظيمية <span aria-hidden="true" className="text-[var(--color-error)]">*</span></label>
-        <select
-          id="organizationalUnitId"
-          value={organizationalUnitId}
-          onChange={(e) => setOrganizationalUnitId(e.target.value)}
+      <div className="grid grid-cols-2 gap-4">
+        <Input
+          label="تاريخ التعيين"
+          id="hireDate"
+          type="date"
+          value={hireDate}
+          onChange={(e) => setHireDate(e.target.value)}
           required
-          className="w-full px-3 py-2 border border-[var(--color-border-container)] rounded-lg bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-        >
-          <option value="">— اختر —</option>
-          {orgUnits.map((u) => (
-            <option key={u.id} value={u.id}>{u.name}</option>
-          ))}
-        </select>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="jobTitle" className="block text-sm font-medium text-[var(--color-on-surface)] mb-1">المسمى الوظيفي <span aria-hidden="true" className="text-[var(--color-error)]">*</span></label>
-          <input
-            id="jobTitle"
-            type="text"
-            value={jobTitle}
-            onChange={(e) => setJobTitle(e.target.value)}
-            required
-            maxLength={200}
-            className="w-full px-3 py-2 border border-[var(--color-border-container)] rounded-lg bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-          />
-        </div>
-        <div>
-          <label htmlFor="jobGrade" className="block text-sm font-medium text-[var(--color-on-surface)] mb-1">الدرجة الوظيفية</label>
-          <input
-            id="jobGrade"
-            type="text"
-            value={jobGrade}
-            onChange={(e) => setJobGrade(e.target.value)}
-            maxLength={50}
-            className="w-full px-3 py-2 border border-[var(--color-border-container)] rounded-lg bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="hireDate" className="block text-sm font-medium text-[var(--color-on-surface)] mb-1">تاريخ التعيين <span aria-hidden="true" className="text-[var(--color-error)]">*</span></label>
-          <input
-            id="hireDate"
-            type="date"
-            value={hireDate}
-            onChange={(e) => setHireDate(e.target.value)}
-            required
-            className="w-full px-3 py-2 border border-[var(--color-border-container)] rounded-lg bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-          />
-        </div>
-        <div>
-          <label htmlFor="employmentStatus" className="block text-sm font-medium text-[var(--color-on-surface)] mb-1">الحالة الوظيفية</label>
-          <select
-            id="employmentStatus"
-            value={employmentStatus}
-            onChange={(e) => setEmploymentStatus(e.target.value)}
-            className="w-full px-3 py-2 border border-[var(--color-border-container)] rounded-lg bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-          >
-            {employmentStatusOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
+        />
+        <Select
+          label="الحالة الوظيفية"
+          id="employmentStatus"
+          value={employmentStatus}
+          onChange={(e) => setEmploymentStatus(e.target.value)}
+          options={employmentStatusOptions}
+        />
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
