@@ -40,7 +40,4 @@ public class RecurringEntry : BaseAuditableEntity
 
     // Cross-module FKs (Module 1)
     // public Currency? Currency { get; set; }
-
-    // Execution history
-    public ICollection<RecurringEntryExecutionLog> ExecutionLogs { get; set; } = new List<RecurringEntryExecutionLog>();
 }

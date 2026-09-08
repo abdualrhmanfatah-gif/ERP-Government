@@ -71,7 +71,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<JournalEntryTemplate> JournalEntryTemplates => Set<JournalEntryTemplate>();
     public DbSet<JournalEntryTemplateLine> JournalEntryTemplateLines => Set<JournalEntryTemplateLine>();
     public DbSet<RecurringEntry> RecurringEntries => Set<RecurringEntry>();
-    public DbSet<RecurringEntryExecutionLog> RecurringEntryExecutionLogs => Set<RecurringEntryExecutionLog>();
 
     // Module 5: Budgeting & Funds
     public DbSet<BudgetClassification> BudgetClassifications => Set<BudgetClassification>();

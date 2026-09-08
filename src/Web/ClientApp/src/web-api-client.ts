@@ -618,7 +618,7 @@ export class UsersClient {
      * Revoke a specific session
      * @return No Content
      */
-    revokePOST(id: number, sessionId: number): Promise<void> {
+    revoke(id: number, sessionId: number): Promise<void> {
         let url_ = this.baseUrl + "/api/Users/{id}/sessions/{sessionId}/revoke";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -635,11 +635,11 @@ export class UsersClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processRevokePOST(_response);
+            return this.processRevoke(_response);
         });
     }
 
-    protected processRevokePOST(response: Response): Promise<void> {
+    protected processRevoke(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -10088,193 +10088,6 @@ export class WorkflowInstancesClient {
     }
 
     protected processCancelPOST3(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-}
-
-export class ApprovalDelegationsClient {
-    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
-
-    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
-        this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "";
-    }
-
-    /**
-     * Get all approval delegations
-     * @param delegateUserId (optional) 
-     * @param entityType (optional) 
-     * @param status (optional) 
-     * @return OK
-     */
-    approvalDelegationsAll(delegateUserId: number | undefined, entityType: string | undefined, status: string | undefined): Promise<ApprovalDelegationDto[]> {
-        let url_ = this.baseUrl + "/api/ApprovalDelegations?";
-        if (delegateUserId === null)
-            throw new globalThis.Error("The parameter 'delegateUserId' cannot be null.");
-        else if (delegateUserId !== undefined)
-            url_ += "DelegateUserId=" + encodeURIComponent("" + delegateUserId) + "&";
-        if (entityType === null)
-            throw new globalThis.Error("The parameter 'entityType' cannot be null.");
-        else if (entityType !== undefined)
-            url_ += "EntityType=" + encodeURIComponent("" + entityType) + "&";
-        if (status === null)
-            throw new globalThis.Error("The parameter 'status' cannot be null.");
-        else if (status !== undefined)
-            url_ += "Status=" + encodeURIComponent("" + status) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprovalDelegationsAll(_response);
-        });
-    }
-
-    protected processApprovalDelegationsAll(response: Response): Promise<ApprovalDelegationDto[]> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(ApprovalDelegationDto.fromJS(item));
-            }
-            else {
-                result200 = null as any;
-            }
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<ApprovalDelegationDto[]>(null as any);
-    }
-
-    /**
-     * Create a new approval delegation
-     * @return OK
-     */
-    approvalDelegations(body: CreateApprovalDelegationCommand): Promise<number> {
-        let url_ = this.baseUrl + "/api/ApprovalDelegations";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprovalDelegations(_response);
-        });
-    }
-
-    protected processApprovalDelegations(response: Response): Promise<number> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                result200 = resultData200 !== undefined ? resultData200 : null as any;
-    
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<number>(null as any);
-    }
-
-    /**
-     * Revoke an approval delegation
-     * @return No Content
-     */
-    revokePATCH(id: number): Promise<void> {
-        let url_ = this.baseUrl + "/api/ApprovalDelegations/{id}/revoke";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "PATCH",
-            headers: {
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processRevokePATCH(_response);
-        });
-    }
-
-    protected processRevokePATCH(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -21473,86 +21286,6 @@ export enum AppropriationType {
     Adjustment = "Adjustment",
 }
 
-export class ApprovalDelegationDto implements IApprovalDelegationDto {
-    id?: number;
-    delegatorUserId?: number;
-    delegateUserId?: number;
-    entityType?: string | undefined;
-    startDate?: Date;
-    endDate?: Date;
-    status?: DelegationStatus;
-    canReDelegate?: boolean;
-    reason?: string | undefined;
-
-    [key: string]: any;
-
-    constructor(data?: IApprovalDelegationDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.delegatorUserId = _data["delegatorUserId"];
-            this.delegateUserId = _data["delegateUserId"];
-            this.entityType = _data["entityType"];
-            this.startDate = _data["startDate"] ? new Date(_data["startDate"].toString()) : undefined as any;
-            this.endDate = _data["endDate"] ? new Date(_data["endDate"].toString()) : undefined as any;
-            this.status = _data["status"];
-            this.canReDelegate = _data["canReDelegate"];
-            this.reason = _data["reason"];
-        }
-    }
-
-    static fromJS(data: any): ApprovalDelegationDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new ApprovalDelegationDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["delegatorUserId"] = this.delegatorUserId;
-        data["delegateUserId"] = this.delegateUserId;
-        data["entityType"] = this.entityType;
-        data["startDate"] = this.startDate ? formatDate(this.startDate) : undefined as any;
-        data["endDate"] = this.endDate ? formatDate(this.endDate) : undefined as any;
-        data["status"] = this.status;
-        data["canReDelegate"] = this.canReDelegate;
-        data["reason"] = this.reason;
-        return data;
-    }
-}
-
-export interface IApprovalDelegationDto {
-    id?: number;
-    delegatorUserId?: number;
-    delegateUserId?: number;
-    entityType?: string | undefined;
-    startDate?: Date;
-    endDate?: Date;
-    status?: DelegationStatus;
-    canReDelegate?: boolean;
-    reason?: string | undefined;
-
-    [key: string]: any;
-}
-
 export class ApprovalRuleDto implements IApprovalRuleDto {
     id?: number;
     documentType?: string;
@@ -26370,78 +26103,6 @@ export interface ICreateAppropriationRequest {
     [key: string]: any;
 }
 
-export class CreateApprovalDelegationCommand implements ICreateApprovalDelegationCommand {
-    delegatorUserId?: number;
-    delegateUserId?: number;
-    entityType?: string | undefined;
-    startDate?: Date;
-    endDate?: Date;
-    canReDelegate?: boolean;
-    reason?: string | undefined;
-
-    [key: string]: any;
-
-    constructor(data?: ICreateApprovalDelegationCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.delegatorUserId = _data["delegatorUserId"];
-            this.delegateUserId = _data["delegateUserId"];
-            this.entityType = _data["entityType"];
-            this.startDate = _data["startDate"] ? new Date(_data["startDate"].toString()) : undefined as any;
-            this.endDate = _data["endDate"] ? new Date(_data["endDate"].toString()) : undefined as any;
-            this.canReDelegate = _data["canReDelegate"];
-            this.reason = _data["reason"];
-        }
-    }
-
-    static fromJS(data: any): CreateApprovalDelegationCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new CreateApprovalDelegationCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["delegatorUserId"] = this.delegatorUserId;
-        data["delegateUserId"] = this.delegateUserId;
-        data["entityType"] = this.entityType;
-        data["startDate"] = this.startDate ? formatDate(this.startDate) : undefined as any;
-        data["endDate"] = this.endDate ? formatDate(this.endDate) : undefined as any;
-        data["canReDelegate"] = this.canReDelegate;
-        data["reason"] = this.reason;
-        return data;
-    }
-}
-
-export interface ICreateApprovalDelegationCommand {
-    delegatorUserId?: number;
-    delegateUserId?: number;
-    entityType?: string | undefined;
-    startDate?: Date;
-    endDate?: Date;
-    canReDelegate?: boolean;
-    reason?: string | undefined;
-
-    [key: string]: any;
-}
-
 export class CreateApprovalRuleCommand implements ICreateApprovalRuleCommand {
     documentType?: string;
     fundId?: number | undefined;
@@ -29886,12 +29547,6 @@ export enum DeductionType {
     AdvanceRecovery = "AdvanceRecovery",
     LegalDeduction = "LegalDeduction",
     Other = "Other",
-}
-
-export enum DelegationStatus {
-    Active = "Active",
-    Expired = "Expired",
-    Revoked = "Revoked",
 }
 
 export class DepositSlipDto implements IDepositSlipDto {

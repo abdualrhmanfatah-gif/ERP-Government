@@ -1,7 +1,7 @@
 # جداول قاعدة البيانات — Database Tables Complete Reference
 
 > **تاريخ آخر تحديث:** 2026-09-07
-> **عدد الجداول:** 104 جداول
+> **عدد الجداول:** 103 جداول
 
 ---
 
@@ -460,7 +460,7 @@
 
 ---
 
-## 5. المحاسبة — Accounting (13)
+## 5. المحاسبة — Accounting (12)
 
 ### 5.1 مجموعات الحسابات — AccountGroups
 
@@ -670,21 +670,6 @@
 | الحالة | Status | enum (RecurringEntryStatus) | default Active |
 | معرف القيد المُولَّد | GeneratedJournalEntryId | int? | FK→JournalEntries |
 | نشط | IsActive | bool | default true |
-| نسخة صف | RowVersion | byte[] | |
-
-### 5.13 سجلات التنفيذ — RecurringEntryExecutionLogs
-
-| العمود | Column | النوع | القيود |
-|--------|--------|------|--------|
-| المعرف | Id | int | PK |
-| معرف القيد الدوري | RecurringEntryId | int | FK→RecurringEntries |
-| تاريخ التنفيذ | ExecutionDate | DateOnly | |
-| معرف القيد المُولَّد | GeneratedJournalEntryId | int? | FK→JournalEntries |
-| الحالة | Status | enum (RecurringEntryExecutionStatus) | default Created |
-| وقت البدء | StartedAt | DateTimeOffset | |
-| وقت الانتهاء | CompletedAt | DateTimeOffset? | |
-| رسالة الخطأ | ErrorMessage | string? | |
-| المُشغِّل | TriggeredBy | string | default "Scheduler" |
 | نسخة صف | RowVersion | byte[] | |
 
 ---
