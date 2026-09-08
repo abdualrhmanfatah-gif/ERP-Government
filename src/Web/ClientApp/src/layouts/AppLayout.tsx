@@ -7,6 +7,7 @@ import { ThemeToggle } from '../components/ThemeToggle';
 import { Menu, X, User } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { TopNav } from './TopNav';
+import { Button } from '@/components/ui';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -67,15 +68,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Header — 64px sticky, z-30 per scale */}
         <header className="h-16 sticky top-0 z-30 bg-[var(--color-primary)] border-b border-white/10 flex items-center px-4 sm:px-6 gap-3 sm:gap-4 shadow-sm">
           {/* Mobile menu toggle */}
-          <button
-            type="button"
-            className="lg:hidden p-2.5 min-w-11 min-h-11 rounded-lg hover:bg-white/10 text-white transition-colors duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none shrink-0"
+          <Button
+            variant="header"
+            size="icon"
+            className="lg:hidden"
             aria-label={sidebarOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
             aria-expanded={sidebarOpen}
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          </Button>
 
           {/* Brand — desktop only; drawer owns its brand on mobile */}
           <Link
@@ -101,16 +103,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             {/* User profile */}
             {isAuthenticated ? (
               <div ref={profileRef} className="relative">
-                <button
-                  type="button"
-                  className="flex items-center gap-2 p-2.5 sm:p-3 min-h-11 rounded-lg hover:bg-white/10 text-white transition-colors duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
+                <Button
+                  variant="header"
+                  className="flex items-center gap-2"
                   aria-label="حساب المستخدم"
                   aria-expanded={profileOpen}
                   onClick={() => { setProfileOpen(!profileOpen); }}
                 >
                   <User size={18} />
                   <span className="text-body-sm text-white/90 hidden sm:inline max-w-[12ch] truncate">{userProfile.name}</span>
-                </button>
+                </Button>
                 {profileOpen ? (
                   <div
                     role="menu"
@@ -123,14 +125,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         <div className="text-label-sm text-[var(--color-on-surface-variant)] mt-0.5">{userProfile.role}</div>
                       ) : null}
                     </div>
-                    <button
-                      type="button"
+                    <Button
+                      variant="ghost"
                       role="menuitem"
                       className="w-full text-start px-4 py-3 text-body-sm text-[var(--color-error)] hover:bg-[var(--color-surface-container-high)] transition-colors duration-200 cursor-pointer"
                       onClick={() => { setProfileOpen(false); logout(); }}
                     >
                       تسجيل الخروج
-                    </button>
+                    </Button>
                   </div>
                 ) : null}
               </div>

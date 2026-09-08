@@ -124,7 +124,7 @@ export function AccountGroupDetailPage() {
     >
 
       {/* ═══ Basic Info Card ═══ */}
-      <Card className="p-6">
+      <Card>
         <div className="flex items-center gap-2 mb-4">
           <div className="flex items-center justify-center size-8 rounded-lg bg-[var(--color-primary-container)]">
             <BookOpen size={16} className="text-[var(--color-on-primary-container)]" />
@@ -171,7 +171,7 @@ export function AccountGroupDetailPage() {
       </Card>
 
       {/* ═══ Children Section ═══ */}
-      <Card className="p-6">
+      <Card>
         <div className="flex items-center gap-2 mb-4">
           <div className="flex items-center justify-center size-8 rounded-lg bg-[var(--color-primary-container)]">
             <Layers size={16} className="text-[var(--color-on-primary-container)]" />
@@ -190,7 +190,7 @@ export function AccountGroupDetailPage() {
       </Card>
 
       {/* ═══ Accounts Section ═══ */}
-      <Card className="p-6">
+      <Card>
         <div className="flex items-center gap-2 mb-4">
           <div className="flex items-center justify-center size-8 rounded-lg bg-[var(--color-primary-container)]">
             <BookOpen size={16} className="text-[var(--color-on-primary-container)]" />

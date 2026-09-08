@@ -149,7 +149,7 @@ Government Operations
 | Outbox Pattern | Infrastructure | OutboxMessage | Reliable domain event delivery |
 | Background Jobs | BackgroundJobs | BackgroundJobDefinition, BackgroundJobInstance, BackgroundJobExecutionLog | Scheduled task execution |
 | Notifications | Security | Notification | User notification delivery |
-| Automated Posting | Accounting | AccountingEvent, PostingRule, PostingRuleLine | Domain event → journal entry automation |
+| Automated Posting | Accounting | PostingRule, PostingRuleLine | Domain event → journal entry automation (AccountingEvent removed, DEP-026) |
 | Document Numbering | FinancialSettings | DocumentSequence | Sequential document number generation |
 
 ---
@@ -162,8 +162,8 @@ Government Operations
 | Payment → Accounting Integration | PARTIALLY_IMPLEMENTED | PostingPipeline creates journal entries from PaymentOrder events. MoveLine generation deferred (FEATURE-027). |
 | Budget Availability Model | NOT_STARTED | Budget checking before payment approval. Constitution Principle V requires this. |
 | Authorization Hardening | NOT_STARTED | 231 open auth policies need real RBAC wiring. Constitution Principle VII requires this. |
-| PostingPipeline Orphan Recovery | IMPLEMENTED | Crash recovery for stale Processing events. Reset on startup. |
-| Structured Logging | IMPLEMENTED | Correlation IDs across OutboxMessage → AccountingEvent → Move. |
+| PostingPipeline Orphan Recovery | REMOVED (DEP-026) | AccountingEvents staging removed — pipeline writes JournalEntries directly. |
+| Structured Logging | IMPLEMENTED | Correlation IDs across OutboxMessage → JournalEntry. |
 
 ---
 

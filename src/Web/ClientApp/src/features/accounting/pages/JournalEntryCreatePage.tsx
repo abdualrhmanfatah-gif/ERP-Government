@@ -12,7 +12,7 @@ import { EntryLinesEditor, type EntryLine } from '@/components/AccountingEntryLi
 import { FiscalYearIndicator } from '@/components/AccountingFiscalYearIndicator';
 import { MoveEntryType } from '../../../web-api-client';
 import { notify } from '@/features/notifications/notify';
-import { Page, Button, Card, Input, Select, Textarea } from '@/components/ui';
+import { Page, Button, Card, Input, Select, Textarea, Badge } from '@/components/ui';
 
 const headerSchema = z.object({
   documentDate: z.string().min(1, 'التاريخ مطلوب'),
@@ -173,9 +173,9 @@ export function JournalEntryCreatePage() {
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-bold text-[var(--color-on-surface)]">أسطر القيد</h2>
                 {lines.length > 0 && (
-                  <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-[var(--color-surface-container-high)] text-[var(--color-on-surface-variant)]">
+                  <Badge variant="default">
                     {lines.length} أسطر
-                  </span>
+                  </Badge>
                 )}
               </div>
             </div>

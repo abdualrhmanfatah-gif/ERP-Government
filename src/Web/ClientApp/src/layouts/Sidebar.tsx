@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { moduleGroups } from './navigation';
+import { Button } from '@/components/ui';
 
 const STORAGE_KEY = 'erpSidebarCollapsed';
 
@@ -66,14 +67,14 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             <span className="w-1 h-5 rounded-full bg-[var(--color-secondary)] shrink-0" aria-hidden="true" />
             ERP Government
           </Link>
-          <button
-            type="button"
+          <Button
+            variant="header"
+            size="icon-xs"
             onClick={onClose}
-            className="p-2 -me-1 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
             aria-label="إغلاق القائمة"
           >
             <ChevronRight size={20} className="rotate-180 lg:rotate-0" aria-hidden="true" />
-          </button>
+          </Button>
         </div>
 
         {/* Module groups */}
@@ -83,10 +84,10 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               const expanded = isGroupExpanded(group.label);
               return (
                 <li key={group.label} role="treeitem" aria-expanded={expanded}>
-                  <button
-                    type="button"
+                  <Button
+                    variant="header"
+                    className="w-full flex items-center justify-between px-6 py-3 min-h-11 text-body-md font-semibold uppercase"
                     onClick={() => toggleGroup(group.label)}
-                    className="w-full flex items-center justify-between px-6 py-3 min-h-11 text-body-md font-semibold uppercase text-white/70 hover:text-white hover:bg-white/[0.04] transition-colors cursor-pointer focus-visible:outline-none focus-visible:bg-white/[0.08]"
                     aria-label={` ${group.label}`}
                   >
                     <span role="heading" aria-level={2}>{group.label}</span>
@@ -95,7 +96,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                     ) : (
                       <ChevronRight size={14} aria-hidden="true" />
                     )}
-                  </button>
+                  </Button>
                   {expanded ? (
                     <ul className="list-none m-0 p-0" role="group">
                       {group.items.map((item) => {

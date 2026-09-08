@@ -14,7 +14,7 @@ import { BalanceIndicator } from '@/components/AccountingBalanceIndicator';
 import { ReverseDialog } from '@/components/AccountingReverseDialog';
 import { ApprovalsPanel } from '@/components/DocumentsApprovalsPanel';
 import { StatusLogPanel } from '@/components/DocumentsStatusLogPanel';
-import { Page, Button, Card } from '@/components/ui';
+import { Page, Button, Card, Badge } from '@/components/ui';
 function formatDate(value: unknown): string {
   if (!value) return '';
   if (typeof value === 'string') return value;
@@ -119,7 +119,7 @@ export function JournalEntryDetailPage() {
                 <h2 className="text-xl font-bold text-[var(--color-on-surface)]">
                   {entry.entryNumber}
                   {entry.isSystemGenerated && (
-                    <span className="mr-2 text-[10px] px-2 py-0.5 rounded-full font-bold bg-[var(--color-surface-container-high)] text-[var(--color-on-surface-variant)]">نظام</span>
+                    <Badge variant="default" className="ms-2">نظام</Badge>
                   )}
                 </h2>
                 <p className="text-sm mt-0.5 text-[var(--color-on-surface-variant)]">{formatDate(entry.documentDate)}</p>
@@ -147,10 +147,10 @@ export function JournalEntryDetailPage() {
           </div>
           <div className="p-6">
             {entry.lines.length > 0 ? (
-              <div className="overflow-x-auto rounded-lg border" style={{ borderColor: 'var(--color-outline-variant)' }}>
-                <table className="min-w-full divide-y" style={{ borderColor: 'var(--color-outline-variant)' }}>
+              <div className="overflow-x-auto rounded-lg border border-[var(--color-outline-variant)]">
+                <table className="min-w-full divide-y border-[var(--color-outline-variant)]">
                     <thead>
-                      <tr style={{ backgroundColor: 'var(--color-surface-container-low)' }}>
+                      <tr className="bg-[var(--color-surface-container-low)]">
                         <th className="px-4 py-3 text-start text-xs font-bold text-[var(--color-on-surface-variant)]">#</th>
                         <th className="px-4 py-3 text-start text-xs font-bold text-[var(--color-on-surface-variant)]">الحساب</th>
                         <th className="px-4 py-3 text-end text-xs font-bold text-[var(--color-on-surface-variant)]">مدين</th>
@@ -159,9 +159,9 @@ export function JournalEntryDetailPage() {
                         <th className="px-4 py-3 text-start text-xs font-bold text-[var(--color-on-surface-variant)]">الأبعاد</th>
                       </tr>
                     </thead>
-                  <tbody className="divide-y" style={{ borderColor: 'var(--color-outline-variant)' }}>
+                  <tbody className="divide-y border-[var(--color-outline-variant)]">
                     {entry.lines.map((line) => (
-                      <tr key={line.id} style={{ backgroundColor: 'var(--color-surface)' }}>
+                      <tr key={line.id} className="bg-[var(--color-surface)]">
                         <td className="px-4 py-3 text-sm text-[var(--color-on-surface-variant)]">{line.sequence}</td>
                         <td className="px-4 py-3 text-sm font-bold text-[var(--color-on-surface)]">{line.accountCode} - {line.accountName}</td>
                         <td className="px-4 py-3 text-sm text-end tabular-nums font-bold text-[var(--color-on-surface)]">{line.debit > 0 ? line.debit.toLocaleString('ar-YE') : '-'}</td>

@@ -45,7 +45,6 @@ public class JournalEntryConfiguration : IEntityTypeConfiguration<JournalEntry>
 
         builder.HasIndex(e => e.FiscalYearId);
 
-        builder.HasIndex(e => e.SourceEventId);
 
         builder.HasIndex(e => e.ReversalOfId);
 
@@ -67,11 +66,6 @@ public class JournalEntryConfiguration : IEntityTypeConfiguration<JournalEntry>
         builder.HasOne(e => e.Journal)
             .WithMany()
             .HasForeignKey(e => e.JournalId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(e => e.SourceEvent)
-            .WithMany()
-            .HasForeignKey(e => e.SourceEventId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Cross-module FKs (Module 1)

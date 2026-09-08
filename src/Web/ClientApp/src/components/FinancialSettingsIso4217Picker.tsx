@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useIso4217Codes } from '@/features/financial-settings/hooks/useCurrencies';
 import type { Iso4217CodeDto } from '@/features/financial-settings/shared/types';
+import { FormField, Input } from '@/components/ui';
 
 interface Iso4217PickerProps {
   onSelect: (code: Iso4217CodeDto) => void;
@@ -12,7 +13,6 @@ export function Iso4217Picker({ onSelect, selectedCode, disabled }: Iso4217Picke
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
-  const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const { data: codes = [], isLoading } = useIso4217Codes(query || undefined);
 
@@ -65,30 +65,28 @@ export function Iso4217Picker({ onSelect, selectedCode, disabled }: Iso4217Picke
 
   return (
     <div className="relative">
-      <label htmlFor="isoSearch" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">
-        بحث ISO 4217 *
-      </label>
-      <input
-        ref={inputRef}
-        id="isoSearch"
-        type="text"
-        value={query}
-        onChange={(e) => {
-          setQuery(e.target.value);
-          setIsOpen(true);
-          setActiveIndex(-1);
-        }}
-        onFocus={() => setIsOpen(true)}
-        onBlur={() => setTimeout(() => setIsOpen(false), 150)}
-        onKeyDown={handleKeyDown}
-        placeholder="اكتب كود العملة مثل YER..."
-        disabled={disabled}
-        className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] focus:border-[var(--color-focus-ring)]"
-        role="combobox"
-        aria-expanded={isOpen}
-        aria-autocomplete="list"
-        aria-controls="iso4217-listbox"
-      />
+      <FormField label="بحث ISO 4217" htmlFor="isoSearch" required>
+        <Input
+          ref={inputRef}
+          id="isoSearch"
+          type="text"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setIsOpen(true);
+            setActiveIndex(-1);
+          }}
+          onFocus={() => setIsOpen(true)}
+          onBlur={() => setTimeout(() => setIsOpen(false), 150)}
+          onKeyDown={handleKeyDown}
+          placeholder="اكتب كود العملة مثل YER..."
+          disabled={disabled}
+          role="combobox"
+          aria-expanded={isOpen}
+          aria-autocomplete="list"
+          aria-controls="iso4217-listbox"
+        />
+      </FormField>
       {isOpen && codes.length > 0 && (
         <ul
           ref={listRef}

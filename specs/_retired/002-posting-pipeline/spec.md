@@ -1,5 +1,7 @@
 # SPEC-002 — Posting Pipeline
 
+> **RETIRED (DEP-026, spec 042, 2026-09-08)**: AccountingEvents staging entity removed. Posting pipeline now writes JournalEntries directly from domain events (PostingPipelineHandler + PostingRuleMatcher + JournalEntryGenerator retained; auditor/retry/queue removed). OutboxMessages shape retained.
+
 **Feature Branch**: `002-posting-pipeline`
 
 **Created**: 2026-09-02

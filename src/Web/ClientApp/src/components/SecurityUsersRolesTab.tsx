@@ -3,6 +3,7 @@ import { notify } from '@/features/notifications/notify';
 import { Shield, ShieldOff, Save } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
+import { Badge } from '@/components/ui/Badge';
 import { DataGrid } from '@/components/ui/DataGrid';
 import { Input } from '@/components/ui/Input';
 import { FormField } from '@/components/ui/FormField';
@@ -100,9 +101,9 @@ export function RolesTab({ userId }: RolesTabProps) {
       header: 'الحالة',
       width: 100,
       render: (_p: EffectivePermissionDto) => (
-        <span className="text-xs px-2 py-0.5 rounded-lg bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)]">
+        <Badge variant="primary">
           موروث
-        </span>
+        </Badge>
       ),
     },
     {
@@ -136,9 +137,9 @@ export function RolesTab({ userId }: RolesTabProps) {
         const pending = pendingOverrides.get(p.permissionId);
         const granted = pending ?? p.isGranted;
         return (
-          <span className={`text-xs px-2 py-0.5 rounded-lg ${granted ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+          <Badge variant={granted ? 'success' : 'danger'}>
             {granted ? 'ممنوح' : 'محجوب'}
-          </span>
+          </Badge>
         );
       },
     },

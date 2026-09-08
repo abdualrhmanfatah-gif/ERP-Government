@@ -178,8 +178,6 @@ public static class RolePermissionSeedData
             Make("Accounting.Templates.Read"), Make("Accounting.Templates.Create"), Make("Accounting.Templates.Update"),
             Make("Accounting.RecurringEntries.Read"), Make("Accounting.RecurringEntries.Create"), Make("Accounting.RecurringEntries.Pause"),
             Make("Accounting.RecurringEntries.Resume"), Make("Accounting.RecurringEntries.Cancel"),
-            Make("Accounting.AccountingEvents.Read"),
-            Make("Accounting.Balances.Rebuild"), Make("Accounting.Balances.Finalize"), Make("Accounting.Balances.Unfinalize"), Make("Accounting.Balances.Read"),
             Make("Accounting.Reports.BalanceSheet"), Make("Accounting.Reports.IncomeStatement"), Make("Accounting.Reports.GeneralLedger"),
             Make("Accounting.Reports.CashFlow"), Make("Accounting.Reports.TrialBalance"), Make("Accounting.Reports.Export"), Make("Accounting.Reports.Print"),
 

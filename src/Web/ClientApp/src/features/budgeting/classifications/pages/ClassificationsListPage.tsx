@@ -5,7 +5,7 @@ import { getExcludedDescendantIds } from '../utils/classification-utils';
 import { usePermission } from '../../../../shared/hooks/usePermission';
 import { BUDGET_PERMISSIONS } from '../../../../shared/constants/permissions';
 import { ChevronRight, ChevronLeft, Plus, Pencil } from 'lucide-react';
-import { Page, FilterBar, FilterSearch, FilterSelect, Dialog, Switch, ConfirmDialog, Button, Input, Select } from '../../../../components/ui';
+import { Page, FilterBar, FilterSearch, FilterSelect, Dialog, Switch, ConfirmDialog, Button, Input, Select, Badge } from '../../../../components/ui';
 import { notify } from '@/features/notifications/notify';
 
 export function normalizeTree(
@@ -141,9 +141,9 @@ function TreeItem({
         )}
         <span className="font-medium text-[var(--color-on-surface)]">{node.code}</span>
         <span className="text-[var(--color-on-surface-variant)]">{node.name}</span>
-        <span className="text-xs bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] rounded-full px-2 py-0.5">
+        <Badge variant="primary">
           مستوى {node.level}
-        </span>
+        </Badge>
         {canUpdate && (
           <Switch
             checked={node.isActive}

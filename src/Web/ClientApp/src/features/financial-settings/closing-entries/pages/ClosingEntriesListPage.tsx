@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Page, Button, FilterBar, FilterSelect, ConfirmDialog } from '@/components/ui';
+import { Page, Button, FilterBar, FilterSelect, ConfirmDialog, Badge } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Eye } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
@@ -50,7 +50,7 @@ export default function ClosingEntriesListPage() {
   const columns: DataGridColumn<typeof entries[0]>[] = [
     { header: 'رقم القيد', cell: (row) => <span className="font-mono font-medium">{row.closingEntryNumber}</span> },
     { header: 'التاريخ', cell: (row) => <span className="whitespace-nowrap">{new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium' }).format(new Date(row.closingDate))}</span> },
-    { header: 'الحالة', cell: (row) => <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium">{statusLabels[row.status] ?? row.status}</span> },
+    { header: 'الحالة', cell: (row) => <Badge variant={statusVariants[row.status] ?? 'default'}>{statusLabels[row.status] ?? row.status}</Badge> },
     { header: '逆转', cell: (row) => row.isReversal && <span className="text-xs">逆转: {row.reversalOfNumber}</span> },
     {
       header: 'إجراءات',

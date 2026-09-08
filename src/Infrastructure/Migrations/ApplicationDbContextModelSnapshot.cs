@@ -165,81 +165,6 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.ToTable("AccountGroups", (string)null);
                 });
 
-            modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.AccountingEvent", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset>("Created")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ErrorMessage")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("EventCategory")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("EventType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("JournalEntryId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset>("LastModified")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("ProcessedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("RetryCount")
-                        .HasColumnType("int");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int>("SourceDocumentId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SourceDocumentType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("JournalEntryId")
-                        .IsUnique()
-                        .HasFilter("[JournalEntryId] IS NOT NULL");
-
-                    b.HasIndex("EventType", "SourceDocumentType", "SourceDocumentId", "Status")
-                        .IsUnique()
-                        .HasFilter("[Status] = 'Posted'");
-
-                    b.ToTable("AccountingEvents", (string)null);
-                });
-
             modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.Journal", b =>
                 {
                     b.Property<int>("Id")
@@ -396,9 +321,6 @@ namespace ERP_Government.Infrastructure.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
-                    b.Property<int?>("SourceEventId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CancelledById");
@@ -415,8 +337,6 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.HasIndex("PostedById");
 
                     b.HasIndex("ReversalOfId");
-
-                    b.HasIndex("SourceEventId");
 
                     b.HasIndex("EntryStatus", "DocumentDate")
                         .HasDatabaseName("IX_JournalEntries_EntryStatus_DocumentDate");
@@ -7722,16 +7642,6 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.AccountingEvent", b =>
-                {
-                    b.HasOne("ERP_Government.Domain.Accounting.Entities.JournalEntry", "JournalEntry")
-                        .WithMany()
-                        .HasForeignKey("JournalEntryId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("JournalEntry");
-                });
-
             modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.Journal", b =>
                 {
                     b.HasOne("ERP_Government.Domain.Accounting.Entities.Account", "Account")
@@ -7783,11 +7693,6 @@ namespace ERP_Government.Infrastructure.Migrations
                         .HasForeignKey("ReversalOfId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("ERP_Government.Domain.Accounting.Entities.AccountingEvent", "SourceEvent")
-                        .WithMany()
-                        .HasForeignKey("SourceEventId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("CancelledBy");
 
                     b.Navigation("FiscalYear");
@@ -7799,8 +7704,6 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Navigation("PostedBy");
 
                     b.Navigation("ReversalOf");
-
-                    b.Navigation("SourceEvent");
                 });
 
             modelBuilder.Entity("ERP_Government.Domain.Accounting.Entities.JournalEntryLine", b =>

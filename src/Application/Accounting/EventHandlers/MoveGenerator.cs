@@ -9,7 +9,7 @@ namespace ERP_Government.Application.Accounting.EventHandlers;
 
 /// <summary>
 /// Generates JournalEntry (journal entry header) shells from PostingRule matches.
-/// Each PostingRule match produces one JournalEntry linked to the AccountingEvent.
+/// Each PostingRule match produces one JournalEntry (DEP-026 — SourceEventId link removed).
 /// JournalEntryLine generation is FEATURE-027 responsibility.
 /// </summary>
 public class JournalEntryGenerator
@@ -24,10 +24,10 @@ public class JournalEntryGenerator
     }
 
     /// <summary>
-    /// Creates a JournalEntry shell for the given PostingRule, linked to the AccountingEvent.
+    /// Creates a JournalEntry shell for the given PostingRule.
     /// </summary>
     public async Task<JournalEntry> GenerateJournalEntryAsync(
-        AccountingEvent accountingEvent,
+        EventType eventType,
         PostingRule postingRule,
         IHasSourceEntity sourceEvent,
         DateOnly documentDate,
@@ -42,17 +42,16 @@ public class JournalEntryGenerator
             PostingDate = documentDate,
             EntryStatus = EntryStatus.Draft,
             JournalId = postingRule.JournalId,
-            SourceEventId = accountingEvent.Id,
             IsSystemGenerated = true,
-            Narration = $"Auto-generated from {accountingEvent.EventType} event"
+            Narration = $"Auto-generated from {eventType} event"
         };
 
         _context.JournalEntries.Add(journalEntry);
         // SaveChangesAsync removed — persistence handled by OutboxProcessorService transaction scope.
         // Nested SaveChanges would re-trigger DispatchDomainEventsInterceptor, causing infinite recursion.
 
-        _logger.LogDebug("JournalEntry generated: EntryNumber={EntryNumber}, JournalId={JournalId}, SourceEventId={SourceEventId}",
-            journalEntry.EntryNumber, journalEntry.JournalId, journalEntry.SourceEventId);
+        _logger.LogDebug("JournalEntry generated: EntryNumber={EntryNumber}, JournalId={JournalId}",
+            journalEntry.EntryNumber, journalEntry.JournalId);
 
         return journalEntry;
     }

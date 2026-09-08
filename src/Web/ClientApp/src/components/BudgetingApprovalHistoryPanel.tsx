@@ -1,4 +1,5 @@
 import type { ApprovalDecisionDto } from '@/web-api-client';
+import { Loading } from '@/components/ui/Loading';
 
 interface ApprovalHistoryPanelProps {
   decisions: (ApprovalDecisionDto | null | undefined)[];
@@ -29,9 +30,7 @@ export function ApprovalHistoryPanel({
     <section aria-label={title} className="rounded-lg border border-[var(--color-outline)] p-4">
       <h2 className="mb-3 text-sm font-semibold">{title}</h2>
       {isLoading ? (
-        <p className="text-sm text-[var(--color-on-surface-variant)]" role="status">
-          جارٍ التحميل...
-        </p>
+        <Loading text="جارٍ التحميل..." />
       ) : items.length === 0 ? (
         <p className="text-sm text-[var(--color-on-surface-variant)]">لا يوجد سجل اعتمادات بعد</p>
       ) : (

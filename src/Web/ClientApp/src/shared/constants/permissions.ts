@@ -65,12 +65,6 @@ export const PERMISSIONS = {
       UpdateLines: 'Accounting.JournalEntries.UpdateLines',
       Cancel: 'Accounting.JournalEntries.Cancel',
     },
-    Balances: {
-      Read: 'Accounting.Balances.Read',
-      Finalize: 'Accounting.Balances.Finalize',
-      Unfinalize: 'Accounting.Balances.Unfinalize',
-      Rebuild: 'Accounting.Balances.Rebuild',
-    },
     Reports: {
       ViewBalanceSheet: 'Accounting.Reports.BalanceSheet',
       ViewIncomeStatement: 'Accounting.Reports.IncomeStatement',

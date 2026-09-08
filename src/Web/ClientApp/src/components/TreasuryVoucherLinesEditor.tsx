@@ -1,6 +1,6 @@
 // Revenue lines editor — at least one line required (FR-002).
 import { Plus, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button, FormField, Input, Select } from '@/components/ui';
 import type { LineFormRow, AccountLookupDto } from '@/features/treasury/shared/types';
 
 interface VoucherLinesEditorProps {
@@ -40,42 +40,40 @@ export function VoucherLinesEditor({ rows, accounts, disabled, onChange, error }
           className="grid grid-cols-1 md:grid-cols-3 gap-3 rounded border border-[var(--color-outline-variant)] p-3"
           data-testid={`line-row-${index}`}
         >
-          <div>
-            <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">حساب الإيراد *</label>
-            <select
-              value={row.revenueAccountId}
-              disabled={disabled}
-              onChange={(e) => updateRow(index, { revenueAccountId: Number(e.target.value) })}
-              className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-            >
-              <option value={0}>اختر الحساب...</option>
-              {accounts.map((a) => (
-                <option key={a.id} value={a.id}>{a.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">المبلغ *</label>
-            <input
+          <Select
+            label="حساب الإيراد"
+            id={`revenueAccountId-${index}`}
+            value={String(row.revenueAccountId)}
+            disabled={disabled}
+            onChange={(e) => updateRow(index, { revenueAccountId: Number(e.target.value) })}
+            options={[
+              { value: '0', label: 'اختر الحساب...' },
+              ...accounts.map((a) => ({ value: String(a.id), label: a.name })),
+            ]}
+          />
+          <FormField label="المبلغ" htmlFor={`amount-${index}`} required>
+            <Input
+              id={`amount-${index}`}
               type="number"
               min={0}
               step="0.01"
               value={row.amount}
               disabled={disabled}
               onChange={(e) => updateRow(index, { amount: Number(e.target.value) })}
-              className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm tabular-nums"
+              className="tabular-nums"
             />
-          </div>
+          </FormField>
           <div className="flex items-end gap-3">
             <div className="flex-1">
-              <label className="block text-xs text-[var(--color-on-surface-variant)] mb-1">الوصف</label>
-              <input
-                type="text"
-                value={row.description ?? ''}
-                disabled={disabled}
-                onChange={(e) => updateRow(index, { description: e.target.value })}
-                className="w-full rounded border border-[var(--color-outline)] bg-[var(--color-surface)] px-3 py-2 text-sm"
-              />
+              <FormField label="الوصف" htmlFor={`description-${index}`}>
+                <Input
+                  id={`description-${index}`}
+                  type="text"
+                  value={row.description ?? ''}
+                  disabled={disabled}
+                  onChange={(e) => updateRow(index, { description: e.target.value })}
+                />
+              </FormField>
             </div>
             <Button
               type="button"
