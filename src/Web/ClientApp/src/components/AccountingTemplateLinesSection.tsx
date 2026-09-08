@@ -4,6 +4,9 @@ import { useAccountsList } from '@/features/accounting/hooks/useAccountsList';
 import { useCurrenciesList } from '@/features/accounting/hooks/useCurrenciesList';
 import { useCreateTemplateLine, useUpdateTemplateLine, useRemoveTemplateLine } from '@/features/accounting/hooks/useTemplateLines';
 import { showToast } from '@/components/ui/Toast';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 
 export interface TemplateLineRow {
   id: number;
@@ -119,63 +122,58 @@ export function TemplateLinesSection({ templateId, lines }: Props) {
     }
   };
 
-  const inputCls = 'w-full px-3 py-2 rounded-lg border text-sm focus:outline-none';
-  const labelCls = 'block text-sm font-bold mb-1.5';
-
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <button type="button" onClick={openNew}
-          className="px-4 py-2 text-sm font-bold rounded-lg cursor-pointer hover:shadow-sm"
-          style={{ backgroundColor: 'var(--color-secondary-container)', color: 'var(--color-on-secondary-container)' }}>
+        <Button type="button" variant="secondary" size="sm" onClick={openNew}>
           + إضافة سطر
-        </button>
+        </Button>
       </div>
 
       {rows.length === 0 ? (
-        <div className="text-center py-12 rounded-lg border-2 border-dashed" style={{ borderColor: 'var(--color-outlineVariant)' }}>
-          <p className="text-sm font-medium" style={{ color: 'var(--color-onSurfaceVariant)' }}>لا توجد أسطر بعد</p>
+        <div className="text-center py-12 rounded-lg border-2 border-dashed border-[var(--color-outline-variant)]">
+          <p className="text-sm font-medium text-[var(--color-on-surface-variant)]">لا توجد أسطر بعد</p>
         </div>
       ) : (
         <div>
-          <div className="overflow-x-auto rounded-lg border" style={{ borderColor: 'var(--color-outlineVariant)' }}>
-            <table className="min-w-full divide-y" style={{ borderColor: 'var(--color-outlineVariant)' }}>
+          <div className="overflow-x-auto rounded-lg border border-[var(--color-outline-variant)]">
+            <table className="min-w-full divide-y border-[var(--color-outline-variant)]">
               <thead>
-                <tr style={{ backgroundColor: 'var(--color-surfaceContainerLow)' }}>
-                  <th className="px-4 py-3 text-right text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>#</th>
-                  <th className="px-4 py-3 text-right text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>الحساب</th>
-                  <th className="px-4 py-3 text-left text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>مدين</th>
-                  <th className="px-4 py-3 text-left text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>دائن</th>
-                  <th className="px-4 py-3 text-right text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>الوصف</th>
-                  <th className="px-4 py-3 text-right text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>عملة/سعر</th>
-                  <th className="px-4 py-3 text-right text-xs font-bold" style={{ color: 'var(--color-onSurfaceVariant)' }}>مركز تكلفة</th>
+                <tr className="bg-[var(--color-surface-container-low)]">
+                  <th className="px-4 py-3 text-right text-xs font-bold text-[var(--color-on-surface-variant)]">#</th>
+                  <th className="px-4 py-3 text-right text-xs font-bold text-[var(--color-on-surface-variant)]">الحساب</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-[var(--color-on-surface-variant)]">مدين</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-[var(--color-on-surface-variant)]">دائن</th>
+                  <th className="px-4 py-3 text-right text-xs font-bold text-[var(--color-on-surface-variant)]">الوصف</th>
+                  <th className="px-4 py-3 text-right text-xs font-bold text-[var(--color-on-surface-variant)]">عملة/سعر</th>
+                  <th className="px-4 py-3 text-right text-xs font-bold text-[var(--color-on-surface-variant)]">مركز تكلفة</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
-              <tbody className="divide-y" style={{ borderColor: 'var(--color-outlineVariant)' }}>
+              <tbody className="divide-y border-[var(--color-outline-variant)]">
                 {rows.map((line) => (
-                  <tr key={line.id} style={{ backgroundColor: 'var(--color-surface)' }}>
-                    <td className="px-4 py-3 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>{line.sequence}</td>
-                    <td className="px-4 py-3 text-sm font-bold" style={{ color: 'var(--color-onSurface)' }}>
+                  <tr key={line.id} className="bg-[var(--color-surface)]">
+                    <td className="px-4 py-3 text-sm text-[var(--color-on-surface-variant)]">{line.sequence}</td>
+                    <td className="px-4 py-3 text-sm font-bold text-[var(--color-on-surface)]">
                       {line.accountCode} - {line.accountName}
                     </td>
-                    <td className="px-4 py-3 text-sm text-left tabular-nums font-bold" style={{ color: 'var(--color-onSurface)' }}>
+                    <td className="px-4 py-3 text-sm text-left tabular-nums font-bold text-[var(--color-on-surface)]">
                       {line.debit > 0 ? line.debit.toLocaleString('ar-YE') : '-'}
                     </td>
-                    <td className="px-4 py-3 text-sm text-left tabular-nums font-bold" style={{ color: 'var(--color-onSurface)' }}>
+                    <td className="px-4 py-3 text-sm text-left tabular-nums font-bold text-[var(--color-on-surface)]">
                       {line.credit > 0 ? line.credit.toLocaleString('ar-YE') : '-'}
                     </td>
-                    <td className="px-4 py-3 text-sm" style={{ color: 'var(--color-onSurfaceVariant)' }}>{line.description || '-'}</td>
-                    <td className="px-4 py-3 text-xs" style={{ color: 'var(--color-onSurfaceVariant)' }}>
+                    <td className="px-4 py-3 text-sm text-[var(--color-on-surface-variant)]">{line.description || '-'}</td>
+                    <td className="px-4 py-3 text-xs text-[var(--color-on-surface-variant)]">
                       {line.currencyId} × {line.exchangeRate}
                     </td>
-                    <td className="px-4 py-3 text-xs" style={{ color: 'var(--color-onSurfaceVariant)' }}>
+                    <td className="px-4 py-3 text-xs text-[var(--color-on-surface-variant)]">
                       {line.costCenterName || line.costCenterId || '-'}
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <div className="flex gap-2">
-                        <button type="button" onClick={() => openEdit(line)} className="text-sm font-bold cursor-pointer hover:underline" style={{ color: 'var(--color-link)' }}>تعديل</button>
-                        <button type="button" onClick={() => remove(line)} className="text-sm font-bold cursor-pointer hover:underline" style={{ color: 'var(--color-error)' }}>حذف</button>
+                        <Button type="button" variant="link" size="sm" onClick={() => openEdit(line)}>تعديل</Button>
+                        <Button type="button" variant="ghost" size="sm" onClick={() => remove(line)} className="text-[var(--color-error)] hover:text-[var(--color-error)]">حذف</Button>
                       </div>
                     </td>
                   </tr>
@@ -188,50 +186,66 @@ export function TemplateLinesSection({ templateId, lines }: Props) {
       )}
 
       {editing && (
-        <div className="mt-4 rounded-lg border p-5 space-y-4" style={{ backgroundColor: 'var(--color-surfaceContainerLow)', borderColor: 'var(--color-outlineVariant)' }}>
-          <h4 className="text-sm font-bold" style={{ color: 'var(--color-onSurface)' }}>{editing.id ? 'تعديل سطر' : 'سطر جديد'}</h4>
+        <div className="mt-4 rounded-lg border p-5 space-y-4 bg-[var(--color-surface-container-low)] border-[var(--color-outline-variant)]">
+          <h4 className="text-sm font-bold text-[var(--color-on-surface)]">{editing.id ? 'تعديل سطر' : 'سطر جديد'}</h4>
           <div className="grid grid-cols-4 gap-4">
             <div className="col-span-2">
-              <label className={labelCls} style={{ color: 'var(--color-onSurface)' }}>الحساب</label>
-              <select value={editing.accountId || ''} onChange={(e) => setEditing({ ...editing, accountId: Number(e.target.value) })}
-                className={inputCls} style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-onSurface)', borderColor: 'var(--color-outlineVariant)' }}>
-                <option value="">اختر الحساب...</option>
-                {accounts.map((a) => <option key={a.id} value={a.id}>{a.code} - {a.name}</option>)}
-              </select>
+              <Select
+                label="الحساب"
+                value={editing.accountId || ''}
+                onChange={(e) => setEditing({ ...editing, accountId: Number(e.target.value) })}
+                options={[
+                  { value: '', label: 'اختر الحساب...' },
+                  ...accounts.map((a) => ({ value: String(a.id), label: `${a.code} - ${a.name}` })),
+                ]}
+              />
             </div>
             <div>
-              <label className={labelCls} style={{ color: 'var(--color-onSurface)' }}>العملة</label>
-              <select value={editing.currencyId || ''} onChange={(e) => setEditing({ ...editing, currencyId: Number(e.target.value) })}
-                className={inputCls} style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-onSurface)', borderColor: 'var(--color-outlineVariant)' }}>
-                {currencies?.map((c) => <option key={c.id} value={c.id}>{c.code} - {c.name}</option>)}
-              </select>
+              <Select
+                label="العملة"
+                value={editing.currencyId || ''}
+                onChange={(e) => setEditing({ ...editing, currencyId: Number(e.target.value) })}
+                options={currencies?.map((c) => ({ value: String(c.id), label: `${c.code} - ${c.name}` })) ?? []}
+              />
             </div>
             <div>
-              <label className={labelCls} style={{ color: 'var(--color-onSurface)' }}>سعر الصرف</label>
-              <input type="number" step="any" value={editing.exchangeRate || ''} onChange={(e) => setEditing({ ...editing, exchangeRate: Number(e.target.value) })} className={inputCls}
-                style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-onSurface)', borderColor: 'var(--color-outlineVariant)' }} />
+              <Input
+                label="سعر الصرف"
+                type="number"
+                step="any"
+                value={editing.exchangeRate || ''}
+                onChange={(e) => setEditing({ ...editing, exchangeRate: Number(e.target.value) })}
+              />
             </div>
             <div>
-              <label className={labelCls} style={{ color: 'var(--color-onSurface)' }}>مدين</label>
-              <input type="number" value={editing.debit || ''} onChange={(e) => setEditing({ ...editing, debit: Number(e.target.value), credit: 0 })} className={inputCls}
-                style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-onSurface)', borderColor: 'var(--color-outlineVariant)' }} />
+              <Input
+                label="مدين"
+                type="number"
+                value={editing.debit || ''}
+                onChange={(e) => setEditing({ ...editing, debit: Number(e.target.value), credit: 0 })}
+              />
             </div>
             <div>
-              <label className={labelCls} style={{ color: 'var(--color-onSurface)' }}>دائن</label>
-              <input type="number" value={editing.credit || ''} onChange={(e) => setEditing({ ...editing, credit: Number(e.target.value), debit: 0 })} className={inputCls}
-                style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-onSurface)', borderColor: 'var(--color-outlineVariant)' }} />
+              <Input
+                label="دائن"
+                type="number"
+                value={editing.credit || ''}
+                onChange={(e) => setEditing({ ...editing, credit: Number(e.target.value), debit: 0 })}
+              />
             </div>
             <div className="col-span-2">
-              <label className={labelCls} style={{ color: 'var(--color-onSurface)' }}>الوصف</label>
-              <input type="text" value={editing.description || ''} onChange={(e) => setEditing({ ...editing, description: e.target.value })} placeholder="وصف السطر..." className={inputCls}
-                style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-onSurface)', borderColor: 'var(--color-outlineVariant)' }} />
+              <Input
+                label="الوصف"
+                type="text"
+                value={editing.description || ''}
+                onChange={(e) => setEditing({ ...editing, description: e.target.value })}
+                placeholder="وصف السطر..."
+              />
             </div>
           </div>
           <div className="flex gap-2 pt-2">
-            <button type="button" onClick={save} className="px-4 py-2 text-sm font-bold rounded-lg cursor-pointer hover:shadow-sm"
-              style={{ backgroundColor: 'var(--color-success)', color: 'var(--color-surface)' }}>حفظ السطر</button>
-            <button type="button" onClick={() => setEditing(null)} className="px-4 py-2 text-sm font-bold rounded-lg cursor-pointer hover:shadow-sm"
-              style={{ backgroundColor: 'var(--color-surfaceContainer)', color: 'var(--color-onSurface)' }}>إلغاء</button>
+            <Button type="button" variant="primary" size="sm" onClick={save}>حفظ السطر</Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => setEditing(null)}>إلغاء</Button>
           </div>
         </div>
       )}

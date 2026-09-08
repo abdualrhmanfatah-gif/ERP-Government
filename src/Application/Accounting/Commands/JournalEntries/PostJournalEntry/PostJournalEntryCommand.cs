@@ -123,57 +123,7 @@ public class PostJournalEntryCommandHandler(
         entity.PostingDate = entity.DocumentDate;
         entity.PostedAt = DateTimeOffset.UtcNow;
 
-        // Load existing balances for this period/year combination
-        var existingBalances = await context.AccountBalances
-            .Where(x => x.FiscalYearId == entity.FiscalYearId
-                     && x.FiscalPeriodId == entity.PeriodId)
-            .ToListAsync(cancellationToken);
-
-        // Group lines by AccountId + CurrencyId
-        var lineGroups = journalEntryLines
-            .GroupBy(x => new { x.AccountId, x.CurrencyId })
-            .Select(g => new
-            {
-                g.Key.AccountId,
-                g.Key.CurrencyId,
-                TotalDebit = g.Sum(x => x.Debit),
-                TotalCredit = g.Sum(x => x.Credit)
-            })
-            .ToList();
-
-        foreach (var group in lineGroups)
-        {
-            var existing = existingBalances
-                .FirstOrDefault(x => x.AccountId == group.AccountId
-                                  && x.CurrencyId == group.CurrencyId);
-
-            if (existing is not null)
-            {
-                existing.Debit += group.TotalDebit;
-                existing.Credit += group.TotalCredit;
-                // Recalculate closing: Opening + Current - Credit side
-                existing.ClosingDebit = existing.OpeningDebit + existing.Debit - existing.ClosingCredit;
-                existing.ClosingCredit = existing.OpeningCredit + existing.Credit - existing.ClosingDebit;
-            }
-            else
-            {
-                // First balance for this account/period — opening = 0
-                context.AccountBalances.Add(new AccountBalance
-                {
-                    AccountId = group.AccountId,
-                    FiscalYearId = entity.FiscalYearId,
-                    FiscalPeriodId = entity.PeriodId,
-                    CurrencyId = group.CurrencyId,
-                    OpeningDebit = 0,
-                    OpeningCredit = 0,
-                    Debit = group.TotalDebit,
-                    Credit = group.TotalCredit,
-                    ClosingDebit = group.TotalDebit,
-                    ClosingCredit = group.TotalCredit,
-                    IsFinalized = false
-                });
-            }
-        }
+        // AccountBalances removed (DEP-026) — balances computed live from JournalEntryLines at query time
 
         // Raised on successful post to complete the posting pipeline (DEC-6)
         entity.AddDomainEvent(new JournalEntryPosted

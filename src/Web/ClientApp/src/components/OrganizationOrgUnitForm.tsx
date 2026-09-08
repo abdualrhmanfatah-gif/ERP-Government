@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { useOrganizationalUnits } from '@/features/organization/hooks';
 import type { OrganizationalUnitDto, CreateOrgUnitCommand } from '@/features/organization/types';
 
@@ -29,51 +31,41 @@ export function OrgUnitForm({ initialData, isEdit, onSubmit, serverError, loadin
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {serverError && (
-        <div className="p-3 bg-[var(--color-error-container)] text-[var(--color-on-error-container)] rounded-lg text-sm">{serverError}</div>
+        <div role="alert" className="p-3 bg-[var(--color-error-container)] text-[var(--color-on-error-container)] rounded-lg text-sm">{serverError}</div>
       )}
 
-      <div>
-        <label htmlFor="code" className="block text-sm font-medium text-[var(--color-on-surface)] mb-1">الكود <span aria-hidden="true" className="text-[var(--color-error)]">*</span></label>
-        <input
-          id="code"
-          type="text"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          disabled={isEdit}
-          required
-          maxLength={50}
-          className="w-full px-3 py-2 border border-[var(--color-border-container)] rounded-lg bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50"
-          dir="ltr"
-        />
-      </div>
+      <Input
+        label="الكود"
+        id="code"
+        type="text"
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+        disabled={isEdit}
+        required
+        maxLength={50}
+        dir="ltr"
+      />
 
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-[var(--color-on-surface)] mb-1">الاسم <span aria-hidden="true" className="text-[var(--color-error)]">*</span></label>
-        <input
-          id="name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          maxLength={200}
-          className="w-full px-3 py-2 border border-[var(--color-border-container)] rounded-lg bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-        />
-      </div>
+      <Input
+        label="الاسم"
+        id="name"
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+        maxLength={200}
+      />
 
-      <div>
-        <label htmlFor="parentId" className="block text-sm font-medium text-[var(--color-on-surface)] mb-1">الوحدة الأب</label>
-        <select
-          id="parentId"
-          value={parentId}
-          onChange={(e) => setParentId(e.target.value)}
-          className="w-full px-3 py-2 border border-[var(--color-border-container)] rounded-lg bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-        >
-          <option value="">— لا يوجد —</option>
-          {orgUnits.map(ou => (
-            <option key={ou.id} value={ou.id}>{ou.name}</option>
-          ))}
-        </select>
-      </div>
+      <Select
+        label="الوحدة الأب"
+        id="parentId"
+        value={parentId}
+        onChange={(e) => setParentId(e.target.value)}
+        options={[
+          { value: '', label: '— لا يوجد —' },
+          ...orgUnits.map((ou) => ({ value: String(ou.id), label: ou.name })),
+        ]}
+      />
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="submit" variant="primary" disabled={loading} loading={loading}>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useStatusLog } from '@/features/documents/hooks/useDocuments';
 import type { StatusLogPanelProps } from '@/features/documents/shared/types';
+import { Button } from '@/components/ui/Button';
 
 export function StatusLogPanel({ documentType, documentId }: StatusLogPanelProps) {
   const { data: statusLog, isLoading, isError, refetch } = useStatusLog(documentType, documentId);
@@ -18,25 +19,23 @@ export function StatusLogPanel({ documentType, documentId }: StatusLogPanelProps
     return (
       <div className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-4">
         <p className="text-sm text-[var(--color-error)]">حدث خطأ أثناء تحميل سجل الحالات</p>
-        <button
-          onClick={() => refetch()}
-          className="mt-2 text-sm text-[var(--color-link)] underline"
-        >
+        <Button variant="link" size="sm" onClick={() => refetch()} className="mt-2">
           إعادة المحاولة
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)]">
-      <button
+      <Button
+        variant="ghost"
         className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-[var(--color-on-surface)]"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <span>سجل الحالات</span>
         <span className="text-[var(--color-on-surface-variant)]">{isExpanded ? '▲' : '▼'}</span>
-      </button>
+      </Button>
       {isExpanded && (
         <div className="px-4 pb-4">
           {!statusLog || statusLog.length === 0 ? (

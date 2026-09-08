@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { Textarea } from '@/components/ui/Textarea';
 import type { SecurityRoleDto, CreateRoleCommand } from '@/features/security/rbac/types';
 
 const roleLevelOptions = [
@@ -40,75 +43,57 @@ export function RoleForm({ initialData, isEdit, onSubmit, serverError, loading }
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {serverError && (
-        <div className="p-3 bg-[var(--color-error-container)] text-[var(--color-on-error-container)] rounded-lg text-sm">{serverError}</div>
+        <div role="alert" className="p-3 bg-[var(--color-error-container)] text-[var(--color-on-error-container)] rounded-lg text-sm">{serverError}</div>
       )}
 
-      <div>
-        <label htmlFor="code" className="block text-sm font-medium text-[var(--color-on-surface)] mb-1">الكود <span aria-hidden="true" className="text-[var(--color-error)]">*</span></label>
-        <input
-          id="code"
-          type="text"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          disabled={isEdit}
-          required
-          maxLength={50}
-          className="w-full px-3 py-2 border border-[var(--color-border-container)] rounded-lg bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50"
-          dir="ltr"
-        />
-      </div>
+      <Input
+        label="الكود"
+        id="code"
+        type="text"
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+        disabled={isEdit}
+        required
+        maxLength={50}
+        dir="ltr"
+      />
 
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-[var(--color-on-surface)] mb-1">الاسم <span aria-hidden="true" className="text-[var(--color-error)]">*</span></label>
-        <input
-          id="name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          maxLength={200}
-          className="w-full px-3 py-2 border border-[var(--color-border-container)] rounded-lg bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-        />
-      </div>
+      <Input
+        label="الاسم"
+        id="name"
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+        maxLength={200}
+      />
 
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-[var(--color-on-surface)] mb-1">الوصف</label>
-        <textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          maxLength={500}
-          rows={3}
-          className="w-full px-3 py-2 border border-[var(--color-border-container)] rounded-lg bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-        />
-      </div>
+      <Textarea
+        label="الوصف"
+        id="description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        maxLength={500}
+        rows={3}
+      />
 
-      <div>
-        <label htmlFor="roleLevel" className="block text-sm font-medium text-[var(--color-on-surface)] mb-1">مستوى الدور</label>
-        <select
-          id="roleLevel"
-          value={roleLevel}
-          onChange={(e) => setRoleLevel(e.target.value)}
-          className="w-full px-3 py-2 border border-[var(--color-border-container)] rounded-lg bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-        >
-          {roleLevelOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
-      </div>
+      <Select
+        label="مستوى الدور"
+        id="roleLevel"
+        value={roleLevel}
+        onChange={(e) => setRoleLevel(e.target.value)}
+        options={roleLevelOptions}
+      />
 
-      <div>
-        <label htmlFor="maxSessionDuration" className="block text-sm font-medium text-[var(--color-on-surface)] mb-1">مدة الجلسة القصوى (دقيقة)</label>
-        <input
-          id="maxSessionDuration"
-          type="number"
-          value={maxSessionDuration}
-          onChange={(e) => setMaxSessionDuration(e.target.value)}
-          min={1}
-          className="w-full px-3 py-2 border border-[var(--color-border-container)] rounded-lg bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-          dir="ltr"
-        />
-      </div>
+      <Input
+        label="مدة الجلسة القصوى (دقيقة)"
+        id="maxSessionDuration"
+        type="number"
+        value={maxSessionDuration}
+        onChange={(e) => setMaxSessionDuration(e.target.value)}
+        min={1}
+        dir="ltr"
+      />
 
       <div className="flex items-center gap-2">
         <input

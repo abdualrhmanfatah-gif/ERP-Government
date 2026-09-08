@@ -57,8 +57,7 @@ public class PostJournalEntryCommandTests
 
     private void SetupDependencies(
         List<JournalEntryLine> lines,
-        List<Currency>? currencies = null,
-        List<AccountBalance>? existingBalances = null)
+        List<Currency>? currencies = null)
     {
         var journalEntry = new JournalEntry
         {
@@ -85,9 +84,6 @@ public class PostJournalEntryCommandTests
         _contextMock.Setup(x => x.Currencies).Returns(currencies.AsQueryable().BuildMockForAsync().Object);
 
         _contextMock.Setup(x => x.JournalEntryLines).Returns(lines.AsQueryable().BuildMockForAsync().Object);
-
-        _contextMock.Setup(x => x.AccountBalances)
-            .Returns((existingBalances ?? new List<AccountBalance>()).AsQueryable().BuildMockForAsync().Object);
 
         _contextMock.Setup(x => x.SecurityAuditLogs)
             .Returns(new List<SecurityAuditLog>().AsQueryable().BuildMockForAsync().Object);

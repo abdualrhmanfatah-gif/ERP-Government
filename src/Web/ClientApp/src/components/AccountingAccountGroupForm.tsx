@@ -59,20 +59,29 @@ export function AccountGroupForm({ open, onOpenChange, initial, onSubmit, isPend
           <Input label="الكود (20)" {...form.register('code')} disabled={!!initial} error={form.formState.errors.code?.message} />
           <Input label="الاسم (200)" {...form.register('name')} error={form.formState.errors.name?.message} />
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm">النوع</label>
-              <select {...form.register('type')} className="w-full rounded-md border p-2">
-                <option value="Asset">أصل - Asset</option><option value="Liability">التزام - Liability</option><option value="Equity">حقوق ملكية - Equity</option><option value="Revenue">إيراد - Revenue</option><option value="Expense">مصروف - Expense</option>
-              </select>
-              <p className="text-xs text-[var(--color-error)]">{form.formState.errors.type?.message}</p>
-            </div>
-            <div>
-              <label className="text-sm">الرصيد الطبيعي</label>
-              <select {...form.register('normalBalance')} className="w-full rounded-md border p-2">
-                <option value="Debit">مدين - Debit</option><option value="Credit">دائن - Credit</option>
-              </select>
-              <p className="text-xs text-[var(--color-error)]">{form.formState.errors.normalBalance?.message}</p>
-            </div>
+            <Select
+              label="النوع"
+              value={form.watch('type')}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => form.setValue('type', e.target.value as 'Asset'|'Liability'|'Equity'|'Revenue'|'Expense', { shouldValidate: true })}
+              options={[
+                { value: 'Asset', label: 'أصل - Asset' },
+                { value: 'Liability', label: 'التزام - Liability' },
+                { value: 'Equity', label: 'حقوق ملكية - Equity' },
+                { value: 'Revenue', label: 'إيراد - Revenue' },
+                { value: 'Expense', label: 'مصروف - Expense' },
+              ]}
+              error={form.formState.errors.type?.message}
+            />
+            <Select
+              label="الرصيد الطبيعي"
+              value={form.watch('normalBalance')}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => form.setValue('normalBalance', e.target.value as 'Debit'|'Credit', { shouldValidate: true })}
+              options={[
+                { value: 'Debit', label: 'مدين - Debit' },
+                { value: 'Credit', label: 'دائن - Credit' },
+              ]}
+              error={form.formState.errors.normalBalance?.message}
+            />
           </div>
           <Input label="الوصف (500 اختياري)" {...form.register('description')} error={form.formState.errors.description?.message} />
           <Select

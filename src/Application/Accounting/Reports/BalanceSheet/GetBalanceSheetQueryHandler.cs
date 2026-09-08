@@ -17,23 +17,27 @@ public class GetBalanceSheetQueryHandler(
         {
             var asOfDate = DateOnly.TryParse(request.AsOfDate, out var parsed) ? parsed : DateOnly.FromDateTime(DateTime.Today);
 
-            var balances = await context.AccountBalances
+            // Live aggregation from posted JournalEntryLines up to as-of date (DEP-026 — AccountBalances removed)
+            var balances = await context.JournalEntryLines
+                .Include(x => x.JournalEntry)
                 .Include(x => x.Account)
                     .ThenInclude(a => a.AccountGroup)
-                .Where(x => x.Account.IsActive)
+                .Where(x => x.JournalEntry.EntryStatus == EntryStatus.Posted
+                         && x.JournalEntry.DocumentDate <= asOfDate
+                         && x.Account.IsActive)
                 .ToListAsync(cancellationToken);
 
-            var assets = BuildGroup(balances, AccountGroupType.Asset, asOfDate);
-            var liabilities = BuildGroup(balances, AccountGroupType.Liability, asOfDate);
-            var equityBase = BuildGroup(balances, AccountGroupType.Equity, asOfDate);
+            var assets = BuildGroup(balances, AccountGroupType.Asset);
+            var liabilities = BuildGroup(balances, AccountGroupType.Liability);
+            var equityBase = BuildGroup(balances, AccountGroupType.Equity);
 
             // Compute NetIncome from Revenue and Expense accounts
             var netIncome = balances
                 .Where(x => x.Account.AccountGroup.Type == AccountGroupType.Revenue)
-                .Sum(x => x.ClosingCredit - x.ClosingDebit)
+                .Sum(x => x.Credit - x.Debit)
                 - balances
                 .Where(x => x.Account.AccountGroup.Type == AccountGroupType.Expense)
-                .Sum(x => x.ClosingDebit - x.ClosingCredit);
+                .Sum(x => x.Debit - x.Credit);
 
             var totalEquity = equityBase.Total + netIncome;
 
@@ -87,11 +91,10 @@ public class GetBalanceSheetQueryHandler(
     }
 
     private static BalanceSheetGroup BuildGroup(
-        List<AccountBalance> balances,
-        AccountGroupType type,
-        DateOnly asOfDate)
+        List<JournalEntryLine> lines,
+        AccountGroupType type)
     {
-        var typeBalances = balances
+        var typeBalances = lines
             .Where(x => x.Account.AccountGroup.Type == type)
             .ToList();
 
@@ -102,19 +105,19 @@ public class GetBalanceSheetQueryHandler(
             {
                 Title = g.Key.Name,
                 TitleEn = g.Key.Name,
-                Lines = g.Select(x => new ReportLine
+                Lines = g.GroupBy(x => x.Account).Select(a => new ReportLine
                 {
-                    AccountCode = x.Account.Code,
-                    AccountName = x.Account.Name,
-                    Debit = x.ClosingDebit,
-                    Credit = x.ClosingCredit,
+                    AccountCode = a.Key.Code,
+                    AccountName = a.Key.Name,
+                    Debit = a.Sum(x => x.Debit),
+                    Credit = a.Sum(x => x.Credit),
                     Balance = type == AccountGroupType.Asset
-                        ? x.ClosingDebit - x.ClosingCredit
-                        : x.ClosingCredit - x.ClosingDebit,
+                        ? a.Sum(x => x.Debit) - a.Sum(x => x.Credit)
+                        : a.Sum(x => x.Credit) - a.Sum(x => x.Debit),
                 }).ToList(),
-                Total = g.Sum(x => type == AccountGroupType.Asset
-                    ? x.ClosingDebit - x.ClosingCredit
-                    : x.ClosingCredit - x.ClosingDebit),
+                Total = g.GroupBy(x => x.Account).Sum(a => type == AccountGroupType.Asset
+                    ? a.Sum(x => x.Debit) - a.Sum(x => x.Credit)
+                    : a.Sum(x => x.Credit) - a.Sum(x => x.Debit)),
             })
             .ToList();
 

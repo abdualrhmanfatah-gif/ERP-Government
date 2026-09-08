@@ -1,5 +1,7 @@
 # Feature Specification: ACC-05 — مراقبة المحاسبة (Accounting Monitoring)
 
+> **RETIRED (DEP-026, spec 041)**: AccountBalance entity/endpoints removed. Balances computed live from JournalEntryLines. Remaining sections below document PostingRules/AccountingEvents as they stood; AccountingEvents retired separately (spec 042).
+
 **Feature Branch**: `030-accounting-monitoring`
 
 **Created**: 2026-09-07

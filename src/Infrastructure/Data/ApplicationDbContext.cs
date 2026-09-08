@@ -64,7 +64,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Journal> Journals => Set<Journal>();
     public DbSet<JournalEntry> JournalEntries => Set<JournalEntry>();
     public DbSet<JournalEntryLine> JournalEntryLines => Set<JournalEntryLine>();
-    public DbSet<AccountBalance> AccountBalances => Set<AccountBalance>();
     public DbSet<AccountingEvent> AccountingEvents => Set<AccountingEvent>();
     public DbSet<PostingRule> PostingRules => Set<PostingRule>();
     public DbSet<PostingRuleLine> PostingRuleLines => Set<PostingRuleLine>();

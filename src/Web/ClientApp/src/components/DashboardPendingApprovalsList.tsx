@@ -1,6 +1,7 @@
 import { usePendingApprovalsCount } from '@/features/dashboard/hooks/usePendingApprovalsCount';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Button } from '@/components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { Clock, ChevronLeft } from 'lucide-react';
 
@@ -67,13 +68,14 @@ export function PendingApprovalsList() {
         </div>
       ))}
       {data.items.length > 5 && (
-        <button
-          type="button"
+        <Button
+          variant="link"
+          size="sm"
           onClick={() => navigate('/approval-rules/pending')}
-          className="w-full text-center py-2 text-body-sm text-[var(--color-primary)] hover:text-[var(--color-primary-container)] transition-colors cursor-pointer"
+          className="w-full"
         >
           عرض الكل ({data.items.length})
-        </button>
+        </Button>
       )}
     </div>
   );

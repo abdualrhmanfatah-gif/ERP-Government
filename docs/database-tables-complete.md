@@ -1,7 +1,7 @@
 # جداول قاعدة البيانات — Database Tables Complete Reference
 
 > **تاريخ آخر تحديث:** 2026-09-07
-> **عدد الجداول:** 103 جداول
+> **عدد الجداول:** 102 جدول
 
 ---
 
@@ -460,7 +460,7 @@
 
 ---
 
-## 5. المحاسبة — Accounting (12)
+## 5. المحاسبة — Accounting (11)
 
 ### 5.1 مجموعات الحسابات — AccountGroups
 
@@ -553,27 +553,11 @@
 | معرف أمر الدفع | PaymentOrderId | int? | FK→PaymentOrders |
 | نسخة الصف | RowVersion | byte[] | |
 
-### 5.6 أرصدة الحسابات — AccountBalances
-
-| العمود | Column | النوع | القيود |
-|--------|--------|------|--------|
-| المعرف | Id | int | PK |
-| معرف الحساب | AccountId | int | FK→Accounts |
-| معرف السنة المالية | FiscalYearId | int | FK→FiscalYears |
-| معرف الفترة المالية | FiscalPeriodId | int | FK→FiscalPeriods |
-| معرف العملة | CurrencyId | int | FK→Currencies |
-| رصيد افتتاحي مدين | OpeningDebit | decimal | |
-| رصيد افتتاحي دائن | OpeningCredit | decimal | |
-| إجمالي المدين | Debit | decimal | |
-| إجمالي الدائن | Credit | decimal | |
-| رصيد ختامي مدين | ClosingDebit | decimal | |
-| رصيد ختامي دائن | ClosingCredit | decimal | |
-| مُ finalized | IsFinalized | bool | |
 | وقت التfinalization | FinalizedAt | DateTimeOffset? | |
 | نشط | IsActive | bool | default true |
 | نسخة الصف | RowVersion | byte[] | |
 
-### 5.7 الأحداث المحاسبية — AccountingEvents
+### 5.6 الأحداث المحاسبية — AccountingEvents
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -589,7 +573,7 @@
 | عدد المحاولات | RetryCount | int | |
 | نسخة الصف | RowVersion | byte[] | |
 
-### 5.8 قواعد الترحيل — PostingRules
+### 5.7 قواعد الترحيل — PostingRules
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -601,7 +585,7 @@
 | نشط | IsActive | bool | default true |
 | نسخة صف | RowVersion | byte[] | |
 
-### 5.9 أسطر قواعد الترحيل — PostingRuleLines
+### 5.8 أسطر قواعد الترحيل — PostingRuleLines
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -618,7 +602,7 @@
 | نشط | IsActive | bool | default true |
 | نسخة صف | RowVersion | byte[] | |
 
-### 5.10 قوالب قيود اليومية — JournalEntryTemplates
+### 5.9 قوالب قيود اليومية — JournalEntryTemplates
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -631,7 +615,7 @@
 | نشط | IsActive | bool | default true |
 | نسخة صف | RowVersion | byte[] | |
 
-### 5.11 أسطر القوالب — JournalEntryTemplateLines
+### 5.10 أسطر القوالب — JournalEntryTemplateLines
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -647,7 +631,7 @@
 | معرف مركز التكلفة | CostCenterId | int? | FK→CostCenters |
 | نسخة صف | RowVersion | byte[] | |
 
-### 5.12 القيود الدورية — RecurringEntries
+### 5.11 القيود الدورية — RecurringEntries
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|

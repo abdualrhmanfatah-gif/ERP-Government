@@ -178,8 +178,6 @@ public class PostJournalEntryRateResolutionTests
             new FiscalYear { Id = 1, Status = FiscalYearStatus.Open });
         _contextMock.Setup(c => c.FiscalYears).Returns(yearsMock.Object);
 
-        _contextMock.Setup(c => c.AccountBalances)
-            .Returns(new List<AccountBalance>().AsQueryable().BuildMockForAsync().Object);
         _contextMock.Setup(c => c.SecurityAuditLogs)
             .Returns(new List<SecurityAuditLog>().AsQueryable().BuildMockForAsync().Object);
         _contextMock.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);

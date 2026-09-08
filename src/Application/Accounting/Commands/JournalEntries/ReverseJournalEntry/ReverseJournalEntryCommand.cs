@@ -53,11 +53,7 @@ public class ReverseJournalEntryCommandHandler(
         if (fiscalYear.Status != FiscalYearStatus.Open)
             return Result<int>.Failure(["Fiscal year is not Open."]);
 
-        // FR-020: Block reversal in finalized periods
-        var balanceInPeriod = await context.AccountBalances
-            .FirstOrDefaultAsync(x => x.FiscalPeriodId == original.PeriodId, cancellationToken);
-        if (balanceInPeriod?.IsFinalized == true)
-            return Result<int>.Failure(["Cannot reverse a journal entry in a finalized period. Unfinalize the period first."]);
+        // FR-020 (revised): finalized-period blocking handled by IsLockedForPosting check above (AccountBalances removed — DEP-026)
 
         // Get original lines
         var originalLines = await context.JournalEntryLines
@@ -113,55 +109,7 @@ public class ReverseJournalEntryCommandHandler(
         // Mark original as reversed
         original.EntryStatus = EntryStatus.Reversed;
 
-        // FR-001: Update account balances for reversal lines
-        var reversalBalanceUpdates = originalLines
-            .GroupBy(x => new { x.AccountId, x.CurrencyId })
-            .Select(g => new
-            {
-                g.Key.AccountId,
-                g.Key.CurrencyId,
-                // Reversal swaps debit/credit
-                ReversalDebit = g.Sum(x => x.Credit),
-                ReversalCredit = g.Sum(x => x.Debit)
-            })
-            .ToList();
-
-        var existingBalances = await context.AccountBalances
-            .Where(x => x.FiscalYearId == original.FiscalYearId
-                     && x.FiscalPeriodId == original.PeriodId)
-            .ToListAsync(cancellationToken);
-
-        foreach (var update in reversalBalanceUpdates)
-        {
-            var existing = existingBalances
-                .FirstOrDefault(x => x.AccountId == update.AccountId
-                                  && x.CurrencyId == update.CurrencyId);
-
-            if (existing is not null)
-            {
-                existing.Debit += update.ReversalDebit;
-                existing.Credit += update.ReversalCredit;
-                existing.ClosingDebit = existing.OpeningDebit + existing.Debit - existing.ClosingCredit;
-                existing.ClosingCredit = existing.OpeningCredit + existing.Credit - existing.ClosingDebit;
-            }
-            else
-            {
-                context.AccountBalances.Add(new AccountBalance
-                {
-                    AccountId = update.AccountId,
-                    FiscalYearId = original.FiscalYearId,
-                    FiscalPeriodId = original.PeriodId,
-                    CurrencyId = update.CurrencyId,
-                    OpeningDebit = 0,
-                    OpeningCredit = 0,
-                    Debit = update.ReversalDebit,
-                    Credit = update.ReversalCredit,
-                    ClosingDebit = update.ReversalDebit,
-                    ClosingCredit = update.ReversalCredit,
-                    IsFinalized = false
-                });
-            }
-        }
+        // FR-001 (revised): AccountBalances removed (DEP-026) — reversal lines themselves adjust live aggregation
 
         await context.SaveChangesAsync(cancellationToken);
 
