@@ -315,10 +315,6 @@ public static class PermissionCodes
     public const string ApprovalRulesView = "ApprovalRules.View";
     public const string ApprovalRulesManage = "ApprovalRules.Manage";
 
-    // ─── Approval Delegations ─────────────────────────────────────────
-    public const string ApprovalDelegationsView = "ApprovalDelegations.View";
-    public const string ApprovalDelegationsManage = "ApprovalDelegations.Manage";
-
     // ─── Workflow ─────────────────────────────────────────────────────
     public const string WorkflowDefinitionsView = "WorkflowDefinitions.View";
     public const string WorkflowDefinitionsManage = "WorkflowDefinitions.Manage";

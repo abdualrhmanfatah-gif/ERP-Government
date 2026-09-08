@@ -1,7 +1,7 @@
 # جداول قاعدة البيانات — Database Tables Complete Reference
 
 > **تاريخ آخر تحديث:** 2026-09-07
-> **عدد الجداول:** 105 جداول
+> **عدد الجداول:** 104 جداول
 
 ---
 
@@ -207,22 +207,7 @@
 | معرف الصلاحية | PermissionId | int | FK→SecurityPermissions |
 | نسخة الصف | RowVersion | byte[] | |
 
-### 2.7 تفويضات الاعتماد — ApprovalDelegations
-
-| العمود | Column | النوع | القيود |
-|--------|--------|------|--------|
-| المعرف | Id | int | PK |
-| معرف المُفوِّض | DelegatorUserId | int | FK→Users |
-| معرف المُفوَّض إليه | DelegateUserId | int | FK→Users |
-| نوع الكيان | EntityType | string? | |
-| تاريخ البدء | StartDate | DateOnly | |
-| تاريخ الانتهاء | EndDate | DateOnly | |
-| الحالة | Status | enum (DelegationStatus) | |
-| يُسمح بإعادة التفويض | CanReDelegate | bool | |
-| السبب | Reason | string? | |
-| نسخة الصف | RowVersion | byte[] | |
-
-### 2.8 سجلات التدقيق الأمنية — SecurityAuditLogs
+### 2.7 سجلات التدقيق الأمنية — SecurityAuditLogs
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -241,7 +226,7 @@
 | القيم الجديدة | NewValues | string? | |
 | الوقت | Timestamp | DateTimeOffset | |
 
-### 2.9 قواعد الاعتماد — ApprovalRules
+### 2.8 قواعد الاعتماد — ApprovalRules
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -256,7 +241,7 @@
 | نشط | IsActive | bool | default true |
 | نسخة الصف | RowVersion | byte[] | |
 
-### 2.10 سجل الاعتمادات — ApprovalHistory
+### 2.9 سجل الاعتمادات — ApprovalHistory
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -273,7 +258,7 @@
 | لقطة التقييم | EvaluationSnapshot | string? | |
 | نسخة الصف | RowVersion | byte[] | |
 
-### 2.11 المرفقات — Attachments
+### 2.10 المرفقات — Attachments
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -292,7 +277,7 @@
 | تاريخ الإنشاء | CreatedAt | DateTimeOffset | |
 | نسخة الصف | RowVersion | byte[] | |
 
-### 2.12 سجلات حالة المستندات — DocumentStatusLogs
+### 2.11 سجلات حالة المستندات — DocumentStatusLogs
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -305,7 +290,7 @@
 | وقت التغيير | ChangedAt | DateTimeOffset | |
 | السبب | Reason | string? | |
 
-### 2.13 متطلبات المرفقات — DocumentAttachmentRequirements
+### 2.12 متطلبات المرفقات — DocumentAttachmentRequirements
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -317,7 +302,7 @@
 | نشط | IsActive | bool | default true |
 | نسخة الصف | RowVersion | byte[] | |
 
-### 2.14 الإشعارات — Notifications
+### 2.13 الإشعارات — Notifications
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|
@@ -332,7 +317,7 @@
 | مقروء | IsRead | bool | |
 | وقت القراءة | ReadAt | DateTimeOffset? | |
 
-### 2.15 آثار التدقيق — AuditTrails
+### 2.14 آثار التدقيق — AuditTrails
 
 | العمود | Column | النوع | القيود |
 |--------|--------|------|--------|

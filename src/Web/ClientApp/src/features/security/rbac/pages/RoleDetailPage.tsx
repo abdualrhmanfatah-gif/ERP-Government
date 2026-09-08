@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Plus, Trash2 } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
-import { Page, Button, StatusBadge, DataGrid, type DataGridColumn, Loading, Card, Input, EmptyState } from '@/components/ui';
+import { Page, Button, StatusBadge, DataGrid, Loading, Card, Input, EmptyState } from '@/components/ui';
+import type { DataGridColumn } from '@/components/ui/DataGrid';
 import { useRoles, useRolePermissions, useAssignRolePermission, useRemoveRolePermission, usePermissions } from '../hooks';
 
 interface AssignedPermission {

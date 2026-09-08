@@ -35,7 +35,6 @@ public interface IApplicationDbContext
     DbSet<SecurityPermission> SecurityPermissions { get; }
     DbSet<UserPermission> UserPermissions { get; }
     DbSet<RolePermission> RolePermissions { get; }
-    DbSet<ApprovalDelegation> ApprovalDelegations { get; }
     DbSet<SecurityAuditLog> SecurityAuditLogs { get; }
     DbSet<ApprovalRule> ApprovalRules { get; }
     DbSet<ApprovalHistory> ApprovalHistory { get; }

@@ -233,6 +233,6 @@ export function AccountGroupDetailPage() {
         }}
         isPending={updateMut.isPending}
       />
-    </div>
+    </Page>
   );
 }

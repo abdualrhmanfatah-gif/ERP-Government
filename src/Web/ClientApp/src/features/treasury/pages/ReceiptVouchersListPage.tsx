@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Button, FilterBar, FilterDate, FilterSelect, Badge, EmptyState, Loading, MoneyDisplay, Page } from '@/components/ui';
+import { Button, FilterBar, FilterDate, FilterSelect, Badge, EmptyState, MoneyDisplay, Page } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Eye } from 'lucide-react';
 import { ReceiptVouchersClient, PaymentMethod, ReceiptVoucherStatus } from '../../../web-api-client';

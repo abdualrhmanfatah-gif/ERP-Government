@@ -1,9 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Loading } from '@/components/ui/Loading';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { Page, Button, Card, Loading, EmptyState } from '@/components/ui';
 import { TemplateForm } from '@/components/AccountingTemplateForm';
 import { TemplateLinesSection } from '@/components/AccountingTemplateLinesSection';
 import { useTemplateById } from '../../hooks/useTemplateById';
@@ -18,10 +14,6 @@ export function TemplateEditPage() {
   const { data: template, isLoading } = useTemplateById(templateId);
   const { mutateAsync, isPending } = useUpdateTemplate();
   const { data: journals = [] } = useJournalsList();
-
-  if (isLoading) {
-    return <Loading />;
-  }
 
   if (!template) {
     return (
@@ -57,8 +49,7 @@ export function TemplateEditPage() {
   };
 
   return (
-    <div>
-      <PageHeader title={`تعديل القالب: ${template.templateName}`} description={`الدفتر: ${template.journalName}`} />
+    <Page title={`تعديل القالب: ${template.templateName}`} description={`الدفتر: ${template.journalName}`} maxWidth="sm" loading={isLoading}>
       <TemplateForm
         initialData={template}
         journals={journals}
@@ -73,6 +64,6 @@ export function TemplateEditPage() {
           <TemplateLinesSection templateId={templateId!} lines={(template as unknown as { lines?: unknown[] }).lines ?? []} />
         </div>
       </Card>
-    </div>
+    </Page>
   );
 }

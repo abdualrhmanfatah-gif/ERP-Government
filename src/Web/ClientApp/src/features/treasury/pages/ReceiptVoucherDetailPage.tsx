@@ -2,7 +2,7 @@
 // Reviewer display name resolved from users lookup (SC-002); contract DTO stays literal.
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Button, Badge, Card, Dialog, MoneyDisplay, EmptyState, Textarea, Page } from '@/components/ui';
+import { Button, Badge, Card, Dialog, MoneyDisplay, Textarea, Page } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 import { useUserDetail } from '../../security/users/hooks/useUserDetail';
 import { notify } from '@/features/notifications/notify';
@@ -36,12 +36,18 @@ export default function ReceiptVoucherDetailPage() {
   const [cancelReason, setCancelReason] = useState('');
   const [actionError, setActionError] = useState('');
 
-  const notFound = !voucher || !voucher.id;
+  if (isLoading) return <Page title="">{undefined}</Page>;
+  if (!voucher || !voucher.id)
+    return (
+      <Page title="" error="السند غير موجود." onRetry={() => navigate('/treasury/receipt-vouchers')}>
+        <Button variant="outline" onClick={() => navigate('/treasury/receipt-vouchers')}>العودة للقائمة</Button>
+      </Page>
+    );
 
-  const rowVersion = voucher?.rowVersion ?? '';
-  const status = voucher?.status ?? ReceiptVoucherStatus.Draft;
-  const lines = voucher?.lines ?? [];
-  const checks = voucher?.checks ?? [];
+  const rowVersion = voucher.rowVersion ?? '';
+  const status = voucher.status ?? ReceiptVoucherStatus.Draft;
+  const lines = voucher.lines ?? [];
+  const checks = voucher.checks ?? [];
 
   async function submit() {
     setActionError('');
@@ -85,13 +91,9 @@ export default function ReceiptVoucherDetailPage() {
 
   return (
     <Page
-      title={notFound ? '' : `سند القبض ${voucher.voucherNumber}`}
-      loading={isLoading}
-      error={notFound ? 'السند غير موجود.' : undefined}
+      title={`سند القبض ${voucher.voucherNumber}`}
       actions={
-        !notFound && (
-          <Badge variant={voucherStatusBadgeVariant[status]}>{voucherStatusLabels[status]}</Badge>
-        )
+        <Badge variant={voucherStatusBadgeVariant[status]}>{voucherStatusLabels[status]}</Badge>
       }
     >
       <Button variant="ghost" size="icon" onClick={() => navigate('/treasury/receipt-vouchers')} aria-label="العودة" className="mb-4">

@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Page, Button, Badge, Card, StatusBadge, FormField, Input, ConfirmDialog, EmptyState } from '@/components/ui';
-import { ArrowRight, Pencil, X, Check } from 'lucide-react';
+import { Page, Button, Badge, Card, StatusBadge, FormField, Input, ConfirmDialog } from '@/components/ui';
+import { Pencil, X, Check } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { useCurrencyDetail, useUpdateCurrency, useActivateCurrency, useDeactivateCurrency } from '../../hooks/useCurrencies';
 import type { CurrencyDto } from '../../shared/types';
@@ -27,6 +27,7 @@ export default function CurrencyDetailPage() {
   const [confirmToggle, setConfirmToggle] = useState<{ action: 'activate' | 'deactivate' } | null>(null);
 
   function startEdit() {
+    if (!currency) return;
     setEditForm({
       name: currency.name,
       symbol: currency.symbol,
@@ -43,7 +44,7 @@ export default function CurrencyDetailPage() {
   }
 
   function handleSave() {
-    if (!editForm.name || !editForm.symbol) {
+    if (!currency || !editForm.name || !editForm.symbol) {
       notify({ type: 'error', title: 'الاسم والرمز مطلوبان' });
       return;
     }
@@ -72,7 +73,7 @@ export default function CurrencyDetailPage() {
   }
 
   function handleToggleActive() {
-    if (!confirmToggle) return;
+    if (!confirmToggle || !currency) return;
     const mutation = confirmToggle.action === 'activate' ? activateMutation : deactivateMutation;
     mutation.mutate(
       { id: currency.id, rowVersion: currency.rowVersion },

@@ -45,17 +45,6 @@ public class ApprovalService(
 
         if (!hasRequiredRole)
         {
-            // Check delegation
-            var delegation = await ResolveActiveDelegationAsync(executingUserId, documentType, ct);
-            if (delegation is not null)
-            {
-                hasRequiredRole = true;
-                matchedRole = $"Delegated:{delegation.DelegatorUserId}";
-            }
-        }
-
-        if (!hasRequiredRole)
-        {
             var requiredRoles = evaluationResults.Select(r => r.RequiredRole).Where(r => !string.IsNullOrEmpty(r));
             errors.Add($"User does not have any required approval role ({string.Join(", ", requiredRoles)}).");
             return new ApprovalResult { Success = false, Errors = errors };
@@ -103,37 +92,5 @@ public class ApprovalService(
             Success = true,
             ApprovalHistoryId = history.Id
         };
-    }
-
-    public async Task<IReadOnlyList<ApprovalDelegation>> ResolveDelegationAsync(
-        int userId,
-        string documentType,
-        CancellationToken ct)
-    {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
-        return await context.ApprovalDelegations
-            .Where(d => d.DelegateUserId == userId
-                && d.Status == Domain.Security.Enums.DelegationStatus.Active
-                && d.StartDate <= today
-                && d.EndDate >= today
-                && (d.EntityType == null || d.EntityType == documentType))
-            .OrderByDescending(d => d.Created)
-            .ToListAsync(ct);
-    }
-
-    private async Task<ApprovalDelegation?> ResolveActiveDelegationAsync(
-        int userId, string documentType, CancellationToken ct)
-    {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
-        return await context.ApprovalDelegations
-            .FirstOrDefaultAsync(d =>
-                d.DelegateUserId == userId
-                && d.Status == Domain.Security.Enums.DelegationStatus.Active
-                && d.StartDate <= today
-                && d.EndDate >= today
-                && (d.EntityType == null || d.EntityType == documentType),
-                ct);
     }
 }

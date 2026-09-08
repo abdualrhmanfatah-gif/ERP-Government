@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCreateRecurringEntry } from '../hooks/useRecurringEntries';
 import { FREQUENCY_LABELS } from '../shared/types';
 import type { CreateRecurringEntryCommand } from '../shared/types';
-import { Button, Input, Select } from '@/components/ui';
+import { Page, Button, Input, Select } from '@/components/ui';
 
 export default function RecurringEntryCreatePage() {
   const navigate = useNavigate();
@@ -23,9 +23,7 @@ export default function RecurringEntryCreatePage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">إنشاء جدول دوري جديد</h1>
-
+    <Page title="إنشاء جدول دوري جديد" maxWidth="sm">
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           label="اسم الجدول"
@@ -89,6 +87,6 @@ export default function RecurringEntryCreatePage() {
           </Button>
         </div>
       </form>
-    </div>
+    </Page>
   );
 }

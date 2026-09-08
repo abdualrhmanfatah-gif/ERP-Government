@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFundDetail } from '../hooks/useFunds';
 import { fundTypeLabels, fundCategoryLabels } from '../../shared/types';
-import { Button, Badge, Card, Loading } from '@/components/ui';
+import { Page, Button, Badge, Card } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 
 export default function FundDetailPage() {
@@ -11,17 +11,14 @@ export default function FundDetailPage() {
 
   const { data: fund, isLoading, error } = useFundDetail(fundId);
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
-  if (error || !fund) {
-    return <div className="p-6 text-center text-[var(--color-error)]">حدث خطأ أثناء تحميل بيانات الصندوق</div>;
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
+    <Page
+      title={fund?.fundName ?? 'تفاصيل الصندوق'}
+      description={fund ? `${fund.fundNumber} — ${fund.fundName}` : undefined}
+      loading={isLoading}
+      error={error || !fund && !isLoading ? 'حدث خطأ أثناء تحميل بيانات الصندوق' : undefined}
+      breadcrumbs={[{ label: 'صناديق الميزانية', path: '/budgeting/funds' }, { label: fund?.fundName ?? '' }]}
+      actions={
         <Button
           variant="ghost"
           size="icon"
@@ -30,12 +27,9 @@ export default function FundDetailPage() {
         >
           <ArrowRight size={18} />
         </Button>
-        <div>
-          <h1 className="text-xl font-semibold text-[var(--color-on-surface)]">تفاصيل الصندوق</h1>
-          <p className="text-sm text-[var(--color-on-surface-variant)]">{fund.fundNumber} — {fund.fundName}</p>
-        </div>
-      </div>
-
+      }
+    >
+      {!fund ? null : (
       <Card className="bg-[var(--color-surface-container-lowest)]">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -78,6 +72,7 @@ export default function FundDetailPage() {
           )}
         </div>
       </Card>
-    </div>
+      )}
+    </Page>
   );
 }

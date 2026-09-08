@@ -1,11 +1,9 @@
-using ERP_Government.Domain.Security.Entities;
-
 namespace ERP_Government.Application.Security.Common;
 
 public interface IApprovalService
 {
     /// <summary>
-    /// Validates that the user is authorized to approve the document (role or delegation),
+    /// Validates that the user is authorized to approve the document (role check),
     /// records the decision in ApprovalHistory, and returns the result.
     /// </summary>
     /// <param name="documentType">Entity type discriminator (e.g. "PurchaseOrder")</param>
@@ -22,13 +20,5 @@ public interface IApprovalService
         string decision,
         string? reason,
         IReadOnlyList<ApprovalRuleResult> evaluationResults,
-        CancellationToken ct);
-
-    /// <summary>
-    /// Resolves active delegations for a user for a given document type.
-    /// </summary>
-    Task<IReadOnlyList<ApprovalDelegation>> ResolveDelegationAsync(
-        int userId,
-        string documentType,
         CancellationToken ct);
 }

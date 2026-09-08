@@ -60,13 +60,7 @@ public class DeactivateUserCommandHandler(
                 return Result.Failure(["Cannot deactivate the last active administrator."]);
         }
 
-        // FR-005: Block deactivation if user has pending approval delegations
-        var hasPendingDelegations = await context.ApprovalDelegations
-            .AnyAsync(d => d.DelegateUserId == entity.Id
-                && d.Status == DelegationStatus.Active, cancellationToken);
-
-        if (hasPendingDelegations)
-            return Result.Failure(["Cannot deactivate user with pending approval delegations."]);
+        // FR-005 (revised): pending approval delegations removed (DEP-026) — no guard required
 
         // Deactivate user
         entity.IsActive = false;
