@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { PageHeader } from '@/components/ui/PageHeader';
+import { Page } from '@/components/ui';
 import { TemplateForm } from '@/components/AccountingTemplateForm';
 import { useCreateTemplate } from '../../hooks/useCreateTemplate';
 import { useJournalsList } from '../../hooks/useJournalsList';
@@ -24,9 +24,8 @@ export function TemplateCreatePage() {
   };
 
   return (
-    <div>
-      <PageHeader title="إنشاء قالب جديد" description="إضافة قالب قيود يومية" />
+    <Page title="إنشاء قالب جديد" description="إضافة قالب قيود يومية" maxWidth="sm">
       <TemplateForm journals={journals} onSubmit={handleSubmit} loading={isPending} />
-    </div>
+    </Page>
   );
 }

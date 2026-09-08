@@ -7,7 +7,7 @@ import {
   useCancelRecurringEntry,
 } from '../hooks/useRecurringEntries';
 import { FREQUENCY_LABELS, STATUS_LABELS } from '../shared/types';
-import { Button, Textarea, Loading, Badge, Dialog, EmptyState } from '@/components/ui';
+import { Page, Button, Textarea, Loading, Badge, Dialog, EmptyState } from '@/components/ui';
 
 export default function RecurringEntryDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -22,7 +22,6 @@ export default function RecurringEntryDetailPage() {
   const [showPauseDialog, setShowPauseDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
-  if (isLoading) return <Loading />;
   if (!entry) return <EmptyState message="الجدول غير موجود" />;
 
   const canPause = entry.status === 'Active';
@@ -55,15 +54,11 @@ export default function RecurringEntryDetailPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <Button variant="link" onClick={() => navigate(-1)} className="mb-2">
-            ← رجوع
-          </Button>
-          <h1 className="text-2xl font-bold">{entry.name}</h1>
-          <p className="text-muted-foreground">{entry.entryNumber}</p>
-        </div>
+    <Page
+      title={entry.name}
+      description={entry.entryNumber}
+      loading={isLoading}
+      actions={
         <div className="flex gap-2">
           {canPause && (
             <Button variant="outline" onClick={() => setShowPauseDialog(true)}>
@@ -81,7 +76,8 @@ export default function RecurringEntryDetailPage() {
             </Button>
           )}
         </div>
-      </div>
+      }
+    >
 
       <div className="grid grid-cols-2 gap-6">
         <div className="space-y-4">
@@ -222,6 +218,6 @@ export default function RecurringEntryDetailPage() {
           rows={3}
         />
       </Dialog>
-    </div>
+    </Page>
   );
 }

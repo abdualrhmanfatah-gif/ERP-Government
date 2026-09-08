@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, MoneyDisplay, EmptyState, Loading, Input, Select, Page } from '@/components/ui';
+import { Button, MoneyDisplay, EmptyState, Input, Select, Page } from '@/components/ui';
 import { notify } from '@/features/notifications/notify';
 import { DepositSlipsClient, FormType } from '../../../web-api-client';
 import { useEligibleVouchers } from '../hooks/useEligibleVouchers';

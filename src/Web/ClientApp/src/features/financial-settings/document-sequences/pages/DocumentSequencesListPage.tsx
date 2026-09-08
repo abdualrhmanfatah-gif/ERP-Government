@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Button, Switch, ConfirmDialog, Input } from '@/components/ui';
+import { Page, Button, Switch, ConfirmDialog, Input } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { notify } from '@/features/notifications/notify';
 import { useDocumentSequencesList, useUpdateDocumentSequence, useDeactivateDocumentSequence } from '../../hooks/useDocumentSequences';
@@ -71,12 +71,10 @@ export default function DocumentSequencesListPage() {
   ];
 
   return (
-    <div className="space-y-5">
-      <div>
-        <h1 className="text-headline-sm sm:text-headline-md font-bold text-[var(--color-on-surface)]">تسلسل الوثائق</h1>
-        <p className="text-body-sm text-[var(--color-on-surface-variant)] mt-1">إدارة أرقام التسلسل للوثائق المالية</p>
-      </div>
-
+    <Page
+      title="تسلسل الوثائق"
+      description="إدارة أرقام التسلسل للوثائق المالية"
+    >
       <DataGrid
         columns={columns}
         data={items}
@@ -93,6 +91,6 @@ export default function DocumentSequencesListPage() {
         message={`هل تريد تعطيل تسلسل "${confirmDeactivate?.name}"؟ لن يؤثر على الأرقام שכבר صدرت.`}
         loading={deactivateMutation.isPending}
       />
-    </div>
+    </Page>
   );
 }

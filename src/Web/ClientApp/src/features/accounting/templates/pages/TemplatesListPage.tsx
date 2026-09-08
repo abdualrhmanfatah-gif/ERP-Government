@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Button } from '@/components/ui/Button';
-import { FilterBar, FilterSelect } from '@/components/ui';
+import { Page, Button, FilterBar, FilterSelect } from '@/components/ui';
 import { TemplateGrid } from '@/components/AccountingTemplateGrid';
 import { useTemplatesList } from '../../hooks/useTemplatesList';
 import { useJournalsList } from '../../hooks/useJournalsList';
@@ -44,47 +42,49 @@ export function TemplatesListPage() {
   };
 
   return (
-    <div>
-      <PageHeader
-        title="قوالب القيود"
-        description="إدارة قوالب القيود اليومية"
-        actions={
-          <Button variant="primary" size="sm" icon={<Plus size={16} />} onClick={() => navigate('/accounting/templates/create')}>
-            إنشاء قالب
-          </Button>
-        }
+    <Page
+      title="قوالب القيود"
+      description="إدارة قوالب القيود اليومية"
+      actions={
+        <Button variant="primary" size="sm" icon={<Plus size={16} />} onClick={() => navigate('/accounting/templates/create')}>
+          إنشاء قالب
+        </Button>
+      }
+      toolbar={
+        <FilterBar hasFilters={hasFilters} onClear={clearAll}>
+          <FilterSelect
+            label="الدفتر"
+            value={journalId}
+            onChange={setJournalId}
+            options={[
+              { value: '', label: 'الكل' },
+              ...journals.map((j) => ({ value: String(j.id), label: `${j.code} - ${j.name}` })),
+            ]}
+          />
+          <FilterSelect
+            label="النوع"
+            value={templateType}
+            onChange={setTemplateType}
+            options={templateTypeOptions}
+          />
+          <FilterSelect
+            label="الحالة"
+            value={isActive}
+            onChange={setIsActive}
+            options={activeOptions}
+          />
+        </FilterBar>
+      }
+      loading={isLoading}
+      error={error ? 'فشل تحميل البيانات' : undefined}
+      onRetry={() => refetch()}
+    >
+      <TemplateGrid
+        data={templates}
+        loading={isLoading}
+        error={error ? 'فشل تحميل البيانات' : undefined}
+        onRetry={() => refetch()}
       />
-      <FilterBar hasFilters={hasFilters} onClear={clearAll}>
-        <FilterSelect
-          label="الدفتر"
-          value={journalId}
-          onChange={setJournalId}
-          options={[
-            { value: '', label: 'الكل' },
-            ...journals.map((j) => ({ value: String(j.id), label: `${j.code} - ${j.name}` })),
-          ]}
-        />
-        <FilterSelect
-          label="النوع"
-          value={templateType}
-          onChange={setTemplateType}
-          options={templateTypeOptions}
-        />
-        <FilterSelect
-          label="الحالة"
-          value={isActive}
-          onChange={setIsActive}
-          options={activeOptions}
-        />
-      </FilterBar>
-      <div className="mt-4">
-        <TemplateGrid
-          data={templates}
-          loading={isLoading}
-          error={error ? 'فشل تحميل البيانات' : undefined}
-          onRetry={() => refetch()}
-        />
-      </div>
-    </div>
+    </Page>
   );
 }

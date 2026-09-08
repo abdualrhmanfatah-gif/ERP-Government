@@ -243,7 +243,6 @@ public static class RolePermissionSeedData
 
             // Approval
             Make("ApprovalRules.View"), Make("ApprovalRules.Manage"),
-            Make("ApprovalDelegations.View"), Make("ApprovalDelegations.Manage"),
 
             // Workflow
             Make("WorkflowDefinitions.View"), Make("WorkflowDefinitions.Manage"),

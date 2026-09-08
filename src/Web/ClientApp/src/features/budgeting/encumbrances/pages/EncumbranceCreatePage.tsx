@@ -82,16 +82,15 @@ export default function EncumbranceCreatePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
+    <Page
+      title={showReversal ? 'عكس التزام' : 'التزام جديد'}
+      maxWidth="sm"
+      actions={
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="العودة">
           <ArrowRight size={18} />
         </Button>
-        <h1 className="text-xl font-semibold text-[var(--color-on-surface)]">
-          {showReversal ? 'عكس التزام' : 'التزام جديد'}
-        </h1>
-      </div>
-
+      }
+    >
       {form.appropriationId > 0 && !showReversal && (
         <AvailabilityIndicator key={availabilityKey} appropriationId={form.appropriationId} />
       )}
@@ -211,6 +210,6 @@ export default function EncumbranceCreatePage() {
           </Button>
         </div>
       </form>
-    </div>
+    </Page>
   );
 }

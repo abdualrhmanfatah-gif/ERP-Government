@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, MoneyDisplay, Badge, Loading, EmptyState, Input, Dialog, Page } from '@/components/ui';
+import { Button, MoneyDisplay, Badge, EmptyState, Input, Dialog, Page } from '@/components/ui';
 import { notify } from '@/features/notifications/notify';
 import { DepositSlipsClient, FormType, DepositSlipStatus } from '../../../web-api-client';
 import { useEligibleVouchers } from '../hooks/useEligibleVouchers';
@@ -92,16 +92,22 @@ export default function DepositSlipDetailPage() {
     onError: () => notify({ type: 'error', title: 'فشل الاعتماد' }),
   });
 
-  const slipFormType = slip?.formType ?? 'Form47';
-  const slipStatus = slip?.status ?? 'Draft';
+  if (isLoading) return <Page title="">{undefined}</Page>;
+  if (!slip)
+    return (
+      <Page title="" error="البطاقة غير موجودة" onRetry={() => window.location.reload()}>
+        {undefined}
+      </Page>
+    );
+
+  const slipFormType = slip.formType ?? 'Form47';
+  const slipStatus = slip.status ?? 'Draft';
 
   return (
     <Page
-      title={`بطاقة إيداع ${slip?.slipNumber ?? ''}`}
-      loading={isLoading}
-      error={!slip ? 'البطاقة غير موجودة' : undefined}
+      title={`بطاقة إيداع ${slip.slipNumber}`}
       actions={
-        isDraft && slip ? (
+        isDraft ? (
           <Button onClick={() => setShowApproveDialog(true)}>
             اعتماد البطاقة
           </Button>

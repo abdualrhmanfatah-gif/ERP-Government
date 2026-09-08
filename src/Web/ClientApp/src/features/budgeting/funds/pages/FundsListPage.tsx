@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
-import { Button, Switch, FilterBar, FilterSearch, FilterSelect, Dialog, ConfirmDialog, Badge, Input, Select, Textarea } from '@/components/ui';
+import { Page, Button, Switch, FilterBar, FilterSearch, FilterSelect, Dialog, ConfirmDialog, Badge, Input, Select, Textarea } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Pencil, Eye } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
@@ -144,28 +144,26 @@ export default function FundsListPage() {
   ];
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-headline-sm sm:text-headline-md font-bold text-[var(--color-on-surface)]">صناديق الميزانية</h1>
-          <p className="text-body-sm text-[var(--color-on-surface-variant)] mt-1">إدارة صناديق الميزانية والبحث والتصفية</p>
-        </div>
-        {canManage && (
+    <Page
+      title="صناديق الميزانية"
+      description="إدارة صناديق الميزانية والبحث والتصفية"
+      loading={isLoading}
+      actions={
+        canManage ? (
           <Button onClick={handleCreate} icon={<Plus size={16} />} className="self-start sm:self-auto cursor-pointer shadow-sm hover:shadow transition-shadow">
             إضافة صندوق
           </Button>
-        )}
-      </div>
-
-      <FilterBar hasFilters={hasFilters} onClear={handleClearFilters}>
-        <FilterSearch value={search} onChange={setSearch} placeholder="بحث برقم الصندوق أو الاسم..." />
-        <FilterSelect value={fundTypeFilter} onChange={setFundTypeFilter} options={fundTypeOptions} placeholder="النوع" label="النوع" />
-        <FilterSelect value={fundCategoryFilter} onChange={setFundCategoryFilter} options={fundCategoryOptions} placeholder="الفئة" label="الفئة" />
-        <FilterSelect value={isActiveFilter} onChange={setIsActiveFilter} options={isActiveOptions} placeholder="الحالة" label="الحالة" />
-      </FilterBar>
-
- 
-
+        ) : undefined
+      }
+      toolbar={
+        <FilterBar hasFilters={hasFilters} onClear={handleClearFilters}>
+          <FilterSearch value={search} onChange={setSearch} placeholder="بحث برقم الصندوق أو الاسم..." />
+          <FilterSelect value={fundTypeFilter} onChange={setFundTypeFilter} options={fundTypeOptions} placeholder="النوع" label="النوع" />
+          <FilterSelect value={fundCategoryFilter} onChange={setFundCategoryFilter} options={fundCategoryOptions} placeholder="الفئة" label="الفئة" />
+          <FilterSelect value={isActiveFilter} onChange={setIsActiveFilter} options={isActiveOptions} placeholder="الحالة" label="الحالة" />
+        </FilterBar>
+      }
+    >
       <DataGrid
         columns={columns}
         data={filtered}
@@ -204,6 +202,6 @@ export default function FundsListPage() {
         title={confirmToggle?.isActive ? 'تعطيل الصندوق' : 'تنشيط الصندوق'}
         loading={toggleMutation.isPending}
       />
-    </div>
+    </Page>
   );
 }

@@ -3,9 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useRecurringEntries } from '../hooks/useRecurringEntries';
 import { FREQUENCY_LABELS, STATUS_LABELS } from '../shared/types';
 import type { RecurringEntryListFilters } from '../shared/client';
-import { Button } from '@/components/ui/Button';
-import { Select } from '@/components/ui';
-import { StatusBadge } from '@/components/ui/StatusBadge';
+import { Page, Button, Select, StatusBadge } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 
 type EntryRow = NonNullable<ReturnType<typeof useRecurringEntries>['data']>[number];
@@ -46,37 +44,39 @@ export default function RecurringEntriesListPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">القيود الدورية</h1>
+    <Page
+      title="القيود الدورية"
+      actions={
         <Button variant="primary" size="sm" onClick={() => navigate('/accounting/recurring-entries/new')}>
           إنشاء جدول جديد
         </Button>
-      </div>
-
-      <div className="flex gap-4">
-        <Select
-          label="الحالة"
-          value={filters.status ?? ''}
-          onChange={(e) => setFilters({ ...filters, status: e.target.value || undefined })}
-          options={[
-            { value: '', label: 'الكل' },
-            ...Object.entries(STATUS_LABELS).map(([key, label]) => ({ value: key, label })),
-          ]}
-          className="w-auto"
-        />
-        <Select
-          label="الدورية"
-          value={filters.frequency ?? ''}
-          onChange={(e) => setFilters({ ...filters, frequency: e.target.value || undefined })}
-          options={[
-            { value: '', label: 'الكل' },
-            ...Object.entries(FREQUENCY_LABELS).map(([key, label]) => ({ value: key, label })),
-          ]}
-          className="w-auto"
-        />
-      </div>
-
+      }
+      toolbar={
+        <div className="flex gap-4">
+          <Select
+            label="الحالة"
+            value={filters.status ?? ''}
+            onChange={(e) => setFilters({ ...filters, status: e.target.value || undefined })}
+            options={[
+              { value: '', label: 'الكل' },
+              ...Object.entries(STATUS_LABELS).map(([key, label]) => ({ value: key, label })),
+            ]}
+            className="w-auto"
+          />
+          <Select
+            label="الدورية"
+            value={filters.frequency ?? ''}
+            onChange={(e) => setFilters({ ...filters, frequency: e.target.value || undefined })}
+            options={[
+              { value: '', label: 'الكل' },
+              ...Object.entries(FREQUENCY_LABELS).map(([key, label]) => ({ value: key, label })),
+            ]}
+            className="w-auto"
+          />
+        </div>
+      }
+      loading={isLoading}
+    >
       <DataGrid
         columns={columns}
         data={entries ?? []}
@@ -84,6 +84,6 @@ export default function RecurringEntriesListPage() {
         emptyMessage="لا توجد جداول دورية"
         rowKey={(entry) => entry.id}
       />
-    </div>
+    </Page>
   );
 }
