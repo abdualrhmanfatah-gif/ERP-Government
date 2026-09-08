@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBudgetDetail, useSubmitBudget, useApproveBudget, useActivateBudget, useSuspendBudget, useCloseBudget, useCancelBudget } from '../../hooks/useBudgets';
-import { useBudgetItemsTree, useCreateBudgetItem, useUpdateBudgetItem, useDeleteBudgetItem } from '../../hooks/useBudgetItems';
+import { useBudgetItemsTree, useCreateBudgetItem } from '../../hooks/useBudgetItems';
 import { useBudgetItemFormFields } from '../../hooks/useBudgetItemFormFields';
 import { budgetStatusLabels, BudgetStatus } from '../../shared/types';
 import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
@@ -16,7 +16,7 @@ import { ArrowRight, Plus, Calendar, BarChart3 } from 'lucide-react';
 
 const budgetActions: Record<string, LifecycleAction[]> = {
   [BudgetStatus.Draft]: [
-    { key: 'submit', label: 'تقديم', permission: BUDGET_PERMISSIONS.Budgets.Submit, confirmMessage: 'هل أنت متأكد من تقديم هذه الموازنة؟' },
+    { key: 'submit', label: 'إرسال للمراجعة', permission: BUDGET_PERMISSIONS.Budgets.Submit, confirmMessage: 'هل أنت متأكد من إرسال هذه الموازنة للمراجعة؟' },
   ],
   [BudgetStatus.Submitted]: [
     { key: 'approve', label: 'اعتماد', permission: BUDGET_PERMISSIONS.Budgets.Approve, confirmMessage: 'هل أنت متأكد من اعتماد هذه الموازنة؟' },
@@ -53,8 +53,6 @@ export default function BudgetDetailPage() {
   const { data: budget, isLoading } = useBudgetDetail(budgetId);
   const { data: tree } = useBudgetItemsTree(budgetId);
   const createItem = useCreateBudgetItem(budgetId);
-  const updateItem = useUpdateBudgetItem();
-  const deleteItem = useDeleteBudgetItem();
   const { fundOptions, costCenterOptions, accountOptions, classificationOptions } = useBudgetItemFormFields();
 
   const [pendingAction, setPendingAction] = useState<string | null>(null);

@@ -8,8 +8,14 @@ export function TopNav() {
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
   const location = useLocation();
+  const prevPathRef = useRef(location.pathname);
 
-  useEffect(() => { setOpenGroup(null); }, [location.pathname]);
+  useEffect(() => {
+    if (prevPathRef.current !== location.pathname) {
+      prevPathRef.current = location.pathname;
+      setOpenGroup(null);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {

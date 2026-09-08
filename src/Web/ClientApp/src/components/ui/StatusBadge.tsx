@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-export type BadgeVariant = 'draft' | 'pending' | 'approved' | 'active' | 'closed' | 'posted' | 'reversed' | 'cancelled' | 'locked' | 'overBudget' | 'unbalanced';
+export type BadgeVariant = 'draft' | 'pending' | 'approved' | 'active' | 'closed' | 'posted' | 'reversed' | 'cancelled' | 'locked' | 'overBudget' | 'unbalanced' | 'submitted' | 'sentToTreasury' | 'paid' | 'partiallyPaid' | 'rejected' | 'voided' | 'disbursed' | 'failed' | 'warning' | 'overridden' | 'passed';
 type BadgeSize = 'sm' | 'md';
 
 interface StatusBadgeProps {
@@ -19,10 +19,21 @@ const variantClasses: Record<BadgeVariant, string> = {
   closed: 'bg-status-closed-bg text-status-closed-fg',
   posted: 'bg-status-posted-bg text-status-posted-fg',
   reversed: 'bg-status-reversed-bg text-status-reversed-fg',
-  cancelled: 'bg-status-cancelled-bg text-status-cancelled-fg',
+  cancelled: 'bg-status-closed-bg text-status-closed-fg',
   locked: 'bg-status-locked-bg text-status-locked-fg',
   overBudget: 'bg-status-overBudget-bg text-status-overBudget-fg',
   unbalanced: 'border-2 border-status-unbalanced-border bg-transparent text-status-unbalanced-fg',
+  submitted: 'bg-status-pending-bg text-status-pending-fg',
+  sentToTreasury: 'bg-status-pending-bg text-status-pending-fg',
+  paid: 'bg-status-approved-bg text-status-approved-fg',
+  partiallyPaid: 'bg-status-active-bg text-status-active-fg',
+  rejected: 'bg-status-reversed-bg text-status-reversed-fg',
+  voided: 'bg-status-closed-bg text-status-closed-fg',
+  disbursed: 'bg-status-approved-bg text-status-approved-fg',
+  failed: 'bg-status-reversed-bg text-status-reversed-fg',
+  warning: 'bg-status-overBudget-bg text-status-overBudget-fg',
+  overridden: 'bg-status-overBudget-bg text-status-overBudget-fg',
+  passed: 'bg-status-active-bg text-status-active-fg',
 };
 
 const sizeClasses: Record<BadgeSize, string> = {

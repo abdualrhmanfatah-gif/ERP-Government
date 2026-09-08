@@ -92,6 +92,22 @@ public class ApproveDisbursementRequestCommandHandler(
         }
         else
         {
+            bool hasRequiredRole = false;
+            string matchedRole = "";
+
+            foreach (var role in RequiredRoles)
+            {
+                if (await identityService.IsInRoleAsync(executingUserId, role))
+                {
+                    hasRequiredRole = true;
+                    matchedRole = role;
+                    break;
+                }
+            }
+
+            if (!hasRequiredRole)
+                return Result.Failure(["Second approver must hold AccountsManager or AuthorizingOfficer role."]);
+
             var history = new ApprovalHistory
             {
                 DocumentType = "DisbursementRequest",
@@ -99,7 +115,7 @@ public class ApproveDisbursementRequestCommandHandler(
                 ApprovalStep = step,
                 Action = ApprovalAction.Approve,
                 ApproverUserId = executingUserId,
-                RequiredRole = "",
+                RequiredRole = matchedRole,
                 Decision = "Approved",
                 DecisionAt = DateTimeOffset.UtcNow,
                 Reason = request.Reason,

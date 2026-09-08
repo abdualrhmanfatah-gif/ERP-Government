@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Badge, Button, DataGrid, FilterSelect, FormField, Input, Page } from '@/components/ui';
 import type { DataGridColumn } from '@/components/ui/DataGrid';
@@ -23,7 +23,6 @@ const statusColors: Record<string, 'warning' | 'success' | 'error'> = {
 
 export default function ChecksListPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const today = new Date();
   const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
   const [fromDate, setFromDate] = useState(format(firstDay, 'yyyy-MM-dd'));
@@ -40,7 +39,7 @@ export default function ChecksListPage() {
     status: statusFilter || undefined,
   });
 
-  const { data: checkDetail } = useCheckDetail(selectedCheckId ?? 0);
+  useCheckDetail(selectedCheckId ?? 0);
 
   const columns: DataGridColumn<any>[] = [
     { key: 'checkNumber', header: 'رقم الشيك' },

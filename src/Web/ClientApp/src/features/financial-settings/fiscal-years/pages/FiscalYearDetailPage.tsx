@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Page, Button, Card, ConfirmDialog, EmptyState } from '@/components/ui';
+import { Page, Button, Card, ConfirmDialog } from '@/components/ui';
 import { ArrowRight, Unlock, Lock, CalendarPlus, FolderOpen, X } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { FiscalYearStatusBadge } from '@/components/FinancialSettingsFiscalYearStatusBadge';

@@ -89,7 +89,7 @@ export default function CreateDepositSlipPage() {
             <Button variant="outline" onClick={clearAll}>
               إلغاء التحديد
             </Button>
-            <span className="mr-auto text-sm text-muted-foreground">
+            <span className="ms-auto text-sm text-muted-foreground">
               {selectedIds.length} من {eligible.length}
             </span>
           </div>
@@ -107,7 +107,7 @@ export default function CreateDepositSlipPage() {
                 />
                 <span className="font-medium tabular-nums">{v.voucherNumber}</span>
                 <span className="text-muted-foreground text-sm">{v.receivedFrom}</span>
-                <span className="mr-auto">
+                <span className="ms-auto">
                   <MoneyDisplay value={v.totalAmount ?? 0} />
                 </span>
               </label>

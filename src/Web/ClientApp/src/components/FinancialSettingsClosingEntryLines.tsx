@@ -24,11 +24,11 @@ export function ClosingEntryLines({ lines }: ClosingEntryLinesProps) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-[var(--color-border-container)] bg-[var(--color-surface-container)]">
-            <th className="px-4 py-3 text-right font-semibold text-[var(--color-on-surface)]">رقم الحساب</th>
-            <th className="px-4 py-3 text-right font-semibold text-[var(--color-on-surface)]">اسم الحساب</th>
+            <th className="px-4 py-3 text-end font-semibold text-[var(--color-on-surface)]">رقم الحساب</th>
+            <th className="px-4 py-3 text-end font-semibold text-[var(--color-on-surface)]">اسم الحساب</th>
             <th className="px-4 py-3 text-end font-semibold text-[var(--color-on-surface)]">مدين</th>
             <th className="px-4 py-3 text-end font-semibold text-[var(--color-on-surface)]">دائن</th>
-            <th className="px-4 py-3 text-right font-semibold text-[var(--color-on-surface)]">الوصف</th>
+            <th className="px-4 py-3 text-end font-semibold text-[var(--color-on-surface)]">الوصف</th>
           </tr>
         </thead>
         <tbody>

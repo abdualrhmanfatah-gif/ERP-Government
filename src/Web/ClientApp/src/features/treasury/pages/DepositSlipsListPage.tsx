@@ -103,7 +103,7 @@ export default function DepositSlipsListPage() {
       title="بطاقات الإيداع"
       actions={
         <Button onClick={() => navigate('/treasury/deposit-slips/create')}>
-          <Plus className="h-4 w-4 ml-2" /> إنشاء بطاقة
+          <Plus className="h-4 w-4 ms-2" /> إنشاء بطاقة
         </Button>
       }
       toolbar={

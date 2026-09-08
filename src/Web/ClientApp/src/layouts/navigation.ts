@@ -11,12 +11,6 @@ export interface ModuleGroup {
 
 export const moduleGroups: ModuleGroup[] = [
   {
-    label: 'الرئيسية',
-    items: [
-      { path: '/', label: 'لوحة التحكم' },
-    ],
-  },
-  {
     label: 'اداره الحسابات',
     items: [
       { path: '/accounting/account-groups', label: 'مجموعات الحسابات', permission: 'Accounting.ChartOfAccounts.Read' },
@@ -71,6 +65,20 @@ export const moduleGroups: ModuleGroup[] = [
     ],
   },
   {
+    label: 'التقارير',
+    items: [
+      { path: '/reporting/budget-execution', label: 'تقرير تنفيذ الموازنة', permission: 'Reporting.ViewBudgetExecution' },
+      { path: '/reporting/revenue-collections', label: 'سجل التحصيلات', permission: 'Reporting.ViewRevenueCollections' },
+      { path: '/reporting/disbursement-register', label: 'سجل الصرف', permission: 'Reporting.ViewDisbursementRegister' },
+      { path: '/reporting/availability-snapshot', label: 'لقطة التوفر', permission: 'Reporting.ViewAvailabilitySnapshot' },
+      { path: '/reporting/trial-balance', label: 'ميزان المراجعة', permission: 'Reporting.ViewTrialBalance' },
+      { path: '/reporting/financial-statements/balance-sheet', label: 'الميزانية العمومية', permission: 'Reporting.ViewFinancialStatements' },
+      { path: '/reporting/financial-statements/income-statement', label: 'قائمة الدخل', permission: 'Reporting.ViewFinancialStatements' },
+      { path: '/reporting/financial-statements/cash-flow', label: 'قائمة التدفقات النقدية', permission: 'Reporting.ViewFinancialStatements' },
+      { path: '/reporting/financial-statements/general-ledger', label: 'دفتر الأستاذ العام', permission: 'Reporting.ViewFinancialStatements' },
+    ],
+  },
+  {
     label: 'الإعدادات المالية',
     items: [
       { path: '/financial-settings/fiscal-years', label: 'السنوات المالية', permission: 'FiscalYears.View' },
@@ -78,6 +86,15 @@ export const moduleGroups: ModuleGroup[] = [
       { path: '/financial-settings/currencies', label: 'العملات', permission: 'Currencies.View' },
       { path: '/financial-settings/exchange-rates', label: 'أسعار الصرف', permission: 'ExchangeRates.View' },
       { path: '/financial-settings/closing-entries', label: 'قيود الإغلاق', permission: 'ClosingEntries.View' },
+    ],
+  },
+  {
+    label: 'المدفوعات',
+    items: [
+      { path: '/payments/payment-orders', label: 'أوامر الدفع', permission: 'PaymentOrders.View' },
+      { path: '/payments/disbursement-requests', label: 'طلبات الصرف', permission: 'DisbursementRequests.View' },
+      { path: '/payments/payments', label: 'المدفوعات', permission: 'Payments.View' },
+      { path: '/payments/bank-accounts', label: 'الحسابات البنكية', permission: 'BankAccounts.View' },
     ],
   },
 ];

@@ -206,6 +206,7 @@ public static class DependencyInjection
             options.AddPolicy(PermissionCodes.PaymentOrdersCancel, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PaymentOrdersSendToTreasury, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PaymentOrdersVoid, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.PaymentOrdersOverrideBudgetCheck, p => p.RequireAssertion(_ => true));
 
             // ─── Disbursements ────────────────────────────────────────
             options.AddPolicy(PermissionCodes.DisbursementRequestsView, p => p.RequireAssertion(_ => true));

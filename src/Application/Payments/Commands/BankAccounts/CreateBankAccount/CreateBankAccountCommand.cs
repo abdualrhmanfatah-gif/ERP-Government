@@ -77,6 +77,16 @@ public class CreateBankAccountCommandHandler(
         };
 
         context.BankAccounts.Add(entity);
+
+        if (request.IsDefault)
+        {
+            var otherDefaults = await context.BankAccounts
+                .Where(b => b.IsDefault && b.Id != entity.Id)
+                .ToListAsync(cancellationToken);
+            foreach (var other in otherDefaults)
+                other.IsDefault = false;
+        }
+
         await context.SaveChangesAsync(cancellationToken);
 
         return Result.Success();

@@ -8,6 +8,21 @@ namespace ERP_Government.Application.Reporting.BudgetExecution.GetBudgetExecutio
 internal class GetBudgetExecutionReportQueryHandler(IApplicationDbContext dbContext)
     : IRequestHandler<GetBudgetExecutionReportQuery, BudgetExecutionReportDto>
 {
+    private static readonly Domain.Budgeting.Enums.EncumbranceStatus[] OpenEncumbranceStatuses =
+    [
+        Domain.Budgeting.Enums.EncumbranceStatus.Active,
+        Domain.Budgeting.Enums.EncumbranceStatus.PartiallyReleased,
+        Domain.Budgeting.Enums.EncumbranceStatus.PartiallyLiquidated,
+    ];
+
+    private static readonly Domain.Payments.Enums.PaymentOrderStatus[] ExecutedPaymentStatuses =
+    [
+        Domain.Payments.Enums.PaymentOrderStatus.Approved,
+        Domain.Payments.Enums.PaymentOrderStatus.SentToTreasury,
+        Domain.Payments.Enums.PaymentOrderStatus.Paid,
+        Domain.Payments.Enums.PaymentOrderStatus.PartiallyPaid,
+    ];
+
     public async Task<BudgetExecutionReportDto> Handle(
         GetBudgetExecutionReportQuery request,
         CancellationToken cancellationToken)
@@ -33,19 +48,56 @@ internal class GetBudgetExecutionReportQueryHandler(IApplicationDbContext dbCont
 
         var appropriations = await query.ToListAsync(cancellationToken);
 
+        // Classification ancestry (leaf → root) for program/project dimensions and subtree filters.
+        // A ProgramId/ProjectId filter matches an item when the item's classification chain
+        // contains that node — i.e. the item is classified under the node or any descendant.
+        var classifications = await dbContext.BudgetClassifications
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+        var classificationById = classifications.ToDictionary(c => c.Id);
+
+        List<int> GetChain(int? classificationId)
+        {
+            var chain = new List<int>();
+            var current = classificationId;
+            while (current.HasValue && classificationById.TryGetValue(current.Value, out var node))
+            {
+                chain.Add(node.Id);
+                current = node.ParentId;
+            }
+
+            return chain;
+        }
+
+        if (request.ProgramId.HasValue)
+        {
+            var programId = request.ProgramId.Value;
+            appropriations = appropriations
+                .Where(a => GetChain(a.BudgetItem!.BudgetClassificationId).Contains(programId))
+                .ToList();
+        }
+
+        if (request.ProjectId.HasValue)
+        {
+            var projectId = request.ProjectId.Value;
+            appropriations = appropriations
+                .Where(a => GetChain(a.BudgetItem!.BudgetClassificationId).Contains(projectId))
+                .ToList();
+        }
+
         var budgetItemIds = appropriations.Select(a => a.BudgetItemId).Distinct().ToList();
 
         var encumbrances = await dbContext.Encumbrances
             .AsNoTracking()
             .Include(e => e.Appropriation)
             .Where(e => budgetItemIds.Contains(e.Appropriation.BudgetItemId)
-                     && e.Status != Domain.Budgeting.Enums.EncumbranceStatus.Cancelled)
+                     && OpenEncumbranceStatuses.Contains(e.Status))
             .ToListAsync(cancellationToken);
 
         var paymentOrders = await dbContext.PaymentOrders
             .AsNoTracking()
             .Where(po => budgetItemIds.Contains(po.AppropriationId)
-                      && po.Status != Domain.Payments.Enums.PaymentOrderStatus.Cancelled)
+                      && ExecutedPaymentStatuses.Contains(po.Status))
             .ToListAsync(cancellationToken);
 
         var funds = await dbContext.Funds
@@ -68,6 +120,23 @@ internal class GetBudgetExecutionReportQueryHandler(IApplicationDbContext dbCont
 
                 var fund = funds.GetValueOrDefault(fundId);
 
+                // Program = the item classification's direct parent; Project = the item's own classification.
+                var itemClassificationId = g.First().BudgetItem!.BudgetClassificationId;
+                int? programId = null;
+                string? programCode = null;
+                int? projectId = null;
+                string? projectCode = null;
+                if (itemClassificationId.HasValue && classificationById.TryGetValue(itemClassificationId.Value, out var leaf))
+                {
+                    projectId = leaf.Id;
+                    projectCode = leaf.Code;
+                    if (leaf.ParentId.HasValue && classificationById.TryGetValue(leaf.ParentId.Value, out var parent))
+                    {
+                        programId = parent.Id;
+                        programCode = parent.Code;
+                    }
+                }
+
                 return new BudgetExecutionLineDto
                 {
                     BudgetItemId = budgetItemId,
@@ -76,6 +145,10 @@ internal class GetBudgetExecutionReportQueryHandler(IApplicationDbContext dbCont
                     FundId = fundId,
                     FundNumber = fund.FundNumber,
                     FundName = fund.FundName,
+                    ProgramId = programId,
+                    ProgramCode = programCode,
+                    ProjectId = projectId,
+                    ProjectCode = projectCode,
                     AppropriatedAmount = appropriated,
                     EncumberedAmount = encumbered,
                     PaidAmount = paid,

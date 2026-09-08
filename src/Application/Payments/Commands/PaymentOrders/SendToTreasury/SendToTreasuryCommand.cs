@@ -1,4 +1,6 @@
+using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Application.Parties.Common;
 using ERP_Government.Domain.Payments.Enums;
 
 namespace ERP_Government.Application.Payments.Commands.PaymentOrders.SendToTreasury;
@@ -12,12 +14,17 @@ public class SendToTreasuryCommand : IRequest<Result>
 }
 
 public class SendToTreasuryCommandHandler(
-    IApplicationDbContext context) : IRequestHandler<SendToTreasuryCommand, Result>
+    IApplicationDbContext context,
+    IDocumentStatusLogger statusLogger,
+    IUser user) : IRequestHandler<SendToTreasuryCommand, Result>
 {
     public async Task<Result> Handle(
         SendToTreasuryCommand request,
         CancellationToken cancellationToken)
     {
+        if (user.Id is not int userId)
+            return Result.Failure(["User identity is required for this operation."]);
+
         var entity = await context.PaymentOrders
             .FindAsync(request.Id, cancellationToken);
 
@@ -31,6 +38,15 @@ public class SendToTreasuryCommandHandler(
         entity.TreasuryStatus = "Sent";
         entity.TreasuryReference = request.TreasuryReference;
         entity.TreasurySentAt = DateTimeOffset.UtcNow;
+
+        await statusLogger.LogAsync(
+            "paymentorders",
+            entity.Id,
+            PaymentOrderStatus.Approved.ToString(),
+            PaymentOrderStatus.SentToTreasury.ToString(),
+            userId,
+            $"Treasury reference: {request.TreasuryReference}",
+            cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
 

@@ -22,7 +22,7 @@ import { ArrowRight } from 'lucide-react';
 
 const appropriationActions: Record<string, LifecycleAction[]> = {
   [AppropriationStatus.Draft]: [
-    { key: 'submit', label: 'تقديم', permission: BUDGET_PERMISSIONS.Appropriations.Submit, confirmMessage: 'هل أنت متأكد من تقديم هذا التخصيص؟' },
+    { key: 'submit', label: 'إرسال للمراجعة', permission: BUDGET_PERMISSIONS.Appropriations.Submit, confirmMessage: 'هل أنت متأكد من إرسال هذا التخصيص للمراجعة؟' },
     { key: 'delete', label: 'حذف', permission: BUDGET_PERMISSIONS.Appropriations.Delete, confirmMessage: 'هل أنت متأكد من حذف هذا التخصيص؟' },
   ],
   [AppropriationStatus.PendingApproval]: [

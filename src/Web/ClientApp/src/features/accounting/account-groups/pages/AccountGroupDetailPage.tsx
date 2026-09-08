@@ -1,6 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { Page, StatusBadge, DataGrid, Button, Card, Skeleton } from '@/components/ui';
-import { AuditTimeline } from '@/components/ui/AuditTimeline';
+import { Page, StatusBadge, DataGrid, Button, Card } from '@/components/ui';
 import { useAccountGroupDetail } from '../hooks/useAccountGroupDetail';
 import { useToggleAccountGroupActive } from '../hooks/useToggleAccountGroupActive';
 import { usePermission } from '@/shared/hooks/usePermission';
@@ -10,7 +9,7 @@ import { useState } from 'react';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { AccountGroupForm } from '@/components/AccountingAccountGroupForm';
 import { useUpdateAccountGroup } from '../hooks/useUpdateAccountGroup';
-import { ArrowRight, Layers, BookOpen, Shield } from 'lucide-react';
+import { ArrowRight, Layers, BookOpen } from 'lucide-react';
 
 export function AccountGroupDetailPage() {
   const { id } = useParams();
@@ -39,14 +38,6 @@ export function AccountGroupDetailPage() {
       notify({ type: 'error', title: e instanceof Error ? e.message : 'فشل' });
     }
   };
-
-  const auditEntries = data.audit.map((a) => ({
-    id: a.id,
-    action: (a.action || 'update') as 'create' | 'update' | 'delete',
-    user: a.userName ?? `#${a.userId}`,
-    timestamp: a.timestamp,
-    description: a.changeSummary ?? a.fieldChanges ?? '',
-  }));
 
   const childColumns = [
     { id: 'code', accessorKey: 'code', header: 'الكود' },

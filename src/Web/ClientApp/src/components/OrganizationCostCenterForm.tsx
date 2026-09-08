@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useOrganizationalUnits } from '@/features/organization/hooks';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
@@ -19,15 +19,19 @@ export function CostCenterForm({ initialData, isEdit, onSubmit, serverError, id 
   const [organizationUnitId, setOrganizationUnitId] = useState(initialData?.organizationUnitId?.toString() ?? '');
   const [budgetLimit, setBudgetLimit] = useState(initialData?.budgetLimit?.toString() ?? '');
   const [errors, setErrors] = useState<{ code?: string; name?: string }>({});
+  const prevInitialDataRef = useRef(initialData);
 
   const { data: orgUnits = [], isLoading: orgUnitsLoading } = useOrganizationalUnits();
 
   useEffect(() => {
-    setCode(initialData?.code ?? '');
-    setName(initialData?.name ?? '');
-    setOrganizationUnitId(initialData?.organizationUnitId?.toString() ?? '');
-    setBudgetLimit(initialData?.budgetLimit?.toString() ?? '');
-    setErrors({});
+    if (prevInitialDataRef.current !== initialData) {
+      prevInitialDataRef.current = initialData;
+      setCode(initialData?.code ?? '');
+      setName(initialData?.name ?? '');
+      setOrganizationUnitId(initialData?.organizationUnitId?.toString() ?? '');
+      setBudgetLimit(initialData?.budgetLimit?.toString() ?? '');
+      setErrors({});
+    }
   }, [initialData]);
 
   const validate = () => {

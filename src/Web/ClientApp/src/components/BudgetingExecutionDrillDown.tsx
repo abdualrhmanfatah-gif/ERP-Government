@@ -4,7 +4,7 @@ import { useBudgetDetail } from '@/features/budgeting/hooks/useBudgets';
 import { useBudgetItemsTree } from '@/features/budgeting/hooks/useBudgetItems';
 import { useAppropriationsList } from '@/features/budgeting/hooks/useAppropriations';
 import { useEncumbrancesList } from '@/features/budgeting/hooks/useEncumbrances';
-import { budgetStatusLabels, appropriationTypeLabels, encumbranceTypeLabels } from '@/features/budgeting/shared/types';
+import { appropriationTypeLabels, encumbranceTypeLabels } from '@/features/budgeting/shared/types';
 import { Badge, Button } from '@/components/ui';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
@@ -102,10 +102,9 @@ export function ExecutionDrillDown({ budgetId }: ExecutionDrillDownProps) {
                   </Button>
 
                   {isExpanded && itemApps.length > 0 && (
-                    <div className="mr-8 space-y-1">
+                    <div className="me-8 space-y-1">
                       {itemApps.map((app) => {
                         const appEncumbrances = encumbrances?.filter((e) => e.appropriationId === app.id) ?? [];
-                        const appEncTotal = appEncumbrances.reduce((sum, e) => sum + e.amount, 0);
                         const isAppExpanded = expandedAppropriations.has(app.id);
 
                         return (
@@ -125,7 +124,7 @@ export function ExecutionDrillDown({ budgetId }: ExecutionDrillDownProps) {
                             </Button>
 
                             {isAppExpanded && appEncumbrances.length > 0 && (
-                              <div className="mr-8 space-y-1">
+                              <div className="me-8 space-y-1">
                                 {appEncumbrances.map((enc) => (
                                   <div
                                     key={enc.id}

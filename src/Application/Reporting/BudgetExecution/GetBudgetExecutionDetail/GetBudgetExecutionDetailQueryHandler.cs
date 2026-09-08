@@ -23,11 +23,20 @@ internal class GetBudgetExecutionDetailQueryHandler(IApplicationDbContext dbCont
             .Select(a => a.Id)
             .ToListAsync(cancellationToken);
 
+        // Same status semantics as the main report (research D3) so detail sums
+        // reconcile with the summary line figures.
+        var openEncumbranceStatuses = new[]
+        {
+            Domain.Budgeting.Enums.EncumbranceStatus.Active,
+            Domain.Budgeting.Enums.EncumbranceStatus.PartiallyReleased,
+            Domain.Budgeting.Enums.EncumbranceStatus.PartiallyLiquidated,
+        };
+
         var encumbrances = await dbContext.Encumbrances
             .AsNoTracking()
             .Include(e => e.Appropriation)
             .Where(e => appropriationIds.Contains(e.AppropriationId)
-                     && e.Status != Domain.Budgeting.Enums.EncumbranceStatus.Cancelled)
+                     && openEncumbranceStatuses.Contains(e.Status))
             .Select(e => new EncumbranceDetailDto
             {
                 EncumbranceId = e.Id,
@@ -38,12 +47,18 @@ internal class GetBudgetExecutionDetailQueryHandler(IApplicationDbContext dbCont
             })
             .ToListAsync(cancellationToken);
 
-        var encumbranceIds = encumbrances.Select(e => e.EncumbranceId).ToList();
+        var executedPaymentStatuses = new[]
+        {
+            Domain.Payments.Enums.PaymentOrderStatus.Approved,
+            Domain.Payments.Enums.PaymentOrderStatus.SentToTreasury,
+            Domain.Payments.Enums.PaymentOrderStatus.Paid,
+            Domain.Payments.Enums.PaymentOrderStatus.PartiallyPaid,
+        };
 
         var payments = await dbContext.PaymentOrders
             .AsNoTracking()
-            .Where(po => encumbranceIds.Contains(po.EncumbranceId ?? 0)
-                      && po.Status != Domain.Payments.Enums.PaymentOrderStatus.Cancelled)
+            .Where(po => appropriationIds.Contains(po.AppropriationId)
+                      && executedPaymentStatuses.Contains(po.Status))
             .Select(po => new PaymentDetailDto
             {
                 PaymentOrderId = po.Id,

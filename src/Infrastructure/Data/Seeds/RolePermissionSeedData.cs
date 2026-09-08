@@ -34,7 +34,7 @@ public static class RolePermissionSeedData
             p.Code.StartsWith("FiscalPeriods.") || p.Code.StartsWith("Currencies.") ||
             p.Code.StartsWith("ExchangeRates.") || p.Code.StartsWith("ClosingEntries.") ||
             p.Code.StartsWith("DocumentSequences.") ||
-            p.Code.StartsWith("Reports.")))
+            p.Code.StartsWith("Reports.") || p.Code.StartsWith("Reporting.")))
             rolePerms.Add(new RolePermission { RoleId = finMgr.Id, PermissionId = p.Id });
 
         // ACCT_SR — محاسب أول: مراجعة + اعتماد + ترحيل
@@ -42,7 +42,7 @@ public static class RolePermissionSeedData
         foreach (var p in allPerms.Where(p =>
             p.Code.StartsWith("Accounting.") || p.Code.StartsWith("FiscalYears.") ||
             p.Code.StartsWith("FiscalPeriods.") || p.Code.StartsWith("ClosingEntries.") ||
-            p.Code.StartsWith("Reports.") || p.Code.StartsWith("Currencies.") ||
+            p.Code.StartsWith("Reports.") || p.Code.StartsWith("Reporting.") || p.Code.StartsWith("Currencies.") ||
             p.Code.StartsWith("ExchangeRates.")))
             rolePerms.Add(new RolePermission { RoleId = acctSr.Id, PermissionId = p.Id });
 
@@ -51,14 +51,14 @@ public static class RolePermissionSeedData
         foreach (var p in allPerms.Where(p =>
             p.Code.StartsWith("Accounting.Journals.") || p.Code.StartsWith("Accounting.JournalEntries.") ||
             p.Code.StartsWith("Accounting.ChartOfAccounts.") || p.Code.StartsWith("Accounting.Templates.") ||
-            p.Code.StartsWith("Accounting.RecurringEntries.") || p.Code.StartsWith("Reports.")))
+            p.Code.StartsWith("Accounting.RecurringEntries.") || p.Code.StartsWith("Reports.") || p.Code.StartsWith("Reporting.")))
             rolePerms.Add(new RolePermission { RoleId = acct.Id, PermissionId = p.Id });
 
         // AUDITOR — مراجع: قراءة + تقارير فقط
         var auditor = roles.First(r => r.Code == "AUDITOR");
         foreach (var p in allPerms.Where(p =>
             p.Code.EndsWith(".View") || p.Code.EndsWith(".Read") ||
-            p.Code.StartsWith("Reports.") || p.Code.StartsWith("Accounting.Reports.")))
+            p.Code.StartsWith("Reports.") || p.Code.StartsWith("Reporting.") || p.Code.StartsWith("Accounting.Reports.")))
             rolePerms.Add(new RolePermission { RoleId = auditor.Id, PermissionId = p.Id });
 
         // BUD_MGR — مدير الموازنة: موازنة شاملة
@@ -206,7 +206,7 @@ public static class RolePermissionSeedData
             // Payments
             Make("BankAccounts.View"), Make("BankAccounts.Create"), Make("BankAccounts.Update"), Make("BankAccounts.Activate"), Make("BankAccounts.Deactivate"),
             Make("PaymentOrders.View"), Make("PaymentOrders.Create"), Make("PaymentOrders.Submit"), Make("PaymentOrders.Approve"),
-            Make("PaymentOrders.Reject"), Make("PaymentOrders.Cancel"), Make("PaymentOrders.SendToTreasury"), Make("PaymentOrders.Void"),
+            Make("PaymentOrders.Reject"), Make("PaymentOrders.Cancel"), Make("PaymentOrders.SendToTreasury"), Make("PaymentOrders.Void"), Make("PaymentOrders.OverrideBudgetCheck"),
 
             // Committees
             Make("Committees.View"), Make("Committees.Create"), Make("Committees.Update"), Make("Committees.Activate"), Make("Committees.Deactivate"), Make("Committees.Dissolve"),
@@ -266,6 +266,14 @@ public static class RolePermissionSeedData
 
             // Reports
             Make("Reports.Read"), Make("Reports.Export"),
+
+            // Reporting (RPT-01..06)
+            Make("Reporting.ViewBudgetExecution"), Make("Reporting.ExportReports"),
+            Make("Reporting.ViewRevenueCollections"),
+            Make("Reporting.ViewDisbursementRegister"),
+            Make("Reporting.ViewAvailabilitySnapshot"),
+            Make("Reporting.ViewTrialBalanceReport"),
+            Make("Reporting.ViewFinancialStatements"),
 
             // Background Jobs
             Make("BackgroundJobs.View"), Make("BackgroundJobs.Manage"),

@@ -215,6 +215,13 @@ export type AssetPermission =
   | typeof ASSET_PERMISSIONS.AssetImpairments[keyof typeof ASSET_PERMISSIONS.AssetImpairments]
   | typeof ASSET_PERMISSIONS.Depreciation[keyof typeof ASSET_PERMISSIONS.Depreciation];
 
+// ─── Reporting (RPT-01) ─────────────────────────────────────────────
+
+export const REPORTING_PERMISSIONS = {
+  ViewBudgetExecution: 'Reporting.ViewBudgetExecution',
+  ExportReports: 'Reporting.ExportReports',
+} as const;
+
 // ─── Budgeting ─────────────────────────────────────────────────────
 
 export const BUDGET_PERMISSIONS = {

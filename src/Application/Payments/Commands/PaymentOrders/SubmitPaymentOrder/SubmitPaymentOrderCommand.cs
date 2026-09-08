@@ -1,3 +1,4 @@
+using ERP_Government.Application.Budgeting.Common;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Domain.Payments.Enums;
 
@@ -11,7 +12,8 @@ public class SubmitPaymentOrderCommand : IRequest<Result>
 }
 
 public class SubmitPaymentOrderCommandHandler(
-    IApplicationDbContext context) : IRequestHandler<SubmitPaymentOrderCommand, Result>
+    IApplicationDbContext context,
+    IBudgetAvailabilityService budgetAvailabilityService) : IRequestHandler<SubmitPaymentOrderCommand, Result>
 {
     public async Task<Result> Handle(
         SubmitPaymentOrderCommand request,
@@ -26,19 +28,27 @@ public class SubmitPaymentOrderCommandHandler(
         if (entity.Status != PaymentOrderStatus.Draft)
             return Result.Failure(["Only draft payment orders can be submitted."]);
 
-        // Budget check: an open (non-Cancelled/Closed) budget must exist for the fund.
-        // Computed availability enforcement for payments ships with the PostingPipeline
-        // integration (out of scope); snapshot amounts no longer exist on Budget.
-        var budget = await context.Budgets
-            .FirstOrDefaultAsync(b => b.FundId == entity.FundId
-                && b.Status != ERP_Government.Domain.Budgeting.Enums.BudgetStatus.Cancelled
-                && b.Status != ERP_Government.Domain.Budgeting.Enums.BudgetStatus.Closed, cancellationToken);
+        var hasLines = await context.PaymentOrderLines
+            .AnyAsync(l => l.PaymentOrderId == entity.Id, cancellationToken);
+        if (!hasLines)
+            return Result.Failure(["Cannot submit a payment order with no lines."]);
 
-        if (budget is null)
+        var appropriation = await context.Appropriations.FindAsync(entity.AppropriationId, cancellationToken);
+        if (appropriation is null)
         {
             entity.BudgetCheckStatus = BudgetCheckStatus.Failed;
             await context.SaveChangesAsync(cancellationToken);
-            return Result.Failure(["Budget check failed: No active budget found for this fund."]);
+            return Result.Failure(["Budget check failed: Invalid appropriation."]);
+        }
+
+        var available = await budgetAvailabilityService.GetAvailableForAppropriationAsync(appropriation.BudgetItemId);
+        var netAmount = entity.AmountGross - entity.DeductionAmount;
+
+        if (available < netAmount)
+        {
+            entity.BudgetCheckStatus = BudgetCheckStatus.Failed;
+            await context.SaveChangesAsync(cancellationToken);
+            return Result.Failure([$"Budget check failed: Insufficient appropriation availability. Available: {available:N2}, Required: {netAmount:N2}."]);
         }
 
         entity.BudgetCheckStatus = BudgetCheckStatus.Passed;

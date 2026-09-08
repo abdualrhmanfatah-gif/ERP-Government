@@ -9,25 +9,49 @@ namespace ERP_Government.Application.Reporting.Common;
 
 public static class ReportResultMapper
 {
-    public static ReportResult ToReportResult(this BudgetExecutionReportDto report, string? currencyCode) =>
+    private const string PartialDataWarning = "بيانات جزئية — الفترة الحالية جارية";
+
+    public static ReportResult ToReportResult(this BudgetExecutionReportDto report, string? currencyCode, bool includePartialDataWarning = false) =>
         new()
         {
             Currency = currencyCode ?? string.Empty,
             GeneratedAt = DateTimeOffset.UtcNow,
+            DataWarning = includePartialDataWarning ? PartialDataWarning : null,
             Sections =
             [
                 new ReportSection
                 {
-                    Title = "Budget Execution",
+                    Title = "تقرير تنفيذ الموازنة",
+                    TitleEn = "Budget Execution",
                     Lines = report.Lines.Select(l => new ReportLine
                     {
                         AccountCode = l.ItemCode,
                         AccountName = $"{l.ItemName} - {l.FundNumber}",
-                        Debit = l.PaidAmount,
-                        Credit = 0,
-                        Balance = l.AvailableAmount
+                        Values =
+                        [
+                            l.AppropriatedAmount,
+                            l.EncumberedAmount,
+                            l.PaidAmount,
+                            l.AvailableAmount
+                        ]
                     }).ToList(),
-                    Total = report.Totals.AvailableAmount
+                    Total = report.Totals.AvailableAmount,
+                    ColumnHeaders =
+                    [
+                        "كود البند",
+                        "اسم البند",
+                        "المخصص",
+                        "الالتزامات",
+                        "المدفوعات",
+                        "المتاح"
+                    ],
+                    ColumnTotals =
+                    [
+                        report.Totals.AppropriatedAmount,
+                        report.Totals.EncumberedAmount,
+                        report.Totals.PaidAmount,
+                        report.Totals.AvailableAmount
+                    ]
                 }
             ]
         };

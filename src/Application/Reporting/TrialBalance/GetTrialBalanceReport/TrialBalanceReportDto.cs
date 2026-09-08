@@ -17,6 +17,8 @@ public record TrialBalanceLineDto
     public string AccountName { get; init; } = string.Empty;
     public string AccountType { get; init; } = string.Empty;
     public decimal OpeningBalance { get; init; }
+    public decimal OpeningDebit { get; init; }
+    public decimal OpeningCredit { get; init; }
     public decimal DebitTotal { get; init; }
     public decimal CreditTotal { get; init; }
     public decimal ClosingBalance { get; init; }

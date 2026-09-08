@@ -177,6 +177,7 @@ public static class PermissionCodes
     public const string PaymentOrdersCancel = "PaymentOrders.Cancel";
     public const string PaymentOrdersSendToTreasury = "PaymentOrders.SendToTreasury";
     public const string PaymentOrdersVoid = "PaymentOrders.Void";
+    public const string PaymentOrdersOverrideBudgetCheck = "PaymentOrders.OverrideBudgetCheck";
 
     // ─── Disbursements ────────────────────────────────────────────────
     public const string DisbursementRequestsView = "DisbursementRequests.View";

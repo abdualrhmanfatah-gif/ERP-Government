@@ -30,9 +30,10 @@ public class GetPaymentOrderTotalsQueryHandler(
         var totalDeductions = deductions.Sum(d => d.Amount);
         var netAmount = paymentOrder.AmountGross - totalDeductions;
 
-        var isPaid = paymentOrder.Status == PaymentOrderStatus.Paid;
-        var isPartiallyPaid = paymentOrder.Status == PaymentOrderStatus.PartiallyPaid;
-        var paidAmount = isPaid ? netAmount : 0m;
+        var paidAmount = await context.Payments
+            .Where(p => p.PaymentOrderId == request.Id && p.Status == PaymentStatus.Completed)
+            .SumAsync(p => p.Amount, cancellationToken);
+
         var remainingAmount = netAmount - paidAmount;
 
         return new PaymentOrderTotalsDto
@@ -43,7 +44,7 @@ public class GetPaymentOrderTotalsQueryHandler(
             NetAmount = netAmount,
             PaidAmount = paidAmount,
             RemainingAmount = remainingAmount,
-            IsFullyPaid = isPaid,
+            IsFullyPaid = remainingAmount <= 0m,
             Status = paymentOrder.Status
         };
     }

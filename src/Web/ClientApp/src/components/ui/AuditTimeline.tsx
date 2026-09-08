@@ -77,7 +77,7 @@ const actionConfig: Record<AuditAction, {
   },
   submit: {
     icon: ArrowRight,
-    label: 'تقديم',
+    label: 'إرسال للمراجعة',
     colorClass: 'text-status-pending-fg',
     bgClass: 'bg-status-pending-bg',
   },

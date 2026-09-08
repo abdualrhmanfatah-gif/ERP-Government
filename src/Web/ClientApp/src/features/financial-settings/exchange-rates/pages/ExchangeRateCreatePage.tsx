@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Page, Button, Card, Input, Select, Loading } from '@/components/ui';
+import { Page, Button, Card, Input, Select } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { useCreateExchangeRate } from '../../hooks/useExchangeRates';

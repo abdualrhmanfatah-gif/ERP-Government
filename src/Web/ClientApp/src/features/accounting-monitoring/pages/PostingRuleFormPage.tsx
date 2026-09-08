@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePostingRule, useCreatePostingRule, useUpdatePostingRule } from '../hooks/usePostingRules';
 import { notify } from '@/features/notifications/notify';
@@ -38,9 +38,11 @@ export function PostingRuleFormPage() {
   const [priority, setPriority] = useState(0);
   const [isActive, setIsActive] = useState(true);
   const [lines, setLines] = useState<LineForm[]>([emptyLine()]);
+  const prevExistingRef = useRef(existing);
 
   useEffect(() => {
-    if (existing && isEdit) {
+    if (existing && isEdit && prevExistingRef.current !== existing) {
+      prevExistingRef.current = existing;
       setName(existing.name);
       setEventType(existing.eventType);
       setJournalId(existing.journalId);

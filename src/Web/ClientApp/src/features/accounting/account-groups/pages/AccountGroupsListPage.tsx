@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Power, PowerOff, Eye, Pencil } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
-import { Page, DataGrid, Button, ConfirmDialog, Input, FilterBar, FilterSelect, Loading, StatusBadge } from '@/components/ui';
+import { Page, DataGrid, Button, ConfirmDialog, Input, FilterBar, FilterSelect, StatusBadge } from '@/components/ui';
 import { GroupTree } from '@/components/AccountingGroupTree';
 import { AccountGroupForm } from '@/components/AccountingAccountGroupForm';
 import { useAccountGroupsList } from '../hooks/useAccountGroupsList';

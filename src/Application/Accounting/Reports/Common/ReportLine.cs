@@ -11,4 +11,10 @@ public class ReportLine
     public decimal Credit { get; init; }
 
     public decimal Balance { get; init; }
+
+    /// <summary>
+    /// Extended per-row values matching the section's ColumnHeaders when used.
+    /// Additive — legacy mappers leave it null.
+    /// </summary>
+    public List<decimal>? Values { get; init; }
 }

@@ -55,18 +55,34 @@ public class BudgetExecutionReports : IEndpointGroup
             .Where(c => c.IsBase)
             .Select(c => c.Code)
             .FirstOrDefaultAsync();
+
+        // RC-4: exporting data that includes the currently open fiscal period is partial data.
+        var isPartialData = await context.FiscalYears
+            .AnyAsync(fy => fy.Id == query.FiscalYearId
+                         && fy.Status == Domain.FinancialSettings.Enums.FiscalYearStatus.Open);
+
         var stream = new MemoryStream();
-        var exporter = format?.ToLower() == "pdf"
+        var isPdf = format?.ToLower() == "pdf";
+        var exporter = isPdf
             ? (ERP_Government.Application.Accounting.Reports.Common.IReportExporter)new ERP_Government.Infrastructure.Services.PdfReportExporter()
             : new ERP_Government.Infrastructure.Services.ExcelReportExporter();
 
-        var reportResult = result.ToReportResult(currencyCode);
+        var reportResult = result.ToReportResult(currencyCode, isPartialData);
 
-        await exporter.ExportExcelAsync(reportResult, "Budget Execution", stream);
+        if (isPdf)
+        {
+            await exporter.ExportPdfAsync(reportResult, "تقرير تنفيذ الموازنة", stream);
+        }
+        else
+        {
+            await exporter.ExportExcelAsync(reportResult, "تقرير تنفيذ الموازنة", stream);
+        }
         stream.Position = 0;
 
-        var extension = format?.ToLower() == "pdf" ? "pdf" : "xlsx";
-        var contentType = format?.ToLower() == "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        var extension = isPdf ? "pdf" : "xlsx";
+        var contentType = isPdf
+            ? "application/pdf"
+            : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
         return Results.File(stream, contentType, $"BudgetExecution-{DateTime.Now:yyyyMMdd}.{extension}");
     }
 }

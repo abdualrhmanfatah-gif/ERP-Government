@@ -12038,9 +12038,11 @@ export class ReportsClient {
      * @param accountCode (optional) 
      * @param fiscalYearId (optional) 
      * @param fiscalPeriodId (optional) 
+     * @param pageSize (optional) 
+     * @param isLandscape (optional) 
      * @return OK
      */
-    export(reportType: string, format: string, asOfDate: Date | undefined, startDate: Date | undefined, endDate: Date | undefined, accountId: number | undefined, accountCode: string | undefined, fiscalYearId: number | undefined, fiscalPeriodId: number | undefined): Promise<void> {
+    export(reportType: string, format: string, asOfDate: Date | undefined, startDate: Date | undefined, endDate: Date | undefined, accountId: number | undefined, accountCode: string | undefined, fiscalYearId: number | undefined, fiscalPeriodId: number | undefined, pageSize: string | undefined, isLandscape: boolean | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/Reports/{reportType}/export?";
         if (reportType === undefined || reportType === null)
             throw new globalThis.Error("The parameter 'reportType' must be defined.");
@@ -12077,6 +12079,14 @@ export class ReportsClient {
             throw new globalThis.Error("The parameter 'fiscalPeriodId' cannot be null.");
         else if (fiscalPeriodId !== undefined)
             url_ += "fiscalPeriodId=" + encodeURIComponent("" + fiscalPeriodId) + "&";
+        if (pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (isLandscape === null)
+            throw new globalThis.Error("The parameter 'isLandscape' cannot be null.");
+        else if (isLandscape !== undefined)
+            url_ += "isLandscape=" + encodeURIComponent("" + isLandscape) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {
@@ -18452,6 +18462,91 @@ export class JournalEntriesClient {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Export journal entries to Excel or PDF
+     * @param journalId (optional) 
+     * @param entryId (optional) 
+     * @param status (optional) 
+     * @param fromDate (optional) 
+     * @param toDate (optional) 
+     * @param pageSize (optional) 
+     * @param isLandscape (optional) 
+     * @return OK
+     */
+    export7(format: string, journalId: number | undefined, entryId: number | undefined, status: string | undefined, fromDate: Date | undefined, toDate: Date | undefined, pageSize: string | undefined, isLandscape: boolean | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/JournalEntries/export?";
+        if (format === undefined || format === null)
+            throw new globalThis.Error("The parameter 'format' must be defined and cannot be null.");
+        else
+            url_ += "format=" + encodeURIComponent("" + format) + "&";
+        if (journalId === null)
+            throw new globalThis.Error("The parameter 'journalId' cannot be null.");
+        else if (journalId !== undefined)
+            url_ += "journalId=" + encodeURIComponent("" + journalId) + "&";
+        if (entryId === null)
+            throw new globalThis.Error("The parameter 'entryId' cannot be null.");
+        else if (entryId !== undefined)
+            url_ += "entryId=" + encodeURIComponent("" + entryId) + "&";
+        if (status === null)
+            throw new globalThis.Error("The parameter 'status' cannot be null.");
+        else if (status !== undefined)
+            url_ += "status=" + encodeURIComponent("" + status) + "&";
+        if (fromDate === null)
+            throw new globalThis.Error("The parameter 'fromDate' cannot be null.");
+        else if (fromDate !== undefined)
+            url_ += "fromDate=" + encodeURIComponent(fromDate ? "" + fromDate.toISOString() : "") + "&";
+        if (toDate === null)
+            throw new globalThis.Error("The parameter 'toDate' cannot be null.");
+        else if (toDate !== undefined)
+            url_ += "toDate=" + encodeURIComponent(toDate ? "" + toDate.toISOString() : "") + "&";
+        if (pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (isLandscape === null)
+            throw new globalThis.Error("The parameter 'isLandscape' cannot be null.");
+        else if (isLandscape !== undefined)
+            url_ += "isLandscape=" + encodeURIComponent("" + isLandscape) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processExport7(_response);
+        });
+    }
+
+    protected processExport7(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
             return response.text().then((_responseText) => {
             return;
             });
@@ -35745,6 +35840,7 @@ export class ReportLine implements IReportLine {
     debit?: number;
     credit?: number;
     balance?: number;
+    values?: number[] | undefined;
 
     [key: string]: any;
 
@@ -35768,6 +35864,11 @@ export class ReportLine implements IReportLine {
             this.debit = _data["debit"];
             this.credit = _data["credit"];
             this.balance = _data["balance"];
+            if (Array.isArray(_data["values"])) {
+                this.values = [] as any;
+                for (let item of _data["values"])
+                    this.values!.push(item);
+            }
         }
     }
 
@@ -35789,6 +35890,11 @@ export class ReportLine implements IReportLine {
         data["debit"] = this.debit;
         data["credit"] = this.credit;
         data["balance"] = this.balance;
+        if (Array.isArray(this.values)) {
+            data["values"] = [];
+            for (let item of this.values)
+                data["values"].push(item);
+        }
         return data;
     }
 }
@@ -35799,6 +35905,7 @@ export interface IReportLine {
     debit?: number;
     credit?: number;
     balance?: number;
+    values?: number[] | undefined;
 
     [key: string]: any;
 }
@@ -35808,6 +35915,8 @@ export class ReportSection implements IReportSection {
     titleEn?: string;
     lines?: ReportLine[];
     total?: number;
+    columnHeaders?: string[] | undefined;
+    columnTotals?: number[] | undefined;
 
     [key: string]: any;
 
@@ -35834,6 +35943,16 @@ export class ReportSection implements IReportSection {
                     this.lines!.push(ReportLine.fromJS(item));
             }
             this.total = _data["total"];
+            if (Array.isArray(_data["columnHeaders"])) {
+                this.columnHeaders = [] as any;
+                for (let item of _data["columnHeaders"])
+                    this.columnHeaders!.push(item);
+            }
+            if (Array.isArray(_data["columnTotals"])) {
+                this.columnTotals = [] as any;
+                for (let item of _data["columnTotals"])
+                    this.columnTotals!.push(item);
+            }
         }
     }
 
@@ -35858,6 +35977,16 @@ export class ReportSection implements IReportSection {
                 data["lines"].push(item ? item.toJSON() : undefined as any);
         }
         data["total"] = this.total;
+        if (Array.isArray(this.columnHeaders)) {
+            data["columnHeaders"] = [];
+            for (let item of this.columnHeaders)
+                data["columnHeaders"].push(item);
+        }
+        if (Array.isArray(this.columnTotals)) {
+            data["columnTotals"] = [];
+            for (let item of this.columnTotals)
+                data["columnTotals"].push(item);
+        }
         return data;
     }
 }
@@ -35867,6 +35996,8 @@ export interface IReportSection {
     titleEn?: string;
     lines?: ReportLine[];
     total?: number;
+    columnHeaders?: string[] | undefined;
+    columnTotals?: number[] | undefined;
 
     [key: string]: any;
 }
@@ -37464,6 +37595,8 @@ export class TrialBalanceLineDto implements ITrialBalanceLineDto {
     accountName?: string;
     accountType?: string;
     openingBalance?: number;
+    openingDebit?: number;
+    openingCredit?: number;
     debitTotal?: number;
     creditTotal?: number;
     closingBalance?: number;
@@ -37490,6 +37623,8 @@ export class TrialBalanceLineDto implements ITrialBalanceLineDto {
             this.accountName = _data["accountName"];
             this.accountType = _data["accountType"];
             this.openingBalance = _data["openingBalance"];
+            this.openingDebit = _data["openingDebit"];
+            this.openingCredit = _data["openingCredit"];
             this.debitTotal = _data["debitTotal"];
             this.creditTotal = _data["creditTotal"];
             this.closingBalance = _data["closingBalance"];
@@ -37514,6 +37649,8 @@ export class TrialBalanceLineDto implements ITrialBalanceLineDto {
         data["accountName"] = this.accountName;
         data["accountType"] = this.accountType;
         data["openingBalance"] = this.openingBalance;
+        data["openingDebit"] = this.openingDebit;
+        data["openingCredit"] = this.openingCredit;
         data["debitTotal"] = this.debitTotal;
         data["creditTotal"] = this.creditTotal;
         data["closingBalance"] = this.closingBalance;
@@ -37527,6 +37664,8 @@ export interface ITrialBalanceLineDto {
     accountName?: string;
     accountType?: string;
     openingBalance?: number;
+    openingDebit?: number;
+    openingCredit?: number;
     debitTotal?: number;
     creditTotal?: number;
     closingBalance?: number;

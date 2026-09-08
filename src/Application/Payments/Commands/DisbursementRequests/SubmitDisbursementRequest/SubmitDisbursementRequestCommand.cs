@@ -1,5 +1,7 @@
+using ERP_Government.Application.Budgeting.Common;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Domain.Payments.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP_Government.Application.Payments.Commands.DisbursementRequests.SubmitDisbursementRequest;
 
@@ -12,6 +14,7 @@ public class SubmitDisbursementRequestCommand : IRequest<Result>
 
 public class SubmitDisbursementRequestCommandHandler(
     IApplicationDbContext context,
+    IBudgetAvailabilityService availabilityService,
     IUser user) : IRequestHandler<SubmitDisbursementRequestCommand, Result>
 {
     public async Task<Result> Handle(
@@ -29,6 +32,32 @@ public class SubmitDisbursementRequestCommandHandler(
 
         if (entity.Status != DisbursementRequestStatus.Draft)
             return Result.Failure(["Only draft disbursement requests can be submitted."]);
+
+        var paymentOrder = await context.PaymentOrders
+            .FindAsync(entity.PaymentOrderId, cancellationToken);
+
+        if (paymentOrder is not null && paymentOrder.AppropriationId > 0)
+        {
+            var appropriation = await context.Appropriations
+                .FindAsync(paymentOrder.AppropriationId, cancellationToken);
+
+            if (appropriation is not null)
+            {
+                var netTotal = paymentOrder.AmountGross - paymentOrder.DeductionAmount;
+                var summary = await availabilityService.GetAvailabilitySummaryAsync(appropriation.BudgetItemId);
+                var (allowed, warning) = availabilityService.EvaluateControlMethod(
+                    summary.BudgetControlMethod, netTotal, summary.Available);
+
+                if (!allowed)
+                    return Result.Failure([
+                        $"Budget availability insufficient. Net appropriated: {summary.NetAppropriated}, " +
+                        $"Encumbered: {summary.Encumbered}, Available: {summary.Available}, " +
+                        $"Requested: {netTotal}, Shortfall: {netTotal - summary.Available}"]);
+
+                if (warning is not null)
+                    entity.HasWarning = true;
+            }
+        }
 
         entity.Status = DisbursementRequestStatus.PendingApproval;
         entity.LastModified = DateTimeOffset.UtcNow;

@@ -53,11 +53,11 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         />
       ) : null}
 
-      {/* Sidebar — drawer anchored to right edge for RTL (physical right-0), z-50 */}
+      {/* Sidebar — drawer anchored to end edge for RTL (logical end-0), z-50 */}
       <aside
         aria-label="القائمة الرئيسية"
         style={{ background: 'var(--gradient-sidebar, #002045)' }}
-        className={`w-[300px] max-w-[85vw] text-white flex flex-col fixed inset-y-0 right-0 z-50 lg:hidden shadow-2xl transition-transform duration-300 ease-out will-change-transform ${
+        className={`w-[300px] max-w-[85vw] text-white flex flex-col fixed inset-y-0 end-0 z-50 lg:hidden shadow-2xl transition-transform duration-300 ease-out will-change-transform ${
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
       >

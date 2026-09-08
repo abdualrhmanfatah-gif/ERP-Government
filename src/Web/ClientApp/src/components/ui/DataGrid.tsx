@@ -266,7 +266,7 @@ export function DataGrid<T>({
 
       {/* Mobile card view */}
       <div className="md:hidden flex flex-col gap-3">
-        {rows.map((row, idx) => {
+        {rows.map((row) => {
           const rowKeyValue = rowKey(row.original as T);
           const isSelected = selectedRowKey !== undefined && selectedRowKey === rowKeyValue;
           return (

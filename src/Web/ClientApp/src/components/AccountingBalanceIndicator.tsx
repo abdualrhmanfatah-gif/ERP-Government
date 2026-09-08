@@ -10,7 +10,8 @@ export function BalanceIndicator({ totalDebit = 0, totalCredit = 0, className = 
 
   return (
     <div
-      className={`flex items-center gap-4 text-sm p-3 rounded-lg ${className}`}
+      dir="rtl"
+      className={`flex flex-wrap items-center justify-between gap-3 text-sm p-3 rounded-lg ${className}`}
       style={{
         backgroundColor: isBalanced ? 'var(--color-successBg)' : 'var(--color-errorContainer)',
         color: isBalanced ? 'var(--color-success)' : 'var(--color-error)',

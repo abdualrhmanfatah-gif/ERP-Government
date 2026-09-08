@@ -91,7 +91,7 @@ export const fundCategoryLabels: Record<string, string> = {
 
 export const budgetStatusLabels: Record<BudgetStatus, string> = {
   [BudgetStatus.Draft]: 'مسودة',
-  [BudgetStatus.Submitted]: 'مقدم',
+  [BudgetStatus.Submitted]: 'مرسل للمراجعة',
   [BudgetStatus.Approved]: 'معتمد',
   [BudgetStatus.Active]: 'نشط',
   [BudgetStatus.Suspended]: 'معلق',

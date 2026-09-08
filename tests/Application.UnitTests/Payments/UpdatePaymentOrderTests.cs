@@ -61,6 +61,32 @@ public class UpdatePaymentOrderTests
         _deductionsMock = deductions.AsQueryable().BuildMockForAsync();
         _contextMock.Setup(x => x.PaymentOrderDeductions).Returns(_deductionsMock.Object);
 
+        var partiesMock = new Mock<DbSet<Domain.Parties.Entities.Party>>();
+        partiesMock.Setup(x => x.FindAsync(It.IsAny<object[]>()))
+            .Returns<object[]>(kvs => ValueTask.FromResult<Domain.Parties.Entities.Party?>(
+                new Domain.Parties.Entities.Party { Id = (int)kvs[0], IsActive = true, PartyType = Domain.Parties.Enums.PartyType.Supplier }));
+        _contextMock.Setup(x => x.Parties).Returns(partiesMock.Object);
+
+        var fundsMock = new Mock<DbSet<Domain.Budgeting.Entities.Fund>>();
+        fundsMock.Setup(x => x.FindAsync(It.IsAny<object[]>()))
+            .Returns<object[]>(kvs => ValueTask.FromResult<Domain.Budgeting.Entities.Fund?>(
+                new Domain.Budgeting.Entities.Fund { Id = (int)kvs[0], IsActive = true }));
+        _contextMock.Setup(x => x.Funds).Returns(fundsMock.Object);
+
+        var fyMock = new Mock<DbSet<Domain.FinancialSettings.Entities.FiscalYear>>();
+        fyMock.Setup(x => x.FindAsync(It.IsAny<object[]>()))
+            .Returns<object[]>(kvs => ValueTask.FromResult<Domain.FinancialSettings.Entities.FiscalYear?>(
+                new Domain.FinancialSettings.Entities.FiscalYear { Id = (int)kvs[0], Status = Domain.FinancialSettings.Enums.FiscalYearStatus.Open }));
+        _contextMock.Setup(x => x.FiscalYears).Returns(fyMock.Object);
+
+        var appropMock = new Mock<DbSet<Domain.Budgeting.Entities.Appropriation>>();
+        appropMock.Setup(x => x.FindAsync(It.IsAny<object[]>()))
+            .Returns<object[]>(kvs => ValueTask.FromResult<Domain.Budgeting.Entities.Appropriation?>(
+                new Domain.Budgeting.Entities.Appropriation { Id = (int)kvs[0] }));
+        _contextMock.Setup(x => x.Appropriations).Returns(appropMock.Object);
+
+        _contextMock.Setup(x => x.BankAccounts).Returns(new Mock<DbSet<Domain.Payments.Entities.BankAccount>>().Object);
+
         _contextMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
     }
 

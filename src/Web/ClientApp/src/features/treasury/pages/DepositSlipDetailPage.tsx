@@ -159,7 +159,7 @@ export default function DepositSlipDetailPage() {
             <div key={v.id} className="flex items-center gap-3 px-4 py-3">
               <span className="font-medium tabular-nums">{v.voucherNumber}</span>
               <span className="text-muted-foreground text-sm">{v.receivedFrom}</span>
-              <span className="mr-auto">
+              <span className="ms-auto">
                 <MoneyDisplay value={v.totalAmount ?? 0} />
               </span>
               {isDraft && (

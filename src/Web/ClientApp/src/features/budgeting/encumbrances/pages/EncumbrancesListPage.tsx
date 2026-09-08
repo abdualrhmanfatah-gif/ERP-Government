@@ -10,7 +10,7 @@ import { Plus, RotateCcw } from 'lucide-react';
 
 const encumbranceActions: Record<number, LifecycleAction[]> = {
   [EncumbranceStatus.Draft]: [
-    { key: 'submit', label: 'تقديم', permission: BUDGET_PERMISSIONS.Encumbrances.Submit },
+    { key: 'submit', label: 'إرسال للمراجعة', permission: BUDGET_PERMISSIONS.Encumbrances.Submit },
   ],
   [EncumbranceStatus.PendingApproval]: [
     { key: 'approve', label: 'اعتماد', permission: BUDGET_PERMISSIONS.Encumbrances.Approve },

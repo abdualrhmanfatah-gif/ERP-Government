@@ -2,7 +2,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ReceiptVouchersClient, PaymentMethod, ReceiptVoucherStatus } from '../../../web-api-client';
-import type { ReceiptVoucherDto } from '../shared/types';
 
 const client = new ReceiptVouchersClient();
 

@@ -68,6 +68,25 @@ import EncumbranceCreatePage from '../features/budgeting/encumbrances/pages/Encu
 import { RecurringEntriesListPage } from '../features/accounting/recurring-entries';
 import { RecurringEntryDetailPage } from '../features/accounting/recurring-entries';
 import RecurringEntryCreatePage from '../features/accounting/recurring-entries/pages/RecurringEntryCreatePage';
+import { PaymentOrdersListPage } from '../features/payments/payment-orders/pages/PaymentOrdersListPage';
+import { PaymentOrderCreatePage } from '../features/payments/payment-orders/pages/PaymentOrderCreatePage';
+import PaymentOrderDetailPage from '../features/payments/payment-orders/pages/PaymentOrderDetailPage';
+import { DisbursementRequestsListPage } from '../features/payments/disbursement-requests/pages/DisbursementRequestsListPage';
+import { DisbursementRequestCreatePage } from '../features/payments/disbursement-requests/pages/DisbursementRequestCreatePage';
+import DisbursementRequestDetailPage from '../features/payments/disbursement-requests/pages/DisbursementRequestDetailPage';
+import { PaymentsListPage } from '../features/payments/payments/pages/PaymentsListPage';
+import PaymentSuccessPage from '../features/payments/payments/pages/PaymentSuccessPage';
+import { BankAccountsListPage } from '../features/payments/bank-accounts/pages/BankAccountsListPage';
+import BankAccountDetailPage from '../features/payments/bank-accounts/pages/BankAccountDetailPage';
+import BudgetExecutionReportPage from '../features/reporting/budget-execution-report/pages/BudgetExecutionReportPage';
+import RevenueCollectionsReportPage from '../features/reporting/revenue-collections-report/pages/RevenueCollectionsReportPage';
+import DisbursementRegisterReportPage from '../features/reporting/disbursement-register-report/pages/DisbursementRegisterReportPage';
+import AvailabilitySnapshotReportPage from '../features/reporting/availability-snapshot-report/pages/AvailabilitySnapshotReportPage';
+import TrialBalanceReportPage from '../features/reporting/trial-balance-report/pages/TrialBalanceReportPage';
+import BalanceSheetReportPage from '../features/reporting/financial-statements/pages/BalanceSheetReportPage';
+import IncomeStatementReportPage from '../features/reporting/financial-statements/pages/IncomeStatementReportPage';
+import CashFlowStatementReportPage from '../features/reporting/financial-statements/pages/CashFlowStatementReportPage';
+import GeneralLedgerReportPage from '../features/reporting/financial-statements/pages/GeneralLedgerReportPage';
 
 export interface RouteConfig {
   path: string;
@@ -75,6 +94,7 @@ export interface RouteConfig {
   layout?: React.FC<{ children: ReactNode }>;
   label?: string;
   protected?: boolean;
+  requiredPermission?: string;
 }
 
 export const AppRoutes: RouteConfig[] = [
@@ -532,5 +552,145 @@ export const AppRoutes: RouteConfig[] = [
     element: <ChecksListPage />,
     label: 'الشيكات',
     protected: true,
+  },
+  // Reporting — Budget Execution (RPT-01)
+  {
+    path: '/reporting/budget-execution',
+    element: <BudgetExecutionReportPage />,
+    label: 'تقرير تنفيذ الموازنة',
+    protected: true,
+    requiredPermission: 'Reporting.ViewBudgetExecution',
+  },
+  // Reporting — Revenue Collections (RPT-02)
+  {
+    path: '/reporting/revenue-collections',
+    element: <RevenueCollectionsReportPage />,
+    label: 'سجل التحصيلات',
+    protected: true,
+    requiredPermission: 'Reporting.ViewRevenueCollections',
+  },
+  // Reporting — Disbursement Register (RPT-03)
+  {
+    path: '/reporting/disbursement-register',
+    element: <DisbursementRegisterReportPage />,
+    label: 'سجل الصرف',
+    protected: true,
+    requiredPermission: 'Reporting.ViewDisbursementRegister',
+  },
+  // Reporting — Availability Snapshot (RPT-04)
+  {
+    path: '/reporting/availability-snapshot',
+    element: <AvailabilitySnapshotReportPage />,
+    label: 'لقطة التوفر',
+    protected: true,
+    requiredPermission: 'Reporting.ViewAvailabilitySnapshot',
+  },
+  // Reporting — Trial Balance (RPT-05)
+  {
+    path: '/reporting/trial-balance',
+    element: <TrialBalanceReportPage />,
+    label: 'ميزان المراجعة',
+    protected: true,
+    requiredPermission: 'Reporting.ViewTrialBalance',
+  },
+  // Reporting — Financial Statements (RPT-06)
+  {
+    path: '/reporting/financial-statements/balance-sheet',
+    element: <BalanceSheetReportPage />,
+    label: 'الميزانية العمومية',
+    protected: true,
+    requiredPermission: 'Reporting.ViewFinancialStatements',
+  },
+  {
+    path: '/reporting/financial-statements/income-statement',
+    element: <IncomeStatementReportPage />,
+    label: 'قائمة الدخل',
+    protected: true,
+    requiredPermission: 'Reporting.ViewFinancialStatements',
+  },
+  {
+    path: '/reporting/financial-statements/cash-flow',
+    element: <CashFlowStatementReportPage />,
+    label: 'قائمة التدفقات النقدية',
+    protected: true,
+    requiredPermission: 'Reporting.ViewFinancialStatements',
+  },
+  {
+    path: '/reporting/financial-statements/general-ledger',
+    element: <GeneralLedgerReportPage />,
+    label: 'دفتر الأستاذ العام',
+    protected: true,
+    requiredPermission: 'Reporting.ViewFinancialStatements',
+  },
+  // ─── Payments ──────────────────────────────────────────────────
+  {
+    path: '/payments/payment-orders',
+    element: <PaymentOrdersListPage />,
+    label: 'أوامر الدفع',
+    protected: true,
+    requiredPermission: 'PaymentOrders.View',
+  },
+  {
+    path: '/payments/payment-orders/create',
+    element: <PaymentOrderCreatePage />,
+    label: 'أمر دفع جديد',
+    protected: true,
+    requiredPermission: 'PaymentOrders.Create',
+  },
+  {
+    path: '/payments/payment-orders/:id',
+    element: <PaymentOrderDetailPage />,
+    label: 'تفاصيل أمر الدفع',
+    protected: true,
+    requiredPermission: 'PaymentOrders.View',
+  },
+  {
+    path: '/payments/disbursement-requests',
+    element: <DisbursementRequestsListPage />,
+    label: 'طلبات الصرف',
+    protected: true,
+    requiredPermission: 'DisbursementRequests.View',
+  },
+  {
+    path: '/payments/disbursement-requests/create',
+    element: <DisbursementRequestCreatePage />,
+    label: 'طلب صرف جديد',
+    protected: true,
+    requiredPermission: 'DisbursementRequests.Create',
+  },
+  {
+    path: '/payments/disbursement-requests/:id',
+    element: <DisbursementRequestDetailPage />,
+    label: 'تفاصيل طلب الصرف',
+    protected: true,
+    requiredPermission: 'DisbursementRequests.View',
+  },
+  {
+    path: '/payments/payments',
+    element: <PaymentsListPage />,
+    label: 'المدفوعات',
+    protected: true,
+    requiredPermission: 'Payments.View',
+  },
+  {
+    path: '/payments/payments/:id',
+    element: <PaymentSuccessPage />,
+    label: 'تفاصيل الدفعة',
+    protected: true,
+    requiredPermission: 'Payments.View',
+  },
+  {
+    path: '/payments/bank-accounts',
+    element: <BankAccountsListPage />,
+    label: 'الحسابات البنكية',
+    protected: true,
+    requiredPermission: 'BankAccounts.View',
+  },
+  {
+    path: '/payments/bank-accounts/:id',
+    element: <BankAccountDetailPage />,
+    label: 'تفاصيل الحساب البنكي',
+    protected: true,
+    requiredPermission: 'BankAccounts.View',
   },
 ];

@@ -130,32 +130,55 @@ public class ApplicationDbContextInitialiser
             await _context.SaveChangesAsync();
         }
 
-        // Replace old MODULE_ACTION permissions with PermissionCodes-based ones
-        // (old codes like COMMITTEES_CREATE never match queries using Committees.Create)
-        if (!_context.SecurityPermissions.Any() || !_context.RolePermissions.Any())
-        {
-            // Clear old permissions + role-permissions (old format useless)
-            _context.RolePermissions.RemoveRange(_context.RolePermissions);
-            _context.SecurityPermissions.RemoveRange(_context.SecurityPermissions);
-            await _context.SaveChangesAsync();
-
-            // Seed PermissionCodes-based permissions
-            var allPerms = RolePermissionSeedData.GetAllPermissionCodesStatic();
-            _context.SecurityPermissions.AddRange(allPerms);
-            await _context.SaveChangesAsync();
-
-            // Link ALL to ADMIN
-            var roles = _context.SecurityRoles.ToList();
-            var permissions = _context.SecurityPermissions.ToList();
-            var (_, rolePerms) = RolePermissionSeedData.Seed(roles, permissions);
-            _context.RolePermissions.AddRange(rolePerms);
-            await _context.SaveChangesAsync();
-        }
+        // Merge PermissionCodes-based permissions without deleting existing custom data.
+        await MergeSecurityPermissionsAsync();
 
         if (!_context.ApprovalRules.Any())
         {
             var approvalRules = ApprovalRuleSeedData.GetApprovalRules();
             _context.ApprovalRules.AddRange(approvalRules);
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    private async Task MergeSecurityPermissionsAsync()
+    {
+        var desiredPermissions = RolePermissionSeedData.GetAllPermissionCodesStatic();
+        var existingPermissions = await _context.SecurityPermissions
+            .ToDictionaryAsync(permission => permission.Code);
+
+        var missingPermissions = desiredPermissions
+            .Where(permission => !existingPermissions.ContainsKey(permission.Code))
+            .ToList();
+
+        if (missingPermissions.Count > 0)
+        {
+            _context.SecurityPermissions.AddRange(missingPermissions);
+            await _context.SaveChangesAsync();
+        }
+
+        var roles = await _context.SecurityRoles.ToListAsync();
+        var permissions = await _context.SecurityPermissions.ToListAsync();
+        var (_, desiredRolePermissions) = RolePermissionSeedData.Seed(roles, permissions);
+
+        var existingRolePermissionKeys = (await _context.RolePermissions
+            .Select(rolePermission => new { rolePermission.RoleId, rolePermission.PermissionId })
+            .ToListAsync())
+            .Select(rolePermission => (rolePermission.RoleId, rolePermission.PermissionId))
+            .ToHashSet();
+
+        var missingRolePermissions = desiredRolePermissions
+            .Where(rolePermission => !existingRolePermissionKeys.Contains((rolePermission.RoleId, rolePermission.PermissionId)))
+            .Select(rolePermission => new Domain.Security.Entities.RolePermission
+            {
+                RoleId = rolePermission.RoleId,
+                PermissionId = rolePermission.PermissionId
+            })
+            .ToList();
+
+        if (missingRolePermissions.Count > 0)
+        {
+            _context.RolePermissions.AddRange(missingRolePermissions);
             await _context.SaveChangesAsync();
         }
     }

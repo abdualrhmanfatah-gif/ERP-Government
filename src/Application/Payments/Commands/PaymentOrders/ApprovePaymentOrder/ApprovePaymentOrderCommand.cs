@@ -14,6 +14,7 @@ public class ApprovePaymentOrderCommand : IRequest<Result>
 {
     public int Id { get; init; }
     public byte[] RowVersion { get; init; } = [];
+    public bool? OverrideFailedBudgetCheck { get; init; }
 }
 
 public class ApprovePaymentOrderCommandHandler(
@@ -40,8 +41,28 @@ public class ApprovePaymentOrderCommandHandler(
         if (entity.Status != PaymentOrderStatus.Submitted)
             return Result.Failure(["Only submitted payment orders can be approved."]);
 
-        if (entity.BudgetCheckStatus != BudgetCheckStatus.Passed)
-            return Result.Failure(["Cannot approve payment order with failed budget check."]);
+        if (entity.BudgetCheckStatus == BudgetCheckStatus.Failed)
+        {
+            if (request.OverrideFailedBudgetCheck != true)
+                return Result.Failure(["Cannot approve payment order with failed budget check. Set overrideFailedBudgetCheck to proceed."]);
+
+            var hasPermission = await identityService.AuthorizeAsync(
+                userId, PermissionCodes.PaymentOrdersOverrideBudgetCheck);
+
+            if (!hasPermission)
+                return Result.Failure(["Insufficient permissions to override failed budget check."]);
+
+            entity.BudgetCheckStatus = BudgetCheckStatus.Overridden;
+
+            await statusLogger.LogAsync(
+                "paymentorders",
+                entity.Id,
+                BudgetCheckStatus.Failed.ToString(),
+                BudgetCheckStatus.Overridden.ToString(),
+                userId,
+                "Budget check override",
+                cancellationToken);
+        }
 
         var missingAttachments = await attachmentGate.CheckMandatoryAttachmentsAsync(
             "PaymentOrder", entity.Id, cancellationToken);

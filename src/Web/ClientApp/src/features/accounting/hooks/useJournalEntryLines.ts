@@ -20,6 +20,7 @@ export function useCreateJournalEntryLine() {
       client.linesPOST3(
         journalEntryId,
         new CreateJournalEntryLineCommand({
+          journalEntryId,
           accountId: command.accountId,
           description: command.description ?? undefined,
           currencyId: command.currencyId,

@@ -73,12 +73,12 @@ export function EntryLinesEditor({ lines, onAdd, onRemove }: Props) {
           <table className="min-w-full divide-y border-[var(--color-outline-variant)]">
             <thead>
               <tr className="bg-[var(--color-surface-container-low)]">
-                <th className="px-4 py-3 text-right text-xs font-bold text-[var(--color-on-surface-variant)]">#</th>
-                <th className="px-4 py-3 text-right text-xs font-bold text-[var(--color-on-surface-variant)]">الحساب</th>
-                <th className="px-4 py-3 text-right text-xs font-bold text-[var(--color-on-surface-variant)]">مركز التكلفة</th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-[var(--color-on-surface-variant)]">مدين</th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-[var(--color-on-surface-variant)]">دائن</th>
-                <th className="px-4 py-3 text-right text-xs font-bold text-[var(--color-on-surface-variant)]">الوصف</th>
+                <th className="px-4 py-3 text-end text-xs font-bold text-[var(--color-on-surface-variant)]">#</th>
+                <th className="px-4 py-3 text-end text-xs font-bold text-[var(--color-on-surface-variant)]">الحساب</th>
+                <th className="px-4 py-3 text-end text-xs font-bold text-[var(--color-on-surface-variant)]">مركز التكلفة</th>
+                <th className="px-4 py-3 text-start text-xs font-bold text-[var(--color-on-surface-variant)]">مدين</th>
+                <th className="px-4 py-3 text-start text-xs font-bold text-[var(--color-on-surface-variant)]">دائن</th>
+                <th className="px-4 py-3 text-end text-xs font-bold text-[var(--color-on-surface-variant)]">الوصف</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -88,8 +88,8 @@ export function EntryLinesEditor({ lines, onAdd, onRemove }: Props) {
                   <td className="px-4 py-3 text-sm text-[var(--color-on-surface-variant)]">{line.sequence}</td>
                   <td className="px-4 py-3 text-sm font-bold text-[var(--color-on-surface)]">{accountMap.get(line.accountId) || line.accountId}</td>
                   <td className="px-4 py-3 text-sm text-[var(--color-on-surface-variant)]">{costCenterMap.get(line.costCenterId ?? 0) || '-'}</td>
-                  <td className="px-4 py-3 text-sm text-left tabular-nums font-bold text-[var(--color-on-surface)]">{line.debit > 0 ? line.debit.toLocaleString('ar-YE') : '-'}</td>
-                  <td className="px-4 py-3 text-sm text-left tabular-nums font-bold text-[var(--color-on-surface)]">{line.credit > 0 ? line.credit.toLocaleString('ar-YE') : '-'}</td>
+                  <td className="px-4 py-3 text-sm text-start tabular-nums font-bold text-[var(--color-on-surface)]">{line.debit > 0 ? line.debit.toLocaleString('ar-YE') : '-'}</td>
+                  <td className="px-4 py-3 text-sm text-start tabular-nums font-bold text-[var(--color-on-surface)]">{line.credit > 0 ? line.credit.toLocaleString('ar-YE') : '-'}</td>
                   <td className="px-4 py-3 text-sm text-[var(--color-on-surface-variant)]">{line.description || '-'}</td>
                   <td className="px-4 py-3 text-sm">
                     <Button type="button" variant="ghost" size="sm" onClick={() => onRemove(index)} className="text-[var(--color-error)] hover:text-[var(--color-error)]">حذف</Button>

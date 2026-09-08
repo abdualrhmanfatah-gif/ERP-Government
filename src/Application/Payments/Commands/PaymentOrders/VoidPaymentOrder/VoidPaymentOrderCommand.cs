@@ -1,5 +1,8 @@
+using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Application.Parties.Common;
 using ERP_Government.Domain.Payments.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP_Government.Application.Payments.Commands.PaymentOrders.VoidPaymentOrder;
 
@@ -12,27 +15,73 @@ public class VoidPaymentOrderCommand : IRequest<Result>
 }
 
 public class VoidPaymentOrderCommandHandler(
-    IApplicationDbContext context) : IRequestHandler<VoidPaymentOrderCommand, Result>
+    IApplicationDbContext context,
+    IDocumentStatusLogger statusLogger,
+    IUser user) : IRequestHandler<VoidPaymentOrderCommand, Result>
 {
     public async Task<Result> Handle(
         VoidPaymentOrderCommand request,
         CancellationToken cancellationToken)
     {
+        if (user.Id is not int userId)
+            return Result.Failure(["User identity is required for this operation."]);
+
         var entity = await context.PaymentOrders
             .FindAsync(request.Id, cancellationToken);
 
         if (entity is null)
             return Result.Failure(["Payment order not found."]);
 
-        if (entity.Status != PaymentOrderStatus.Paid)
-            return Result.Failure(["Only paid payment orders can be voided."]);
+        if (entity.Status != PaymentOrderStatus.Approved && entity.Status != PaymentOrderStatus.SentToTreasury)
+            return Result.Failure(["Only approved or sent-to-treasury payment orders can be voided."]);
 
         if (string.IsNullOrWhiteSpace(request.VoidReason))
             return Result.Failure(["Void reason is required."]);
 
+        var hasPayments = await context.Payments
+            .AnyAsync(p => p.PaymentOrderId == entity.Id && p.Status == PaymentStatus.Completed, cancellationToken);
+        if (hasPayments)
+            return Result.Failure(["Cannot void a payment order with completed payments."]);
+
+        var previousStatus = entity.Status.ToString();
         entity.Status = PaymentOrderStatus.Voided;
 
-        // TODO: Create reversing accounting entry
+        var linkedRequests = await context.DisbursementRequests
+            .Where(r => r.PaymentOrderId == entity.Id
+                && (r.Status == DisbursementRequestStatus.Draft
+                    || r.Status == DisbursementRequestStatus.PendingApproval
+                    || (r.Status == DisbursementRequestStatus.Approved && !context.Payments.Any(p => p.DisbursementRequestId == r.Id && p.Status == PaymentStatus.Completed))))
+            .ToListAsync(cancellationToken);
+
+        foreach (var request_ in linkedRequests)
+        {
+            request_.Status = DisbursementRequestStatus.Invalidated;
+
+            context.ApprovalHistory.Add(new Domain.Security.Entities.ApprovalHistory
+            {
+                DocumentType = "DisbursementRequest",
+                DocumentId = request_.Id,
+                ApprovalStep = 0,
+                Action = Domain.Security.Enums.ApprovalAction.Cancel,
+                ApproverUserId = userId,
+                Decision = "Invalidated",
+                DecisionAt = DateTimeOffset.UtcNow,
+                EvaluationSnapshot = $"Linked order voided. Reason: {request.VoidReason}",
+                Created = DateTimeOffset.UtcNow,
+                CreatedBy = userId.ToString(),
+                LastModified = DateTimeOffset.UtcNow,
+                LastModifiedBy = userId.ToString()
+            });
+        }
+
+        await statusLogger.LogAsync(
+            "paymentorders",
+            entity.Id,
+            previousStatus,
+            PaymentOrderStatus.Voided.ToString(),
+            userId,
+            request.VoidReason,
+            cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
 

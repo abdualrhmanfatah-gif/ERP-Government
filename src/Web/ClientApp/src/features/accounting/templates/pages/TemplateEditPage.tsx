@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { Page, Button, Card, Loading, EmptyState } from '@/components/ui';
+import { Page, Button, Card, EmptyState } from '@/components/ui';
 import { TemplateForm } from '@/components/AccountingTemplateForm';
 import { TemplateLinesSection } from '@/components/AccountingTemplateLinesSection';
 import { useTemplateById } from '../../hooks/useTemplateById';

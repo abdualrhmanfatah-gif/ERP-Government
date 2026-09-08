@@ -16,9 +16,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, logout } = useAuth();
   const userProfile = useUserProfile();
   const location = useLocation();
+  const prevPathRef = useRef(location.pathname);
 
   useEffect(() => {
-    setSidebarOpen(false);
+    if (prevPathRef.current !== location.pathname) {
+      prevPathRef.current = location.pathname;
+      setSidebarOpen(false);
+    }
   }, [location.pathname]);
 
   // Lock body scroll when drawer open (mobile) + Escape handling
@@ -141,7 +145,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page content */}
-        <main id="main-content" className="flex-1 p-4 sm:p-6 lg:p-8 bg-[var(--color-surface-container-low)] min-w-0">
+        <main id="main-content" className="flex-1 px-4 sm:px-6 lg:px-8 py-0.5 sm:py-1 bg-[var(--color-surface-container-low)] min-w-0">
           <div className="max-w-[1440px] mx-auto w-full">
             {children}
           </div>

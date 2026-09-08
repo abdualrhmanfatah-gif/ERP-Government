@@ -25,9 +25,9 @@ function ReverseEntryPreview({ lines }: { lines: JournalEntryLineDto[] }) {
       <table className="w-full text-xs">
         <thead>
           <tr>
-            <th className="text-right py-1 text-[var(--color-on-surface-variant)]">الحساب</th>
-            <th className="text-left py-1 text-[var(--color-on-surface-variant)]">مدين</th>
-            <th className="text-left py-1 text-[var(--color-on-surface-variant)]">دائن</th>
+            <th className="text-end py-1 text-[var(--color-on-surface-variant)]">الحساب</th>
+            <th className="text-start py-1 text-[var(--color-on-surface-variant)]">مدين</th>
+            <th className="text-start py-1 text-[var(--color-on-surface-variant)]">دائن</th>
           </tr>
         </thead>
         <tbody>
@@ -36,10 +36,10 @@ function ReverseEntryPreview({ lines }: { lines: JournalEntryLineDto[] }) {
               <td className="py-1 text-[var(--color-on-surface)]">
                 {line.accountCode} - {line.accountName}
               </td>
-              <td className="py-1 text-left tabular-nums text-[var(--color-on-surface)]">
+              <td className="py-1 text-start tabular-nums text-[var(--color-on-surface)]">
                 {line.credit > 0 ? line.credit.toLocaleString('ar-YE') : '-'}
               </td>
-              <td className="py-1 text-left tabular-nums text-[var(--color-on-surface)]">
+              <td className="py-1 text-start tabular-nums text-[var(--color-on-surface)]">
                 {line.debit > 0 ? line.debit.toLocaleString('ar-YE') : '-'}
               </td>
             </tr>

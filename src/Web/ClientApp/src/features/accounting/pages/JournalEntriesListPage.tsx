@@ -1,93 +1,170 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useJournalEntriesList } from '../hooks/useJournalEntries';
 import { StatusBadge } from '@/components/AccountingStatusBadge';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
-import type { JournalEntryDto } from '../shared/client';
-import { Button, Card, Input, Badge } from '@/components/ui';
+import type { JournalEntryDto } from '@/web-api-client';
+import { Button, Card, Input, Badge, Page } from '@/components/ui';
+import { Download, FileText } from 'lucide-react';
+import { notify } from '@/features/notifications/notify';
 
 const statusFilters = [
   { key: '', label: 'الكل' },
   { key: 'Draft', label: 'مسودة' },
-  { key: 'Submitted', label: 'مقدم' },
+  { key: 'Submitted', label: 'مرسل للمراجعة' },
   { key: 'Approved', label: 'موافق عليه' },
   { key: 'Posted', label: 'مسجل' },
   { key: 'Reversed', label: 'معكوس' },
   { key: 'Cancelled', label: 'ملغى' },
 ];
 
-const columns: DataGridColumn<JournalEntryDto>[] = [
-  {
-    id: 'entryNumber',
-    key: 'entryNumber',
-    header: 'رقم القيد',
-    cell: (row) => (
-      <span className="flex items-center gap-2">
-        {row.entryNumber}
-        {row.isSystemGenerated && (
-          <Badge variant="default">نظام</Badge>
-        )}
-      </span>
-    ),
-  },
-  {
-    id: 'documentDate',
-    key: 'documentDate',
-    header: 'التاريخ',
-    cell: (row) => {
-      const v = row.documentDate;
-      if (!v) return '-';
-      if (typeof v === 'string') return v;
-      if (v instanceof Date) return v.toLocaleDateString('ar-YE');
-      return String(v);
-    },
-  },
-  {
-    id: 'entryStatus',
-    key: 'entryStatus',
-    header: 'الحالة',
-    cell: (row) => <StatusBadge status={row.entryStatus} />,
-  },
-  {
-    id: 'journalName',
-    key: 'journalName',
-    header: 'اليومية',
-    cell: (row) => row.journalName || '-',
-  },
-  {
-    id: 'totalDebit',
-    key: 'totalDebit',
-    header: 'مدين',
-    align: 'left',
-    cell: (row) => (row.totalDebit ?? 0).toLocaleString('ar-YE'),
-  },
-  {
-    id: 'totalCredit',
-    key: 'totalCredit',
-    header: 'دائن',
-    align: 'left',
-    cell: (row) => (row.totalCredit ?? 0).toLocaleString('ar-YE'),
-  },
-];
-
 export function JournalEntriesListPage() {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [exportingAll, setExportingAll] = useState(false);
 
   const { data: entries = [], isLoading } = useJournalEntriesList({ entryStatus: statusFilter || undefined });
 
   const filteredEntries = useMemo(() => {
     if (!searchQuery) return entries;
     const q = searchQuery.toLowerCase();
-    return entries.filter((e) => e.entryNumber.toLowerCase().includes(q) || (e.ref && e.ref.toLowerCase().includes(q)));
+    return entries.filter((e) => (e.entryNumber ?? '').toLowerCase().includes(q) || (e.ref && e.ref.toLowerCase().includes(q)));
   }, [entries, searchQuery]);
+
+  const handleExportEntry = useCallback(async (entry: JournalEntryDto, format: 'xlsx' | 'pdf') => {
+    try {
+      const qs = new URLSearchParams();
+      qs.set('format', format);
+      if (entry.id) qs.set('entryId', String(entry.id));
+      const response = await fetch(`/api/JournalEntries/export?${qs.toString()}`);
+      if (!response.ok) throw new Error('Export failed');
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `JournalEntry-${entry.entryNumber ?? entry.id}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      notify({ type: 'success', title: 'تم تصدير القيد بنجاح' });
+    } catch {
+      notify({ type: 'error', title: 'فشل تصدير القيد' });
+    }
+  }, []);
+
+  const handleExportAll = useCallback(async (format: 'xlsx' | 'pdf') => {
+    setExportingAll(true);
+    try {
+      const qs = new URLSearchParams();
+      qs.set('format', format);
+      if (statusFilter) qs.set('status', statusFilter);
+      const response = await fetch(`/api/JournalEntries/export?${qs.toString()}`);
+      if (!response.ok) throw new Error('Export failed');
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `JournalEntries-${new Date().toISOString().slice(0, 10)}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      notify({ type: 'success', title: 'تم تصدير القيود بنجاح' });
+    } catch {
+      notify({ type: 'error', title: 'فشل تصدير القيود' });
+    } finally {
+      setExportingAll(false);
+    }
+  }, [statusFilter]);
+
+  const columns: DataGridColumn<JournalEntryDto>[] = [
+    {
+      id: 'entryNumber',
+      key: 'entryNumber',
+      header: 'رقم القيد',
+      cell: (row) => (
+        <span className="flex items-center gap-2">
+          {row.entryNumber}
+          {row.isSystemGenerated && (
+            <Badge variant="default">نظام</Badge>
+          )}
+        </span>
+      ),
+    },
+    {
+      id: 'documentDate',
+      key: 'documentDate',
+      header: 'التاريخ',
+      cell: (row) => {
+        const v = row.documentDate;
+        if (!v) return '-';
+        if (typeof v === 'string') return v;
+        return String(v);
+      },
+    },
+    {
+      id: 'entryStatus',
+      key: 'entryStatus',
+      header: 'الحالة',
+      cell: (row) => <StatusBadge status={row.entryStatus as any} />,
+    },
+    {
+      id: 'journalName',
+      key: 'journalName',
+      header: 'اليومية',
+      cell: (row) => row.journalName || '-',
+    },
+    {
+      id: 'totalBaseDebit',
+      key: 'totalBaseDebit',
+      header: 'مدين',
+      align: 'left',
+      cell: (row) => (row.totalBaseDebit ?? 0).toLocaleString('ar-YE'),
+    },
+    {
+      id: 'totalBaseCredit',
+      key: 'totalBaseCredit',
+      header: 'دائن',
+      align: 'left',
+      cell: (row) => (row.totalBaseCredit ?? 0).toLocaleString('ar-YE'),
+    },
+    {
+      id: 'export',
+      key: 'export',
+      header: 'تصدير',
+      align: 'center',
+      cell: (row) => (
+        <div className="flex gap-1 justify-center">
+          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleExportEntry(row, 'xlsx'); }}>
+            <Download size={14} />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleExportEntry(row, 'pdf'); }}>
+            <FileText size={14} />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <Page
       title="قيود اليومية"
       description="إدارة ومراجعة قيود اليومية المحاسبية"
-      actions={<Button variant="primary" onClick={() => navigate('/accounting/journal-entries/create')}>+ قيد جديد</Button>}
+      actions={
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" disabled={exportingAll} onClick={() => handleExportAll('xlsx')}>
+            <Download size={16} className="ms-1" />
+            تصدير الكل Excel
+          </Button>
+          <Button variant="outline" size="sm" disabled={exportingAll} onClick={() => handleExportAll('pdf')}>
+            <FileText size={16} className="ms-1" />
+            تصدير الكل PDF
+          </Button>
+          <Button variant="primary" onClick={() => navigate('/accounting/journal-entries/create')}>+ قيد جديد</Button>
+        </div>
+      }
       loading={isLoading}
     >
       <Card variant="default">
@@ -109,7 +186,7 @@ export function JournalEntriesListPage() {
           data={filteredEntries}
           loading={isLoading}
           emptyMessage="لا توجد قيود"
-          rowKey={(row) => row.id}
+          rowKey={(row) => row.id ?? 0}
           onRowClick={(row) => navigate(`/accounting/journal-entries/${row.id}`)}
         />
       </Card>

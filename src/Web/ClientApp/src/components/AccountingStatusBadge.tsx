@@ -12,7 +12,7 @@ const statusVariantMap: Record<EntryStatus, BadgeVariant> = {
 
 const statusLabels: Record<EntryStatus, string> = {
   [EntryStatus.Draft]: 'مسودة',
-  [EntryStatus.Submitted]: 'مقدمة',
+  [EntryStatus.Submitted]: 'مرسلة للمراجعة',
   [EntryStatus.Approved]: 'موافق عليها',
   [EntryStatus.Posted]: 'محاسبة',
   [EntryStatus.Reversed]: 'معكوسة',

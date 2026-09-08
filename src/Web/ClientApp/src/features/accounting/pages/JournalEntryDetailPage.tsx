@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   useJournalEntry,
   useSubmitJournalEntry,
@@ -9,17 +9,33 @@ import {
   useCancelJournalEntry,
 } from '../hooks/useJournalEntries';
 import { usePermission, hasPermission as checkPermission } from '../../../shared/hooks/usePermission';
-import { StatusBadge } from '@/components/AccountingStatusBadge';
-import { BalanceIndicator } from '@/components/AccountingBalanceIndicator';
+import { useFiscalYearByDate } from '../hooks/useFiscalYearByDate';
 import { ReverseDialog } from '@/components/AccountingReverseDialog';
 import { ApprovalsPanel } from '@/components/DocumentsApprovalsPanel';
 import { StatusLogPanel } from '@/components/DocumentsStatusLogPanel';
+import { AccountingJournalEntryDetail } from '@/components/AccountingJournalEntryDetail';
+import { StatusBadge } from '@/components/AccountingStatusBadge';
 import { Page, Button, Card, Badge } from '@/components/ui';
+
 function formatDate(value: unknown): string {
   if (!value) return '';
   if (typeof value === 'string') return value;
   if (value instanceof Date) return value.toLocaleDateString('ar-YE');
   return String(value);
+}
+
+function toDateInput(value: unknown): string {
+  if (!value) return '';
+  const d = value instanceof Date ? value : new Date(String(value));
+  return isNaN(d.getTime()) ? '' : d.toISOString().split('T')[0];
+}
+
+function MetaItem({ label, value }: { label: string; value?: string }) {
+  return (
+    <span className="flex items-center gap-1.5 text-sm text-[var(--color-on-surface)]">
+      {label}: <strong className="text-sm font-bold text-[var(--color-on-surface)]">{value || '-'}</strong>
+    </span>
+  );
 }
 
 function getActionsForStatus(status: string) {
@@ -32,7 +48,7 @@ function getActionsForStatus(status: string) {
   }
 }
 
-const actionLabels: Record<string, string> = { submit: 'تقديم', approve: 'موافقة', post: 'تسجيل', reverse: 'عكس', cancel: 'إلغاء' };
+const actionLabels: Record<string, string> = { submit: 'إرسال للمراجعة', approve: 'موافقة', post: 'تسجيل', reverse: 'عكس', cancel: 'إلغاء' };
 const permissionMap: Record<string, string> = {
   submit: 'Accounting.JournalEntries.Submit', approve: 'Accounting.JournalEntries.Approve',
   post: 'Accounting.JournalEntries.Post', reverse: 'Accounting.JournalEntries.Reverse', cancel: 'Accounting.JournalEntries.Cancel',
@@ -40,7 +56,6 @@ const permissionMap: Record<string, string> = {
 
 export function JournalEntryDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const entryId = Number(id);
 
   const { data: entry, isLoading, error, refetch } = useJournalEntry(entryId);
@@ -50,9 +65,11 @@ export function JournalEntryDetailPage() {
   const reverseMutation = useReverseJournalEntry();
   const cancelMutation = useCancelJournalEntry();
   const { hasPermission } = usePermission();
+  const fiscal = useFiscalYearByDate(toDateInput(entry?.documentDate));
 
   const [showReverseDialog, setShowReverseDialog] = useState(false);
   const [conflictError, setConflictError] = useState<string | null>(null);
+  const [editState, setEditState] = useState({ isEditing: false, canSave: false, isSaving: false });
 
   const handleAction = async (action: string) => {
     setConflictError(null);
@@ -96,8 +113,62 @@ export function JournalEntryDetailPage() {
 
   const actions = getActionsForStatus(entry.entryStatus);
 
+  const headerActions = editState.isEditing ? (
+    <>
+      <Button
+        type="submit"
+        form="journal-entry-detail-form"
+        variant="primary"
+        disabled={!editState.canSave || editState.isSaving}
+        loading={editState.isSaving}
+      >
+        حفظ التغييرات
+      </Button>
+      <Button variant="ghost" disabled={editState.isSaving} onClick={() => setEditState({ ...editState, isEditing: false })}>
+        إلغاء
+      </Button>
+    </>
+  ) : (
+    <>
+      {!entry.isSystemGenerated && actions.map((action) => {
+        const isLoading = loadingMap[action];
+        const handler = handlerMap[action];
+        const allowed = hasPermission || checkPermission(permissionMap[action]);
+        return (
+          <Button key={action} type="button" onClick={handler} disabled={isLoading || !allowed}
+            variant={action === 'cancel' || action === 'reverse' ? 'destructive' : 'primary'}
+            loading={isLoading}>
+            {actionLabels[action]}
+          </Button>
+        );
+      })}
+      {!entry.isSystemGenerated && actions.length > 0 && (
+        <Button type="button" variant="secondary" onClick={() => setEditState({ ...editState, isEditing: true })}>
+          تعديل
+        </Button>
+      )}
+    </>
+  );
+
   return (
-    <Page title={entry.entryNumber} description={formatDate(entry.documentDate)} loading={isLoading} error={error ? 'خطأ في تحميل القيد' : undefined}>
+    <Page
+      title={entry.entryNumber}
+      loading={isLoading}
+      error={error ? 'خطأ في تحميل القيد' : undefined}
+      actions={headerActions}
+      toolbar={
+        <div className="flex flex-wrap items-center gap-3 rounded-lg bg-[var(--color-surface-container-low)] px-4 py-2.5">
+          <StatusBadge status={entry.entryStatus} />
+          {entry.isSystemGenerated && <Badge variant="default">نظام</Badge>}
+          <span className="h-4 w-px bg-[var(--color-outline-variant)]" aria-hidden="true" />
+          <MetaItem label="السنة المالية" value={fiscal.data?.fiscalYearCode} />
+          <span className="h-4 w-px bg-[var(--color-outline-variant)]" aria-hidden="true" />
+          <MetaItem label="الفترة" value={fiscal.data?.fiscalPeriodName} />
+          <span className="h-4 w-px bg-[var(--color-outline-variant)]" aria-hidden="true" />
+          <MetaItem label="التاريخ" value={formatDate(entry.documentDate)} />
+        </div>
+      }
+    >
       {conflictError && (
         <Card variant="default" padding="sm" className="mb-6 text-sm flex items-center justify-between bg-[var(--color-error-container)] text-[var(--color-error)]">
           <div className="flex items-center gap-2">
@@ -111,107 +182,14 @@ export function JournalEntryDetailPage() {
       )}
 
       <div className="space-y-6">
-        {/* بيانات القيد */}
-        <Card variant="default">
-          <div className="px-6 py-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-[var(--color-on-surface)]">
-                  {entry.entryNumber}
-                  {entry.isSystemGenerated && (
-                    <Badge variant="default" className="ms-2">نظام</Badge>
-                  )}
-                </h2>
-                <p className="text-sm mt-0.5 text-[var(--color-on-surface-variant)]">{formatDate(entry.documentDate)}</p>
-              </div>
-              <StatusBadge status={entry.entryStatus} />
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-3 gap-4 text-sm">
-              <div><span className="text-[var(--color-on-surface-variant)]">الفترة:</span> <span className="font-bold text-[var(--color-on-surface)]">{entry.periodName || entry.periodId}</span></div>
-              <div><span className="text-[var(--color-on-surface-variant)]">السنة المالية:</span> <span className="font-bold text-[var(--color-on-surface)]">{entry.fiscalYearName || entry.fiscalYearId}</span></div>
-              <div><span className="text-[var(--color-on-surface-variant)]">اليومية:</span> <span className="font-bold text-[var(--color-on-surface)]">{entry.journalName || '-'}</span></div>
-            </div>
-            {entry.narration && <p className="mt-4 text-sm text-[var(--color-on-surface)]">{entry.narration}</p>}
-            {entry.ref && <p className="mt-2 text-sm text-[var(--color-on-surface-variant)]">المرجع: {entry.ref}</p>}
-            {entry.postedByName && entry.postedAt && <p className="mt-2 text-sm text-[var(--color-on-surface-variant)]">سجل بواسطة: {entry.postedByName} — {formatDate(entry.postedAt)}</p>}
-            {entry.cancelledByName && entry.cancelledAt && <p className="mt-2 text-sm text-[var(--color-on-surface-variant)]">ألغى بواسطة: {entry.cancelledByName} — {formatDate(entry.cancelledAt)}</p>}
-          </div>
-        </Card>
-
-        {/* الأسطر */}
-        <Card variant="default">
-          <div className="px-6 py-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">
-            <h2 className="text-base font-bold text-[var(--color-on-surface)]">الأسطر</h2>
-          </div>
-          <div className="p-6">
-            {entry.lines.length > 0 ? (
-              <div className="overflow-x-auto rounded-lg border border-[var(--color-outline-variant)]">
-                <table className="min-w-full divide-y border-[var(--color-outline-variant)]">
-                    <thead>
-                      <tr className="bg-[var(--color-surface-container-low)]">
-                        <th className="px-4 py-3 text-start text-xs font-bold text-[var(--color-on-surface-variant)]">#</th>
-                        <th className="px-4 py-3 text-start text-xs font-bold text-[var(--color-on-surface-variant)]">الحساب</th>
-                        <th className="px-4 py-3 text-end text-xs font-bold text-[var(--color-on-surface-variant)]">مدين</th>
-                        <th className="px-4 py-3 text-end text-xs font-bold text-[var(--color-on-surface-variant)]">دائن</th>
-                        <th className="px-4 py-3 text-start text-xs font-bold text-[var(--color-on-surface-variant)]">الوصف</th>
-                        <th className="px-4 py-3 text-start text-xs font-bold text-[var(--color-on-surface-variant)]">الأبعاد</th>
-                      </tr>
-                    </thead>
-                  <tbody className="divide-y border-[var(--color-outline-variant)]">
-                    {entry.lines.map((line) => (
-                      <tr key={line.id} className="bg-[var(--color-surface)]">
-                        <td className="px-4 py-3 text-sm text-[var(--color-on-surface-variant)]">{line.sequence}</td>
-                        <td className="px-4 py-3 text-sm font-bold text-[var(--color-on-surface)]">{line.accountCode} - {line.accountName}</td>
-                        <td className="px-4 py-3 text-sm text-end tabular-nums font-bold text-[var(--color-on-surface)]">{line.debit > 0 ? line.debit.toLocaleString('ar-YE') : '-'}</td>
-                        <td className="px-4 py-3 text-sm text-end tabular-nums font-bold text-[var(--color-on-surface)]">{line.credit > 0 ? line.credit.toLocaleString('ar-YE') : '-'}</td>
-                        <td className="px-4 py-3 text-sm text-[var(--color-on-surface-variant)]">{line.description || '-'}</td>
-                        <td className="px-4 py-3 text-xs text-[var(--color-on-surface-variant)]">
-                          {[
-                            line.fundName && `صندوق: ${line.fundName}`,
-                            line.projectName && `مشروع: ${line.projectName}`,
-                            line.budgetItemCode && `بند: ${line.budgetItemCode}`,
-                            line.encumbranceNumber && `التزام: ${line.encumbranceNumber}`,
-                            line.paymentOrderNumber && `دفع: ${line.paymentOrderNumber}`,
-                          ].filter(Boolean).join(' · ') || '-'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className="text-sm text-[var(--color-on-surface-variant)]">لا توجد أسطر</p>
-            )}
-            <div className="mt-4"><BalanceIndicator totalDebit={entry.totalDebit} totalCredit={entry.totalCredit} /></div>
-          </div>
-        </Card>
-
-        {/* الإجراءات */}
-        {actions.length > 0 && !entry.isSystemGenerated && (
-          <Card variant="default">
-            <div className="px-6 py-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">
-              <h2 className="text-base font-bold text-[var(--color-on-surface)]">الإجراءات</h2>
-            </div>
-            <div className="p-6">
-              <div className="flex flex-wrap gap-2">
-                {actions.map((action) => {
-                  const isLoading = loadingMap[action];
-                  const handler = handlerMap[action];
-                  const allowed = hasPermission || checkPermission(permissionMap[action]);
-                  return (
-                    <Button key={action} type="button" onClick={handler} disabled={isLoading || !allowed}
-                      variant={action === 'cancel' || action === 'reverse' ? 'destructive' : 'primary'}
-                      loading={isLoading}>
-                      {actionLabels[action]}
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-          </Card>
-        )}
+        <AccountingJournalEntryDetail
+          key={`${entry.rowVersion ?? entry.id}-${editState.isEditing ? 'edit' : 'view'}`}
+          entry={entry}
+          editing={editState.isEditing}
+          onToggleEditing={(editing) => setEditState({ ...editState, isEditing: editing })}
+          onStateChange={(state) => setEditState((prev) => ({ ...prev, ...state }))}
+          onSaved={() => refetch()}
+        />
 
         {/* ربط العكس */}
         {entry.reversalOfId && (

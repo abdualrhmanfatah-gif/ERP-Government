@@ -90,7 +90,9 @@ public class Reports : IEndpointGroup
         [FromQuery] int? accountId,
         [FromQuery] string? accountCode,
         [FromQuery] int? fiscalYearId,
-        [FromQuery] int? fiscalPeriodId)
+        [FromQuery] int? fiscalPeriodId,
+        [FromQuery] string? pageSize,
+        [FromQuery] bool? isLandscape)
     {
         ReportResult reportResult;
         string reportName;
@@ -100,35 +102,63 @@ public class Reports : IEndpointGroup
             case "balance-sheet":
                 reportName = "Balance Sheet";
                 var bsResult = await sender.Send(new GetBalanceSheetQuery { AsOfDate = (asOfDate ?? DateOnly.FromDateTime(DateTime.Today)).ToString("yyyy-MM-dd") });
-                reportResult = new ReportResult { Currency = bsResult.Currency, GeneratedAt = bsResult.GeneratedAt, Sections = [] };
+                var bsSections = new List<ReportSection>();
+                if (bsResult.Assets?.Sections?.Count > 0)
+                    bsSections.Add(new ReportSection { Title = "الأصول", TitleEn = "Assets", Lines = bsResult.Assets.Sections.SelectMany(s => s.Lines ?? []).Select(l => new ReportLine { AccountCode = l.AccountCode ?? "", AccountName = l.AccountName ?? "", Debit = l.Debit, Credit = l.Credit, Balance = l.Balance }).ToList(), Total = bsResult.Assets.Total });
+                if (bsResult.Liabilities?.Sections?.Count > 0)
+                    bsSections.Add(new ReportSection { Title = "الخصوم", TitleEn = "Liabilities", Lines = bsResult.Liabilities.Sections.SelectMany(s => s.Lines ?? []).Select(l => new ReportLine { AccountCode = l.AccountCode ?? "", AccountName = l.AccountName ?? "", Debit = l.Debit, Credit = l.Credit, Balance = l.Balance }).ToList(), Total = bsResult.Liabilities.Total });
+                if (bsResult.Equity?.Sections?.Count > 0)
+                    bsSections.Add(new ReportSection { Title = "حقوق الملكية", TitleEn = "Equity", Lines = bsResult.Equity.Sections.SelectMany(s => s.Lines ?? []).Select(l => new ReportLine { AccountCode = l.AccountCode ?? "", AccountName = l.AccountName ?? "", Debit = l.Debit, Credit = l.Credit, Balance = l.Balance }).ToList(), Total = bsResult.Equity.Total });
+                reportResult = new ReportResult { Currency = bsResult.Currency, GeneratedAt = bsResult.GeneratedAt, Sections = bsSections, PaperSize = pageSize, IsLandscape = isLandscape ?? true };
                 break;
             case "income-statement":
                 reportName = "Income Statement";
                 var isResult = await sender.Send(new GetIncomeStatementQuery { StartDate = (startDate ?? DateOnly.FromDateTime(DateTime.Today.AddDays(-30))).ToString("yyyy-MM-dd"), EndDate = (endDate ?? DateOnly.FromDateTime(DateTime.Today)).ToString("yyyy-MM-dd") });
-                reportResult = new ReportResult { Currency = isResult.Currency, GeneratedAt = isResult.GeneratedAt, Sections = [] };
+                var isSections = new List<ReportSection>();
+                if (isResult.Revenue?.Sections?.Count > 0)
+                    isSections.Add(new ReportSection { Title = "الإيرادات", TitleEn = "Revenue", Lines = isResult.Revenue.Sections.SelectMany(s => s.Lines ?? []).Select(l => new ReportLine { AccountCode = l.AccountCode ?? "", AccountName = l.AccountName ?? "", Debit = l.Debit, Credit = l.Credit, Balance = l.Balance }).ToList(), Total = isResult.Revenue.Total });
+                if (isResult.Expenses?.Sections?.Count > 0)
+                    isSections.Add(new ReportSection { Title = "المصروفات", TitleEn = "Expenses", Lines = isResult.Expenses.Sections.SelectMany(s => s.Lines ?? []).Select(l => new ReportLine { AccountCode = l.AccountCode ?? "", AccountName = l.AccountName ?? "", Debit = l.Debit, Credit = l.Credit, Balance = l.Balance }).ToList(), Total = isResult.Expenses.Total });
+                reportResult = new ReportResult { Currency = isResult.Currency, GeneratedAt = isResult.GeneratedAt, Sections = isSections, PaperSize = pageSize, IsLandscape = isLandscape ?? true };
                 break;
             case "general-ledger":
                 reportName = "General Ledger";
                 var glResult = await sender.Send(new GetGeneralLedgerQuery { AccountId = accountId, AccountCode = accountCode, StartDate = startDate?.ToString("yyyy-MM-dd"), EndDate = endDate?.ToString("yyyy-MM-dd") });
-                reportResult = new ReportResult { Currency = glResult.Currency, GeneratedAt = glResult.GeneratedAt, TotalLines = glResult.TotalLines, Sections = [] };
+                var glLines = glResult.Lines?.Select(l => new ReportLine { AccountCode = l.AccountCode ?? "", AccountName = l.AccountName ?? "", Debit = l.Debit, Credit = l.Credit, Balance = l.RunningBalance }).ToList() ?? [];
+                reportResult = new ReportResult { Currency = glResult.Currency, GeneratedAt = glResult.GeneratedAt, TotalLines = glResult.TotalLines, Sections = [new ReportSection { Title = "دفتر الأستاذ العام", TitleEn = "General Ledger", Lines = glLines, Total = 0 }], PaperSize = pageSize, IsLandscape = isLandscape ?? true };
                 break;
             case "cash-flow":
                 reportName = "Cash Flow Statement";
                 var cfResult = await sender.Send(new GetCashFlowStatementQuery { StartDate = (startDate ?? DateOnly.FromDateTime(DateTime.Today.AddDays(-30))).ToString("yyyy-MM-dd"), EndDate = (endDate ?? DateOnly.FromDateTime(DateTime.Today)).ToString("yyyy-MM-dd") });
-                reportResult = new ReportResult { Currency = cfResult.Currency, GeneratedAt = cfResult.GeneratedAt, Sections = [] };
+                var cfSections = new List<ReportSection>();
+                if (cfResult.Operating?.Items?.Count > 0)
+                    cfSections.Add(new ReportSection { Title = "التدفقات التشغيلية", TitleEn = "Operating", Lines = cfResult.Operating.Items.Select(i => new ReportLine { AccountCode = "", AccountName = i.Description ?? "", Balance = i.Amount }).ToList(), Total = cfResult.Operating.Total });
+                if (cfResult.Investing?.Items?.Count > 0)
+                    cfSections.Add(new ReportSection { Title = "التدفقات الاستثمارية", TitleEn = "Investing", Lines = cfResult.Investing.Items.Select(i => new ReportLine { AccountCode = "", AccountName = i.Description ?? "", Balance = i.Amount }).ToList(), Total = cfResult.Investing.Total });
+                if (cfResult.Financing?.Items?.Count > 0)
+                    cfSections.Add(new ReportSection { Title = "التدفقات التمويلية", TitleEn = "Financing", Lines = cfResult.Financing.Items.Select(i => new ReportLine { AccountCode = "", AccountName = i.Description ?? "", Balance = i.Amount }).ToList(), Total = cfResult.Financing.Total });
+                reportResult = new ReportResult { Currency = cfResult.Currency, GeneratedAt = cfResult.GeneratedAt, Sections = cfSections, PaperSize = pageSize, IsLandscape = isLandscape ?? true };
                 break;
             case "trial-balance":
                 reportName = "Trial Balance";
                 var tbResult = await sender.Send(new GetTrialBalanceQuery { FiscalYearId = fiscalYearId ?? 0, FiscalPeriodId = fiscalPeriodId ?? 0 });
-                reportResult = new ReportResult { Currency = tbResult.Currency, GeneratedAt = tbResult.GeneratedAt, Sections = tbResult.Sections };
+                reportResult = new ReportResult { Currency = tbResult.Currency, GeneratedAt = tbResult.GeneratedAt, Sections = tbResult.Sections, PaperSize = pageSize, IsLandscape = isLandscape ?? true };
                 break;
             default:
                 return Results.BadRequest($"Unknown report type: {reportType}");
         }
 
         var stream = new MemoryStream();
-        var exporter = format?.ToLower() == "pdf" ? (IReportExporter)new PdfReportExporter() : new ExcelReportExporter();
-        await exporter.ExportExcelAsync(reportResult, reportName, stream);
+        if (format?.ToLower() == "pdf")
+        {
+            var exporter = new PdfReportExporter();
+            await exporter.ExportPdfAsync(reportResult, reportName, stream);
+        }
+        else
+        {
+            var exporter = new ExcelReportExporter();
+            await exporter.ExportExcelAsync(reportResult, reportName, stream);
+        }
         stream.Position = 0;
 
         var contentType = format?.ToLower() == "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";

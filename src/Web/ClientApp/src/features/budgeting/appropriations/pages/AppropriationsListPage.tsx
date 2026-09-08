@@ -27,7 +27,7 @@ import { Plus } from 'lucide-react';
 
 const appropriationActions: Record<number, LifecycleAction[]> = {
   [AppropriationStatus.Draft]: [
-    { key: 'submit', label: 'تقديم', permission: BUDGET_PERMISSIONS.Appropriations.Submit },
+    { key: 'submit', label: 'إرسال للمراجعة', permission: BUDGET_PERMISSIONS.Appropriations.Submit },
     { key: 'delete', label: 'حذف', permission: BUDGET_PERMISSIONS.Appropriations.Delete, confirmMessage: 'هل أنت متأكد من حذف هذا التخصيص؟' },
   ],
   [AppropriationStatus.PendingApproval]: [

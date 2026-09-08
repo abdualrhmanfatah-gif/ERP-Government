@@ -117,7 +117,7 @@ export default function PartyDetailPage() {
       {showDeactivationWarning && (
         <div className="rounded-lg border border-[var(--color-error)] bg-[var(--color-error-container)] p-4">
           <p className="text-sm font-medium text-[var(--color-on-error-container)]">
-            تحذير: هذا الطرف لديه مستندات مفتوحة (مسودة/مقدمة). هل أنت متأكد من التعطيل؟
+            تحذير: هذا الطرف لديه مستندات مفتوحة (مسودة/مرسلة للمراجعة). هل أنت متأكد من التعطيل؟
           </p>
           <div className="mt-3 flex gap-2">
             <Button variant="destructive" size="sm" onClick={confirmDeactivation}>تأكيد التعطيل</Button>

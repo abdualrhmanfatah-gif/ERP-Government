@@ -160,8 +160,8 @@ public class JournalEntryDto
     public byte[] RowVersion { get; init; } = [];
     // Ephemeral base-currency conversion surface (AR-001, DEC-002) — NOT persisted columns
     public int? BaseCurrencyId { get; init; }
-    public decimal? TotalBaseDebit { get; init; }
-    public decimal? TotalBaseCredit { get; init; }
+    public decimal? TotalBaseDebit { get; set; }
+    public decimal? TotalBaseCredit { get; set; }
     public List<JournalEntryLineDto> Lines { get; set; } = [];
 
     private class Mapping : Profile

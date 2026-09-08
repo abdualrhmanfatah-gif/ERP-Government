@@ -62,7 +62,10 @@ public class TrialBalanceReports : IEndpointGroup
 
         var reportResult = result.ToReportResult(currencyCode);
 
-        await exporter.ExportExcelAsync(reportResult, "Trial Balance", stream);
+        if (format?.ToLower() == "pdf")
+            await exporter.ExportPdfAsync(reportResult, "Trial Balance", stream);
+        else
+            await exporter.ExportExcelAsync(reportResult, "Trial Balance", stream);
         stream.Position = 0;
 
         var extension = format?.ToLower() == "pdf" ? "pdf" : "xlsx";

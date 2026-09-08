@@ -7,7 +7,7 @@ import {
   useCancelRecurringEntry,
 } from '../hooks/useRecurringEntries';
 import { FREQUENCY_LABELS, STATUS_LABELS } from '../shared/types';
-import { Page, Button, Textarea, Loading, Badge, Dialog, EmptyState } from '@/components/ui';
+import { Page, Button, Textarea, Badge, Dialog, EmptyState } from '@/components/ui';
 
 export default function RecurringEntryDetailPage() {
   const { id } = useParams<{ id: string }>();
