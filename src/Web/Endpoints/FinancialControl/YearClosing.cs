@@ -51,7 +51,7 @@ public record LapseFiscalYearResponse(
 public record ReopenFiscalYearResponse(
     int YearClosingRunId,
     int FiscalYearId,
-    decimal RestoredAppropriationTotal,
+    decimal RestoredBudgetTotal,
     decimal RestoredEncumbranceTotal);
 
 internal static class YearClosingMappingExtensions
@@ -66,6 +66,6 @@ internal static class YearClosingMappingExtensions
     public static ReopenFiscalYearResponse ToResponse(this ReopenFiscalYearResult result) => new(
         result.YearClosingRunId,
         result.FiscalYearId,
-        result.RestoredAppropriationTotal,
+        result.RestoredBudgetTotal,
         result.RestoredEncumbranceTotal);
 }

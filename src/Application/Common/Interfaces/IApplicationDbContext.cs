@@ -35,10 +35,6 @@ public interface IApplicationDbContext
     DbSet<SecurityPermission> SecurityPermissions { get; }
     DbSet<UserPermission> UserPermissions { get; }
     DbSet<RolePermission> RolePermissions { get; }
-    DbSet<RecordRule> RecordRules { get; }
-    DbSet<FieldSecurityPolicy> FieldSecurityPolicies { get; }
-    DbSet<ApprovalDelegation> ApprovalDelegations { get; }
-    DbSet<SoDMatrix> SoDMatrix { get; }
     DbSet<SecurityAuditLog> SecurityAuditLogs { get; }
     DbSet<ApprovalRule> ApprovalRules { get; }
     DbSet<ApprovalHistory> ApprovalHistory { get; }
@@ -57,7 +53,6 @@ public interface IApplicationDbContext
     // Module 3: Organizational Structure
     DbSet<OrganizationalUnit> OrganizationalUnits { get; }
     DbSet<CostCenter> CostCenters { get; }
-    DbSet<CostCenterAccount> CostCenterAccounts { get; }
     DbSet<Project> Projects { get; }
     DbSet<Employee> Employees { get; }
 
@@ -67,15 +62,11 @@ public interface IApplicationDbContext
     DbSet<Journal> Journals { get; }
     DbSet<JournalEntry> JournalEntries { get; }
     DbSet<JournalEntryLine> JournalEntryLines { get; }
-    DbSet<AccountBalance> AccountBalances { get; }
-    DbSet<AccountingEvent> AccountingEvents { get; }
     DbSet<PostingRule> PostingRules { get; }
     DbSet<PostingRuleLine> PostingRuleLines { get; }
     DbSet<JournalEntryTemplate> JournalEntryTemplates { get; }
     DbSet<JournalEntryTemplateLine> JournalEntryTemplateLines { get; }
     DbSet<RecurringEntry> RecurringEntries { get; }
-    DbSet<RecurringEntryExecutionLog> RecurringEntryExecutionLogs { get; }
-    DbSet<CashFlowMappingRule> CashFlowMappingRules { get; }
 
     // Module 5: Budgeting & Funds
     DbSet<BudgetClassification> BudgetClassifications { get; }
@@ -83,8 +74,10 @@ public interface IApplicationDbContext
     DbSet<BudgetType> BudgetTypes { get; }
     DbSet<Budget> Budgets { get; }
     DbSet<BudgetItem> BudgetItems { get; }
-    DbSet<Appropriation> Appropriations { get; }
+    DbSet<BudgetItemAllocation> BudgetItemAllocations { get; }
     DbSet<Encumbrance> Encumbrances { get; }
+    DbSet<EncumbranceLine> EncumbranceLines { get; }
+    DbSet<BudgetTransaction> BudgetTransactions { get; }
     DbSet<BudgetItemMonthlyPlan> BudgetItemMonthlyPlans { get; }
     DbSet<YearClosingRun> YearClosingRuns { get; }
     DbSet<FinalAccount> FinalAccounts { get; }
@@ -93,12 +86,14 @@ public interface IApplicationDbContext
     // Module 6: Procurement
     DbSet<PurchaseRequest> PurchaseRequests { get; }
     DbSet<PurchaseRequestDetail> PurchaseRequestDetails { get; }
-    DbSet<RequestForQuotation> RequestForQuotations { get; }
-    DbSet<RFQSupplier> RFQSuppliers { get; }
     DbSet<Quotation> Quotations { get; }
     DbSet<QuotationDetail> QuotationDetails { get; }
     DbSet<PurchaseOrder> PurchaseOrders { get; }
     DbSet<PurchaseOrderDetail> PurchaseOrderDetails { get; }
+    DbSet<ERP_Government.Domain.Procurement.Entities.GoodsReceiptNote> GoodsReceiptNotes { get; }
+    DbSet<ERP_Government.Domain.Procurement.Entities.GoodsReceiptNoteDetail> GoodsReceiptNoteDetails { get; }
+    DbSet<SupplierInvoice> SupplierInvoices { get; }
+    DbSet<SupplierInvoiceDetail> SupplierInvoiceDetails { get; }
 
     // Module 7: Parties
     DbSet<Party> Parties { get; }
@@ -106,7 +101,7 @@ public interface IApplicationDbContext
     // Module 8: Payments
     DbSet<BankAccount> BankAccounts { get; }
     DbSet<PaymentOrder> PaymentOrders { get; }
-    DbSet<PaymentOrderLine> PaymentOrderLines { get; }
+    // PaymentOrderLine removed per ADR-001 D-4
     DbSet<PaymentOrderDeduction> PaymentOrderDeductions { get; }
     DbSet<DisbursementRequest> DisbursementRequests { get; }
     DbSet<Payment> Payments { get; }
@@ -143,8 +138,6 @@ public interface IApplicationDbContext
     DbSet<Item> Items { get; }
     DbSet<ItemUnit> ItemUnits { get; }
     DbSet<StockTransaction> StockTransactions { get; }
-    DbSet<GoodsReceiptNote> GoodsReceiptNotes { get; }
-    DbSet<GoodsReceiptNoteDetail> GoodsReceiptNoteDetails { get; }
     DbSet<StockTake> StockTakes { get; }
     DbSet<StockTakeDetail> StockTakeDetails { get; }
 

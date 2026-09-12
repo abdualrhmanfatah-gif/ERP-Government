@@ -21,7 +21,7 @@ public class BudgetItemTests : TestBase
         var budgetId = budgetResult.Value;
 
         var itemResult = await TestApp.SendAsync(new CreateBudgetItemCommand(
-            budgetId, "PS-001", "Personnel Services", null, null));
+            budgetId, "PS-001", "Personnel Services", null, null, null, null, null, null, null));
         itemResult.Succeeded.ShouldBeTrue();
         itemResult.Value.ShouldBeGreaterThan(0);
     }
@@ -36,11 +36,11 @@ public class BudgetItemTests : TestBase
         var budgetId = budgetResult.Value;
 
         var rootResult = await TestApp.SendAsync(new CreateBudgetItemCommand(
-            budgetId, "ROOT-001", "Root Item", null, null));
+            budgetId, "ROOT-001", "Root Item", null, null, null, null, null, null, null));
         rootResult.Succeeded.ShouldBeTrue();
 
         var childResult = await TestApp.SendAsync(new CreateBudgetItemCommand(
-            budgetId, "CHILD-001", "Child Item", rootResult.Value, null));
+            budgetId, "CHILD-001", "Child Item", rootResult.Value, null, null, null, null, null, null));
         childResult.Succeeded.ShouldBeTrue();
 
         var tree = await TestApp.SendAsync(new GetBudgetItemsTreeQuery(budgetId));
@@ -60,13 +60,13 @@ public class BudgetItemTests : TestBase
 
         // Level 0: root
         var root = await TestApp.SendAsync(new CreateBudgetItemCommand(
-            budgetId, "L0-001", "Level 0", null, null));
+            budgetId, "L0-001", "Level 0", null, null, null, null, null, null, null));
         // Level 1: child of root
         var l1 = await TestApp.SendAsync(new CreateBudgetItemCommand(
-            budgetId, "L1-001", "Level 1", root.Value, null));
+            budgetId, "L1-001", "Level 1", root.Value, null, null, null, null, null, null));
         // Level 2: child of level 1
         var l2 = await TestApp.SendAsync(new CreateBudgetItemCommand(
-            budgetId, "L2-001", "Level 2", l1.Value, null));
+            budgetId, "L2-001", "Level 2", l1.Value, null, null, null, null, null, null));
 
         var tree = await TestApp.SendAsync(new GetBudgetItemsTreeQuery(budgetId));
         tree.Count.ShouldBe(1);
@@ -97,7 +97,7 @@ public class BudgetItemTests : TestBase
 
         // Item with AllowOverrun = null -> should inherit from BudgetType
         var itemResult = await TestApp.SendAsync(new CreateBudgetItemCommand(
-            budgetId, "AO-001", "Inherit Item", null, null));
+            budgetId, "AO-001", "Inherit Item", null, null, null, null, null, null, null));
 
         var tree = await TestApp.SendAsync(new GetBudgetItemsTreeQuery(budgetId));
         tree.Count.ShouldBe(1);
@@ -149,9 +149,9 @@ public class BudgetItemTests : TestBase
         var budgetId = budgetResult.Value;
 
         var root = await TestApp.SendAsync(new CreateBudgetItemCommand(
-            budgetId, "DEL-001", "Root", null, null));
+            budgetId, "DEL-001", "Root", null, null, null, null, null, null, null));
         await TestApp.SendAsync(new CreateBudgetItemCommand(
-            budgetId, "DEL-002", "Child", root.Value, null));
+            budgetId, "DEL-002", "Child", root.Value, null, null, null, null, null, null));
 
         var deleteResult = await TestApp.SendAsync(new DeleteBudgetItemCommand(root.Value));
         deleteResult.Succeeded.ShouldBeFalse();
@@ -168,11 +168,11 @@ public class BudgetItemTests : TestBase
         var budgetId = budgetResult.Value;
 
         var parentA = await TestApp.SendAsync(new CreateBudgetItemCommand(
-            budgetId, "MOV-A", "Parent A", null, null));
+            budgetId, "MOV-A", "Parent A", null, null, null, null, null, null, null));
         var parentB = await TestApp.SendAsync(new CreateBudgetItemCommand(
-            budgetId, "MOV-B", "Parent B", null, null));
+            budgetId, "MOV-B", "Parent B", null, null, null, null, null, null, null));
         var child = await TestApp.SendAsync(new CreateBudgetItemCommand(
-            budgetId, "MOV-C", "Child", parentA.Value, null));
+            budgetId, "MOV-C", "Child", parentA.Value, null, null, null, null, null, null));
 
         // Get the child's RowVersion
         var items = await TestApp.SendAsync(new GetBudgetItemsListQuery(budgetId));
@@ -198,9 +198,9 @@ public class BudgetItemTests : TestBase
         var budgetId = budgetResult.Value;
 
         var parent = await TestApp.SendAsync(new CreateBudgetItemCommand(
-            budgetId, "CIRC-P", "Parent", null, null));
+            budgetId, "CIRC-P", "Parent", null, null, null, null, null, null, null));
         var child = await TestApp.SendAsync(new CreateBudgetItemCommand(
-            budgetId, "CIRC-C", "Child", parent.Value, null));
+            budgetId, "CIRC-C", "Child", parent.Value, null, null, null, null, null, null));
 
         // Get the child's RowVersion
         var items = await TestApp.SendAsync(new GetBudgetItemsListQuery(budgetId));
@@ -223,7 +223,7 @@ public class BudgetItemTests : TestBase
         var budgetId = budgetResult.Value;
 
         var item = await TestApp.SendAsync(new CreateBudgetItemCommand(
-            budgetId, "DEL-ND", "Non-Draft Item", null, null));
+            budgetId, "DEL-ND", "Non-Draft Item", null, null, null, null, null, null, null));
 
         // Submit budget to move out of Draft
         var budget = await TestApp.SendAsync(new GetBudgetByIdQuery(budgetId));

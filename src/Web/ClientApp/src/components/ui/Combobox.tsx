@@ -38,6 +38,8 @@ export function Combobox({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [openUp, setOpenUp] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,6 +49,22 @@ export function Combobox({
   const filtered = options.filter((opt) =>
     opt.label.toLowerCase().includes(query.toLowerCase())
   );
+
+  const computeOpenUp = () => {
+    const btn = buttonRef.current;
+    if (!btn) return false;
+    const rect = btn.getBoundingClientRect();
+    const estHeight = 280;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    return spaceBelow < estHeight && spaceAbove > spaceBelow;
+  };
+
+  const openDropdown = () => {
+    setOpenUp(computeOpenUp());
+    setOpen(true);
+    inputRef.current?.focus();
+  };
 
   const handleSelect = useCallback(
     (val: string) => {
@@ -69,13 +87,13 @@ export function Combobox({
           if (open && activeIndex >= 0 && filtered[activeIndex]) {
             handleSelect(filtered[activeIndex].value);
           } else if (!open) {
-            setOpen(true);
+            openDropdown();
           }
           break;
         case 'ArrowDown':
           e.preventDefault();
           if (!open) {
-            setOpen(true);
+            openDropdown();
           } else {
             setActiveIndex((prev) =>
               prev < filtered.length - 1 ? prev + 1 : 0
@@ -136,6 +154,7 @@ export function Combobox({
       <div className="relative">
         <button
           type="button"
+          ref={buttonRef}
           role="combobox"
           aria-expanded={open}
           aria-haspopup="listbox"
@@ -144,8 +163,11 @@ export function Combobox({
           disabled={disabled}
           onClick={() => {
             if (!disabled) {
-              setOpen(!open);
-              inputRef.current?.focus();
+              if (open) {
+                setOpen(false);
+              } else {
+                openDropdown();
+              }
             }
           }}
           className={cn(
@@ -171,7 +193,7 @@ export function Combobox({
         </button>
 
         {open && (
-          <div className="absolute z-[300] mt-1 w-full bg-[var(--color-surface-container-lowest)] rounded-lg border border-[var(--color-border-container)] shadow-lg overflow-hidden">
+          <div className={`absolute z-[300] w-full ${openUp ? 'bottom-full mb-1' : 'top-full mt-1'} bg-[var(--color-surface-container-lowest)] rounded-lg border border-[var(--color-border-container)] shadow-lg overflow-hidden`}>
             {/* Search input */}
             <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--color-border-container)]">
               <Search size={16} className="text-[var(--color-on-surface-variant)] shrink-0" aria-hidden="true" />

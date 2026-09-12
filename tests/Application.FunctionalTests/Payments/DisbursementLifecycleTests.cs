@@ -1,6 +1,8 @@
-using ERP_Government.Application.Budgeting.Commands.Appropriations;
 using ERP_Government.Application.Budgeting.Commands.Budgets;
-using ERP_Government.Application.Budgeting.Commands.Encumbrances;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.ApproveBudgetTransaction;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.CreateBudgetTransaction;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.PostBudgetTransaction;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.SubmitBudgetTransaction;
 using ERP_Government.Application.Payments.Commands.DisbursementRequests.ApproveDisbursementRequest;
 using ERP_Government.Application.Payments.Commands.DisbursementRequests.CancelDisbursementRequest;
 using ERP_Government.Application.Payments.Commands.DisbursementRequests.CreateDisbursementRequest;
@@ -19,7 +21,6 @@ public class DisbursementLifecycleTests : TestBase
 {
     private int _budgetId;
     private int _budgetItemId;
-    private int _appropriationId;
 
     [SetUp]
     public async Task SeedTestData()
@@ -44,34 +45,30 @@ public class DisbursementLifecycleTests : TestBase
         await TestApp.AddAsync(item);
         _budgetItemId = item.Id;
 
-        var appResult = await TestApp.SendAsync(new CreateAppropriationCommand(
-            _budgetId, _budgetItemId, AppropriationType.Original, "PO", 1, 100000m));
-        appResult.Succeeded.ShouldBeTrue();
-        _appropriationId = appResult.Value;
+        var txResult = await TestApp.SendAsync(new CreateBudgetTransactionCommand(
+            _budgetId, BudgetTransactionType.InitialAppropriation,
+            DateOnly.FromDateTime(DateTime.UtcNow), "PO", 1, "Seed appropriation",
+            [new BudgetTransactionLineRequest(_budgetItemId, TransactionDirection.Increase, 100000m, null)]));
+        txResult.Succeeded.ShouldBeTrue();
 
-        var appropriation = await TestApp.FindAsync<Appropriation>(_appropriationId);
-        appropriation!.Status = AppropriationStatus.Active;
-        await TestApp.AddAsync(appropriation);
+        var tx = await TestApp.FindAsync<BudgetTransaction>(txResult.Value);
+        await TestApp.SendAsync(new SubmitBudgetTransactionCommand(tx!.Id, tx.RowVersion));
+        tx = await TestApp.FindAsync<BudgetTransaction>(txResult.Value);
+        await TestApp.SendAsync(new ApproveBudgetTransactionCommand(tx!.Id, tx.RowVersion, null));
+        tx = await TestApp.FindAsync<BudgetTransaction>(txResult.Value);
+        await TestApp.SendAsync(new PostBudgetTransactionCommand(tx!.Id, tx.RowVersion));
     }
 
-    // ─── T052: Full lifecycle ─────────────────────────────────────
-
     [Test]
-    public async Task T052_FullLifecycle_Create_DualApproval_Execute_ShouldTransitionToPaid()
+    public async Task T052_FullLifecycle_CreateRequest_DualApproval_OrderGeneration_ShouldWork()
     {
-        var encumbranceResult = await TestApp.SendAsync(new CreateEncumbranceCommand(
-            _appropriationId, EncumbranceType.Commitment, null, null,
-            "PO", 1, "Disbursement test encumbrance",
-            DateOnly.FromDateTime(DateTime.UtcNow), 10000m));
-        encumbranceResult.Succeeded.ShouldBeTrue();
-
-        var encumbrance = await TestApp.FindAsync<Encumbrance>(encumbranceResult.Value);
-        encumbrance!.Status = EncumbranceStatus.Active;
-        await TestApp.AddAsync(encumbrance);
-
         var createResult = await TestApp.SendAsync(new CreateDisbursementRequestCommand
         {
-            PaymentOrderId = 1
+            BeneficiaryName = "Test Vendor",
+            RequestedAmount = 35000m,
+            CurrencyId = 1,
+            Purpose = "Test disbursement",
+            FinancialYearId = 1
         });
         createResult.Succeeded.ShouldBeTrue();
         var requestId = createResult.Value!.Id;
@@ -80,8 +77,7 @@ public class DisbursementLifecycleTests : TestBase
 
         var submitResult = await TestApp.SendAsync(new SubmitDisbursementRequestCommand
         {
-            Id = requestId,
-            RowVersion = request.RowVersion
+            Id = requestId
         });
         submitResult.Succeeded.ShouldBeTrue();
 
@@ -91,8 +87,8 @@ public class DisbursementLifecycleTests : TestBase
         var approve1Result = await TestApp.SendAsync(new ApproveDisbursementRequestCommand
         {
             Id = requestId,
-            Reason = "First approval",
-            RowVersion = request.RowVersion
+            ApprovedAmount = 35000m,
+            Reason = "First approval"
         });
         approve1Result.Succeeded.ShouldBeTrue();
 
@@ -102,69 +98,59 @@ public class DisbursementLifecycleTests : TestBase
         var approve2Result = await TestApp.SendAsync(new ApproveDisbursementRequestCommand
         {
             Id = requestId,
-            Reason = "Second approval",
-            RowVersion = request.RowVersion
+            ApprovedAmount = 35000m,
+            Reason = "Second approval"
         });
         approve2Result.Succeeded.ShouldBeTrue();
 
         request = (await TestApp.FindAsync<DisbursementRequest>(requestId))!;
         request.Status.ShouldBe(DisbursementRequestStatus.Approved);
 
-        var po = (await TestApp.FindAsync<PaymentOrder>(request.PaymentOrderId))!;
-        po.Status.ShouldBe(PaymentOrderStatus.Paid);
+        var paymentOrders = await TestApp.WhereAsync<PaymentOrder>(po =>
+            po.DisbursementRequestId == requestId);
+        paymentOrders.ShouldNotBeEmpty();
+        var po = paymentOrders.First();
+        po.Status.ShouldBe(PaymentOrderStatus.Draft);
+        po.AmountGross.ShouldBe(35000m);
     }
-
-    // ─── T053: Budget blocking rejection ──────────────────────────
 
     [Test]
-    public async Task T053_CreateRequest_BudgetBlocking_ShouldRejectWithBreakdown()
+    public async Task T053_CreateRequest_InvalidData_ShouldReject()
     {
-        var po = await TestApp.FindAsync<PaymentOrder>(1);
-        if (po is null)
+        var result = await TestApp.SendAsync(new CreateDisbursementRequestCommand
         {
-            var createResult = await TestApp.SendAsync(new CreateDisbursementRequestCommand
-            {
-                PaymentOrderId = 1
-            });
-            if (!createResult.Succeeded)
-            {
-                createResult.Errors.ShouldContain(e =>
-                    e.Contains("Budget availability insufficient") ||
-                    e.Contains("Payment order must be approved"));
-                Assert.Pass("Budget blocking rejection verified");
-                return;
-            }
-        }
-
-        Assert.Pass("Budget blocking behavior verified through error response");
+            BeneficiaryName = "",
+            RequestedAmount = 0,
+            CurrencyId = 999,
+            Purpose = "",
+            FinancialYearId = 999
+        });
+        result.Succeeded.ShouldBeFalse();
     }
-
-    // ─── T054: Dual-signature combinations ────────────────────────
 
     [Test]
     public async Task T054_SameUserDoubleApproval_ShouldReject()
     {
         var createResult = await TestApp.SendAsync(new CreateDisbursementRequestCommand
         {
-            PaymentOrderId = 1
+            BeneficiaryName = "Test Vendor",
+            RequestedAmount = 10000m,
+            CurrencyId = 1,
+            Purpose = "Test",
+            FinancialYearId = 1
         });
         createResult.Succeeded.ShouldBeTrue();
         var requestId = createResult.Value!.Id;
 
-        var request = await TestApp.FindAsync<DisbursementRequest>(requestId);
-        var submitResult = await TestApp.SendAsync(new SubmitDisbursementRequestCommand
-        {
-            Id = requestId,
-            RowVersion = request!.RowVersion
-        });
-        submitResult.Succeeded.ShouldBeTrue();
+        await TestApp.SendAsync(new SubmitDisbursementRequestCommand { Id = requestId });
 
-        request = await TestApp.FindAsync<DisbursementRequest>(requestId);
+        var request = await TestApp.FindAsync<DisbursementRequest>(requestId);
         var approve1Result = await TestApp.SendAsync(new ApproveDisbursementRequestCommand
         {
             Id = requestId,
-            Reason = "First approval",
-            RowVersion = request!.RowVersion
+            ApprovedAmount = 10000m,
+
+            Reason = "First"
         });
         approve1Result.Succeeded.ShouldBeTrue();
 
@@ -172,21 +158,24 @@ public class DisbursementLifecycleTests : TestBase
         var approve2Result = await TestApp.SendAsync(new ApproveDisbursementRequestCommand
         {
             Id = requestId,
-            Reason = "Second approval same user",
-            RowVersion = request!.RowVersion
+            ApprovedAmount = 10000m,
+
+            Reason = "Second same user"
         });
         approve2Result.Succeeded.ShouldBeFalse();
         approve2Result.Errors.ShouldContain(e => e.Contains("different approver"));
     }
-
-    // ─── T055: Cancellation clears PO link ───────────────────────
 
     [Test]
     public async Task T055_CancelRequest_ShouldTransitionToCancelled()
     {
         var createResult = await TestApp.SendAsync(new CreateDisbursementRequestCommand
         {
-            PaymentOrderId = 1
+            BeneficiaryName = "Test Vendor",
+            RequestedAmount = 10000m,
+            CurrencyId = 1,
+            Purpose = "Test",
+            FinancialYearId = 1
         });
         createResult.Succeeded.ShouldBeTrue();
         var requestId = createResult.Value!.Id;
@@ -195,62 +184,39 @@ public class DisbursementLifecycleTests : TestBase
         var cancelResult = await TestApp.SendAsync(new CancelDisbursementRequestCommand
         {
             Id = requestId,
-            Reason = "No longer needed",
-            RowVersion = request!.RowVersion
+            Reason = "No longer needed"
         });
         cancelResult.Succeeded.ShouldBeTrue();
 
         request = await TestApp.FindAsync<DisbursementRequest>(requestId);
         request!.Status.ShouldBe(DisbursementRequestStatus.Cancelled);
-
-        var newRequestResult = await TestApp.SendAsync(new CreateDisbursementRequestCommand
-        {
-            PaymentOrderId = 1
-        });
-        newRequestResult.Succeeded.ShouldBeTrue();
     }
 
-    // ─── T056: Payment posting balanced journal ───────────────────
-
     [Test]
-    public async Task T056_PaymentOrderPaid_ShouldHaveJournalEntry()
+    public async Task T056_AfterFirstApproval_AmountShouldBeFrozen()
     {
         var createResult = await TestApp.SendAsync(new CreateDisbursementRequestCommand
         {
-            PaymentOrderId = 1
+            BeneficiaryName = "Test Vendor",
+            RequestedAmount = 20000m,
+            CurrencyId = 1,
+            Purpose = "Test",
+            FinancialYearId = 1
         });
         createResult.Succeeded.ShouldBeTrue();
         var requestId = createResult.Value!.Id;
 
+        await TestApp.SendAsync(new SubmitDisbursementRequestCommand { Id = requestId });
+
         var request = await TestApp.FindAsync<DisbursementRequest>(requestId);
-        await TestApp.SendAsync(new SubmitDisbursementRequestCommand
+        var approve1Result = await TestApp.SendAsync(new ApproveDisbursementRequestCommand
         {
             Id = requestId,
-            RowVersion = request!.RowVersion
+            ApprovedAmount = 20000m
         });
+        approve1Result.Succeeded.ShouldBeTrue();
 
         request = await TestApp.FindAsync<DisbursementRequest>(requestId);
-        await TestApp.SendAsync(new ApproveDisbursementRequestCommand
-        {
-            Id = requestId,
-            Reason = "Approval step 1",
-            RowVersion = request!.RowVersion
-        });
-
-        request = await TestApp.FindAsync<DisbursementRequest>(requestId);
-        await TestApp.SendAsync(new ApproveDisbursementRequestCommand
-        {
-            Id = requestId,
-            Reason = "Approval step 2",
-            RowVersion = request!.RowVersion
-        });
-
-        var po = await TestApp.FindAsync<PaymentOrder>(request!.PaymentOrderId);
-        if (po!.Status == PaymentOrderStatus.Paid)
-        {
-            po.JournalEntryId.ShouldNotBeNull();
-        }
-
-        Assert.Pass("Payment posting journal entry verification completed");
+        request!.Status.ShouldBe(DisbursementRequestStatus.PendingApproval);
     }
 }

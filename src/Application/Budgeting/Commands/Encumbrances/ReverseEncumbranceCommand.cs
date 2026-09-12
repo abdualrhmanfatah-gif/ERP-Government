@@ -36,6 +36,7 @@ public class ReverseEncumbranceCommandHandler(
         if (string.IsNullOrWhiteSpace(request.Reason))
             return Result.Failure(["Reversal reason is required."]);
 
+        var fromStatus = entity.Status;
         entity.Status = EncumbranceStatus.Reversed;
 
         context.ApprovalHistory.Add(new ApprovalHistory
@@ -44,7 +45,7 @@ public class ReverseEncumbranceCommandHandler(
             DocumentId = entity.Id,
             ApproverUserId = userId,
             RequiredRole = "",
-            Decision = $"{entity.Status} -> Reversed",
+            Decision = $"{fromStatus} -> Reversed",
             DecisionAt = DateTimeOffset.UtcNow,
             Reason = request.Reason
         });
@@ -52,7 +53,7 @@ public class ReverseEncumbranceCommandHandler(
         await statusLogger.LogAsync(
             "encumbrances",
             entity.Id,
-            entity.Status.ToString(),
+            fromStatus.ToString(),
             EncumbranceStatus.Reversed.ToString(),
             userId,
             request.Reason,

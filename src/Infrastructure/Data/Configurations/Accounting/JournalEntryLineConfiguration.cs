@@ -27,7 +27,7 @@ public class JournalEntryLineConfiguration : IEntityTypeConfiguration<JournalEnt
 
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_JournalEntryLines_DebitCreditXOR",
-            "([Debit] > 0) != ([Credit] > 0)"));
+            "(([Debit] > 0 AND [Credit] = 0) OR ([Debit] = 0 AND [Credit] > 0))"));
 
         builder.Property(e => e.RowVersion)
             .IsRowVersion();
@@ -40,14 +40,6 @@ public class JournalEntryLineConfiguration : IEntityTypeConfiguration<JournalEnt
 
         builder.HasIndex(e => e.CostCenterId);
 
-        builder.HasIndex(e => e.FundId);
-
-        builder.HasIndex(e => e.ProjectId);
-
-        builder.HasIndex(e => e.BudgetItemId);
-
-        builder.HasIndex(e => e.EncumbranceId);
-
         builder.HasIndex(e => e.PaymentOrderId);
 
         // Performance index for General Ledger report (running balance computation)
@@ -56,7 +48,7 @@ public class JournalEntryLineConfiguration : IEntityTypeConfiguration<JournalEnt
 
         // Same-module FK
         builder.HasOne(e => e.JournalEntry)
-            .WithMany()
+            .WithMany(e => e.Lines)
             .HasForeignKey(e => e.JournalEntryId)
             .OnDelete(DeleteBehavior.Restrict);
 

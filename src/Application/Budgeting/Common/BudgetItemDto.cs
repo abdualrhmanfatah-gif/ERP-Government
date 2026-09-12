@@ -9,6 +9,15 @@ public class BudgetItemDto
     public string ItemCode { get; init; } = string.Empty;
     public string ItemName { get; init; } = string.Empty;
     public int? ParentId { get; init; }
+    public int? AccountId { get; init; }
+    public string? AccountName { get; set; }
+    public int? FundId { get; init; }
+    public string? FundName { get; set; }
+    public string? BudgetName { get; set; }
+    public int? CostCenterId { get; init; }
+    public string? CostCenterName { get; set; }
+    public int? BudgetClassificationId { get; init; }
+    public string? BudgetClassificationName { get; set; }
     public string? Remarks { get; init; }
     public int Level { get; set; }
     public bool? AllowOverrun { get; init; }

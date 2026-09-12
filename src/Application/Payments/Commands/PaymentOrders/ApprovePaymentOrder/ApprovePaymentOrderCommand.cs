@@ -19,7 +19,6 @@ public class ApprovePaymentOrderCommand : IRequest<Result>
 public class ApprovePaymentOrderCommandHandler(
     IApplicationDbContext context,
     IApprovalRuleEvaluationService evaluationService,
-    IIdentityService identityService,
     IDocumentStatusLogger statusLogger,
     IAttachmentGateService attachmentGate,
     IUser user) : IRequestHandler<ApprovePaymentOrderCommand, Result>
@@ -40,9 +39,6 @@ public class ApprovePaymentOrderCommandHandler(
         if (entity.Status != PaymentOrderStatus.Submitted)
             return Result.Failure(["Only submitted payment orders can be approved."]);
 
-        if (entity.BudgetCheckStatus != BudgetCheckStatus.Passed)
-            return Result.Failure(["Cannot approve payment order with failed budget check."]);
-
         var missingAttachments = await attachmentGate.CheckMandatoryAttachmentsAsync(
             "PaymentOrder", entity.Id, cancellationToken);
 
@@ -59,24 +55,9 @@ public class ApprovePaymentOrderCommandHandler(
         if (evaluationResults.Count == 0)
             return Result.Failure(["No approval rules defined for this document type."]);
 
-        string? matchedRole = null;
-        foreach (var rule in evaluationResults)
-        {
-            if (string.IsNullOrEmpty(rule.RequiredRole)) continue;
-            if (await identityService.IsInRoleAsync(userId, rule.RequiredRole))
-            {
-                matchedRole = rule.RequiredRole;
-                break;
-            }
-        }
-
-        if (matchedRole is null)
-        {
-            var requiredRoles = evaluationResults
-                .Select(r => r.RequiredRole)
-                .Where(r => !string.IsNullOrEmpty(r));
-            return Result.Failure([$"User does not have any required approval role ({string.Join(", ", requiredRoles)})."]);
-        }
+        // Use first matched rule's role for audit trail (no role gate — permission is the gate)
+        var matchedRole = evaluationResults
+            .FirstOrDefault(r => !string.IsNullOrEmpty(r.RequiredRole))?.RequiredRole ?? "Unknown";
 
         var evaluationSnapshot = JsonSerializer.Serialize(evaluationResults.Select(r => new
         {

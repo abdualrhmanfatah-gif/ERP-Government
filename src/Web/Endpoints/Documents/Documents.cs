@@ -1,10 +1,13 @@
+using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Documents.Commands.DeleteAttachment;
 using ERP_Government.Application.Documents.Commands.UploadAttachment;
+using ERP_Government.Application.Documents.Common;
 using ERP_Government.Application.Documents.Queries.GetAttachmentRequirements;
 using ERP_Government.Application.Documents.Queries.GetDocumentApprovals;
 using ERP_Government.Application.Documents.Queries.GetDocumentAttachments;
 using ERP_Government.Application.Documents.Queries.GetDocumentStatusLog;
+using ERP_Government.Application.Security.Common;
 using ERP_Government.Web.Infrastructure;
 
 namespace ERP_Government.Web.Endpoints.Documents;
@@ -20,6 +23,8 @@ public class Documents : IEndpointGroup
         group.MapPost("/{documentType}/{documentId:int}/attachments", HandleUploadAttachment)
             .DisableAntiforgery();
         group.MapDelete("/attachments/{id:int}", HandleDeleteAttachment);
+        group.MapGet("/{documentType}/{documentId:int}/attachment-gate-check", HandleAttachmentGateCheck);
+        group.MapGet("/attachments/{id:int}/download", HandleDownloadAttachment);
     }
 
     private static async Task<IResult> HandleGetApprovals(
@@ -76,5 +81,28 @@ public class Documents : IEndpointGroup
     {
         var result = await sender.Send(new DeleteAttachmentCommand(id));
         return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+    }
+
+    private static async Task<IResult> HandleAttachmentGateCheck(
+        IAttachmentGateService gateService,
+        string documentType,
+        int documentId)
+    {
+        var missing = await gateService.CheckMandatoryAttachmentsAsync(documentType, documentId);
+        return Results.Ok(missing);
+    }
+
+    private static async Task<IResult> HandleDownloadAttachment(
+        IFileStorageService fileStorage,
+        IApplicationDbContext dbContext,
+        int id)
+    {
+        var attachment = await dbContext.Attachments.FindAsync(id);
+        if (attachment is null) return Results.NotFound();
+
+        var stream = await fileStorage.OpenReadAsync(attachment.StoragePath);
+        if (stream is null) return Results.NotFound();
+
+        return Results.File(stream, attachment.MimeType, attachment.FileName);
     }
 }

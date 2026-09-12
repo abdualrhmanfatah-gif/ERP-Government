@@ -28,11 +28,13 @@ public class CancelReceiptVoucherCommandHandler(
         if (voucher is null)
             return Result.Failure(new[] { "Receipt voucher not found."});
 
-        if (voucher.Status == ReceiptVoucherStatus.Cancelled)
-            return Result.Failure(new[] { "Voucher is already cancelled."});
+        if (voucher.Status is not (ReceiptVoucherStatus.Draft or ReceiptVoucherStatus.PendingReview))
+            return Result.Failure(new[] { "Only Draft or PendingReview vouchers can be cancelled."});
 
-        if (voucher.Status == ReceiptVoucherStatus.Approved && voucher.DepositSlipId.HasValue)
-            return Result.Failure(new[] { "Cannot cancel voucher that is part of an approved deposit slip."});
+        if (voucher.DepositSlipId.HasValue)
+            return Result.Failure(new[] { "Cannot cancel a voucher that is linked to a deposit slip."});
+
+        var fromStatus = voucher.Status;
 
         voucher.Status = ReceiptVoucherStatus.Cancelled;
         voucher.CancellationReason = request.Reason;
@@ -42,7 +44,7 @@ public class CancelReceiptVoucherCommandHandler(
         {
             EntityName = nameof(ReceiptVoucher),
             DocumentId = voucher.Id,
-            FromStatus = voucher.Status.ToString(),
+            FromStatus = fromStatus.ToString(),
             ToStatus = ReceiptVoucherStatus.Cancelled.ToString(),
             ChangedById = userId,
             ChangedAt = DateTimeOffset.UtcNow,

@@ -1,5 +1,6 @@
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Revenue.Common.DTOs;
+using ERP_Government.Domain.Revenue.Enums;
 
 namespace ERP_Government.Application.Revenue.Queries.Statements.GetMonthlyStatement;
 
@@ -21,11 +22,13 @@ public class GetMonthlyStatementQueryHandler(
         var startDate = new DateOnly(request.Year, request.Month, 1);
         var endDate = startDate.AddMonths(1).AddDays(-1);
 
+        // FR-016: vouchers[] lists ALL approved vouchers of the month (full activity)
         var vouchers = await context.ReceiptVouchers
             .Include(v => v.Party)
             .Include(v => v.Lines)
             .Include(v => v.Checks)
-            .Where(v => v.VoucherDate >= startDate && v.VoucherDate <= endDate)
+            .Where(v => v.VoucherDate >= startDate && v.VoucherDate <= endDate
+                        && v.Status == ReceiptVoucherStatus.Approved)
             .ToListAsync(cancellationToken);
 
         var voucherIds = vouchers.Select(v => v.Id).ToList();
@@ -34,21 +37,23 @@ public class GetMonthlyStatementQueryHandler(
             .Where(s => s.ReceiptVouchers.Any(v => voucherIds.Contains(v.Id)))
             .ToListAsync(cancellationToken);
 
+        var approvedSlips = slips.Where(s => s.Status == DepositSlipStatus.Approved).ToList();
+
         var clearedChecks = await context.Checks
-            .Where(c => voucherIds.Contains(c.ReceiptVoucherId) && c.Status == Domain.Revenue.Enums.CheckStatus.Cleared)
+            .Where(c => voucherIds.Contains(c.ReceiptVoucherId) && c.Status == CheckStatus.Cleared)
             .ToListAsync(cancellationToken);
 
-        var cashVouchers = vouchers.Where(v => v.PaymentMethod == Domain.Revenue.Enums.PaymentMethod.Cash);
-        var checkVouchers = vouchers.Where(v => v.PaymentMethod == Domain.Revenue.Enums.PaymentMethod.Check);
+        var cashVouchers = vouchers.Where(v => v.PaymentMethod == PaymentMethod.Cash);
+        var checkVouchers = vouchers.Where(v => v.PaymentMethod == PaymentMethod.Check);
 
         var summary = new MonthlyStatementSummaryDto
         {
             TotalCashCollections = cashVouchers.Sum(v => v.Lines.Sum(l => l.Amount)),
             TotalCheckCollections = checkVouchers.Sum(v => v.Lines.Sum(l => l.Amount)),
-            TotalDeposited = slips.Where(s => s.Status == Domain.Revenue.Enums.DepositSlipStatus.Approved).Sum(s => s.TotalAmount),
-            TotalUnderCollection = checkVouchers.Where(v => v.Checks.Any(c => c.Status == Domain.Revenue.Enums.CheckStatus.UnderCollection)).Sum(v => v.Lines.Sum(l => l.Amount)),
+            TotalDeposited = approvedSlips.Sum(s => s.TotalAmount),
+            TotalUnderCollection = checkVouchers.Where(v => v.Checks.Any(c => c.Status == CheckStatus.UnderCollection)).Sum(v => v.Lines.Sum(l => l.Amount)),
             TotalCleared = clearedChecks.Sum(c => c.Amount),
-            TotalBounced = checkVouchers.Where(v => v.Checks.Any(c => c.Status == Domain.Revenue.Enums.CheckStatus.Bounced)).Sum(v => v.Lines.Sum(l => l.Amount))
+            TotalBounced = checkVouchers.Where(v => v.Checks.Any(c => c.Status == CheckStatus.Bounced)).Sum(v => v.Lines.Sum(l => l.Amount))
         };
 
         var statement = new MonthlyStatementDto
@@ -56,7 +61,7 @@ public class GetMonthlyStatementQueryHandler(
             Year = request.Year,
             Month = request.Month,
             FundId = request.FundId,
-            FundName = "General Fund",
+            FundName = await GetFundNameAsync(request.FundId, cancellationToken),
             GeneratedAt = DateTimeOffset.UtcNow,
             Summary = summary,
             Vouchers = vouchers.Select(v => new ReceiptVoucherDto
@@ -85,5 +90,11 @@ public class GetMonthlyStatementQueryHandler(
         };
 
         return Result<MonthlyStatementDto>.Success(statement);
+    }
+
+    private async Task<string> GetFundNameAsync(int fundId, CancellationToken cancellationToken)
+    {
+        var fund = await context.Funds.FindAsync(new object[] { fundId }, cancellationToken);
+        return fund?.FundName ?? "Unknown Fund";
     }
 }

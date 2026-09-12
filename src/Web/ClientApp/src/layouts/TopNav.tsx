@@ -2,13 +2,20 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { moduleGroups } from './navigation';
+import { Button } from '@/components/ui';
 
 export function TopNav() {
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
   const location = useLocation();
+  const prevPathRef = useRef(location.pathname);
 
-  useEffect(() => { setOpenGroup(null); }, [location.pathname]);
+  useEffect(() => {
+    if (prevPathRef.current !== location.pathname) {
+      prevPathRef.current = location.pathname;
+      setOpenGroup(null);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -21,20 +28,23 @@ export function TopNav() {
   }, []);
 
   return (
-    <nav aria-label="التنقل الرئيسي" ref={navRef} className="hidden lg:flex items-center gap-1">
+    <nav aria-label="التنقل الرئيسي" ref={navRef} className="hidden lg:flex items-center gap-0.5 text-xs">
       {moduleGroups.map((group) => {
         const open = openGroup === group.label;
         const active = group.items.some((i) => location.pathname.startsWith(i.path));
         return (
           <div key={group.label} className="relative">
-            <button
-              type="button" aria-expanded={open} aria-haspopup="menu" aria-label={group.label}
+            <Button
+              variant="header"
+              aria-expanded={open}
+              aria-haspopup="menu"
+              aria-label={group.label}
               onClick={() => setOpenGroup(open ? null : group.label)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-body-md font-semibold transition-colors duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none ${open || active ? 'bg-white/15 text-white' : 'text-white/75 hover:text-white hover:bg-white/10'}`}
+              className={open || active ? 'bg-white/15' : ''}
             >
               {group.label}
               <ChevronDown size={14} aria-hidden="true" className={open ? 'rotate-180 transition-transform duration-200' : 'transition-transform duration-200'} />
-            </button>
+            </Button>
             {open && (
               <div role="menu" aria-label={group.label} className="absolute top-full mt-2 start-0 min-w-56 bg-[var(--color-surface)] rounded-xl shadow-xl border border-[var(--color-border-container)] z-50 overflow-hidden py-1">
                 {group.items.map((item) => {

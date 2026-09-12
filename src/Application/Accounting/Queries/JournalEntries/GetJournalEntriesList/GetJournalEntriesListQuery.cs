@@ -41,6 +41,28 @@ public class GetJournalEntriesListQueryHandler(
             .ThenByDescending(x => x.Id)
             .ToListAsync(cancellationToken);
 
-        return mapper.Map<List<JournalEntryDto>>(items);
+        var entryIds = items.Select(x => x.Id).ToList();
+        var lineTotals = await context.JournalEntryLines
+            .Where(l => entryIds.Contains(l.JournalEntryId))
+            .GroupBy(l => l.JournalEntryId)
+            .Select(g => new
+            {
+                JournalEntryId = g.Key,
+                TotalBaseDebit = g.Sum(l => l.Debit),
+                TotalBaseCredit = g.Sum(l => l.Credit),
+            })
+            .ToDictionaryAsync(x => x.JournalEntryId, cancellationToken);
+
+        var dtos = mapper.Map<List<JournalEntryDto>>(items);
+        foreach (var dto in dtos)
+        {
+            if (lineTotals.TryGetValue(dto.Id, out var totals))
+            {
+                dto.TotalBaseDebit = totals.TotalBaseDebit;
+                dto.TotalBaseCredit = totals.TotalBaseCredit;
+            }
+        }
+
+        return dtos;
     }
 }

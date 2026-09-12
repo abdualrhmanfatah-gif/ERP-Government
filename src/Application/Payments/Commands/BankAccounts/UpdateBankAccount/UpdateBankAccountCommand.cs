@@ -61,6 +61,16 @@ public class UpdateBankAccountCommandHandler(
         entity.MaxTransactionLimit = request.MaxTransactionLimit;
         entity.RequiresDualApproval = request.RequiresDualApproval;
 
+        if (request.IsDefault && !entity.IsDefault)
+        {
+            var otherDefaults = await context.BankAccounts
+                .Where(b => b.IsDefault && b.Id != entity.Id)
+                .ToListAsync(cancellationToken);
+            foreach (var other in otherDefaults)
+                other.IsDefault = false;
+        }
+        entity.IsDefault = request.IsDefault;
+
         await context.SaveChangesAsync(cancellationToken);
 
         return Result.Success();

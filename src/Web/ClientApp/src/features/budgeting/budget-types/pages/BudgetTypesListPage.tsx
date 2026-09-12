@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
-import { Button, Switch, FilterBar, FilterSearch, FilterSelect, Dialog, ConfirmDialog, Badge } from '@/components/ui';
+import { Page, Button, Switch, FilterBar, FilterSearch, FilterSelect, Dialog, ConfirmDialog, Badge, Input, Textarea, Select } from '@/components/ui';
+import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Pencil } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import { budgetControlMethodLabels, BudgetControlMethod } from '../../shared/types';
 import type { BudgetTypeDto } from '../../shared/types';
+import { activeStatusLabels, getActiveStatusLabel } from '@/shared/constants/labels';
 import { useBudgetTypesList, useCreateBudgetType, useUpdateBudgetType, useToggleBudgetTypeActive } from '../hooks/useBudgetTypes';
 
 const controlMethodBadgeVariant: Record<BudgetControlMethod, 'success' | 'warning' | 'danger'> = {
@@ -20,8 +22,15 @@ const controlMethodOptions = Object.entries(budgetControlMethodLabels).map(([val
 }));
 
 const isActiveOptions = [
-  { value: 'true', label: 'نشط' },
-  { value: 'false', label: 'معطل' },
+  { value: 'true', label: activeStatusLabels.active },
+  { value: 'false', label: activeStatusLabels.disabled },
+];
+
+const columns: DataGridColumn<BudgetTypeDto>[] = [
+  { header: 'الكود', cell: (row) => <span className="font-mono">{row.code}</span> },
+  { header: 'الاسم', cell: (row) => row.name },
+  { header: 'طريقة التحكم', cell: (row) => <Badge variant={controlMethodBadgeVariant[row.controlMethod]}>{budgetControlMethodLabels[row.controlMethod]}</Badge> },
+  { header: 'السماح بالتجاوز', cell: (row) => <Switch checked={row.allowOverrun} disabled /> },
 ];
 
 export default function BudgetTypesListPage() {
@@ -31,6 +40,7 @@ export default function BudgetTypesListPage() {
   const [isActiveFilter, setIsActiveFilter] = useState<string>('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editItem, setEditItem] = useState<BudgetTypeDto | null>(null);
+  const [allowOverrun, setAllowOverrun] = useState(false);
   const [confirmToggle, setConfirmToggle] = useState<BudgetTypeDto | null>(null);
 
   const { data: items = [], isLoading } = useBudgetTypesList();
@@ -60,11 +70,13 @@ export default function BudgetTypesListPage() {
 
   function handleCreate() {
     setEditItem(null);
+    setAllowOverrun(false);
     setDialogOpen(true);
   }
 
   function handleEdit(item: BudgetTypeDto) {
     setEditItem(item);
+    setAllowOverrun(item.allowOverrun);
     setDialogOpen(true);
   }
 
@@ -78,10 +90,10 @@ export default function BudgetTypesListPage() {
       { id: confirmToggle.id, rowVersion: confirmToggle.rowVersion, isActive: !confirmToggle.isActive },
       {
         onSuccess: () => {
-          toast.success(confirmToggle.isActive ? 'تم التعطيل بنجاح' : 'تم التنشيط بنجاح');
+          notify({ type: 'success', title: confirmToggle.isActive ? 'تم التعطيل بنجاح' : 'تم التنشيط بنجاح' });
           setConfirmToggle(null);
         },
-        onError: () => toast.error('حدث خطأ أثناء التبديل'),
+        onError: () => notify({ type: 'error', title: 'حدث خطأ أثناء التبديل' }),
       },
     );
   }
@@ -94,7 +106,7 @@ export default function BudgetTypesListPage() {
       name: form.get('name') as string,
       description: (form.get('description') as string) || undefined,
       controlMethod: Number(form.get('controlMethod')) as BudgetControlMethod,
-      allowOverrun: form.get('allowOverrun') === 'on',
+      allowOverrun,
     };
 
     if (editItem) {
@@ -102,174 +114,129 @@ export default function BudgetTypesListPage() {
         { id: editItem.id, rowVersion: editItem.rowVersion, ...data },
         {
           onSuccess: () => {
-            toast.success('تم التحديث بنجاح');
+            notify({ type: 'success', title: 'تم التحديث بنجاح' });
             setDialogOpen(false);
           },
-          onError: () => toast.error('حدث خطأ أثناء التحديث'),
+          onError: () => notify({ type: 'error', title: 'حدث خطأ أثناء التحديث' }),
         },
       );
     } else {
       createMutation.mutate(data, {
         onSuccess: () => {
-          toast.success('تم الإنشاء بنجاح');
+          notify({ type: 'success', title: 'تم الإنشاء بنجاح' });
           setDialogOpen(false);
         },
-        onError: () => toast.error('حدث خطأ أثناء الإنشاء'),
+        onError: () => notify({ type: 'error', title: 'حدث خطأ أثناء الإنشاء' }),
       });
     }
   }
 
+  const allColumns: DataGridColumn<BudgetTypeDto>[] = [
+    ...columns,
+    {
+      header: 'الحالة',
+      cell: (row) => canManage
+        ? <Switch checked={row.isActive} onChange={() => handleToggle(row)} label={getActiveStatusLabel(row.isActive)} />
+        : <Badge variant={row.isActive ? 'success' : 'danger'}>{getActiveStatusLabel(row.isActive)}</Badge>,
+    },
+    ...(canManage ? [{
+      header: 'إجراءات',
+      cell: (row: BudgetTypeDto) => <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} aria-label="تعديل"><Pencil size={16} /></Button>,
+    }] : []),
+  ];
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-[var(--color-on-surface)]">أنواع الميزانيات</h1>
-        {canManage && (
+    <Page
+      title="أنواع الميزانيات"
+      actions={
+        canManage ? (
           <Button onClick={handleCreate} icon={<Plus size={16} />}>
             إضافة نوع ميزانية
           </Button>
-        )}
-      </div>
-
-      <FilterBar hasFilters={hasFilters} onClear={handleClearFilters}>
-        <FilterSearch value={search} onChange={setSearch} placeholder="بحث بالكود أو الاسم..." />
-        <FilterSelect
-          value={controlMethodFilter}
-          onChange={setControlMethodFilter}
-          options={controlMethodOptions}
-          placeholder="طريقة التحكم"
-          label="طريقة التحكم"
-        />
-        <FilterSelect
-          value={isActiveFilter}
-          onChange={setIsActiveFilter}
-          options={isActiveOptions}
-          placeholder="الحالة"
-          label="الحالة"
-        />
-      </FilterBar>
-
+        ) : undefined
+      }
+      toolbar={
+        <FilterBar hasFilters={hasFilters} onClear={handleClearFilters}>
+          <FilterSearch value={search} onChange={setSearch} placeholder="بحث بالكود أو الاسم..." />
+          <FilterSelect
+            value={controlMethodFilter}
+            onChange={setControlMethodFilter}
+            options={controlMethodOptions}
+            placeholder="طريقة التحكم"
+            label="طريقة التحكم"
+          />
+          <FilterSelect
+            value={isActiveFilter}
+            onChange={setIsActiveFilter}
+            options={isActiveOptions}
+            placeholder="الحالة"
+            label="الحالة"
+          />
+        </FilterBar>
+      }
+    >
       <div className="flex items-center gap-2 text-sm text-[var(--color-on-surface-variant)]">
         <span>{filtered.length} نتيجة</span>
         {items.length > 0 && <span>({items.length} إجمالي)</span>}
       </div>
 
-      <div className="w-full overflow-x-auto rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container-lowest)]">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-[var(--color-border-container)] bg-[var(--color-surface-container-low)]">
-              <th className="px-4 py-3 text-right font-medium text-[var(--color-on-surface-variant)]">الكود</th>
-              <th className="px-4 py-3 text-right font-medium text-[var(--color-on-surface-variant)]">الاسم</th>
-              <th className="px-4 py-3 text-right font-medium text-[var(--color-on-surface-variant)]">طريقة التحكم</th>
-              <th className="px-4 py-3 text-right font-medium text-[var(--color-on-surface-variant)]">السماح بالتجاوز</th>
-              <th className="px-4 py-3 text-right font-medium text-[var(--color-on-surface-variant)]">الحالة</th>
-              {canManage && <th className="px-4 py-3 text-right font-medium text-[var(--color-on-surface-variant)]">إجراءات</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((item) => (
-              <tr key={item.id} className="border-b border-[var(--color-border-container)] last:border-0 hover:bg-[var(--color-surface-container-low)] transition-colors">
-                <td className="px-4 py-3 font-mono text-[var(--color-on-surface)]">{item.code}</td>
-                <td className="px-4 py-3 text-[var(--color-on-surface)]">{item.name}</td>
-                <td className="px-4 py-3">
-                  <Badge variant={controlMethodBadgeVariant[item.controlMethod]}>
-                    {budgetControlMethodLabels[item.controlMethod]}
-                  </Badge>
-                </td>
-                <td className="px-4 py-3">
-                  <Switch checked={item.allowOverrun} disabled />
-                </td>
-                <td className="px-4 py-3">
-                  {canManage ? (
-                    <Switch
-                      checked={item.isActive}
-                      onChange={() => handleToggle(item)}
-                      label={item.isActive ? 'نشط' : 'معطل'}
-                    />
-                  ) : (
-                    <Badge variant={item.isActive ? 'success' : 'danger'}>
-                      {item.isActive ? 'نشط' : 'معطل'}
-                    </Badge>
-                  )}
-                </td>
-                {canManage && (
-                  <td className="px-4 py-3">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(item)} aria-label="تعديل">
-                      <Pencil size={16} />
-                    </Button>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataGrid
+        columns={allColumns}
+        data={filtered}
+        loading={isLoading}
+        emptyMessage="لا توجد نتائج"
+        rowKey={(row) => row.id}
+      />
 
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         title={editItem ? 'تعديل نوع الميزانية' : 'إضافة نوع ميزانية جديد'}
         footer={
-          <Button type="submit" form="budget-type-form" disabled={createMutation.isPending || updateMutation.isPending}>
+          <Button type="submit" form="budget-type-form" disabled={createMutation.isPending || updateMutation.isPending} loading={createMutation.isPending || updateMutation.isPending}>
             {editItem ? 'حفظ التعديلات' : 'إنشاء'}
           </Button>
         }
       >
-        <form id="budget-type-form" onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="code" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">الكود *</label>
-            <input
-              id="code"
-              name="code"
-              type="text"
-              required
-              defaultValue={editItem?.code}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            />
-          </div>
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">الاسم *</label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              defaultValue={editItem?.name}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            />
-          </div>
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">الوصف</label>
-            <textarea
-              id="description"
-              name="description"
-              rows={3}
-              defaultValue={editItem?.description}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            />
-          </div>
-          <div>
-            <label htmlFor="controlMethod" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">طريقة التحكم *</label>
-            <select
-              id="controlMethod"
-              name="controlMethod"
-              required
-              defaultValue={editItem?.controlMethod}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            >
-              {Object.entries(budgetControlMethodLabels).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
-            </select>
-          </div>
+        <form id="budget-type-form" onSubmit={handleSubmit} className="space-y-4" aria-label="نموذج نوع الموازنة">
+          <Input
+            label="الكود *"
+            id="code"
+            name="code"
+            type="text"
+            required
+            defaultValue={editItem?.code}
+          />
+          <Input
+            label="الاسم *"
+            id="name"
+            name="name"
+            type="text"
+            required
+            defaultValue={editItem?.name}
+          />
+          <Textarea
+            label="الوصف"
+            id="description"
+            name="description"
+            rows={3}
+            defaultValue={editItem?.description}
+          />
+          <Select
+            label="طريقة التحكم *"
+            id="controlMethod"
+            name="controlMethod"
+            required
+            defaultValue={String(editItem?.controlMethod ?? '')}
+            options={Object.entries(budgetControlMethodLabels).map(([value, label]) => ({ value, label }))}
+          />
           <div className="flex items-center gap-2">
-            <input
+            <Switch
               id="allowOverrun"
-              name="allowOverrun"
-              type="checkbox"
-              defaultChecked={editItem?.allowOverrun}
-              className="w-4 h-4"
+              checked={allowOverrun}
+              onChange={setAllowOverrun}
+              label="السماح بالتجاوز"
             />
-            <label htmlFor="allowOverrun" className="text-sm text-[var(--color-on-surface)]">السماح بالتجاوز</label>
           </div>
         </form>
       </Dialog>
@@ -282,6 +249,6 @@ export default function BudgetTypesListPage() {
         title={confirmToggle?.isActive ? 'تعطيل نوع الميزانية' : 'تنشيط نوع الميزانية'}
         loading={toggleMutation.isPending}
       />
-    </div>
+    </Page>
   );
 }

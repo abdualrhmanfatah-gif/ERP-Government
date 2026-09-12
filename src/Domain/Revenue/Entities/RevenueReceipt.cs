@@ -13,7 +13,7 @@ public class RevenueReceipt : BaseAuditableEntity
     public int? BudgetClassificationId { get; set; }
     public int CurrencyId { get; set; }
     public decimal AmountTotal { get; set; }
-    public Payments.Enums.PaymentMethod PaymentMethod { get; set; }
+    public Payments.Enums.PaymentMethod? PaymentMethod { get; set; }
     public string? ExternalTransactionRef { get; set; }
     public int? JournalEntryId { get; set; }
     public Enums.RevenueReceiptStatus Status { get; set; }

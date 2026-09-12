@@ -1,5 +1,8 @@
-using ERP_Government.Application.Budgeting.Commands.Appropriations;
 using ERP_Government.Application.Budgeting.Commands.Budgets;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.ApproveBudgetTransaction;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.CreateBudgetTransaction;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.PostBudgetTransaction;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.SubmitBudgetTransaction;
 using ERP_Government.Application.Budgeting.Commands.Encumbrances;
 using ERP_Government.Domain.Budgeting.Entities;
 using ERP_Government.Domain.Budgeting.Enums;
@@ -13,7 +16,6 @@ public class EncumbranceAuthorizationTests : TestBase
 {
     private int _budgetId;
     private int _budgetItemId;
-    private int _appropriationId;
 
     [SetUp]
     public async Task SeedTestData()
@@ -38,14 +40,18 @@ public class EncumbranceAuthorizationTests : TestBase
         await TestApp.AddAsync(item);
         _budgetItemId = item.Id;
 
-        var appResult = await TestApp.SendAsync(new CreateAppropriationCommand(
-            _budgetId, _budgetItemId, AppropriationType.Original, "PO", 1, 50000m));
-        appResult.Succeeded.ShouldBeTrue();
-        _appropriationId = appResult.Value;
+        var txResult = await TestApp.SendAsync(new CreateBudgetTransactionCommand(
+            _budgetId, BudgetTransactionType.InitialAppropriation,
+            DateOnly.FromDateTime(DateTime.UtcNow), "PO", 1, "Seed appropriation",
+            [new BudgetTransactionLineRequest(_budgetItemId, TransactionDirection.Increase, 50000m, null)]));
+        txResult.Succeeded.ShouldBeTrue();
 
-        var appropriation = await TestApp.FindAsync<Appropriation>(_appropriationId);
-        appropriation!.Status = AppropriationStatus.Active;
-        await TestApp.AddAsync(appropriation);
+        var tx = await TestApp.FindAsync<BudgetTransaction>(txResult.Value);
+        await TestApp.SendAsync(new SubmitBudgetTransactionCommand(tx!.Id, tx.RowVersion));
+        tx = await TestApp.FindAsync<BudgetTransaction>(txResult.Value);
+        await TestApp.SendAsync(new ApproveBudgetTransactionCommand(tx!.Id, tx.RowVersion, null));
+        tx = await TestApp.FindAsync<BudgetTransaction>(txResult.Value);
+        await TestApp.SendAsync(new PostBudgetTransactionCommand(tx!.Id, tx.RowVersion));
     }
 
     [Test]
@@ -54,8 +60,9 @@ public class EncumbranceAuthorizationTests : TestBase
         await TestApp.ResetState();
 
         var act = () => TestApp.SendAsync(new CreateEncumbranceCommand(
-            _appropriationId, EncumbranceType.Commitment, null, null,
-            "PO", 1, "Unauthorized", DateOnly.FromDateTime(DateTime.UtcNow), 1000m));
+            EncumbranceType.Commitment, null, null,
+            "PO", 1, "Unauthorized", DateOnly.FromDateTime(DateTime.UtcNow),
+            [new EncumbranceLineRequest(_budgetItemId, 1000m, null)]));
 
         var result = await act.ShouldThrowAsync<UnauthorizedAccessException>();
     }

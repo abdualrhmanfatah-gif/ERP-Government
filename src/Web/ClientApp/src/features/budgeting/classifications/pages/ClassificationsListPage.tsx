@@ -5,8 +5,9 @@ import { getExcludedDescendantIds } from '../utils/classification-utils';
 import { usePermission } from '../../../../shared/hooks/usePermission';
 import { BUDGET_PERMISSIONS } from '../../../../shared/constants/permissions';
 import { ChevronRight, ChevronLeft, Plus, Pencil } from 'lucide-react';
-import { FilterBar, FilterSearch, FilterSelect, Dialog, Switch, ConfirmDialog } from '../../../../components/ui';
-import { toast } from 'sonner';
+import { Page, FilterBar, FilterSearch, FilterSelect, Dialog, Switch, ConfirmDialog, Button, Input, Select, Badge } from '../../../../components/ui';
+import { getDisabledStatusLabel, activeStatusLabels } from '../../../../shared/constants/labels';
+import { notify } from '@/features/notifications/notify';
 
 export function normalizeTree(
   nodes: BudgetClassificationTreeDto[],
@@ -141,23 +142,26 @@ function TreeItem({
         )}
         <span className="font-medium text-[var(--color-on-surface)]">{node.code}</span>
         <span className="text-[var(--color-on-surface-variant)]">{node.name}</span>
-        <span className="text-xs bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] rounded-full px-2 py-0.5">
+        <Badge variant="primary">
           مستوى {node.level}
-        </span>
+        </Badge>
         {canUpdate && (
           <Switch
             checked={node.isActive}
             onChange={() => onToggleActive(node)}
-            label={node.isActive ? 'نشط' : 'معطل'}
+            label={getDisabledStatusLabel(node.isActive)}
           />
         )}
         {canEdit && (
-          <button
+          <Button
+            variant="ghost"
+            size="icon-xs"
             onClick={(e) => { e.stopPropagation(); onEdit(node); }}
-            className="ms-auto text-[var(--color-on-surface-variant)] hover:text-[var(--color-primary)] p-1"
+            className="ms-auto"
+            aria-label="تعديل"
           >
             <Pencil size={14} />
-          </button>
+          </Button>
         )}
       </div>
       {isExpanded && hasChildren && (
@@ -182,7 +186,7 @@ function TreeItem({
 }
 
 export default function ClassificationsListPage() {
-  const { data: rawTree, isLoading, error } = useClassificationsTree();
+  const { data: rawTree, isLoading, error, refetch } = useClassificationsTree();
   const createMutation = useCreateClassification();
   const updateMutation = useUpdateClassification();
   const toggleMutation = useToggleClassificationActive();
@@ -346,14 +350,14 @@ export default function ClassificationsListPage() {
       { id: toggleItem.id, data: { id: toggleItem.id, rowVersion: toggleItem.rowVersion, isActive: !toggleItem.isActive } },
       {
         onSuccess: () => {
-          toast.success('تم تحديث الحالة بنجاح');
+          notify({ type: 'success', title: 'تم تحديث الحالة بنجاح' });
           setToggleItem(null);
         },
         onError: (err: any) => {
           if (err?.status === 409) {
-            toast.error('تعارض في البيانات. جاري تحديث البيانات...');
+            notify({ type: 'error', title: 'تعارض في البيانات. جاري تحديث البيانات...' });
           } else {
-            toast.error('خطأ في تحديث الحالة');
+            notify({ type: 'error', title: 'خطأ في تحديث الحالة' });
           }
           setToggleItem(null);
         },
@@ -389,65 +393,42 @@ export default function ClassificationsListPage() {
     [editItem, selectedParentId, formIsActive, createMutation, updateMutation, handleCloseDialog],
   );
 
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-[var(--color-surface-container)] rounded w-48" />
-          <div className="h-4 bg-[var(--color-surface-container)] rounded w-full" />
-          <div className="h-4 bg-[var(--color-surface-container)] rounded w-3/4" />
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-6 text-center">
-        <p className="text-[var(--color-error)]">خطأ في تحميل التصنيفات</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-2 text-sm text-[var(--color-primary)] underline"
-        >
-          إعادة المحاولة
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-6 space-y-4" dir="rtl">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[var(--color-on-surface)]">التصنيفات المالية</h1>
-        {canCreate && (
-          <button onClick={handleOpenCreate} className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-on-primary)] px-4 py-2 rounded-lg">
-            <Plus size={16} />
+    <Page
+      title="التصنيفات المالية"
+      loading={isLoading}
+      error={error ? 'خطأ في تحميل التصنيفات' : undefined}
+      onRetry={error ? () => refetch() : undefined}
+      actions={
+        canCreate ? (
+          <Button variant="primary" onClick={handleOpenCreate} icon={<Plus size={16} />}>
             إضافة تصنيف جديد
-          </button>
-        )}
-      </div>
-
-      <FilterBar hasFilters={!!(search || isActiveFilter !== 'All')} onClear={() => { setSearch(''); setIsActiveFilter('All'); }}>
-        <FilterSearch value={search} onChange={setSearch} placeholder="بحث بالكود أو الاسم..." />
-        <FilterSelect
-          value={isActiveFilter}
-          onChange={setIsActiveFilter}
-          options={[
-            { value: 'All', label: 'الكل' },
-            { value: 'active', label: 'نشط' },
-            { value: 'inactive', label: 'معطل' },
-          ]}
-          placeholder="الحالة"
-          label="الحالة"
-        />
-      </FilterBar>
-
+          </Button>
+        ) : undefined
+      }
+      toolbar={
+        <FilterBar hasFilters={!!(search || isActiveFilter !== 'All')} onClear={() => { setSearch(''); setIsActiveFilter('All'); }}>
+          <FilterSearch value={search} onChange={setSearch} placeholder="بحث بالكود أو الاسم..." />
+          <FilterSelect
+            value={isActiveFilter}
+            onChange={setIsActiveFilter}
+            options={[
+              { value: 'All', label: 'الكل' },
+              { value: 'active', label: activeStatusLabels.active },
+              { value: 'inactive', label: activeStatusLabels.disabled },
+            ]}
+            placeholder="الحالة"
+            label="الحالة"
+          />
+        </FilterBar>
+      }
+    >
       {tree.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-[var(--color-on-surface-variant)]">لا توجد تصنيفات بعد</p>
-          <button className="mt-2 text-sm text-[var(--color-primary)] underline">
+          <Button variant="link" className="mt-2">
             إضافة تصنيف رئيسي
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="border border-[var(--color-outline-variant)] rounded-lg overflow-hidden" role="tree">
@@ -472,63 +453,44 @@ export default function ClassificationsListPage() {
         onClose={handleCloseDialog}
         title={editItem ? 'تعديل التصنيف' : 'إضافة تصنيف جديد'}
         footer={
-          <button
-            type="submit"
-            form="classification-form"
-            disabled={createMutation.isPending || updateMutation.isPending}
-            className="bg-[var(--color-primary)] text-[var(--color-on-primary)] px-4 py-2 rounded-lg disabled:opacity-50"
-          >
+          <Button type="submit" form="classification-form" variant="primary" disabled={createMutation.isPending || updateMutation.isPending} loading={createMutation.isPending || updateMutation.isPending}>
             {editItem ? 'حفظ التعديلات' : 'إنشاء'}
-          </button>
+          </Button>
         }
       >
-        <form id="classification-form" onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="code" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">الكود *</label>
-            <input
-              id="code"
-              name="code"
-              type="text"
-              required
-              defaultValue={editItem?.code}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            />
-          </div>
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">الاسم *</label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              defaultValue={editItem?.name}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            />
-          </div>
-          <div>
-            <label htmlFor="parentId" className="block text-sm font-medium text-[var(--color-on-surface-variant)] mb-1">التصنيف الأب</label>
-            <select
-              id="parentId"
-              value={selectedParentId === undefined ? '' : String(selectedParentId)}
-              onChange={(e) => {
-                const val = e.target.value;
-                setSelectedParentId(val ? Number(val) : undefined);
-                setParentIdError('');
-              }}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-container)] bg-[var(--color-surface-container)] text-[var(--color-on-surface)]"
-            >
-              {parentOptions.map((opt) => (
-                <option key={opt.value} value={opt.value} disabled={opt.disabled}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            {parentIdError && <p className="text-xs text-[var(--color-error)] mt-1">{parentIdError}</p>}
-          </div>
+        <form id="classification-form" onSubmit={handleSubmit} className="space-y-4" aria-label="نموذج التصنيف">
+          <Input
+            id="code"
+            name="code"
+            type="text"
+            required
+            defaultValue={editItem?.code}
+            label="الكود"
+          />
+          <Input
+            id="name"
+            name="name"
+            type="text"
+            required
+            defaultValue={editItem?.name}
+            label="الاسم"
+          />
+          <Select
+            id="parentId"
+            label="التصنيف الأب"
+            value={selectedParentId === undefined ? '' : String(selectedParentId)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSelectedParentId(val ? Number(val) : undefined);
+              setParentIdError('');
+            }}
+            options={parentOptions.map((opt) => ({ value: opt.value, label: opt.label, disabled: opt.disabled }))}
+          />
+          {parentIdError && <p className="text-xs text-[var(--color-error)] mt-1">{parentIdError}</p>}
           <Switch
             checked={formIsActive}
             onChange={setFormIsActive}
-            label="نشط"
+            label={activeStatusLabels.active}
           />
         </form>
       </Dialog>
@@ -541,6 +503,6 @@ export default function ClassificationsListPage() {
         title="تأكيد تغيير الحالة"
         loading={toggleMutation.isPending}
       />
-    </div>
+    </Page>
   );
 }

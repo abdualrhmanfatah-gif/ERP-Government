@@ -79,7 +79,7 @@ public class AvailabilityBreakdownTests
     {
         var breakdown = new List<AvailabilityBreakdownDto>
         {
-            new(1, "F1", "Fund One", null, null, null, null, null, null, 100, "ITEM-001", 100000m, 30000m, 20000m, 0m)
+            new(1, "F1", "Fund One", null, null, null, null, null, null, 100, "ITEM-001", 100000m, 30000m, 20000m, 50000m)
         };
 
         _availabilityServiceMock
@@ -134,7 +134,7 @@ public class AvailabilityBreakdownTests
     {
         var breakdown = new List<AvailabilityBreakdownDto>
         {
-            new(1, "F1", "Fund One", null, null, null, null, null, null, 100, "ITEM-001", 50000m, 60000m, 0m, 0m)
+            new(1, "F1", "Fund One", null, null, null, null, null, null, 100, "ITEM-001", 50000m, 60000m, 0m, -10000m)
         };
 
         _availabilityServiceMock

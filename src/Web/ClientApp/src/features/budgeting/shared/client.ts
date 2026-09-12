@@ -1,5 +1,5 @@
 // Budgeting Shared Client — typed API functions + cache key factory
-// Mirrors backend endpoints from specs/010-rebuild-budgeting-module/contracts/budgeting-api.md
+// Matches backend endpoints from specs/046-budget-ledger-redesign
 
 import type {
   BudgetTypeDto,
@@ -8,9 +8,8 @@ import type {
   BudgetClassificationTreeDto,
   BudgetDto,
   BudgetItemDto,
-  AppropriationDto,
-  ItemAvailabilityDto,
-  EncumbranceAvailabilityDto,
+  EncumbranceDto,
+  EncumbranceDetailDto,
   CreateBudgetTypeCommand,
   UpdateBudgetTypeCommand,
   ToggleBudgetTypeActiveCommand,
@@ -83,18 +82,10 @@ export const budgetingKeys = {
     tree: (id: number) => [BUDGETING_KEY, 'budgets', 'tree', id] as const,
   },
 
-  appropriations: {
-    all: [BUDGETING_KEY, 'appropriations'] as const,
-    list: (filters?: Record<string, unknown>) => [BUDGETING_KEY, 'appropriations', 'list', filters] as const,
-    detail: (id: number) => [BUDGETING_KEY, 'appropriations', 'detail', id] as const,
-    availability: (budgetItemId: number) => [BUDGETING_KEY, 'appropriations', 'availability', budgetItemId] as const,
-  },
-
   encumbrances: {
     all: [BUDGETING_KEY, 'encumbrances'] as const,
     list: (filters?: Record<string, unknown>) => [BUDGETING_KEY, 'encumbrances', 'list', filters] as const,
     detail: (id: number) => [BUDGETING_KEY, 'encumbrances', 'detail', id] as const,
-    availability: (appropriationId: number) => [BUDGETING_KEY, 'encumbrances', 'availability', appropriationId] as const,
   },
 };
 
@@ -175,22 +166,12 @@ export const fundsClient = {
     );
   },
 
-  async activate(id: number, rowVersion: string): Promise<void> {
+  async toggleActive(id: number, rowVersion: string): Promise<void> {
     return handleResponse(
-      await fetch(`/api/Funds/${id}/activate`, {
-        method: 'POST',
+      await fetch(`/api/Funds/${id}/toggle-active`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, rowVersion }),
-      }),
-    );
-  },
-
-  async deactivate(id: number, rowVersion: string): Promise<void> {
-    return handleResponse(
-      await fetch(`/api/Funds/${id}/deactivate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, rowVersion }),
+        body: JSON.stringify({ rowVersion }),
       }),
     );
   },
@@ -272,7 +253,7 @@ export const budgetsClient = {
   async transition(id: number, action: string, data: Record<string, unknown>): Promise<void> {
     return handleResponse(
       await fetch(`/api/Budgets/${id}/${action}`, {
-        method: 'POST',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...data, id }),
       }),
@@ -293,9 +274,9 @@ export const budgetsClient = {
     );
   },
 
-  async updateItem(itemId: number, data: Record<string, unknown>): Promise<void> {
+  async updateItem(budgetId: number, itemId: number, data: Record<string, unknown>): Promise<void> {
     return handleResponse(
-      await fetch(`/api/Budgets/items/${itemId}`, {
+      await fetch(`/api/Budgets/${budgetId}/items/${itemId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...data, id: itemId }),
@@ -303,68 +284,12 @@ export const budgetsClient = {
     );
   },
 
-  async deleteItem(itemId: number, rowVersion: string): Promise<void> {
+  async deleteItem(budgetId: number, itemId: number, rowVersion: string): Promise<void> {
     return handleResponse(
-      await fetch(`/api/Budgets/items/${itemId}`, {
+      await fetch(`/api/Budgets/${budgetId}/items/${itemId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rowVersion }),
-      }),
-    );
-  },
-};
-
-// ─── Appropriations Client ────────────────────────────────────────────────────
-
-export const appropriationsClient = {
-  async list(filters?: Record<string, unknown>): Promise<AppropriationDto[]> {
-    return handleResponse(await fetch(`/api/Appropriations${buildQuery(filters ?? {})}`));
-  },
-
-  async getById(id: number): Promise<AppropriationDto> {
-    return handleResponse(await fetch(`/api/Appropriations/${id}`));
-  },
-
-  async getAvailability(budgetItemId: number): Promise<ItemAvailabilityDto> {
-    return handleResponse(await fetch(`/api/Appropriations/availability?budgetItemId=${budgetItemId}`));
-  },
-
-  async create(data: Record<string, unknown>): Promise<{ id: number }> {
-    return handleResponse(
-      await fetch('/api/Appropriations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      }),
-    );
-  },
-
-  async update(id: number, data: Record<string, unknown>): Promise<void> {
-    return handleResponse(
-      await fetch(`/api/Appropriations/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, id }),
-      }),
-    );
-  },
-
-  async delete(id: number, rowVersion: string): Promise<void> {
-    return handleResponse(
-      await fetch(`/api/Appropriations/${id}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rowVersion }),
-      }),
-    );
-  },
-
-  async transition(id: number, action: string, data: Record<string, unknown>): Promise<void> {
-    return handleResponse(
-      await fetch(`/api/Appropriations/${id}/${action}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, id }),
       }),
     );
   },
@@ -373,7 +298,21 @@ export const appropriationsClient = {
 // ─── Encumbrances Client ──────────────────────────────────────────────────────
 
 export const encumbrancesClient = {
-  async getAvailability(appropriationId: number): Promise<EncumbranceAvailabilityDto> {
-    return handleResponse(await fetch(`/api/Encumbrances/availability?appropriationId=${appropriationId}`));
+  async list(filters?: Record<string, unknown>): Promise<EncumbranceDto[]> {
+    return handleResponse(await fetch(`/api/Encumbrances${buildQuery(filters ?? {})}`));
+  },
+
+  async getById(id: number): Promise<EncumbranceDetailDto> {
+    return handleResponse(await fetch(`/api/Encumbrances/${id}`));
+  },
+
+  async create(data: Record<string, unknown>): Promise<{ id: number }> {
+    return handleResponse(
+      await fetch('/api/Encumbrances', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      }),
+    );
   },
 };

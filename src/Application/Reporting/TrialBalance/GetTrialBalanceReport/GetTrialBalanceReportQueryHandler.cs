@@ -39,32 +39,21 @@ internal class GetTrialBalanceReportQueryHandler(IApplicationDbContext dbContext
             .Where(l => l.JournalEntry.FiscalYearId == request.FiscalYearId
                      && l.JournalEntry.EntryStatus == EntryStatus.Posted);
 
-        if (request.FundId.HasValue)
-            query = query.Where(l => l.FundId == request.FundId.Value);
-
-        if (request.ProjectId.HasValue)
-            query = query.Where(l => l.ProjectId == request.ProjectId.Value);
-
         var allLines = await query.ToListAsync(cancellationToken);
 
         // Lines within the reporting period (up to periodEndDate)
         var periodLines = allLines
             .Where(l => l.JournalEntry.DocumentDate <= periodEndDate);
 
-        // Opening balance: all posted lines for these accounts across ALL prior fiscal years
+        // Opening balance: posted Opening entries for these accounts in the SAME fiscal year
         var accountIdSet = allLines.Select(l => l.AccountId).Distinct().ToList();
         var openingQuery = dbContext.JournalEntryLines
             .AsNoTracking()
             .Include(l => l.JournalEntry)
             .Where(l => accountIdSet.Contains(l.AccountId)
                      && l.JournalEntry.EntryStatus == EntryStatus.Posted
-                     && l.JournalEntry.DocumentDate < yearStartDate);
-
-        if (request.FundId.HasValue)
-            openingQuery = openingQuery.Where(l => l.FundId == request.FundId.Value);
-
-        if (request.ProjectId.HasValue)
-            openingQuery = openingQuery.Where(l => l.ProjectId == request.ProjectId.Value);
+                     && l.JournalEntry.EntryType == MoveEntryType.Opening
+                     && l.JournalEntry.FiscalYearId == request.FiscalYearId);
 
         var openingLines = await openingQuery.ToListAsync(cancellationToken);
 
@@ -76,9 +65,15 @@ internal class GetTrialBalanceReportQueryHandler(IApplicationDbContext dbContext
                 var account = g.First().Account;
                 var groupType = account.AccountGroup?.Type ?? AccountGroupType.Asset;
 
-                var opening = openingLines
+                var openingDebit = openingLines
                     .Where(l => l.AccountId == accountId)
-                    .Sum(l => l.Debit - l.Credit);
+                    .Sum(l => l.Debit);
+
+                var openingCredit = openingLines
+                    .Where(l => l.AccountId == accountId)
+                    .Sum(l => l.Credit);
+
+                var opening = openingDebit - openingCredit;
 
                 var debitTotal = periodLines
                     .Where(l => l.AccountId == accountId)
@@ -97,6 +92,8 @@ internal class GetTrialBalanceReportQueryHandler(IApplicationDbContext dbContext
                     AccountName = account.Name,
                     AccountType = groupType.ToString(),
                     OpeningBalance = opening,
+                    OpeningDebit = openingDebit,
+                    OpeningCredit = openingCredit,
                     DebitTotal = debitTotal,
                     CreditTotal = creditTotal,
                     ClosingBalance = closing

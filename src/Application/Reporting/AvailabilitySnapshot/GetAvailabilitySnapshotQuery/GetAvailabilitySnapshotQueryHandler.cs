@@ -15,56 +15,79 @@ internal class GetAvailabilitySnapshotQueryHandler(IApplicationDbContext dbConte
             .AsNoTracking()
             .FirstAsync(fy => fy.Id == request.FiscalYearId, cancellationToken);
 
-        var query = dbContext.Appropriations
+        var budgetIds = await dbContext.Budgets
+            .Where(b => b.FiscalYearId == request.FiscalYearId && b.Status != Domain.Budgeting.Enums.BudgetStatus.Cancelled)
+            .Select(b => b.Id)
+            .ToListAsync(cancellationToken);
+
+        var budgetItemsQuery = dbContext.BudgetItems
             .AsNoTracking()
-            .Include(a => a.BudgetItem)
-            .ThenInclude(bi => bi!.Budget)
-            .Where(a => a.BudgetItem != null
-                     && a.BudgetItem.Budget != null
-                     && a.BudgetItem.Budget.FiscalYearId == request.FiscalYearId
-                     && a.Status != Domain.Budgeting.Enums.AppropriationStatus.Cancelled);
+            .Include(bi => bi.Budget)
+            .Where(bi => budgetIds.Contains(bi.BudgetId));
 
         if (request.FundId.HasValue)
-            query = query.Where(a => a.BudgetItem!.Budget!.FundId == request.FundId.Value);
+            budgetItemsQuery = budgetItemsQuery.Where(bi => bi.Budget!.FundId == request.FundId.Value);
 
         if (request.BudgetItemId.HasValue)
-            query = query.Where(a => a.BudgetItemId == request.BudgetItemId.Value);
+            budgetItemsQuery = budgetItemsQuery.Where(bi => bi.Id == request.BudgetItemId.Value);
 
-        var appropriations = await query.ToListAsync(cancellationToken);
+        var budgetItems = await budgetItemsQuery.ToListAsync(cancellationToken);
+        var budgetItemIds = budgetItems.Select(bi => bi.Id).Distinct().ToList();
 
-        var budgetItemIds = appropriations.Select(a => a.BudgetItemId).Distinct().ToList();
-
-        var encumbrances = await dbContext.Encumbrances
+        // Revised budget from BudgetTransactions
+        var revisedBudgets = await dbContext.BudgetTransactions
             .AsNoTracking()
-            .Include(e => e.Appropriation)
-            .Where(e => budgetItemIds.Contains(e.Appropriation.BudgetItemId)
-                     && e.Status != Domain.Budgeting.Enums.EncumbranceStatus.Cancelled)
-            .ToListAsync(cancellationToken);
+            .Where(t => budgetItemIds.Contains(t.BudgetItemAllocation.BudgetItemId)
+                && t.Status == Domain.Budgeting.Enums.BudgetTransactionStatus.Posted)
+            .GroupBy(t => t.BudgetItemAllocation.BudgetItemId)
+            .Select(g => new
+            {
+                BudgetItemId = g.Key,
+                RevisedBudget = g.Sum(t => t.Direction == Domain.Budgeting.Enums.TransactionDirection.Increase ? t.Amount : -t.Amount)
+            })
+            .ToDictionaryAsync(x => x.BudgetItemId, x => x.RevisedBudget, cancellationToken);
 
-        var paymentOrders = await dbContext.PaymentOrders
+        // Outstanding encumbrances
+        var encumberedAmounts = await dbContext.EncumbranceLines
             .AsNoTracking()
-            .Where(po => budgetItemIds.Contains(po.AppropriationId)
-                      && po.Status != Domain.Payments.Enums.PaymentOrderStatus.Cancelled)
-            .ToListAsync(cancellationToken);
+            .Where(l => budgetItemIds.Contains(l.BudgetItemId)
+                && l.Encumbrance.Status != Domain.Budgeting.Enums.EncumbranceStatus.Cancelled)
+            .GroupBy(l => l.BudgetItemId)
+            .Select(g => new
+            {
+                BudgetItemId = g.Key,
+                Encumbered = g.Sum(l => l.Amount - l.LiquidatedAmount - l.CancelledAmount)
+            })
+            .ToDictionaryAsync(x => x.BudgetItemId, x => x.Encumbered, cancellationToken);
+
+        // Actual expenditure from PaymentOrders (via BudgetItemAllocation)
+        var paidAmounts = await dbContext.PaymentOrders
+            .AsNoTracking()
+            .Join(dbContext.BudgetItemAllocations,
+                po => po.BudgetItemAllocationId,
+                alloc => alloc.Id,
+                (po, alloc) => new { po, alloc.BudgetItemId })
+            .Where(x => budgetItemIds.Contains(x.BudgetItemId)
+                && x.po.Status != Domain.Payments.Enums.PaymentOrderStatus.Cancelled)
+            .GroupBy(x => x.BudgetItemId)
+            .Select(g => new
+            {
+                BudgetItemId = g.Key,
+                Paid = g.Sum(x => x.po.AmountGross)
+            })
+            .ToDictionaryAsync(x => x.BudgetItemId, x => x.Paid, cancellationToken);
 
         var funds = await dbContext.Funds
             .AsNoTracking()
             .ToDictionaryAsync(f => f.Id, f => (f.FundNumber, f.FundName), cancellationToken);
 
-        var breakdown = appropriations
-            .GroupBy(a => new { a.BudgetItemId, FundId = a.BudgetItem!.Budget!.FundId })
-            .Select(g =>
+        var breakdown = budgetItems
+            .Select(bi =>
             {
-                var budgetItemId = g.Key.BudgetItemId;
-                var fundId = g.Key.FundId;
-                var appropriated = g.Sum(a => a.Amount);
-                var encumbered = encumbrances
-                    .Where(e => e.Appropriation.BudgetItemId == budgetItemId)
-                    .Sum(e => e.Amount);
-                var paid = paymentOrders
-                    .Where(po => po.AppropriationId == budgetItemId)
-                    .Sum(po => po.AmountGross);
-
+                var fundId = bi.Budget!.FundId;
+                var revisedBudget = revisedBudgets.GetValueOrDefault(bi.Id);
+                var encumbered = encumberedAmounts.GetValueOrDefault(bi.Id);
+                var paid = paidAmounts.GetValueOrDefault(bi.Id);
                 var fund = funds.GetValueOrDefault(fundId);
 
                 return new AvailabilitySnapshotLineDto
@@ -72,16 +95,16 @@ internal class GetAvailabilitySnapshotQueryHandler(IApplicationDbContext dbConte
                     FundId = fundId,
                     FundCode = fund.FundNumber,
                     FundName = fund.FundName,
-                    AppropriationAmount = appropriated,
+                    AppropriationAmount = revisedBudget,
                     EncumberedAmount = encumbered,
                     PaidAmount = paid,
-                    AvailableAmount = appropriated - encumbered - paid
+                    AvailableAmount = revisedBudget - encumbered - paid
                 };
             })
             .OrderBy(l => l.FundCode)
             .ToList();
 
-        var budgetItem = appropriations.FirstOrDefault()?.BudgetItem;
+        var budgetItem = budgetItems.FirstOrDefault();
 
         return new AvailabilitySnapshotDto
         {

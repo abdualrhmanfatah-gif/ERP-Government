@@ -1,6 +1,7 @@
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Parties.Common;
 using ERP_Government.Domain.Budgeting.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP_Government.Application.Budgeting.Commands.Budgets;
 
@@ -32,6 +33,15 @@ public class SuspendBudgetCommandHandler(
 
         if (!request.RowVersion.SequenceEqual(entity.RowVersion))
             return Result.Failure(["Concurrency conflict. The record has been modified by another user."]);
+
+        var hasActiveEncumbrances = await context.EncumbranceLines
+            .AnyAsync(x => x.BudgetItem.BudgetId == entity.Id
+                && (x.Encumbrance.Status == EncumbranceStatus.Active
+                    || x.Encumbrance.Status == EncumbranceStatus.PartiallyReleased
+                    || x.Encumbrance.Status == EncumbranceStatus.PartiallyLiquidated), cancellationToken);
+
+        if (hasActiveEncumbrances)
+            return Result.Failure(["Cannot suspend budget with active encumbrances. Cancel or reverse them first."]);
 
         entity.Status = BudgetStatus.Suspended;
 

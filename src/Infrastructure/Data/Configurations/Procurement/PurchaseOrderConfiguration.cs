@@ -13,45 +13,45 @@ public class PurchaseOrderConfiguration : IEntityTypeConfiguration<PurchaseOrder
         builder.HasKey(e => e.Id);
 
         builder.Property(e => e.PONumber)
-            .HasMaxLength(50)
+            .HasMaxLength(20)
+            .IsRequired();
+
+        builder.Property(e => e.SupplierPartyId)
             .IsRequired();
 
         builder.Property(e => e.CurrencyCode)
-            .HasMaxLength(10);
+            .HasMaxLength(3);
 
         builder.Property(e => e.ExchangeRate)
             .HasColumnType("decimal(18,6)");
 
         builder.Property(e => e.SubTotal)
-            .HasColumnType("decimal(23,6)");
+            .HasColumnType("decimal(23,2)");
 
         builder.Property(e => e.DiscountAmount)
-            .HasColumnType("decimal(23,6)");
+            .HasColumnType("decimal(23,2)");
 
         builder.Property(e => e.TaxAmount)
-            .HasColumnType("decimal(23,6)");
+            .HasColumnType("decimal(23,2)");
 
         builder.Property(e => e.ShippingCost)
-            .HasColumnType("decimal(23,6)");
+            .HasColumnType("decimal(23,2)");
 
         builder.Property(e => e.OtherCharges)
-            .HasColumnType("decimal(23,6)");
+            .HasColumnType("decimal(23,2)");
 
         builder.Property(e => e.GrandTotal)
-            .HasColumnType("decimal(23,6)");
+            .HasColumnType("decimal(23,2)");
 
         builder.Property(e => e.PaymentTerms)
-            .HasMaxLength(500);
+            .HasMaxLength(2000);
 
         builder.Property(e => e.DeliveryTerms)
-            .HasMaxLength(500);
+            .HasMaxLength(2000);
 
         builder.Property(e => e.Status)
-            .HasMaxLength(50)
+            .HasConversion<int>()
             .IsRequired();
-
-        builder.Property(e => e.RejectionReason)
-            .HasMaxLength(500);
 
         builder.Property(e => e.Notes)
             .HasMaxLength(2000);
@@ -62,11 +62,19 @@ public class PurchaseOrderConfiguration : IEntityTypeConfiguration<PurchaseOrder
         builder.HasIndex(e => e.PONumber)
             .IsUnique();
 
-        builder.HasIndex(e => e.SupplierId);
-        builder.HasIndex(e => e.SupplierPartyId);
+        builder.HasOne(e => e.PurchaseRequest)
+            .WithMany()
+            .HasForeignKey(e => e.PurchaseRequestId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.Quotation)
+            .WithMany()
+            .HasForeignKey(e => e.QuotationId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasIndex(e => e.PurchaseRequestId);
         builder.HasIndex(e => e.QuotationId);
+        builder.HasIndex(e => e.SupplierPartyId);
         builder.HasIndex(e => e.Status);
-        builder.HasIndex(e => e.PODate);
     }
 }

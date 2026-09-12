@@ -5,7 +5,7 @@ namespace ERP_Government.Domain.Budgeting.Entities;
 public class BudgetItemMonthlyPlan : BaseAuditableEntity
 {
     public int BudgetItemId { get; set; }
-    public int Month { get; set; }
+    public int FiscalPeriodId { get; set; }
     public decimal PlannedAmount { get; set; }
     public byte[] RowVersion { get; set; } = [];
 

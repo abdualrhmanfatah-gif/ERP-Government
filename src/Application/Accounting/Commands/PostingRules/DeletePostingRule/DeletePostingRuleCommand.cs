@@ -23,15 +23,7 @@ public class DeletePostingRuleCommandHandler(
         if (postingRule is null)
             return Result.Failure(["Posting rule not found."]);
 
-        // Block deletion if pending or processing events exist
-        var hasPendingEvents = await context.AccountingEvents
-            .AnyAsync(e =>
-                e.EventType.ToString() == postingRule.EventType &&
-                (e.Status == EventStatus.Pending || e.Status == EventStatus.Posted),
-                cancellationToken);
-
-        if (hasPendingEvents)
-            return Result.Failure(["Cannot delete PostingRule with pending AccountingEvents. Process or reset events first."]);
+        // Pending-events guard removed (DEP-026) — AccountingEvents staging no longer exists
 
         context.PostingRules.Remove(postingRule);
         await context.SaveChangesAsync(cancellationToken);

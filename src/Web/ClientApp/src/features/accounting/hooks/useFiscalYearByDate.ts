@@ -1,23 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-
-interface FiscalYearPeriodResult {
-  fiscalYearId: number;
-  fiscalYearCode?: string;
-  fiscalYearName?: string;
-  fiscalPeriodId: number;
-  fiscalPeriodName?: string;
-}
+import { fiscalYearsClient } from '../../financial-settings/shared/client';
 
 export function useFiscalYearByDate(date: string) {
   return useQuery({
     queryKey: ['fiscalYear', 'by-date', date],
-    queryFn: async (): Promise<FiscalYearPeriodResult> => {
-      const res = await fetch(`/api/FiscalYears/by-date?date=${date}`, {
-        headers: { Accept: 'application/json' },
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
-    },
+    queryFn: () => fiscalYearsClient.byDate(date),
     enabled: !!date,
     staleTime: 60_000,
   });

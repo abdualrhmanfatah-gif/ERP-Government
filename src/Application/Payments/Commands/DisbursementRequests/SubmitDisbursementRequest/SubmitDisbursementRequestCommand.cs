@@ -11,16 +11,12 @@ public class SubmitDisbursementRequestCommand : IRequest<Result>
 }
 
 public class SubmitDisbursementRequestCommandHandler(
-    IApplicationDbContext context,
-    IUser user) : IRequestHandler<SubmitDisbursementRequestCommand, Result>
+    IApplicationDbContext context) : IRequestHandler<SubmitDisbursementRequestCommand, Result>
 {
     public async Task<Result> Handle(
         SubmitDisbursementRequestCommand request,
         CancellationToken cancellationToken)
     {
-        if (user.Id is not int userId)
-            return Result.Failure(new[] { "User identity is required for this operation." });
-
         var entity = await context.DisbursementRequests
             .FindAsync(request.Id, cancellationToken);
 
@@ -30,9 +26,10 @@ public class SubmitDisbursementRequestCommandHandler(
         if (entity.Status != DisbursementRequestStatus.Draft)
             return Result.Failure(["Only draft disbursement requests can be submitted."]);
 
+        // ADR-001 D-3: pure status transition — no availability check at request level
         entity.Status = DisbursementRequestStatus.PendingApproval;
         entity.LastModified = DateTimeOffset.UtcNow;
-        entity.LastModifiedBy = userId.ToString();
+        entity.LastModifiedBy = entity.RequestedById.ToString();
 
         await context.SaveChangesAsync(cancellationToken);
 

@@ -1,4 +1,5 @@
 ﻿using ERP_Government.Application.Common.Security;
+using ERP_Government.Application.Parties.Common;
 using ERP_Government.Domain.Accounting.Enums;
 
 namespace ERP_Government.Application.Accounting.Commands.RecurringEntries.CancelRecurringEntry;
@@ -12,25 +13,41 @@ public class CancelRecurringEntryCommand : IRequest<Result>
 }
 
 public class CancelRecurringEntryCommandHandler(
-    IApplicationDbContext context) : IRequestHandler<CancelRecurringEntryCommand, Result>
+    IApplicationDbContext context,
+    IUser currentUser,
+    IDocumentStatusLogger statusLogger) : IRequestHandler<CancelRecurringEntryCommand, Result>
 {
     public async Task<Result> Handle(
         CancelRecurringEntryCommand request,
         CancellationToken cancellationToken)
     {
+        if (currentUser.Id is not int userId)
+            return Result.Failure(["User identity is required for this operation."]);
+
         var entity = await context.RecurringEntries
             .FindAsync(request.Id, cancellationToken);
 
         if (entity is null)
             return Result.Failure(["Recurring entry not found."]);
 
-        // Validate lifecycle: Draft, Active, Paused can be cancelled
         if (entity.Status == RecurringEntryStatus.Completed)
             return Result.Failure(["Completed recurring entries cannot be cancelled."]);
 
-        // Update status
-        entity.Status = RecurringEntryStatus.Completed; // Use Completed as terminal state
+        if (entity.Status == RecurringEntryStatus.Cancelled)
+            return Result.Failure(["Cancelled recurring entries cannot be cancelled."]);
+
+        var previousStatus = entity.Status;
+        entity.Status = RecurringEntryStatus.Cancelled;
         entity.IsActive = false;
+
+        await statusLogger.LogAsync(
+            "RecurringEntry",
+            entity.Id,
+            previousStatus.ToString(),
+            RecurringEntryStatus.Cancelled.ToString(),
+            userId,
+            request.Reason,
+            cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
 

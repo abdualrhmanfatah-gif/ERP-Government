@@ -33,7 +33,7 @@ export function Select({
     <div className="mb-0">
       <label
         htmlFor={id}
-        className="mb-1 block text-xs font-medium text-[var(--color-on-surface-variant)]"
+        className="mb-1 block text-label-md text-[var(--color-on-surface)]"
       >
         {label}
       </label>

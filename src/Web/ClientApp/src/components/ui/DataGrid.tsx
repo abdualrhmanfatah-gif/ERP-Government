@@ -15,7 +15,7 @@ import { ErrorState } from './ErrorState';
 import { Pagination } from './Pagination';
 import { MobileCard, MobileCardField } from './MobileCard';
 
-interface DataGridColumn<T> {
+export interface DataGridColumn<T> {
   id?: string;
   key?: string;
   header: string;
@@ -266,7 +266,7 @@ export function DataGrid<T>({
 
       {/* Mobile card view */}
       <div className="md:hidden flex flex-col gap-3">
-        {rows.map((row, idx) => {
+        {rows.map((row) => {
           const rowKeyValue = rowKey(row.original as T);
           const isSelected = selectedRowKey !== undefined && selectedRowKey === rowKeyValue;
           return (

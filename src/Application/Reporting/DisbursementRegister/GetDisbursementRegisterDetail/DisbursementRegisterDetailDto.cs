@@ -11,6 +11,9 @@ public record DisbursementRegisterDetailDto
     public string FundCode { get; init; } = string.Empty;
     public string? ApproverName { get; init; }
     public DateOnly? PaidAt { get; init; }
+    public int? AccrualJournalEntryId { get; init; }
+    public string? AccrualEntryNumber { get; init; }
+    public string? AccrualEntryStatus { get; init; }
     public List<PaymentDetailDto> Payments { get; init; } = [];
 }
 

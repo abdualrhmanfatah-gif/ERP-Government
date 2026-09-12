@@ -1,18 +1,11 @@
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { DataGrid } from '@/components/ui/DataGrid';
-import { Button } from '@/components/ui/Button';
+import { Page, DataGrid, Button } from '@/components/ui';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useEmployees, useDeleteEmployee } from '../hooks';
+import { employeeStatusLabels } from '../types';
 import { useState } from 'react';
-
-const statusLabels: Record<string, string> = {
-  Active: 'نشط',
-  Suspended: 'موقوف',
-  Terminated: 'منتهي',
-};
 
 export function EmployeesListPage() {
   const navigate = useNavigate();
@@ -31,16 +24,15 @@ export function EmployeesListPage() {
   };
 
   return (
-    <div>
-      <PageHeader
-        title="إدارة الموظفين"
-        description="إضافة وتعديل وحذف الموظفين"
-        actions={
-          <Button variant="primary" size="sm" icon={<Plus size={16} />} onClick={() => navigate('/organization/employees/create')}>
-            موظف جديد
-          </Button>
-        }
-      />
+    <Page
+      title="إدارة الموظفين"
+      description="إضافة وتعديل وحذف الموظفين"
+      actions={
+        <Button variant="primary" size="sm" icon={<Plus size={16} />} onClick={() => navigate('/organization/employees/create')}>
+          موظف جديد
+        </Button>
+      }
+    >
       <DataGrid
         columns={[
           { key: 'employeeNumber', header: 'رقم الموظف', width: 130, render: (r) => <span dir="ltr">{r.employeeNumber}</span> },
@@ -49,7 +41,7 @@ export function EmployeesListPage() {
           { key: 'jobTitle', header: 'المسمى الوظيفي', width: 150 },
           { key: 'employmentStatus', header: 'الحالة', width: 100, render: (r) => (
             <StatusBadge variant={r.isActive ? 'active' : 'draft'}>
-              {statusLabels[r.employmentStatus] ?? r.employmentStatus}
+              {employeeStatusLabels[r.employmentStatus] ?? r.employmentStatus}
             </StatusBadge>
           )},
           { key: 'actions', header: 'الإجراءات', width: 100, render: (r) => (
@@ -80,6 +72,6 @@ export function EmployeesListPage() {
         confirmLabel="حذف"
         loading={deleteMutation.isPending}
       />
-    </div>
+    </Page>
   );
 }

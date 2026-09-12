@@ -1,9 +1,12 @@
+using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Reporting.BudgetExecution.GetBudgetExecutionDetail;
 using ERP_Government.Application.Reporting.BudgetExecution.GetBudgetExecutionReport;
+using ERP_Government.Application.Reporting.Common;
 using ERP_Government.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP_Government.Web.Endpoints.Reporting;
 
@@ -43,42 +46,43 @@ public class BudgetExecutionReports : IEndpointGroup
     [EndpointSummary("Export budget execution report to Excel or PDF")]
     public static async Task<IResult> ExportBudgetExecutionReport(
         ISender sender,
+        [FromServices] IApplicationDbContext context,
         [FromQuery] string format,
         [AsParameters] GetBudgetExecutionReportQuery query)
     {
         var result = await sender.Send(query);
+        var currencyCode = await context.Currencies
+            .Where(c => c.IsBase)
+            .Select(c => c.Code)
+            .FirstOrDefaultAsync();
+
+        // RC-4: exporting data that includes the currently open fiscal period is partial data.
+        var isPartialData = await context.FiscalYears
+            .AnyAsync(fy => fy.Id == query.FiscalYearId
+                         && fy.Status == Domain.FinancialSettings.Enums.FiscalYearStatus.Open);
+
         var stream = new MemoryStream();
-        var exporter = format?.ToLower() == "pdf"
+        var isPdf = format?.ToLower() == "pdf";
+        var exporter = isPdf
             ? (ERP_Government.Application.Accounting.Reports.Common.IReportExporter)new ERP_Government.Infrastructure.Services.PdfReportExporter()
             : new ERP_Government.Infrastructure.Services.ExcelReportExporter();
 
-        var reportResult = new ERP_Government.Application.Accounting.Reports.Common.ReportResult
-        {
-            Currency = "SAR",
-            GeneratedAt = DateTimeOffset.UtcNow,
-            Sections =
-            [
-                new ERP_Government.Application.Accounting.Reports.Common.ReportSection
-                {
-                    Title = "Budget Execution",
-                    Lines = result.Lines.Select(l => new ERP_Government.Application.Accounting.Reports.Common.ReportLine
-                    {
-                        AccountCode = l.ItemCode,
-                        AccountName = $"{l.ItemName} - {l.FundNumber}",
-                        Debit = l.PaidAmount,
-                        Credit = 0,
-                        Balance = l.AvailableAmount
-                    }).ToList(),
-                    Total = result.Totals.AvailableAmount
-                }
-            ]
-        };
+        var reportResult = result.ToReportResult(currencyCode, isPartialData);
 
-        await exporter.ExportExcelAsync(reportResult, "Budget Execution", stream);
+        if (isPdf)
+        {
+            await exporter.ExportPdfAsync(reportResult, "تقرير تنفيذ الموازنة", stream);
+        }
+        else
+        {
+            await exporter.ExportExcelAsync(reportResult, "تقرير تنفيذ الموازنة", stream);
+        }
         stream.Position = 0;
 
-        var extension = format?.ToLower() == "pdf" ? "pdf" : "xlsx";
-        var contentType = format?.ToLower() == "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        var extension = isPdf ? "pdf" : "xlsx";
+        var contentType = isPdf
+            ? "application/pdf"
+            : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
         return Results.File(stream, contentType, $"BudgetExecution-{DateTime.Now:yyyyMMdd}.{extension}");
     }
 }

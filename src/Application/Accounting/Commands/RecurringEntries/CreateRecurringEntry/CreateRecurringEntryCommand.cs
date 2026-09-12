@@ -1,4 +1,5 @@
 ﻿using ERP_Government.Application.Common.Security;
+using ERP_Government.Application.FinancialSettings.Common.Services;
 using ERP_Government.Domain.Accounting.Entities;
 using ERP_Government.Domain.Accounting.Enums;
 
@@ -22,7 +23,8 @@ public class CreateRecurringEntryCommand : IRequest<Result>
 }
 
 public class CreateRecurringEntryCommandHandler(
-    IApplicationDbContext context) : IRequestHandler<CreateRecurringEntryCommand, Result>
+    IApplicationDbContext context,
+    IDocumentSequenceService sequenceService) : IRequestHandler<CreateRecurringEntryCommand, Result>
 {
     public async Task<Result> Handle(
         CreateRecurringEntryCommand request,
@@ -43,9 +45,11 @@ public class CreateRecurringEntryCommandHandler(
         if (journal is null)
             return Result.Failure(["Journal not found."]);
 
+        var entryNumber = await sequenceService.GenerateNextNumberAsync("RecurringEntry", cancellationToken);
+
         var entity = new RecurringEntry
         {
-            EntryNumber = $"RE-{DateTime.UtcNow:yyyyMMddHHmmss}",
+            EntryNumber = entryNumber,
             TemplateId = request.TemplateId,
             JournalId = request.JournalId,
             Name = request.Name,
@@ -86,5 +90,18 @@ public class CreateRecurringEntryCommandValidator : AbstractValidator<CreateRecu
 
         RuleFor(x => x.StartDate)
             .NotEmpty().WithMessage("Start date is required.");
+
+        When(x => !x.TemplateId.HasValue, () =>
+        {
+            RuleFor(x => x.Amount)
+                .NotNull().WithMessage("Amount is required when no template is specified.");
+        });
+
+        When(x => x.EndDate.HasValue, () =>
+        {
+            RuleFor(x => x.EndDate)
+                .GreaterThanOrEqualTo(x => x.StartDate)
+                .WithMessage("End date must not be before start date.");
+        });
     }
 }

@@ -1,5 +1,5 @@
-// Budgeting Shared Types — Single source of truth for all 5 frontend specs
-// Matches backend DTO shapes from specs/010-rebuild-budgeting-module/contracts/budgeting-dtos.md
+// Budgeting Shared Types — Single source of truth for all budgeting frontend specs
+// Matches backend DTOs from specs/046-budget-ledger-redesign
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
@@ -21,51 +21,34 @@ export enum FundCategory {
 }
 
 export enum BudgetStatus {
-  Draft = 0,
-  Submitted = 1,
-  Approved = 2,
-  Active = 3,
-  Suspended = 4,
-  Closed = 5,
-  Cancelled = 6,
-}
-
-export enum AppropriationType {
-  Original = 0,
-  Supplement = 1,
-  Reduction = 2,
-  Adjustment = 3,
-}
-
-export enum AppropriationStatus {
-  Draft = 0,
-  PendingApproval = 1,
-  Approved = 2,
-  Active = 3,
-  Suspended = 4,
-  Closed = 5,
-  Cancelled = 6,
+  Draft = 'Draft',
+  Submitted = 'Submitted',
+  Approved = 'Approved',
+  Active = 'Active',
+  Suspended = 'Suspended',
+  Closed = 'Closed',
+  Cancelled = 'Cancelled',
 }
 
 export enum EncumbranceType {
-  Commitment = 0,
-  Obligational = 1,
-  Contractual = 2,
-  Advance = 3,
-  Adjustment = 4,
+  Commitment = 'Commitment',
+  Obligational = 'Obligational',
+  Contractual = 'Contractual',
+  Advance = 'Advance',
+  Adjustment = 'Adjustment',
 }
 
 export enum EncumbranceStatus {
-  Draft = 0,
-  PendingApproval = 1,
-  Approved = 2,
-  Active = 3,
-  PartialReleased = 4,
-  PartialLiquidated = 5,
-  FullyLiquidated = 6,
-  Closed = 7,
-  Cancelled = 8,
-  Reversed = 9,
+  Draft = 'Draft',
+  PendingApproval = 'PendingApproval',
+  Approved = 'Approved',
+  Active = 'Active',
+  PartiallyReleased = 'PartiallyReleased',
+  PartiallyLiquidated = 'PartiallyLiquidated',
+  FullyLiquidated = 'FullyLiquidated',
+  Closed = 'Closed',
+  Cancelled = 'Cancelled',
+  Reversed = 'Reversed',
 }
 
 // ─── Arabic Label Maps ────────────────────────────────────────────────────────
@@ -76,42 +59,25 @@ export const budgetControlMethodLabels: Record<BudgetControlMethod, string> = {
   [BudgetControlMethod.Blocking]: 'حجب',
 };
 
-export const fundTypeLabels: Record<FundType, string> = {
-  [FundType.General]: 'عام',
-  [FundType.Special]: 'خاص',
-  [FundType.Project]: 'مشروع',
+export const fundTypeLabels: Record<string, string> = {
+  General: 'عام',
+  Special: 'خاص',
+  Project: 'مشروع',
 };
 
-export const fundCategoryLabels: Record<FundCategory, string> = {
-  [FundCategory.Operating]: 'تشغيلي',
-  [FundCategory.Capital]: 'رأسمالي',
+export const fundCategoryLabels: Record<string, string> = {
+  Operating: 'تشغيلي',
+  Capital: 'رأسمالي',
 };
 
 export const budgetStatusLabels: Record<BudgetStatus, string> = {
   [BudgetStatus.Draft]: 'مسودة',
-  [BudgetStatus.Submitted]: 'مقدم',
+  [BudgetStatus.Submitted]: 'مرسل للمراجعة',
   [BudgetStatus.Approved]: 'معتمد',
   [BudgetStatus.Active]: 'نشط',
   [BudgetStatus.Suspended]: 'معلق',
   [BudgetStatus.Closed]: 'مغلق',
   [BudgetStatus.Cancelled]: 'ملغي',
-};
-
-export const appropriationTypeLabels: Record<AppropriationType, string> = {
-  [AppropriationType.Original]: 'أصلي',
-  [AppropriationType.Supplement]: 'تكميلي',
-  [AppropriationType.Reduction]: 'تخفيض',
-  [AppropriationType.Adjustment]: 'تعديل',
-};
-
-export const appropriationStatusLabels: Record<AppropriationStatus, string> = {
-  [AppropriationStatus.Draft]: 'مسودة',
-  [AppropriationStatus.PendingApproval]: 'بانتظار الاعتماد',
-  [AppropriationStatus.Approved]: 'معتمد',
-  [AppropriationStatus.Active]: 'نشط',
-  [AppropriationStatus.Suspended]: 'معلق',
-  [AppropriationStatus.Closed]: 'مغلق',
-  [AppropriationStatus.Cancelled]: 'ملغي',
 };
 
 export const encumbranceTypeLabels: Record<EncumbranceType, string> = {
@@ -127,8 +93,8 @@ export const encumbranceStatusLabels: Record<EncumbranceStatus, string> = {
   [EncumbranceStatus.PendingApproval]: 'بانتظار الاعتماد',
   [EncumbranceStatus.Approved]: 'معتمد',
   [EncumbranceStatus.Active]: 'نشط',
-  [EncumbranceStatus.PartialReleased]: 'تحرير جزئي',
-  [EncumbranceStatus.PartialLiquidated]: 'تسوية جزئية',
+  [EncumbranceStatus.PartiallyReleased]: 'تحرير جزئي',
+  [EncumbranceStatus.PartiallyLiquidated]: 'تسوية جزئية',
   [EncumbranceStatus.FullyLiquidated]: 'تسوية كاملة',
   [EncumbranceStatus.Closed]: 'مغلق',
   [EncumbranceStatus.Cancelled]: 'ملغي',
@@ -136,7 +102,7 @@ export const encumbranceStatusLabels: Record<EncumbranceStatus, string> = {
 };
 
 // Label lookup helpers with fallback for unknown enum values
-export function getLabel<T extends number>(labels: Record<T, string>, value: T): string {
+export function getLabel<T extends number | string>(labels: Record<T, string>, value: T): string {
   return labels[value] ?? String(value);
 }
 
@@ -159,7 +125,6 @@ export interface FundDto {
   fundName: string;
   fundType: FundType;
   fundCategory: FundCategory;
-  fiscalYearId?: number;
   legalAuthority: string;
   description?: string;
   defaultRevenueDebitAccountId?: number;
@@ -190,7 +155,6 @@ export interface BudgetDto {
   fiscalYearId: number;
   fundId: number;
   fundName: string;
-  totalAmount: number;
   status: BudgetStatus;
   allowOverrun?: boolean;
   effectiveAllowOverrun: boolean;
@@ -207,7 +171,6 @@ export interface BudgetItemDto {
   budgetId: number;
   parentId?: number;
   accountId?: number;
-  fundId?: number;
   costCenterId?: number;
   budgetClassificationId?: number;
   level: number;
@@ -226,39 +189,28 @@ export interface ApprovalDecisionDto {
   evaluationSnapshotJson?: string;
 }
 
-export interface AppropriationDto {
+// ─── Encumbrance DTOs ────────────────────────────────────────────────────────
+
+export interface EncumbranceLineDto {
   id: number;
-  appropriationNumber: string;
-  budgetId: number;
   budgetItemId: number;
-  appropriationType: AppropriationType;
-  documentType: string;
-  documentId: number;
   amount: number;
-  status: AppropriationStatus;
-  rowVersion: string;
-  budgetNumber: string;
-  budgetName: string;
-  fundId: number;
-  fundName: string;
-  fiscalYearId: number;
-  availableForItem: number;
-  latestApproval?: ApprovalDecisionDto;
-  createdBy: string;
+  liquidatedAmount: number;
+  cancelledAmount: number;
+  description?: string;
 }
 
 export interface EncumbranceDto {
   id: number;
   encumbranceNumber: string;
   encumbranceType: EncumbranceType;
-  appropriationId: number;
   vendorId?: number;
   purchaseOrderId?: number;
   documentType: string;
   documentId: number;
   description?: string;
   encumbranceDate: string;
-  amount: number;
+  totalAmount: number;
   status: EncumbranceStatus;
   reversalOfId?: number;
   reversalReason?: string;
@@ -266,39 +218,26 @@ export interface EncumbranceDto {
   isReversed: boolean;
   budgetId: number;
   budgetNumber: string;
-  budgetItemId: number;
-  itemCode: string;
   fundId: number;
   fundName: string;
-  fiscalYearId: number;
-  availableForEncumbrance: number;
   latestApproval?: ApprovalDecisionDto;
   createdBy: string;
 }
 
-// ─── Availability DTOs ────────────────────────────────────────────────────────
-
-export interface ItemAvailabilityDto {
-  budgetItemId: number;
-  netAppropriated: number;
-  totalSupplement: number;
-  totalReduction: number;
-  totalAdjustment: number;
-  available: number;
-  controlMethod: BudgetControlMethod;
-  effectiveAllowOverrun: boolean;
-  warning?: string;
+export interface EncumbranceDetailDto extends EncumbranceDto {
+  lines: EncumbranceLineDto[];
 }
 
-export interface EncumbranceAvailabilityDto {
-  appropriationId: number;
+// ─── Availability DTOs ────────────────────────────────────────────────────────
+
+export interface BudgetAvailabilitySummaryDto {
   budgetItemId: number;
-  netAppropriated: number;
-  totalEncumbered: number;
+  revisedBudget: number;
+  actualExpenditure: number;
+  outstandingEncumbrance: number;
   available: number;
-  controlMethod: BudgetControlMethod;
   effectiveAllowOverrun: boolean;
-  warning?: string;
+  controlMethod: BudgetControlMethod;
 }
 
 // ─── Command Types ────────────────────────────────────────────────────────────
@@ -332,7 +271,6 @@ export interface CreateFundCommand {
   fundName: string;
   fundType: FundType;
   fundCategory: FundCategory;
-  fiscalYearId?: number;
   legalAuthority: string;
   description?: string;
   defaultRevenueDebitAccountId?: number;
@@ -345,7 +283,6 @@ export interface UpdateFundCommand {
   fundName: string;
   fundType: FundType;
   fundCategory: FundCategory;
-  fiscalYearId?: number;
   legalAuthority: string;
   description?: string;
   defaultRevenueDebitAccountId?: number;
@@ -383,16 +320,9 @@ export interface BudgetFilters {
   fundId?: number;
 }
 
-export interface AppropriationFilters {
-  search?: string;
-  appropriationType?: AppropriationType;
-  status?: AppropriationStatus;
-  budgetId?: number;
-}
-
 export interface EncumbranceFilters {
   search?: string;
   encumbranceType?: EncumbranceType;
   status?: EncumbranceStatus;
-  appropriationId?: number;
+  budgetId?: number;
 }

@@ -1,5 +1,5 @@
-using ERP_Government.Application.Budgeting.Commands.Appropriations;
 using ERP_Government.Application.Budgeting.Commands.Budgets;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.CreateBudgetTransaction;
 using ERP_Government.Domain.Budgeting.Entities;
 using ERP_Government.Domain.Budgeting.Enums;
 using NUnit.Framework;
@@ -11,7 +11,7 @@ namespace ERP_Government.Application.FunctionalTests.Budgeting;
 public class SequenceConcurrencyTests : TestBase
 {
     [Test]
-    public async Task ParallelAppropriationCreates_ShouldYieldDistinctNumbers()
+    public async Task ParallelBudgetTransactionCreates_ShouldYieldDistinctNumbers()
     {
         await TestApp.RunAsAdministratorAsync();
 
@@ -33,8 +33,10 @@ public class SequenceConcurrencyTests : TestBase
         await TestApp.AddAsync(item);
 
         var tasks = Enumerable.Range(0, 10)
-            .Select(_ => TestApp.SendAsync(new CreateAppropriationCommand(
-                budgetId, item.Id, AppropriationType.Original, "PO", 1, 1000m)))
+            .Select(_ => TestApp.SendAsync(new CreateBudgetTransactionCommand(
+                budgetId, BudgetTransactionType.InitialAppropriation,
+                DateOnly.FromDateTime(DateTime.UtcNow), "PO", 1, "Concurrency test",
+                [new BudgetTransactionLineRequest(item.Id, TransactionDirection.Increase, 1000m, null)])))
             .ToList();
 
         var results = await Task.WhenAll(tasks);
@@ -44,9 +46,8 @@ public class SequenceConcurrencyTests : TestBase
             result.Succeeded.ShouldBeTrue();
         }
 
-        var numbers = results.Select(r => r.Value).ToList();
-        var distinctIds = numbers.Distinct().ToList();
-        distinctIds.Count.ShouldBe(10, "All appropriation IDs should be distinct");
+        var ids = results.Select(r => r.Value).ToList();
+        ids.Distinct().Count().ShouldBe(10, "All transaction IDs should be distinct");
     }
 
     [Test]

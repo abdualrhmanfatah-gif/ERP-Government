@@ -1,4 +1,6 @@
+using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Application.Parties.Common;
 using ERP_Government.Domain.Payments.Enums;
 
 namespace ERP_Government.Application.Payments.Commands.PaymentOrders.SendToTreasury;
@@ -7,17 +9,21 @@ namespace ERP_Government.Application.Payments.Commands.PaymentOrders.SendToTreas
 public class SendToTreasuryCommand : IRequest<Result>
 {
     public int Id { get; init; }
-    public string TreasuryReference { get; init; } = string.Empty;
     public byte[] RowVersion { get; init; } = [];
 }
 
 public class SendToTreasuryCommandHandler(
-    IApplicationDbContext context) : IRequestHandler<SendToTreasuryCommand, Result>
+    IApplicationDbContext context,
+    IDocumentStatusLogger statusLogger,
+    IUser user) : IRequestHandler<SendToTreasuryCommand, Result>
 {
     public async Task<Result> Handle(
         SendToTreasuryCommand request,
         CancellationToken cancellationToken)
     {
+        if (user.Id is not int userId)
+            return Result.Failure(["User identity is required for this operation."]);
+
         var entity = await context.PaymentOrders
             .FindAsync(request.Id, cancellationToken);
 
@@ -27,10 +33,24 @@ public class SendToTreasuryCommandHandler(
         if (entity.Status != PaymentOrderStatus.Approved)
             return Result.Failure(["Only approved payment orders can be sent to treasury."]);
 
+        if (!entity.AccrualJournalEntryId.HasValue)
+            return Result.Failure(["An accrual journal entry must be linked before sending the payment order to treasury."]);
+
+        if (entity.RowVersion.Length > 0 && request.RowVersion.Length > 0
+            && !entity.RowVersion.SequenceEqual(request.RowVersion))
+            return Result.Failure(["RowVersion conflict — record modified by another user. Reload."]);
+
         entity.Status = PaymentOrderStatus.SentToTreasury;
-        entity.TreasuryStatus = "Sent";
-        entity.TreasuryReference = request.TreasuryReference;
         entity.TreasurySentAt = DateTimeOffset.UtcNow;
+
+        await statusLogger.LogAsync(
+            "paymentorders",
+            entity.Id,
+            PaymentOrderStatus.Approved.ToString(),
+            PaymentOrderStatus.SentToTreasury.ToString(),
+            userId,
+            null,
+            cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
 
@@ -44,8 +64,5 @@ public class SendToTreasuryCommandValidator : AbstractValidator<SendToTreasuryCo
     {
         RuleFor(x => x.Id)
             .GreaterThan(0).WithMessage("Invalid payment order ID.");
-
-        RuleFor(x => x.TreasuryReference)
-            .NotEmpty().WithMessage("Treasury reference is required.");
     }
 }

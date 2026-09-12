@@ -1,6 +1,9 @@
 import { Check, X } from 'lucide-react';
+import { Button } from '@/components/ui';
 import { useNotifications, useMarkAsRead, useMarkAllAsRead, useDeleteNotification, useClearAllNotifications } from './hooks';
-import type { NotificationDto } from './types';
+import { useNotificationStore } from './store';
+import type { NotificationEntry, NotificationDto } from './types';
+import { useEffect } from 'react';
 
 interface Props {
   onClose: () => void;
@@ -29,14 +32,26 @@ function notificationTypeIcon(type: string): string {
   }
 }
 
+function toEntry(dto: NotificationDto): NotificationEntry {
+  return {
+    id: String(dto.id),
+    notificationType: dto.notificationType as NotificationEntry['notificationType'],
+    title: dto.title,
+    message: dto.message,
+    isRead: dto.isRead,
+    created: dto.created,
+    source: 'server',
+  };
+}
+
 function NotificationItem({
   notification,
   onMarkAsRead,
   onDelete,
 }: {
-  notification: NotificationDto;
-  onMarkAsRead: (id: number) => void;
-  onDelete: (id: number) => void;
+  notification: NotificationEntry;
+  onMarkAsRead: (id: string) => void;
+  onDelete: (id: string) => void;
 }) {
   return (
     <li
@@ -61,23 +76,23 @@ function NotificationItem({
         </div>
         <div className="flex items-center gap-1">
           {!notification.isRead ? (
-            <button
-              type="button"
-              className="p-2 min-w-9 min-h-9 rounded-lg hover:bg-[var(--color-surface-container-high)] transition-colors text-[var(--color-on-surface-variant)]"
+            <Button
+              variant="ghost"
+              size="icon-xs"
               aria-label="تحديد كمقروء"
               onClick={() => onMarkAsRead(notification.id)}
             >
               <Check size={16} />
-            </button>
+            </Button>
           ) : null}
-          <button
-            type="button"
-              className="p-2 min-w-9 min-h-9 rounded-lg hover:bg-[var(--color-surface-container-high)] transition-colors text-[var(--color-on-surface-variant)]"
+          <Button
+            variant="ghost"
+            size="icon-xs"
             aria-label="حذف"
             onClick={() => onDelete(notification.id)}
           >
             <X size={16} />
-          </button>
+          </Button>
         </div>
       </div>
     </li>
@@ -85,25 +100,34 @@ function NotificationItem({
 }
 
 export function NotificationDropdown({ onClose: _onClose }: Props) {
-  const { data, isLoading } = useNotifications(1, 50);
+  const { data } = useNotifications(1, 50);
   const markAsRead = useMarkAsRead();
   const markAllAsRead = useMarkAllAsRead();
   const deleteNotification = useDeleteNotification();
   const clearAll = useClearAllNotifications();
+  const store = useNotificationStore();
 
-  const unreadCount = data?.items.filter((n) => !n.isRead).length ?? 0;
+  useEffect(() => {
+    if (data?.items) {
+      store.setServer(data.items.map(toEntry));
+    }
+  }, [data, store]);
+
+  const unreadCount = store.entries.filter((n) => !n.isRead).length;
 
   function handleMarkAllAsRead() {
     markAllAsRead.mutate();
+    store.entries.filter((n) => !n.isRead).forEach((n) => store.markRead(n.id));
   }
 
   function handleClearAll() {
     clearAll.mutate();
+    store.clearLocal();
   }
 
   return (
     <div
-      role="dialog"
+      role="listbox"
       aria-label="الإشعارات"
       className="absolute start-0 top-full mt-2 w-80 bg-[var(--color-surface-container-low)] rounded-xl shadow-lg border border-[var(--color-border-container)] z-[300] overflow-hidden"
     >
@@ -111,39 +135,45 @@ export function NotificationDropdown({ onClose: _onClose }: Props) {
         <span className="text-body-sm font-semibold text-[var(--color-on-surface)]">الإشعارات</span>
         <div className="flex items-center gap-2">
           {unreadCount > 0 ? (
-            <button
-              type="button"
-              className="text-label-sm text-[var(--color-primary)] hover:text-[var(--color-primary-container)] transition-colors"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[var(--color-primary)]"
               onClick={handleMarkAllAsRead}
               disabled={markAllAsRead.isPending}
+              loading={markAllAsRead.isPending}
             >
               تحديد الكل كمقروء
-            </button>
+            </Button>
           ) : null}
-          {data && data.items.length > 0 ? (
-            <button
-              type="button"
-              className="text-label-sm text-[var(--color-error)] transition-colors"
+          {store.entries.length > 0 ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[var(--color-error)]"
               onClick={handleClearAll}
               disabled={clearAll.isPending}
+              loading={clearAll.isPending}
             >
               مسح الكل
-            </button>
+            </Button>
           ) : null}
         </div>
       </div>
-      {isLoading ? (
-        <div className="px-4 py-6 text-center text-body-sm text-[var(--color-on-surface-variant)]">
-          جاري التحميل...
-        </div>
-      ) : data && data.items.length > 0 ? (
+      {store.entries.length > 0 ? (
         <ul className="list-none m-0 p-0 max-h-64 overflow-y-auto">
-          {data.items.map((notification) => (
+          {store.entries.map((notification) => (
             <NotificationItem
               key={notification.id}
               notification={notification}
-              onMarkAsRead={(id) => markAsRead.mutate(id)}
-              onDelete={(id) => deleteNotification.mutate(id)}
+              onMarkAsRead={(id) => {
+                if (notification.source === 'server') markAsRead.mutate(Number(id));
+                store.markRead(id);
+              }}
+              onDelete={(id) => {
+                if (notification.source === 'server') deleteNotification.mutate(Number(id));
+                store.remove(id);
+              }}
             />
           ))}
         </ul>

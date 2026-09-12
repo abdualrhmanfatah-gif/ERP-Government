@@ -1,12 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Button } from '@/components/ui/Button';
-import { AccountForm } from '../components/AccountForm';
+import { Page, Button, EmptyState } from '@/components/ui';
+import { AccountForm } from '@/components/AccountingAccountForm';
 import { useAccountDetail } from '../hooks/useAccountDetail';
 import { useUpdateAccount } from '../hooks/useUpdateAccount';
 import { useAccountGroups } from '../hooks/useAccountGroups';
 import { useAccountsList } from '../hooks/useAccountsList';
-import { showToast } from '@/components/ui/Toast';
+import { notify } from '@/features/notifications/notify';
 
 export function AccountEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -17,20 +16,16 @@ export function AccountEditPage() {
   const { data: groups = [] } = useAccountGroups();
   const { data: allAccounts = [] } = useAccountsList();
 
-  if (isLoading) {
-    return <div role="status" aria-busy="true" className="p-12 text-center">جاري التحميل...</div>;
-  }
-
   if (!account) {
     return (
-      <div className="p-12 text-center">
-        الحساب غير موجود
-        <div className="mt-3">
+      <EmptyState
+        message="الحساب غير موجود"
+        action={
           <Button variant="outline" onClick={() => navigate('/accounting/accounts')}>
             العودة للقائمة
           </Button>
-        </div>
-      </div>
+        }
+      />
     );
   }
 
@@ -49,16 +44,15 @@ export function AccountEditPage() {
           rowVersion: account.rowVersion,
         },
       });
-      showToast('success', 'تم تعديل الحساب بنجاح');
+      notify({ type: 'success', title: 'تم تعديل الحساب بنجاح' });
       navigate(`/accounting/accounts/${accountId}`);
     } catch {
-      showToast('error', 'فشل تعديل الحساب');
+      notify({ type: 'error', title: 'فشل تعديل الحساب' });
     }
   };
 
   return (
-    <div>
-      <PageHeader title={`تعديل الحساب: ${account.name}`} description={`الرمز: ${account.code}`} />
+    <Page title={`تعديل الحساب: ${account.name}`} description={`الرمز: ${account.code}`} maxWidth="sm" loading={isLoading}>
       <AccountForm
         initialData={account}
         accountGroups={groups}
@@ -66,6 +60,6 @@ export function AccountEditPage() {
         onSubmit={handleSubmit}
         loading={isPending}
       />
-    </div>
+    </Page>
   );
 }

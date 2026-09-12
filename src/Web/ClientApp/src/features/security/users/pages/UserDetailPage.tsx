@@ -1,23 +1,16 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import { Pencil, Save, X, Shield, Lock, Users as UsersIcon } from 'lucide-react';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Button } from '@/components/ui/Button';
-import { StatusBadge } from '@/components/ui/StatusBadge';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { FormField } from '@/components/ui/FormField';
-import { Tabs } from '@/components/ui/Tabs';
-import { Skeleton } from '@/components/ui/Loading';
+import { Page, Button, Card, EmptyState, StatusBadge, Input, Select, FormField, Tabs } from '@/components/ui';
 import { useUserDetail, useUpdateUser } from '../hooks';
 import { useOrganizationalUnits } from '../../../organization/hooks';
-import { RolesTab } from '../components/RolesTab';
-import { PermissionsTab } from '../components/PermissionsTab';
-import { SessionsTab } from '../components/SessionsTab';
-import { AuditTab } from '../components/AuditTab';
-import { DeactivateUserDialog } from '../components/DeactivateUserDialog';
-import { ReactivateUserDialog } from '../components/ReactivateUserDialog';
+import { RolesTab } from '@/components/SecurityUsersRolesTab';
+import { PermissionsTab } from '@/components/SecurityUsersPermissionsTab';
+import { SessionsTab } from '@/components/SecurityUsersSessionsTab';
+import { AuditTab } from '@/components/SecurityUsersAuditTab';
+import { UserStatusDialog } from '@/components/SecurityUsersStatusDialog';
+import { getActiveStatusLabel } from '@/shared/constants/labels';
 
 export function UserDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -51,30 +44,24 @@ export function UserDetailPage() {
         accountType: editAccountType,
         rowVersion: (user as any).rowVersion ?? '',
       });
-      toast.success('تم الحفظ بنجاح');
+      notify({ type: 'success', title: 'تم الحفظ بنجاح' });
       setIsEditing(false);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ أثناء الحفظ';
       if (message.includes('409') || message.includes('Conflict')) {
-        toast.error('تعارض في البيانات — يرجى تحديث الصفحة');
+        notify({ type: 'error', title: 'تعارض في البيانات — يرجى تحديث الصفحة' });
       } else {
-        toast.error(message);
+        notify({ type: 'error', title: message });
       }
     }
   }
 
   if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton variant="heading" className="w-1/3" />
-        <Skeleton variant="card" />
-        <Skeleton variant="table" lines={4} />
-      </div>
-    );
+    return <Page title="جارٍ التحميل..." loading />;
   }
 
   if (error || !user) {
-    return <div className="p-8 text-center text-[var(--color-on-surface-variant)]">المستخدم غير موجود</div>;
+    return <EmptyState message="المستخدم غير موجود" />;
   }
 
   const tabs = [
@@ -85,42 +72,41 @@ export function UserDetailPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={user.login}
-        description={isEditing ? 'تعديل بيانات المستخدم' : `تفاصيل المستخدم — ${user.departmentName ?? '—'}`}
-        actions={
-          <div className="flex gap-2">
-            {user.isActive ? (
-              <Button variant="ghost" size="sm" onClick={() => setShowDeactivate(true)}>
-                تعطيل
+    <Page
+      title={user.login}
+      description={isEditing ? 'تعديل بيانات المستخدم' : `تفاصيل المستخدم — ${user.departmentName ?? '—'}`}
+      actions={
+        <div className="flex gap-2">
+          {user.isActive ? (
+            <Button variant="ghost" size="sm" onClick={() => setShowDeactivate(true)}>
+              تعطيل
+            </Button>
+          ) : (
+            <Button variant="ghost" size="sm" onClick={() => setShowReactivate(true)}>
+              تنشيط
+            </Button>
+          )}
+          {isEditing ? (
+            <>
+              <Button variant="primary" size="sm" icon={<Save size={14} />} onClick={handleSave} loading={updateUser.isPending}>
+                حفظ
               </Button>
-            ) : (
-              <Button variant="ghost" size="sm" onClick={() => setShowReactivate(true)}>
-                تنشيط
+              <Button variant="ghost" size="sm" icon={<X size={14} />} onClick={() => setIsEditing(false)}>
+                إلغاء
               </Button>
-            )}
-            {isEditing ? (
-              <>
-                <Button variant="primary" size="sm" icon={<Save size={14} />} onClick={handleSave} loading={updateUser.isPending}>
-                  حفظ
-                </Button>
-                <Button variant="ghost" size="sm" icon={<X size={14} />} onClick={() => setIsEditing(false)}>
-                  إلغاء
-                </Button>
-              </>
-            ) : (
-              <Button variant="ghost" size="sm" icon={<Pencil size={14} />} onClick={startEdit}>
-                تعديل
-              </Button>
-            )}
-          </div>
-        }
-      />
+            </>
+          ) : (
+            <Button variant="ghost" size="sm" icon={<Pencil size={14} />} onClick={startEdit}>
+              تعديل
+            </Button>
+          )}
+        </div>
+      }
+    >
 
       <div className="flex flex-wrap gap-3 items-center">
         <StatusBadge variant={user.isActive ? 'active' : 'draft'}>
-          {user.isActive ? 'نشط' : 'غير نشط'}
+          {getActiveStatusLabel(user.isActive)}
         </StatusBadge>
         {user.mfaEnabled && (
           <StatusBadge variant="active">المصادقة الثنائية مفعّلة</StatusBadge>
@@ -155,7 +141,7 @@ export function UserDetailPage() {
           />
         </div>
       ) : (
-        <div className="bg-[var(--color-surface)] rounded-lg border border-[var(--color-border-container)] p-4">
+        <Card className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
             <div className="space-y-1">
               <span className="text-[var(--color-on-surface-variant)] block">الاسم</span>
@@ -182,13 +168,13 @@ export function UserDetailPage() {
               <span className="font-medium">{user.createdBy ?? '—'}</span>
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
       <Tabs tabs={tabs} />
 
-      <DeactivateUserDialog open={showDeactivate} onClose={() => setShowDeactivate(false)} userId={userId} userName={user.login} />
-      <ReactivateUserDialog open={showReactivate} onClose={() => setShowReactivate(false)} userId={userId} userName={user.login} />
-    </div>
+      <UserStatusDialog open={showDeactivate} onClose={() => setShowDeactivate(false)} userId={userId} userName={user.login} action="deactivate" />
+      <UserStatusDialog open={showReactivate} onClose={() => setShowReactivate(false)} userId={userId} userName={user.login} action="reactivate" />
+    </Page>
   );
 }

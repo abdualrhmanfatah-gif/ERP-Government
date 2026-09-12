@@ -7,6 +7,7 @@ import { App } from './App';
 import { AuthProvider } from './shared/hooks/useAuth';
 import { ThemeProvider } from './components/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
+import { NotificationProvider } from './features/notifications/store';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,10 +26,12 @@ root.render(
   <BrowserRouter basename={baseUrl ?? '/'}>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthProvider>
-          <ToastProvider />
-          <App />
-        </AuthProvider>
+        <NotificationProvider>
+          <AuthProvider>
+            <ToastProvider />
+            <App />
+          </AuthProvider>
+        </NotificationProvider>
       </ThemeProvider>
     </QueryClientProvider>
   </BrowserRouter>

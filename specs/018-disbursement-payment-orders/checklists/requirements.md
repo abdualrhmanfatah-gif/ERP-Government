@@ -1,7 +1,7 @@
 # Specification Quality Checklist: Disbursement of Approved Payment Orders
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-09-05
+**Created**: 2026-09-09
 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
@@ -31,6 +31,7 @@
 
 ## Notes
 
-- All items pass validation. Spec is ready for `/speckit.plan`.
-- Documented deviation: tender-law evidence and monthly-plan gates intentionally excluded per user requirements (Constitution Principle V acknowledged).
-- Dual-signature rule is a domain-specific control beyond the standard single-approval pattern — noted in Context.
+- Spec 018 was originally written for a different workflow (order-first). This update reflects the actual request-first implementation based on code examination.
+- The spec references existing entities (DisbursementRequest, PaymentOrder, Payment, PaymentOrderDeduction) and their actual lifecycles as implemented in the codebase.
+- The dual-signature approval with ApprovedAmount, IssuingAuthorityName, and IssuingAuthorityCapacity is documented per the as-built implementation.
+- All requirements use normative language (MUST) per Constitution requirements.

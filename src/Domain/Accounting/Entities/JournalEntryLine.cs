@@ -14,10 +14,6 @@ public class JournalEntryLine : BaseLongAuditableEntity
     public decimal Debit { get; set; }
     public decimal Credit { get; set; }
     public int? CostCenterId { get; set; }
-    public int? FundId { get; set; }
-    public int? ProjectId { get; set; }
-    public int? BudgetItemId { get; set; }
-    public int? EncumbranceId { get; set; }
     public int? PaymentOrderId { get; set; }
     public byte[] RowVersion { get; set; } = [];
 

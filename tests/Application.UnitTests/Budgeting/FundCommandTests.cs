@@ -3,7 +3,6 @@ using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.UnitTests.Accounting;
 using ERP_Government.Domain.Budgeting.Entities;
 using ERP_Government.Domain.Budgeting.Enums;
-using ERP_Government.Domain.FinancialSettings.Entities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -38,7 +37,7 @@ public class FundCommandTests
 
         var command = new CreateFundCommand(
             "F001", "General Fund", FundType.General, FundCategory.Operating,
-            null, "Legal Authority 123", "Description", null);
+            "Legal Authority 123", null!, null, null);
 
         var result = await handler.Handle(command, CancellationToken.None);
 
@@ -61,7 +60,7 @@ public class FundCommandTests
 
         var command = new CreateFundCommand(
             "F001", "Duplicate", FundType.General, FundCategory.Operating,
-            null, "Legal Authority", null, null);
+            "Legal Authority", null!, null, null);
 
         var result = await handler.Handle(command, CancellationToken.None);
 
@@ -70,23 +69,25 @@ public class FundCommandTests
     }
 
     [Test]
-    public async Task CreateFund_InvalidFiscalYear_ShouldReturnFailure()
+    public async Task CreateFund_WithNullOptionalParams_ShouldSucceed()
     {
         var funds = new List<Fund>().AsQueryable().BuildMockForAsync();
-        var fiscalYears = new List<FiscalYear>().AsQueryable().BuildMockForAsync();
         _contextMock.Setup(x => x.Funds).Returns(funds.Object);
-        _contextMock.Setup(x => x.FiscalYears).Returns(fiscalYears.Object);
+
+        funds.Setup(x => x.Add(It.IsAny<Fund>()))
+            .Callback<Fund>(e => e.Id = 1);
+        _contextMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
 
         var handler = new CreateFundCommandHandler(_contextMock.Object);
 
         var command = new CreateFundCommand(
             "F001", "Fund", FundType.General, FundCategory.Operating,
-            999, "Legal Authority", null, null);
+            "Legal Authority", null, null, null);
 
         var result = await handler.Handle(command, CancellationToken.None);
 
-        result.Succeeded.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Contains("Fiscal year not found"));
+        result.Succeeded.ShouldBeTrue();
     }
 
     [Test]
@@ -95,7 +96,7 @@ public class FundCommandTests
         var validator = new CreateFundCommandValidator();
         var command = new CreateFundCommand(
             "", "Fund Name", FundType.General, FundCategory.Operating,
-            null, "Legal Authority", null, null);
+            "Legal Authority", null!, null, null);
 
         var result = await validator.ValidateAsync(command);
 
@@ -109,7 +110,7 @@ public class FundCommandTests
         var validator = new CreateFundCommandValidator();
         var command = new CreateFundCommand(
             "F001", "", FundType.General, FundCategory.Operating,
-            null, "Legal Authority", null, null);
+            "Legal Authority", null, null, null);
 
         var result = await validator.ValidateAsync(command);
 
@@ -123,7 +124,7 @@ public class FundCommandTests
         var validator = new CreateFundCommandValidator();
         var command = new CreateFundCommand(
             "F001", "Fund Name", FundType.General, FundCategory.Operating,
-            null, "", null, null);
+            "", null!, null, null);
 
         var result = await validator.ValidateAsync(command);
 

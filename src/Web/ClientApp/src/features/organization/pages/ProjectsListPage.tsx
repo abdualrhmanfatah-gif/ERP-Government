@@ -1,20 +1,11 @@
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { DataGrid } from '@/components/ui/DataGrid';
-import { Button } from '@/components/ui/Button';
+import { Page, DataGrid, Button } from '@/components/ui';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useProjects, useDeleteProject } from '../hooks';
+import { projectStatusLabels } from '../types';
 import { useState } from 'react';
-
-const statusLabels: Record<string, string> = {
-  Draft: 'مسودة',
-  Active: 'نشط',
-  OnHold: 'معلق',
-  Completed: 'مكتمل',
-  Cancelled: 'ملغي',
-};
 
 export function ProjectsListPage() {
   const navigate = useNavigate();
@@ -33,16 +24,15 @@ export function ProjectsListPage() {
   };
 
   return (
-    <div>
-      <PageHeader
-        title="إدارة المشاريع"
-        description="إضافة وتعديل وحذف المشاريع"
-        actions={
-          <Button variant="primary" size="sm" icon={<Plus size={16} />} onClick={() => navigate('/organization/projects/create')}>
-            مشروع جديد
-          </Button>
-        }
-      />
+    <Page
+      title="إدارة المشاريع"
+      description="إضافة وتعديل وحذف المشاريع"
+      actions={
+        <Button variant="primary" size="sm" icon={<Plus size={16} />} onClick={() => navigate('/organization/projects/create')}>
+          مشروع جديد
+        </Button>
+      }
+    >
       <DataGrid
         columns={[
           { key: 'code', header: 'الكود', width: 120, render: (r) => <span dir="ltr">{r.code}</span> },
@@ -58,7 +48,7 @@ export function ProjectsListPage() {
             };
             return (
               <StatusBadge variant={variantMap[r.status] ?? 'draft'}>
-                {statusLabels[r.status] ?? r.status}
+                {projectStatusLabels[r.status] ?? r.status}
               </StatusBadge>
             );
           }},
@@ -95,6 +85,6 @@ export function ProjectsListPage() {
         confirmLabel="حذف"
         loading={deleteMutation.isPending}
       />
-    </div>
+    </Page>
   );
 }

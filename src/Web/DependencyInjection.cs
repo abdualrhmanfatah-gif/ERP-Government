@@ -18,6 +18,7 @@ public static class DependencyInjection
         builder.Services.AddHttpContextAccessor();
 
         builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
+        builder.Services.AddProblemDetails();
 
         // Customise default API behaviour
         builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -66,6 +67,8 @@ public static class DependencyInjection
 
             options.AddPolicy(PermissionCodes.DocumentSequencesView, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.DocumentSequencesCreate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DocumentSequencesUpdate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DocumentSequencesDeactivate, p => p.RequireAssertion(_ => true));
 
             // ─── Accounting ───────────────────────────────────────────
             options.AddPolicy(PermissionCodes.ChartOfAccountsRead, p => p.RequireAssertion(_ => true));
@@ -99,12 +102,7 @@ public static class DependencyInjection
             options.AddPolicy(PermissionCodes.RecurringEntriesResume, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.RecurringEntriesCancel, p => p.RequireAssertion(_ => true));
 
-            options.AddPolicy(PermissionCodes.AccountingEventsRead, p => p.RequireAssertion(_ => true));
 
-            options.AddPolicy(PermissionCodes.BalancesRebuild, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.BalancesFinalize, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.BalancesUnfinalize, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.BalancesRead, p => p.RequireAssertion(_ => true));
 
             // ─── Accounting Reports ────────────────────────────────────
             options.AddPolicy(PermissionCodes.ViewBalanceSheet, p => p.RequireAssertion(_ => true));
@@ -119,8 +117,7 @@ public static class DependencyInjection
             options.AddPolicy(PermissionCodes.FundsView, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.FundsCreate, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.FundsUpdate, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.FundsActivate, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.FundsDeactivate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.FundsToggleActive, p => p.RequireAssertion(_ => true));
 
             options.AddPolicy(PermissionCodes.BudgetsView, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.BudgetsCreate, p => p.RequireAssertion(_ => true));
@@ -137,6 +134,11 @@ public static class DependencyInjection
             options.AddPolicy(PermissionCodes.BudgetItemsUpdate, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.BudgetItemsDelete, p => p.RequireAssertion(_ => true));
 
+            options.AddPolicy(PermissionCodes.BudgetItemAllocationsView, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.BudgetItemAllocationsCreate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.BudgetItemAllocationsUpdate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.BudgetItemAllocationsDelete, p => p.RequireAssertion(_ => true));
+
             options.AddPolicy(PermissionCodes.BudgetClassificationsView, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.BudgetClassificationsCreate, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.BudgetClassificationsUpdate, p => p.RequireAssertion(_ => true));
@@ -145,16 +147,15 @@ public static class DependencyInjection
             options.AddPolicy(PermissionCodes.BudgetTypesCreate, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.BudgetTypesUpdate, p => p.RequireAssertion(_ => true));
 
-            options.AddPolicy(PermissionCodes.AppropriationsView, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.AppropriationsCreate, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.AppropriationsUpdate, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.AppropriationsDelete, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.AppropriationsSubmit, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.AppropriationsApprove, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.AppropriationsActivate, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.AppropriationsSuspend, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.AppropriationsClose, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.AppropriationsCancel, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.BudgetTransactionsView, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.BudgetTransactionsCreate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.BudgetTransactionsUpdate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.BudgetTransactionsDelete, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.BudgetTransactionsSubmit, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.BudgetTransactionsApprove, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.BudgetTransactionsPost, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.BudgetTransactionsCancel, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.BudgetTransactionsReverse, p => p.RequireAssertion(_ => true));
 
             options.AddPolicy(PermissionCodes.EncumbrancesView, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.EncumbrancesCreate, p => p.RequireAssertion(_ => true));
@@ -177,21 +178,38 @@ public static class DependencyInjection
             options.AddPolicy(PermissionCodes.PurchaseRequestsSubmit, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PurchaseRequestsApprove, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PurchaseRequestsReject, p => p.RequireAssertion(_ => true));
-
-            options.AddPolicy(PermissionCodes.RFQView, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.RFQCreate, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.RFQPublish, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.RFQComplete, p => p.RequireAssertion(_ => true));
-            options.AddPolicy(PermissionCodes.RFQCancel, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.PurchaseRequestsCancel, p => p.RequireAssertion(_ => true));
 
             options.AddPolicy(PermissionCodes.QuotationsView, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.QuotationsCreate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.QuotationsEvaluate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.QuotationsSelect, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.QuotationsAward, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.QuotationsReject, p => p.RequireAssertion(_ => true));
 
             options.AddPolicy(PermissionCodes.PurchaseOrdersView, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PurchaseOrdersCreate, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PurchaseOrdersSubmit, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PurchaseOrdersApprove, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.PurchaseOrdersIssue, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PurchaseOrdersCancel, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.PurchaseOrdersClose, p => p.RequireAssertion(_ => true));
+
+            options.AddPolicy(PermissionCodes.GoodsReceiptsView, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.GoodsReceiptsCreate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.GoodsReceiptsConfirm, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.GoodsReceiptsReject, p => p.RequireAssertion(_ => true));
+
+            options.AddPolicy(PermissionCodes.SupplierInvoicesView, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.SupplierInvoicesCreate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.SupplierInvoicesSubmit, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.SupplierInvoicesMatch, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.SupplierInvoicesAcceptWithNotes, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.SupplierInvoicesCancel, p => p.RequireAssertion(_ => true));
+
+            options.AddPolicy(PermissionCodes.PaymentsView, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.PaymentsCreate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.PaymentsApprove, p => p.RequireAssertion(_ => true));
 
             // ─── Payments ─────────────────────────────────────────────
             options.AddPolicy(PermissionCodes.BankAccountsView, p => p.RequireAssertion(_ => true));
@@ -202,6 +220,7 @@ public static class DependencyInjection
 
             options.AddPolicy(PermissionCodes.PaymentOrdersView, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PaymentOrdersCreate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.PaymentOrdersUpdate, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PaymentOrdersSubmit, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PaymentOrdersApprove, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.PaymentOrdersReject, p => p.RequireAssertion(_ => true));
@@ -216,6 +235,8 @@ public static class DependencyInjection
             options.AddPolicy(PermissionCodes.DisbursementRequestsApprove, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.DisbursementRequestsReject, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.DisbursementRequestsCancel, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DisbursementRequestsUpdate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DisbursementRequestsCreateAccrual, p => p.RequireAssertion(_ => true));
 
             // ─── Payments ─────────────────────────────────────────────
             options.AddPolicy(PermissionCodes.PaymentsView, p => p.RequireAssertion(_ => true));
@@ -368,6 +389,30 @@ public static class DependencyInjection
             // ─── FinancialControl ──────────────────────────────────────
             options.AddPolicy(PermissionCodes.FinancialControlLapseYear, p => p.RequireAssertion(_ => true));
             options.AddPolicy(PermissionCodes.FinancialControlApproveFinalAccount, p => p.RequireAssertion(_ => true));
+
+            // ─── ClosingEntries ──────────────────────────────────────────
+            options.AddPolicy(PermissionCodes.ClosingEntriesView, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ClosingEntriesGenerate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ClosingEntriesApprove, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ClosingEntriesReverse, p => p.RequireAssertion(_ => true));
+
+            // ─── Revenue ─────────────────────────────────────────────
+            options.AddPolicy(PermissionCodes.ReceiptVouchersView, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ReceiptVouchersCreate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ReceiptVouchersSubmit, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ReceiptVouchersApprove, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ReceiptVouchersCancel, p => p.RequireAssertion(_ => true));
+
+            options.AddPolicy(PermissionCodes.DepositSlipsView, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DepositSlipsCreate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DepositSlipsUpdate, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.DepositSlipsApprove, p => p.RequireAssertion(_ => true));
+
+            // ─── Checks ────────────────────────────────────────────────
+            options.AddPolicy(PermissionCodes.ChecksView, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ChecksClear, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ChecksBounce, p => p.RequireAssertion(_ => true));
+            options.AddPolicy(PermissionCodes.ChecksReplace, p => p.RequireAssertion(_ => true));
 
             // ─── Reporting ────────────────────────────────────────────
             options.AddPolicy(PermissionCodes.ReportingViewBudgetExecution, p => p.RequireAssertion(_ => true));

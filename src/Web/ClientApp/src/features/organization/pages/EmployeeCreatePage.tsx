@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { EmployeeForm } from '../components/EmployeeForm';
+import { Page, Loading, EmptyState } from '@/components/ui';
+import { EmployeeForm } from '@/components/OrganizationEmployeeForm';
 import { useEmployee, useCreateEmployee, useUpdateEmployee } from '../hooks';
 import type { CreateEmployeeCommand, UpdateEmployeeCommand } from '../types';
 
@@ -14,16 +14,13 @@ export function EmployeeCreatePage() {
   };
 
   return (
-    <div>
-      <PageHeader title="موظف جديد" description="إضافة موظف جديد" />
-      <div className="max-w-xl">
-        <EmployeeForm
-          onSubmit={handleSubmit}
-          serverError={createMutation.error?.message}
-          loading={createMutation.isPending}
-        />
-      </div>
-    </div>
+    <Page title="موظف جديد" description="إضافة موظف جديد" maxWidth="sm">
+      <EmployeeForm
+        onSubmit={handleSubmit}
+        serverError={createMutation.error?.message}
+        loading={createMutation.isPending}
+      />
+    </Page>
   );
 }
 
@@ -39,21 +36,18 @@ export function EmployeeEditPage() {
     navigate('/organization/employees');
   };
 
-  if (isLoading) return <div className="p-4">جاري التحميل...</div>;
-  if (!employee) return <div className="p-4">الموظف غير موجود</div>;
+  if (isLoading) return <Loading />;
+  if (!employee) return <EmptyState message="الموظف غير موجود" />;
 
   return (
-    <div>
-      <PageHeader title={`تعديل: ${employee.name}`} description="تحديث بيانات الموظف" />
-      <div className="max-w-xl">
-        <EmployeeForm
-          initialData={employee}
-          isEdit
-          onSubmit={handleSubmit}
-          serverError={updateMutation.error?.message}
-          loading={updateMutation.isPending}
-        />
-      </div>
-    </div>
+    <Page title={`تعديل: ${employee.name}`} description="تحديث بيانات الموظف" maxWidth="sm">
+      <EmployeeForm
+        initialData={employee}
+        isEdit
+        onSubmit={handleSubmit}
+        serverError={updateMutation.error?.message}
+        loading={updateMutation.isPending}
+      />
+    </Page>
   );
 }

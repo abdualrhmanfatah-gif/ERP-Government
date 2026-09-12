@@ -41,6 +41,18 @@ public class ApproveBudgetCommandHandler(
         if (missingAttachments.Count > 0)
             return Result.Failure([$"Cannot approve: missing mandatory attachments ({string.Join(", ", missingAttachments)})."]);
 
+        var allocations = await context.BudgetItemAllocations
+            .Where(x => x.BudgetId == entity.Id)
+            .ToListAsync(cancellationToken);
+
+        if (allocations.Count == 0)
+            return Result.Failure(["Cannot approve budget with no allocations. Add at least one budget item allocation."]);
+
+        foreach (var allocation in allocations)
+        {
+            allocation.ApprovedAmount = allocation.ProposedAmount;
+        }
+
         entity.Status = BudgetStatus.Approved;
 
         RecordApproval(context, entity, BudgetStatus.Submitted, BudgetStatus.Approved, userId);

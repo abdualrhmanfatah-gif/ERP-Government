@@ -79,12 +79,6 @@ public class RecurringEntryConfiguration : IEntityTypeConfiguration<RecurringEnt
         //     .HasForeignKey(e => e.FundId)
         //     .OnDelete(DeleteBehavior.Restrict);
 
-        // Execution history
-        builder.HasMany(e => e.ExecutionLogs)
-            .WithOne(r => r.RecurringEntry)
-            .HasForeignKey(r => r.RecurringEntryId)
-            .OnDelete(DeleteBehavior.Restrict);
-
         builder.Ignore(e => e.DomainEvents);
     }
 }

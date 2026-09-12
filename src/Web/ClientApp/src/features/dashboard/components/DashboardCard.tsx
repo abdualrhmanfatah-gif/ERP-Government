@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { Card } from '@/components/ui/Card';
 
 interface DashboardCardProps {
   title: string;
@@ -7,9 +8,7 @@ interface DashboardCardProps {
   children: ReactNode;
   className?: string;
   noPadding?: boolean;
-  /** Make card interactive with hover/focus states */
   interactive?: boolean;
-  /** Click handler — automatically enables interactive mode */
   onClick?: () => void;
 }
 
@@ -25,12 +24,11 @@ export function DashboardCard({
   const isInteractive = interactive || !!onClick;
 
   return (
-    <div
+    <Card
+      padding="none"
       className={cn(
-        // base
-        'rounded-xl border border-[var(--color-border-container)] bg-white overflow-hidden shadow-sm',
+        'border-[var(--color-border-container)] bg-[var(--color-surface)] overflow-hidden shadow-sm h-full flex flex-col',
         'transition-all duration-200 ease-in-out',
-        // interactive states
         isInteractive && [
           'cursor-pointer',
           'hover:shadow-md hover:border-[var(--color-outline)]',
@@ -53,16 +51,13 @@ export function DashboardCard({
           : undefined
       }
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border-container)]">
-        <h2 className="text-headline-sm font-bold text-[var(--color-on-surface)]">
+      <div className="flex items-center justify-between px-3 py-2">
+        <h2 className="text-label-md font-semibold text-[var(--color-on-surface)]">
           {title}
         </h2>
         {action && <div className="flex items-center">{action}</div>}
       </div>
-
-      {/* Content */}
-      <div className={noPadding ? '' : 'p-6'}>{children}</div>
-    </div>
+      <div className={noPadding ? 'flex-1' : 'flex-1 p-3'}>{children}</div>
+    </Card>
   );
 }

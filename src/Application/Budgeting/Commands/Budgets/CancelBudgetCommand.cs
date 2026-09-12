@@ -35,6 +35,22 @@ public class CancelBudgetCommandHandler(
         if (!request.RowVersion.SequenceEqual(entity.RowVersion))
             return Result.Failure(["Concurrency conflict. The record has been modified by another user."]);
 
+        var hasPostedTransactions = await context.BudgetTransactions
+            .AnyAsync(x => x.BudgetId == entity.Id && x.Status == Domain.Budgeting.Enums.BudgetTransactionStatus.Posted, cancellationToken);
+
+        if (hasPostedTransactions)
+            return Result.Failure(["لا يمكن إلغاء الموازنة لوجود حركات مرحّلة أو التزامات قائمة"]);
+
+        var hasOutstandingEncumbrances = await context.EncumbranceLines
+            .AnyAsync(x => x.BudgetItem.BudgetId == entity.Id
+                && (x.Encumbrance.Status == Domain.Budgeting.Enums.EncumbranceStatus.Active
+                    || x.Encumbrance.Status == Domain.Budgeting.Enums.EncumbranceStatus.Approved
+                    || x.Encumbrance.Status == Domain.Budgeting.Enums.EncumbranceStatus.PartiallyReleased
+                    || x.Encumbrance.Status == Domain.Budgeting.Enums.EncumbranceStatus.PartiallyLiquidated), cancellationToken);
+
+        if (hasOutstandingEncumbrances)
+            return Result.Failure(["لا يمكن إلغاء الموازنة لوجود حركات مرحّلة أو التزامات قائمة"]);
+
         var previousStatus = entity.Status;
         entity.Status = BudgetStatus.Cancelled;
 

@@ -37,10 +37,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<SecurityPermission> SecurityPermissions => Set<SecurityPermission>();
     public DbSet<UserPermission> UserPermissions => Set<UserPermission>();
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
-    public DbSet<RecordRule> RecordRules => Set<RecordRule>();
-    public DbSet<FieldSecurityPolicy> FieldSecurityPolicies => Set<FieldSecurityPolicy>();
-    public DbSet<ApprovalDelegation> ApprovalDelegations => Set<ApprovalDelegation>();
-    public DbSet<SoDMatrix> SoDMatrix => Set<SoDMatrix>();
     public DbSet<SecurityAuditLog> SecurityAuditLogs => Set<SecurityAuditLog>();
     public DbSet<ApprovalRule> ApprovalRules => Set<ApprovalRule>();
     public DbSet<ApprovalHistory> ApprovalHistory => Set<ApprovalHistory>();
@@ -59,7 +55,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     // Module 3: Organizational Structure
     public DbSet<OrganizationalUnit> OrganizationalUnits => Set<OrganizationalUnit>();
     public DbSet<CostCenter> CostCenters => Set<CostCenter>();
-    public DbSet<CostCenterAccount> CostCenterAccounts => Set<CostCenterAccount>();
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<Employee> Employees => Set<Employee>();
 
@@ -69,15 +64,11 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Journal> Journals => Set<Journal>();
     public DbSet<JournalEntry> JournalEntries => Set<JournalEntry>();
     public DbSet<JournalEntryLine> JournalEntryLines => Set<JournalEntryLine>();
-    public DbSet<AccountBalance> AccountBalances => Set<AccountBalance>();
-    public DbSet<AccountingEvent> AccountingEvents => Set<AccountingEvent>();
     public DbSet<PostingRule> PostingRules => Set<PostingRule>();
     public DbSet<PostingRuleLine> PostingRuleLines => Set<PostingRuleLine>();
     public DbSet<JournalEntryTemplate> JournalEntryTemplates => Set<JournalEntryTemplate>();
     public DbSet<JournalEntryTemplateLine> JournalEntryTemplateLines => Set<JournalEntryTemplateLine>();
     public DbSet<RecurringEntry> RecurringEntries => Set<RecurringEntry>();
-    public DbSet<RecurringEntryExecutionLog> RecurringEntryExecutionLogs => Set<RecurringEntryExecutionLog>();
-    public DbSet<CashFlowMappingRule> CashFlowMappingRules => Set<CashFlowMappingRule>();
 
     // Module 5: Budgeting & Funds
     public DbSet<BudgetClassification> BudgetClassifications => Set<BudgetClassification>();
@@ -85,8 +76,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<BudgetType> BudgetTypes => Set<BudgetType>();
     public DbSet<Budget> Budgets => Set<Budget>();
     public DbSet<BudgetItem> BudgetItems => Set<BudgetItem>();
-    public DbSet<Appropriation> Appropriations => Set<Appropriation>();
+    public DbSet<BudgetItemAllocation> BudgetItemAllocations => Set<BudgetItemAllocation>();
     public DbSet<Encumbrance> Encumbrances => Set<Encumbrance>();
+    public DbSet<EncumbranceLine> EncumbranceLines => Set<EncumbranceLine>();
+    public DbSet<BudgetTransaction> BudgetTransactions => Set<BudgetTransaction>();
     public DbSet<BudgetItemMonthlyPlan> BudgetItemMonthlyPlans => Set<BudgetItemMonthlyPlan>();
     public DbSet<YearClosingRun> YearClosingRuns => Set<YearClosingRun>();
     public DbSet<FinalAccount> FinalAccounts => Set<FinalAccount>();
@@ -95,12 +88,14 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     // Module 6: Procurement (Target)
     public DbSet<PurchaseRequest> PurchaseRequests => Set<PurchaseRequest>();
     public DbSet<PurchaseRequestDetail> PurchaseRequestDetails => Set<PurchaseRequestDetail>();
-    public DbSet<RequestForQuotation> RequestForQuotations => Set<RequestForQuotation>();
-    public DbSet<RFQSupplier> RFQSuppliers => Set<RFQSupplier>();
     public DbSet<Quotation> Quotations => Set<Quotation>();
     public DbSet<QuotationDetail> QuotationDetails => Set<QuotationDetail>();
     public DbSet<PurchaseOrder> PurchaseOrders => Set<PurchaseOrder>();
     public DbSet<PurchaseOrderDetail> PurchaseOrderDetails => Set<PurchaseOrderDetail>();
+    public DbSet<ERP_Government.Domain.Procurement.Entities.GoodsReceiptNote> GoodsReceiptNotes => Set<ERP_Government.Domain.Procurement.Entities.GoodsReceiptNote>();
+    public DbSet<ERP_Government.Domain.Procurement.Entities.GoodsReceiptNoteDetail> GoodsReceiptNoteDetails => Set<ERP_Government.Domain.Procurement.Entities.GoodsReceiptNoteDetail>();
+    public DbSet<SupplierInvoice> SupplierInvoices => Set<SupplierInvoice>();
+    public DbSet<SupplierInvoiceDetail> SupplierInvoiceDetails => Set<SupplierInvoiceDetail>();
 
     // Module 7: Parties
     public DbSet<ERP_Government.Domain.Parties.Entities.Party> Parties => Set<ERP_Government.Domain.Parties.Entities.Party>();
@@ -108,7 +103,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     // Module 8: Payments
     public DbSet<BankAccount> BankAccounts => Set<BankAccount>();
     public DbSet<PaymentOrder> PaymentOrders => Set<PaymentOrder>();
-    public DbSet<PaymentOrderLine> PaymentOrderLines => Set<PaymentOrderLine>();
+    // PaymentOrderLine removed per ADR-001 D-4
     public DbSet<PaymentOrderDeduction> PaymentOrderDeductions => Set<PaymentOrderDeduction>();
     public DbSet<DisbursementRequest> DisbursementRequests => Set<DisbursementRequest>();
     public DbSet<Payment> Payments => Set<Payment>();
@@ -145,8 +140,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Item> Items => Set<Item>();
     public DbSet<ItemUnit> ItemUnits => Set<ItemUnit>();
     public DbSet<StockTransaction> StockTransactions => Set<StockTransaction>();
-    public DbSet<GoodsReceiptNote> GoodsReceiptNotes => Set<GoodsReceiptNote>();
-    public DbSet<GoodsReceiptNoteDetail> GoodsReceiptNoteDetails => Set<GoodsReceiptNoteDetail>();
     public DbSet<StockTake> StockTakes => Set<StockTake>();
     public DbSet<StockTakeDetail> StockTakeDetails => Set<StockTakeDetail>();
 

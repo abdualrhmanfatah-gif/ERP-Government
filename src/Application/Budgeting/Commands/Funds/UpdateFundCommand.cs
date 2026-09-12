@@ -10,10 +10,10 @@ public record UpdateFundCommand(
     string FundName,
     FundType FundType,
     FundCategory FundCategory,
-    int? FiscalYearId,
     string LegalAuthority,
     string? Description,
-    int? DefaultRevenueDebitAccountId,
+    int? DefaultRevenueAccountId,
+    int? CurrencyId,
     byte[] RowVersion) : IRequest<Result>;
 
 public class UpdateFundCommandHandler(
@@ -38,23 +38,14 @@ public class UpdateFundCommandHandler(
         if (numberExists)
             return Result.Failure(["Fund number already exists."]);
 
-        if (request.FiscalYearId.HasValue)
-        {
-            var fiscalYearExists = await context.FiscalYears
-                .AnyAsync(x => x.Id == request.FiscalYearId.Value, cancellationToken);
-
-            if (!fiscalYearExists)
-                return Result.Failure(["Fiscal year not found."]);
-        }
-
         entity.FundNumber = request.FundNumber;
         entity.FundName = request.FundName;
         entity.FundType = request.FundType;
         entity.FundCategory = request.FundCategory;
-        entity.FiscalYearId = request.FiscalYearId;
         entity.LegalAuthority = request.LegalAuthority;
         entity.Description = request.Description;
-        entity.DefaultRevenueDebitAccountId = request.DefaultRevenueDebitAccountId;
+        entity.DefaultRevenueAccountId = request.DefaultRevenueAccountId;
+        entity.CurrencyId = request.CurrencyId;
 
         await context.SaveChangesAsync(cancellationToken);
 

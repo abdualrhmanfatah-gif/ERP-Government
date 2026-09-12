@@ -131,4 +131,14 @@ public static class TestApp
 
         return await context.Set<TEntity>().CountAsync();
     }
+
+    public static async Task<List<TEntity>> WhereAsync<TEntity>(Func<TEntity, bool> predicate)
+        where TEntity : class
+    {
+        using var scope = FunctionalTestSetup.ScopeFactory.CreateScope();
+
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        return (await context.Set<TEntity>().ToListAsync()).Where(predicate).ToList();
+    }
 }

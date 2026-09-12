@@ -20,13 +20,19 @@ public class FinalAccountLineConfiguration : IEntityTypeConfiguration<FinalAccou
             .HasMaxLength(200)
             .IsRequired();
 
-        builder.Property(e => e.BudgetedAmount)
+        builder.Property(e => e.OriginalBudgetAmount)
+            .HasColumnType("decimal(23,2)");
+
+        builder.Property(e => e.RevisedBudgetAmount)
+            .HasColumnType("decimal(23,2)");
+
+        builder.Property(e => e.EncumberedAmount)
             .HasColumnType("decimal(23,2)");
 
         builder.Property(e => e.ActualAmount)
             .HasColumnType("decimal(23,2)");
 
-        builder.Property(e => e.Variance)
+        builder.Property(e => e.VarianceAmount)
             .HasColumnType("decimal(23,2)");
 
         builder.Property(e => e.RowVersion)

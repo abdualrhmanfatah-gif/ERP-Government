@@ -53,7 +53,9 @@ public class RevenueReceiptConfiguration : IEntityTypeConfiguration<RevenueRecei
 
         builder.HasIndex(e => e.CurrencyId);
 
-        builder.Property(e => e.PaymentMethod).HasDefaultValue(PaymentMethod.Other);
+        builder.Property(e => e.PaymentMethod)
+            .HasDefaultValue(PaymentMethod.Cash)
+            .HasSentinel(null);
 
         builder.HasIndex(e => e.JournalEntryId);
 

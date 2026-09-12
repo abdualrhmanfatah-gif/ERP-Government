@@ -20,7 +20,12 @@ const buttonVariants = cva(
           "border-transparent bg-transparent text-[var(--color-on-surface)] hover:bg-[var(--color-surface-container-low)] hover:text-[var(--color-on-surface)] active:bg-[var(--color-surface-container)] aria-expanded:bg-[var(--color-surface-container-low)] aria-expanded:text-[var(--color-on-surface)] disabled:text-[var(--color-disabled-fg)] disabled:opacity-100",
         destructive:
           "bg-[var(--color-error)] text-[var(--color-on-error)] hover:bg-[var(--color-error-container)] hover:text-[var(--color-on-error-container)] active:bg-[var(--color-error)] disabled:bg-[var(--color-disabled-bg)] disabled:text-[var(--color-disabled-fg)] disabled:opacity-100 focus-visible:border-[color-mix(in_srgb,var(--color-error)_40%,transparent)] focus-visible:ring-[color-mix(in_srgb,var(--color-error)_20%,transparent)] dark:bg-[var(--color-error)] dark:hover:bg-[var(--color-error-container)] dark:focus-visible:ring-[color-mix(in_srgb,var(--color-error)_40%,transparent)]",
+        success:
+          "bg-[var(--color-success,#16a34a)] text-white hover:bg-[var(--color-success-hover,#15803d)] active:bg-[var(--color-success,#16a34a)] disabled:bg-[var(--color-disabled-bg)] disabled:text-[var(--color-disabled-fg)] disabled:opacity-100",
+        info:
+          "bg-[var(--color-info,#2563eb)] text-white hover:bg-[var(--color-info-hover,#1d4ed8)] active:bg-[var(--color-info,#2563eb)] disabled:bg-[var(--color-disabled-bg)] disabled:text-[var(--color-disabled-fg)] disabled:opacity-100",
         link: "text-[var(--color-link)] underline-offset-4 hover:underline disabled:text-[var(--color-disabled-fg)] disabled:no-underline",
+        header: "bg-transparent text-white/70 hover:bg-white/10 hover:text-white active:bg-white/15 disabled:text-white/30 disabled:bg-transparent",
       },
       size: {
         default:

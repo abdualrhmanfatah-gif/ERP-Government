@@ -43,13 +43,12 @@ public class PaymentOrderAuditGuardTests
             .ReturnsAsync(new List<string>());
     }
 
-    private void SetupPaymentOrder(PaymentOrderStatus status, BudgetCheckStatus budgetCheck)
+    private void SetupPaymentOrder(PaymentOrderStatus status)
     {
         var entity = new PaymentOrder
         {
             Id = 1,
             Status = status,
-            BudgetCheckStatus = budgetCheck,
             AmountGross = 1000m,
             FundId = 1,
             CurrencyId = 1,
@@ -75,7 +74,7 @@ public class PaymentOrderAuditGuardTests
     [Test]
     public async Task ApprovePaymentOrder_NullUserId_ShouldRejectAndNotLogAudit()
     {
-        SetupPaymentOrder(PaymentOrderStatus.Submitted, BudgetCheckStatus.Passed);
+        SetupPaymentOrder(PaymentOrderStatus.Submitted);
 
         var handler = new ApprovePaymentOrderCommandHandler(
             _contextMock.Object, _evalServiceMock.Object,
@@ -94,7 +93,7 @@ public class PaymentOrderAuditGuardTests
     [Test]
     public async Task ApprovePaymentOrder_ValidUserId_ShouldSucceedWithCorrectAuditId()
     {
-        SetupPaymentOrder(PaymentOrderStatus.Submitted, BudgetCheckStatus.Passed);
+        SetupPaymentOrder(PaymentOrderStatus.Submitted);
 
         _evalServiceMock.Setup(x => x.EvaluateAsync(
                 It.IsAny<string>(), It.IsAny<decimal>(),

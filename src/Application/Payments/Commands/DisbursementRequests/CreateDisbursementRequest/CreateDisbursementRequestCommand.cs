@@ -1,24 +1,24 @@
-using ERP_Government.Application.Budgeting.Common;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.FinancialSettings.Common.Services;
 using ERP_Government.Application.Payments.Common.DTOs;
-using ERP_Government.Domain.Budgeting.Enums;
 using ERP_Government.Domain.Payments.Entities;
 using ERP_Government.Domain.Payments.Enums;
-using Microsoft.EntityFrameworkCore;
 
 namespace ERP_Government.Application.Payments.Commands.DisbursementRequests.CreateDisbursementRequest;
 
 [Authorize(Policy = PermissionCodes.DisbursementRequestsCreate)]
 public class CreateDisbursementRequestCommand : IRequest<Result<DisbursementRequestDto>>
 {
-    public int PaymentOrderId { get; init; }
+    public string BeneficiaryName { get; init; } = string.Empty;
+    public decimal RequestedAmount { get; init; }
+    public int CurrencyId { get; init; }
+    public string Purpose { get; init; } = string.Empty;
+    public int FinancialYearId { get; init; }
     public string? Notes { get; init; }
 }
 
 public class CreateDisbursementRequestCommandHandler(
     IApplicationDbContext context,
-    IBudgetAvailabilityService availabilityService,
     IDocumentSequenceService sequenceService,
     IUser user) : IRequestHandler<CreateDisbursementRequestCommand, Result<DisbursementRequestDto>>
 {
@@ -27,71 +27,53 @@ public class CreateDisbursementRequestCommandHandler(
         CancellationToken cancellationToken)
     {
         if (user.Id is not int userId)
-            return Result<DisbursementRequestDto>.Failure(new[] { "User identity is required for this operation." });
+            return Result<DisbursementRequestDto>.Failure(["User identity is required for this operation."]);
 
-        var paymentOrder = await context.PaymentOrders
-            .FindAsync(request.PaymentOrderId, cancellationToken);
+        if (request.RequestedAmount <= 0)
+            return Result<DisbursementRequestDto>.Failure(["Requested amount must be greater than zero."]);
 
-        if (paymentOrder is null)
-            return Result<DisbursementRequestDto>.Failure(["Payment order not found."]);
+        if (string.IsNullOrWhiteSpace(request.BeneficiaryName))
+            return Result<DisbursementRequestDto>.Failure(["Beneficiary name is required."]);
 
-        if (paymentOrder.Status != PaymentOrderStatus.Approved)
-            return Result<DisbursementRequestDto>.Failure(["Payment order must be approved first."]);
+        if (string.IsNullOrWhiteSpace(request.Purpose))
+            return Result<DisbursementRequestDto>.Failure(["Purpose is required."]);
 
-        var netTotal = paymentOrder.AmountGross - paymentOrder.DeductionAmount;
-        if (netTotal <= 0)
-            return Result<DisbursementRequestDto>.Failure(["Payment order net total must be greater than zero."]);
+        // Validate currency exists
+        var currency = await context.Currencies.FindAsync(request.CurrencyId, cancellationToken);
+        if (currency is null)
+            return Result<DisbursementRequestDto>.Failure(["Invalid currency."]);
 
-        var existingRequest = await context.DisbursementRequests
-            .FirstOrDefaultAsync(d => d.PaymentOrderId == request.PaymentOrderId, cancellationToken);
+        // Validate fiscal year exists
+        var fiscalYear = await context.FiscalYears.FindAsync(request.FinancialYearId, cancellationToken);
+        if (fiscalYear is null)
+            return Result<DisbursementRequestDto>.Failure(["Invalid fiscal year."]);
 
-        if (existingRequest is not null)
-            return Result<DisbursementRequestDto>.Failure(["A disbursement request already exists for this payment order."]);
+        // Validate requester user exists
+        var userEntity = await context.Users.FindAsync(userId, cancellationToken);
+        string requestedByName = userEntity?.Login ?? "Unknown";
 
-        var requestNumber = await sequenceService.GenerateNextNumberAsync("DisbursementRequest", cancellationToken);
-        if (requestNumber.StartsWith("Error:"))
-            return Result<DisbursementRequestDto>.Failure([requestNumber]);
-
-        var fiscalYearLapsed = await context.YearClosingRuns
-            .AnyAsync(r => r.FiscalYearId == paymentOrder.FiscalYearId
-                && r.Status == YearClosingRunStatus.Completed, cancellationToken);
-
-        if (fiscalYearLapsed)
-            return Result<DisbursementRequestDto>.Failure(
-                ["Payments cannot be processed against a lapsed fiscal year. Reopen the fiscal year first."]);
-
-        bool hasWarning = false;
-
-        if (paymentOrder.AppropriationId > 0)
+        string requestNumber;
+        try
         {
-            var appropriation = await context.Appropriations
-                .FindAsync(paymentOrder.AppropriationId, cancellationToken);
-
-            if (appropriation is not null)
-            {
-                var summary = await availabilityService.GetAvailabilitySummaryAsync(appropriation.BudgetItemId);
-                var (allowed, warning) = availabilityService.EvaluateControlMethod(
-                    summary.BudgetControlMethod, netTotal, summary.Available);
-
-                if (!allowed)
-                    return Result<DisbursementRequestDto>.Failure([
-                        $"Budget availability insufficient. Net appropriated: {summary.NetAppropriated}, " +
-                        $"Encumbered: {summary.Encumbered}, Available: {summary.Available}, " +
-                        $"Requested: {netTotal}, Shortfall: {netTotal - summary.Available}"]);
-
-                if (warning is not null)
-                    hasWarning = true;
-            }
+            requestNumber = await sequenceService.GenerateNextNumberAsync("DisbursementRequest", cancellationToken);
+        }
+        catch (DocumentSequenceException ex)
+        {
+            return Result<DisbursementRequestDto>.Failure([ex.Message]);
         }
 
         var entity = new DisbursementRequest
         {
             RequestNumber = requestNumber,
-            PaymentOrderId = request.PaymentOrderId,
             RequestedById = userId,
+            RequestedByName = requestedByName,
+            BeneficiaryName = request.BeneficiaryName,
+            RequestedAmount = request.RequestedAmount,
+            CurrencyId = request.CurrencyId,
+            Purpose = request.Purpose,
+            FinancialYearId = request.FinancialYearId,
             RequestDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Status = DisbursementRequestStatus.Draft,
-            HasWarning = hasWarning,
             Notes = request.Notes,
             Created = DateTimeOffset.UtcNow,
             CreatedBy = userId.ToString(),
@@ -105,19 +87,22 @@ public class CreateDisbursementRequestCommandHandler(
         return Result<DisbursementRequestDto>.Success(new DisbursementRequestDto(
             entity.Id,
             entity.RequestNumber,
-            entity.PaymentOrderId,
-            paymentOrder.PaymentOrderNumber,
             entity.RequestedById,
-            "",
+            entity.RequestedByName,
+            entity.BeneficiaryName,
+            entity.RequestedAmount,
+            entity.CurrencyId,
+            entity.Purpose,
+            entity.FinancialYearId,
             entity.RequestDate,
             entity.Status,
-            entity.HasWarning,
             entity.Notes,
-            netTotal,
-            paymentOrder.BeneficiaryName,
+            entity.PaymentDate,
             null,
             null,
-            null));
+            null,
+            null,
+            new()));
     }
 }
 
@@ -125,7 +110,21 @@ public class CreateDisbursementRequestCommandValidator : AbstractValidator<Creat
 {
     public CreateDisbursementRequestCommandValidator()
     {
-        RuleFor(x => x.PaymentOrderId)
-            .GreaterThan(0).WithMessage("Payment order is required.");
+        RuleFor(x => x.BeneficiaryName)
+            .NotEmpty().WithMessage("Beneficiary name is required.")
+            .MaximumLength(200).WithMessage("Beneficiary name must not exceed 200 characters.");
+
+        RuleFor(x => x.RequestedAmount)
+            .GreaterThan(0).WithMessage("Requested amount must be greater than zero.");
+
+        RuleFor(x => x.CurrencyId)
+            .GreaterThan(0).WithMessage("Currency is required.");
+
+        RuleFor(x => x.Purpose)
+            .NotEmpty().WithMessage("Purpose is required.")
+            .MaximumLength(500).WithMessage("Purpose must not exceed 500 characters.");
+
+        RuleFor(x => x.FinancialYearId)
+            .GreaterThan(0).WithMessage("Financial year is required.");
     }
 }

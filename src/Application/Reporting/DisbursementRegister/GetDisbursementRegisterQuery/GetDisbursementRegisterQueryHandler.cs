@@ -35,30 +35,46 @@ internal class GetDisbursementRegisterQueryHandler(IApplicationDbContext dbConte
         var paymentOrders = await query.ToListAsync(cancellationToken);
 
         var fundIds = paymentOrders.Select(po => po.FundId).Distinct().ToList();
-        var vendorIds = paymentOrders.Select(po => po.VendorId).Distinct().ToList();
 
         var funds = await dbContext.Funds
             .AsNoTracking()
             .Where(f => fundIds.Contains(f.Id))
             .ToDictionaryAsync(f => f.Id, f => (f.FundNumber, f.FundName), cancellationToken);
 
-        var vendors = await dbContext.Parties
+        var accrualJournalEntryIds = paymentOrders
+            .Where(po => po.AccrualJournalEntryId.HasValue)
+            .Select(po => po.AccrualJournalEntryId!.Value)
+            .Distinct()
+            .ToList();
+
+        var accrualJournalEntries = await dbContext.JournalEntries
             .AsNoTracking()
-            .Where(p => vendorIds.Contains(p.Id))
-            .ToDictionaryAsync(p => p.Id, p => p.NameEn ?? p.NameAr, cancellationToken);
+            .Where(je => accrualJournalEntryIds.Contains(je.Id))
+            .ToDictionaryAsync(je => je.Id, cancellationToken);
 
         var lines = paymentOrders
             .Select(po =>
             {
                 var fund = funds.GetValueOrDefault(po.FundId);
-                var payee = vendors.GetValueOrDefault(po.VendorId);
+
+                int? accrualJournalEntryId = null;
+                string? accrualEntryNumber = null;
+                string? accrualEntryStatus = null;
+
+                if (po.AccrualJournalEntryId.HasValue
+                    && accrualJournalEntries.TryGetValue(po.AccrualJournalEntryId.Value, out var accrualEntry))
+                {
+                    accrualJournalEntryId = accrualEntry.Id;
+                    accrualEntryNumber = accrualEntry.EntryNumber;
+                    accrualEntryStatus = accrualEntry.EntryStatus.ToString();
+                }
 
                 return new DisbursementRegisterLineDto
                 {
                     PaymentOrderId = po.Id,
                     OrderNumber = po.PaymentOrderNumber,
                     OrderDate = po.PaymentOrderDate,
-                    PayeeName = payee ?? po.BeneficiaryName,
+                    PayeeName = po.BeneficiaryName,
                     Amount = po.AmountGross,
                     Status = po.Status.ToString(),
                     FundId = po.FundId,
@@ -66,7 +82,10 @@ internal class GetDisbursementRegisterQueryHandler(IApplicationDbContext dbConte
                     FundName = fund.FundName,
                     ApproverId = null,
                     ApproverName = null,
-                    PaidAt = po.PaidAt.HasValue ? DateOnly.FromDateTime(po.PaidAt.Value.DateTime) : null
+                    PaidAt = po.PaidAt.HasValue ? DateOnly.FromDateTime(po.PaidAt.Value.DateTime) : null,
+                    AccrualJournalEntryId = accrualJournalEntryId,
+                    AccrualEntryNumber = accrualEntryNumber,
+                    AccrualEntryStatus = accrualEntryStatus
                 };
             })
             .OrderBy(l => l.OrderDate)

@@ -156,6 +156,144 @@ As a budget officer, I drill down from a budget summary to its items, from an it
 - **Encumbrance**: Reservation of funds against an Appropriation. Typed. Supports reversal. Budget context via join through Appropriation.
 - **MonthlyPlan (client-side)**: 12-month distribution of a BudgetItem's budget. No backend entity. Stored in local storage.
 
+### Field Contract
+
+#### Budget
+
+| Field | Type | Editable | Notes |
+|-------|------|----------|-------|
+| `budgetNumber` | string | No (issued at creation) | System-generated |
+| `name` | string | Yes (create + edit) | Required |
+| `fiscalYearId` | number | Yes (create) | Open years only |
+| `fundId` | number | Yes (create) | Fund picker |
+| `typeId` | number | Yes (create) | Budget type picker |
+| `status` | enum | No (lifecycle) | Draft/Submitted/Approved/Active/Suspended/Closed/Cancelled |
+| `audit` | object | No | createdAt/By, modifiedAt/By |
+
+#### BudgetItem
+
+| Field | Type | Editable | Notes |
+|-------|------|----------|-------|
+| `itemCode` | string | Yes (create + edit) | Required |
+| `itemName` | string | Yes (create + edit) | Required |
+| `parentId` | number? | Yes (move) | Tree hierarchy |
+| `accountId` | number | Yes (edit) | Account picker |
+| `fundId` | number | Yes (edit) | Fund picker |
+| `costCenterId` | number? | Yes (edit) | Cost center picker |
+| `budgetClassificationId` | number? | Yes (edit) | Classification picker |
+| `allowOverrun` | boolean | Yes (edit) | Overrun flag |
+| `totalAppropriated` | decimal | No (computed) | Server total |
+| `totalEncumbered` | decimal | No (computed) | Server total |
+| `totalAvailable` | decimal | No (computed) | Appropriated − Encumbered |
+
+#### Appropriation
+
+| Field | Type | Editable | Notes |
+|-------|------|----------|-------|
+| `number` | string | No (auto) | System-generated |
+| `itemId` | number | Yes (create) | Budget item picker |
+| `type` | enum | Yes (create) | Original/Supplementary/Reduction/Transfer |
+| `amount` | decimal | Yes (create + edit, Draft only) | Required |
+| `status` | enum | No (lifecycle) | Draft/PendingApproval/Approved/Active/Reversed |
+| `targetBudgetItemId` | number? | Yes (Transfer only) | Target item picker |
+| `documentType` | string | Yes (create) | Optional |
+| `documentId` | number? | Yes (create) | Optional |
+
+#### Encumbrance
+
+| Field | Type | Editable | Notes |
+|-------|------|----------|-------|
+| `number` | string | No (auto) | System-generated |
+| `itemId` | number | Yes (create) | Budget item picker |
+| `vendorPartyId` | number | Yes (create) | Vendor picker (inactive excluded) |
+| `amount` | decimal | Yes (create + edit, Draft only) | Required |
+| `encumbranceDate` | Date | Yes (create) | Required |
+| `status` | enum | No (lifecycle) | Draft/PendingApproval/Approved/Active/Reversed |
+| `reversalOfId` | number? | No | Link to original (set at reverse) |
+| `reversalReason` | string? | No (set at reverse) | Mandatory on reverse |
+
+#### Availability (computed, read-only)
+
+| Field | Source | Notes |
+|-------|--------|-------|
+| `appropriated` | Sum of active appropriation amounts | Per budget item |
+| `encumbered` | Sum of active encumbrance amounts | Per budget item |
+| `available` | appropriated − encumbered | Per budget item |
+| `controlMethod` | BudgetControlMethod | None/Warning/Blocking |
+| `tone` | Derived from controlMethod + available | Green/Amber/Red |
+
+### Permissions
+
+- **FR-PERM-001**: `Budgets.View` — View list + detail
+- **FR-PERM-002**: `Budgets.Create` — Create budget
+- **FR-PERM-003**: `Budgets.Update` — Edit budget
+- **FR-PERM-004**: `Budgets.Submit` — Submit Draft→Submitted
+- **FR-PERM-005**: `Budgets.Approve` — Approve Submitted→Approved
+- **FR-PERM-006**: `Budgets.Activate` — Activate Approved→Active
+- **FR-PERM-007**: `Budgets.Suspend` — Suspend Active→Suspended
+- **FR-PERM-008**: `Budgets.Close` — Close→Closed
+- **FR-PERM-009**: `Budgets.Cancel` — Cancel→Cancelled
+- **FR-PERM-010**: `BudgetItems.View` — View items
+- **FR-PERM-011**: `BudgetItems.Create` — Create item
+- **FR-PERM-012**: `BudgetItems.Update` — Edit item
+- **FR-PERM-013**: `BudgetItems.Delete` — Delete item
+- **FR-PERM-014**: `BudgetItems.Move` — Move item in tree
+- **FR-PERM-015**: `Appropriations.View` — View appropriations
+- **FR-PERM-016**: `Appropriations.Create` — Create appropriation
+- **FR-PERM-017**: `Appropriations.Update` — Edit appropriation (Draft only)
+- **FR-PERM-018**: `Appropriations.Submit` — Submit
+- **FR-PERM-019**: `Appropriations.Approve` — Approve
+- **FR-PERM-020**: `Appropriations.Activate` — Activate
+- **FR-PERM-021**: `Appropriations.Suspend` — Suspend
+- **FR-PERM-022**: `Appropriations.Close` — Close
+- **FR-PERM-023**: `Appropriations.Cancel` — Cancel
+- **FR-PERM-024**: `Appropriations.Reverse` — Reverse
+- **FR-PERM-025**: `Encumbrances.View` — View encumbrances
+- **FR-PERM-026**: `Encumbrances.Create` — Create encumbrance
+- **FR-PERM-027**: `Encumbrances.Update` — Edit encumbrance (Draft only)
+- **FR-PERM-028**: `Encumbrances.Submit` — Submit
+- **FR-PERM-029**: `Encumbrances.Approve` — Approve
+- **FR-PERM-030**: `Encumbrances.Activate` — Activate
+- **FR-PERM-031**: `Encumbrances.Release` — Release
+- **FR-PERM-032**: `Encumbrances.Cancel` — Cancel
+- **FR-PERM-033**: `Encumbrances.Reverse` — Reverse
+
+### Lifecycle Transitions (PATCH-style)
+
+- Budget: Draft→Submitted→Approved→Active→Suspended/Closed/Cancelled
+- Appropriation: Draft→PendingApproval→Approved→Active→Reversed
+- Encumbrance: Draft→PendingApproval→Approved→Active→Reversed
+
+### UI States Required
+
+| Page | Loading | Empty | Error | Unauthorized | Not Found | Normal |
+|------|---------|-------|-------|--------------|-----------|--------|
+| Budgets List | Skeleton | "لا توجد موازنات" | Toast | Guard | N/A | DataGrid |
+| Budget Detail | Skeleton | N/A | Error card | Guard | Not found msg | Info + item tree + actions |
+| Budget Create | N/A | N/A | Toast | Guard | N/A | Form |
+| Appropriations List | Skeleton | "لا توجد تحويلات" | Toast | Guard | N/A | DataGrid |
+| Encumbrances List | Skeleton | "لا توجد التزامات" | Toast | Guard | N/A | DataGrid |
+
+### Tests Expected
+
+| ID | Page | Test |
+|----|------|------|
+| T-021-001 | Budgets List | Renders with status badges |
+| T-021-002 | Budget Detail | Item tree renders |
+| T-021-003 | Budget Create | Form validates |
+| T-021-004 | Budget Detail | Lifecycle buttons per status |
+| T-021-005 | BudgetItem Tree | Add/edit/delete in Draft |
+| T-021-006 | BudgetItem Tree | Move item (no cycle) |
+| T-021-007 | Appropriations | Create Original/Supplement/Reduction/Transfer |
+| T-021-008 | Appropriations | Transfer target selector excludes source |
+| T-021-009 | Encumbrances | Create with availability indicator |
+| T-021-010 | Encumbrances | Availability blocks when exceeding |
+| T-021-011 | Encumbrances | Reverse requires reason |
+| T-021-012 | MonthlyPlan | 12-month editor persists |
+| T-021-013 | MonthlyPlan | Variance indicator |
+| T-021-014 | Drill-Down | Totals at each level |
+| T-021-015 | Availability | Green/Amber/Red per controlMethod |
+
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes

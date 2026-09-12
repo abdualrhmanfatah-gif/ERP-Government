@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 import {
-  getToken, setToken, removeToken,
-  getAuthUser, setAuthUser, isAuthenticated as checkTokenValid,
+  setToken, removeToken,
+  setAuthUser, isAuthenticated as checkTokenValid,
 } from '../utils/auth-token';
 import { authFetch } from '../utils/auth-fetch';
 
@@ -16,13 +16,8 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    setIsAuthenticated(checkTokenValid());
-    setIsLoading(false);
-  }, []);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => checkTokenValid());
+  const [isLoading] = useState(() => false);
 
   const login = async (email: string, password: string) => {
     const res = await fetch('/api/Users/login', {

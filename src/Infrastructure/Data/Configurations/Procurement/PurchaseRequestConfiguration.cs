@@ -13,34 +13,26 @@ public class PurchaseRequestConfiguration : IEntityTypeConfiguration<PurchaseReq
         builder.HasKey(e => e.Id);
 
         builder.Property(e => e.RequestNumber)
-            .HasMaxLength(50)
-            .IsRequired();
-
-        builder.Property(e => e.RequestType)
-            .HasMaxLength(50)
-            .IsRequired();
-
-        builder.Property(e => e.Status)
-            .HasMaxLength(50)
+            .HasMaxLength(20)
             .IsRequired();
 
         builder.Property(e => e.Priority)
-            .HasMaxLength(50);
+            .HasConversion<int>()
+            .IsRequired();
 
-        builder.Property(e => e.CurrencyCode)
-            .HasMaxLength(10);
+        builder.Property(e => e.Status)
+            .HasConversion<int>()
+            .IsRequired();
+
+        builder.Property(e => e.TotalEstimatedCost)
+            .HasColumnType("decimal(23,2)");
+
+        builder.Property(e => e.RequesterName)
+            .HasMaxLength(200)
+            .IsRequired();
 
         builder.Property(e => e.Notes)
             .HasMaxLength(2000);
-
-        builder.Property(e => e.RejectionReason)
-            .HasMaxLength(500);
-
-        builder.Property(e => e.TotalQuantity)
-            .HasColumnType("decimal(18,6)");
-
-        builder.Property(e => e.EstimatedTotalCost)
-            .HasColumnType("decimal(23,6)");
 
         builder.Property(e => e.RowVersion)
             .IsRowVersion();

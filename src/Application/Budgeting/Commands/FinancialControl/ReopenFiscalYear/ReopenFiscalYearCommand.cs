@@ -13,7 +13,7 @@ public record ReopenFiscalYearCommand(int FiscalYearId) : IRequest<Result<Reopen
 public record ReopenFiscalYearResult(
     int YearClosingRunId,
     int FiscalYearId,
-    decimal RestoredAppropriationTotal,
+    decimal RestoredBudgetTotal,
     decimal RestoredEncumbranceTotal);
 
 public class ReopenFiscalYearCommandHandler(
@@ -44,48 +44,59 @@ public class ReopenFiscalYearCommandHandler(
             return Result<ReopenFiscalYearResult>.Failure(new[]
                 { $"Fiscal year {fiscalYear.Name} has not been lapsed." });
 
-        var appropriations = await context.Appropriations
-            .Where(a => a.BudgetItem.Budget.FiscalYearId == request.FiscalYearId
-                && a.Status == AppropriationStatus.Cancelled)
-            .ToListAsync(cancellationToken);
-
+        // Reverse lapsed encumbrances
         var encumbrances = await context.Encumbrances
-            .Where(e => appropriations.Any(a => a.Id == e.AppropriationId)
-                && e.Status == EncumbranceStatus.Cancelled)
+            .Where(e => e.Status == EncumbranceStatus.Cancelled
+                && e.DocumentType == "BudgetTransaction"
+                && e.DocumentId.HasValue
+                && context.BudgetTransactions.Any(bt => bt.Id == e.DocumentId.Value
+                    && bt.Budget.FiscalYearId == request.FiscalYearId))
             .ToListAsync(cancellationToken);
 
-        var restoredAppropriationTotal = 0m;
         var restoredEncumbranceTotal = 0m;
-
-        foreach (var appropriation in appropriations)
-        {
-            restoredAppropriationTotal += appropriation.AppropriationType == AppropriationType.Original ? appropriation.Amount :
-                appropriation.AppropriationType == AppropriationType.Supplement ? appropriation.Amount :
-                appropriation.AppropriationType == AppropriationType.Reduction ? -appropriation.Amount :
-                appropriation.AppropriationType == AppropriationType.Adjustment ? appropriation.Amount : 0m;
-
-            appropriation.Status = AppropriationStatus.Active;
-        }
 
         foreach (var encumbrance in encumbrances)
         {
-            restoredEncumbranceTotal += encumbrance.Amount;
+            restoredEncumbranceTotal += encumbrance.TotalAmount;
             encumbrance.Status = EncumbranceStatus.Active;
+        }
+
+        // Reverse lapse transactions (posted Lapse transactions)
+        var lapseTransactions = await context.BudgetTransactions
+            .Where(bt => bt.TransactionType == BudgetTransactionType.Lapse
+                && bt.Status == BudgetTransactionStatus.Posted
+                && bt.Budget.FiscalYearId == request.FiscalYearId)
+            .ToListAsync(cancellationToken);
+
+        decimal restoredBudgetTotal = 0m;
+        foreach (var lapseTransaction in lapseTransactions)
+        {
+            lapseTransaction.Status = BudgetTransactionStatus.Reversed;
+            restoredBudgetTotal += lapseTransaction.Direction == TransactionDirection.Decrease ? lapseTransaction.Amount : -lapseTransaction.Amount;
+
+            var allocation = await context.BudgetItemAllocations
+                .FirstOrDefaultAsync(a => a.Id == lapseTransaction.BudgetItemAllocationId, cancellationToken);
+
+            if (allocation is not null && allocation.ApprovedAmount.HasValue)
+            {
+                if (lapseTransaction.Direction == TransactionDirection.Decrease)
+                    allocation.ApprovedAmount += lapseTransaction.Amount;
+                else
+                    allocation.ApprovedAmount -= lapseTransaction.Amount;
+            }
         }
 
         fiscalYear.IsClosed = false;
 
         lapsedRun.Status = YearClosingRunStatus.Reversed;
-        lapsedRun.ReversedById = user.Id ?? 0;
-        lapsedRun.ReversedAt = DateTimeOffset.UtcNow;
 
         var reopenRun = new YearClosingRun
         {
             FiscalYearId = request.FiscalYearId,
-            RunAt = DateTimeOffset.UtcNow,
+            StartedAt = DateTimeOffset.UtcNow,
             RunById = user.Id ?? 0,
             RunType = YearClosingRunType.Reopen,
-            LapsedAppropriationTotal = restoredAppropriationTotal,
+            LapsedAppropriationTotal = restoredBudgetTotal,
             LapsedEncumbranceTotal = restoredEncumbranceTotal,
             Status = YearClosingRunStatus.Completed
         };
@@ -96,7 +107,7 @@ public class ReopenFiscalYearCommandHandler(
         return Result<ReopenFiscalYearResult>.Success(new ReopenFiscalYearResult(
             reopenRun.Id,
             request.FiscalYearId,
-            restoredAppropriationTotal,
+            restoredBudgetTotal,
             restoredEncumbranceTotal));
     }
 }

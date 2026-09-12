@@ -11,8 +11,10 @@ using ERP_Government.Application.Accounting.Commands.JournalEntries.UpdateJourna
 using ERP_Government.Application.Accounting.Common;
 using ERP_Government.Application.Accounting.Queries.JournalEntries.GetJournalEntryById;
 using ERP_Government.Application.Accounting.Queries.JournalEntries.GetJournalEntriesList;
+using ERP_Government.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP_Government.Web.Endpoints.Accounting;
 
@@ -78,6 +80,9 @@ public class JournalEntries : IEndpointGroup
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
             .RequireAuthorization("Accounting.JournalEntries.UpdateLines");
+
+        groupBuilder.MapGet("/export", ExportJournalEntries)
+            .RequireAuthorization("Accounting.JournalEntries.Read");
     }
 
     [EndpointSummary("Get all journal entries")]
@@ -239,5 +244,83 @@ public class JournalEntries : IEndpointGroup
         if (!result.Succeeded)
             return Results.BadRequest(result.Errors);
         return Results.NoContent();
+    }
+
+    [EndpointSummary("Export journal entries to Excel or PDF")]
+    public static async Task<IResult> ExportJournalEntries(
+        [FromServices] ISender sender,
+        [FromServices] IApplicationDbContext dbContext,
+        [FromQuery] string format,
+        [FromQuery] int? journalId,
+        [FromQuery] int? entryId,
+        [FromQuery] string? status,
+        [FromQuery] DateOnly? fromDate,
+        [FromQuery] DateOnly? toDate,
+        [FromQuery] string? pageSize,
+        [FromQuery] bool? isLandscape)
+    {
+        var query = new GetJournalEntriesListQuery
+        {
+            JournalId = journalId,
+            EntryStatus = status,
+            FromDate = fromDate,
+            ToDate = toDate
+        };
+        var entries = await sender.Send(query);
+
+        if (entryId.HasValue)
+            entries = entries.Where(e => e.Id == entryId.Value).ToList();
+
+        var entryIds = entries.Select(e => e.Id).ToList();
+        var lines = await dbContext.JournalEntryLines
+            .Include(l => l.Account)
+            .Where(l => entryIds.Contains(l.JournalEntryId))
+            .ToListAsync();
+
+        var linesByEntry = lines.GroupBy(l => l.JournalEntryId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var sections = entries.Select(e => new Application.Accounting.Reports.Common.ReportSection
+        {
+            Title = $"قيد رقم {e.EntryNumber}",
+            TitleEn = $"Entry {e.EntryNumber}",
+            Description = e.Narration,
+            Lines = linesByEntry.TryGetValue(e.Id, out var entryLines)
+                ? entryLines.Select(l => new Application.Accounting.Reports.Common.ReportLine
+                {
+                    AccountCode = l.Account?.Code ?? "",
+                    AccountName = l.Account?.Name ?? "",
+                    Description = l.Description,
+                    Debit = l.Debit,
+                    Credit = l.Credit,
+                }).ToList()
+                : [],
+        }).ToList();
+
+        var reportResult = new Application.Accounting.Reports.Common.ReportResult
+        {
+            Currency = "YER",
+            GeneratedAt = DateTimeOffset.UtcNow,
+            Sections = sections,
+            PaperSize = pageSize ?? "A5",
+            IsLandscape = isLandscape ?? true,
+        };
+
+        var stream = new MemoryStream();
+        if (format?.ToLower() == "pdf")
+        {
+            var exporter = new ERP_Government.Infrastructure.Services.PdfReportExporter();
+            await exporter.ExportPdfAsync(reportResult, "Journal Entries", stream);
+        }
+        else
+        {
+            var exporter = new ERP_Government.Infrastructure.Services.ExcelReportExporter();
+            await exporter.ExportExcelAsync(reportResult, "Journal Entries", stream);
+        }
+        stream.Position = 0;
+
+        var contentType = format?.ToLower() == "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        var extension = format?.ToLower() == "pdf" ? "pdf" : "xlsx";
+        return Results.File(stream, contentType, $"JournalEntries-{DateTime.Now:yyyyMMdd}.{extension}");
     }
 }

@@ -21,7 +21,7 @@ public class ApprovalHistoryConfiguration : IEntityTypeConfiguration<ApprovalHis
             .IsRequired();
 
         builder.Property(e => e.Decision)
-            .HasMaxLength(20)
+            .HasMaxLength(50)
             .IsRequired();
 
         builder.Property(e => e.Reason)

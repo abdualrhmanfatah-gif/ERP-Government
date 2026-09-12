@@ -14,7 +14,7 @@ public class GetBudgetItemAvailabilityQueryHandler(
         CancellationToken cancellationToken)
     {
         var summary = await availabilityService.GetAvailabilitySummaryAsync(request.Id);
-        if (summary.NetAppropriated == 0 && summary.Encumbered == 0 && summary.Available == 0)
+        if (summary.ApprovedAmount == 0 && summary.OutstandingEncumbrance == 0 && summary.AvailableAmount == 0)
             return null;
         return summary;
     }

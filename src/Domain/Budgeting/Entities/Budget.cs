@@ -9,12 +9,15 @@ public class Budget : BaseAuditableEntity
     public int BudgetTypeId { get; set; }
     public int FiscalYearId { get; set; }
     public int FundId { get; set; }
-    public decimal TotalAmount { get; set; }
     public Enums.BudgetStatus Status { get; set; } = Enums.BudgetStatus.Draft;
     public bool? AllowOverrun { get; set; }
     public DateOnly EffectiveFrom { get; set; }
     public DateOnly? EffectiveTo { get; set; }
     public string? Description { get; set; }
+    public DateTimeOffset? ApprovedAt { get; set; }
+    public string? ApprovedBy { get; set; }
+    public DateTimeOffset? ClosedAt { get; set; }
+    public string? ClosedBy { get; set; }
     public byte[] RowVersion { get; set; } = [];
 
     public BudgetType BudgetType { get; set; } = null!;

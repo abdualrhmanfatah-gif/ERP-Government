@@ -15,4 +15,5 @@ public class PostingRule : BaseAuditableEntity
     public byte[] RowVersion { get; set; } = [];
 
     public Journal Journal { get; set; } = null!;
+    public ICollection<PostingRuleLine> Lines { get; set; } = [];
 }

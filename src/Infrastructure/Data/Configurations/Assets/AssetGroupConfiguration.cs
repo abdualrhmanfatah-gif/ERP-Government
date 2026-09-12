@@ -31,6 +31,9 @@ public class AssetGroupConfiguration : IEntityTypeConfiguration<AssetGroup>
             .HasMaxLength(50)
             .IsRequired();
 
+        builder.Property(e => e.DepreciationRate)
+            .HasPrecision(18, 4);
+
         builder.Property(e => e.ResidualValuePercentage)
             .HasColumnType("decimal(5,2)");
 

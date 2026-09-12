@@ -7,8 +7,7 @@ public enum PaymentOrderStatus
     Approved = 2,
     SentToTreasury = 3,
     Paid = 4,
-    PartiallyPaid = 5,
-    Cancelled = 6,
-    Rejected = 7,
-    Voided = 8
+    Cancelled = 5,
+    Rejected = 6,
+    Voided = 7
 }

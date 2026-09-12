@@ -7,6 +7,10 @@ namespace ERP_Government.Application.Budgeting.Commands.BudgetItems;
 public record UpdateBudgetItemCommand(
     int Id,
     string ItemName,
+    int? AccountId,
+    int? CostCenterId,
+    int? BudgetClassificationId,
+    bool? AllowOverrun,
     string? Remarks,
     byte[] RowVersion) : IRequest<Result>;
 
@@ -33,6 +37,10 @@ public class UpdateBudgetItemCommandHandler(
             return Result.Failure(["Concurrency conflict. The record has been modified by another user."]);
 
         entity.ItemName = request.ItemName;
+        entity.AccountId = request.AccountId;
+        entity.CostCenterId = request.CostCenterId;
+        entity.BudgetClassificationId = request.BudgetClassificationId;
+        entity.AllowOverrun = request.AllowOverrun;
         entity.Remarks = request.Remarks;
 
         await context.SaveChangesAsync(cancellationToken);

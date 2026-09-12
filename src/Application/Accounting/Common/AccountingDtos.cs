@@ -160,8 +160,8 @@ public class JournalEntryDto
     public byte[] RowVersion { get; init; } = [];
     // Ephemeral base-currency conversion surface (AR-001, DEC-002) — NOT persisted columns
     public int? BaseCurrencyId { get; init; }
-    public decimal? TotalBaseDebit { get; init; }
-    public decimal? TotalBaseCredit { get; init; }
+    public decimal? TotalBaseDebit { get; set; }
+    public decimal? TotalBaseCredit { get; set; }
     public List<JournalEntryLineDto> Lines { get; set; } = [];
 
     private class Mapping : Profile
@@ -213,29 +213,6 @@ public class JournalEntryLineDto
     }
 }
 
-// T006 — AccountingEventDto
-public class AccountingEventDto
-{
-    public int Id { get; init; }
-    public string EventType { get; init; } = string.Empty;
-    public string SourceTable { get; init; } = string.Empty;
-    public int SourceId { get; init; }
-    public string Status { get; init; } = string.Empty;
-    public int? JournalEntryId { get; init; }
-    public string? ErrorMessage { get; init; }
-    public DateTimeOffset? ProcessedAt { get; init; }
-    public int RetryCount { get; init; }
-
-    private class Mapping : Profile
-    {
-        public Mapping()
-        {
-            CreateMap<AccountingEvent, AccountingEventDto>()
-                .ForMember(d => d.Status, opt => opt.MapFrom(s => s.Status.ToString()));
-        }
-    }
-}
-
 // T007 — PostingRuleDto
 public class PostingRuleDto
 {
@@ -246,13 +223,15 @@ public class PostingRuleDto
     public string JournalName { get; init; } = string.Empty;
     public int Priority { get; init; }
     public bool IsActive { get; init; }
+    public List<PostingRuleLineDto> Lines { get; init; } = [];
 
     private class Mapping : Profile
     {
         public Mapping()
         {
             CreateMap<PostingRule, PostingRuleDto>()
-                .ForMember(d => d.JournalName, opt => opt.MapFrom(s => s.Journal.Name));
+                .ForMember(d => d.JournalName, opt => opt.MapFrom(s => s.Journal.Name))
+                .ForMember(d => d.Lines, opt => opt.MapFrom(s => s.Lines));
         }
     }
 }
@@ -279,12 +258,14 @@ public class PostingRuleLineDto
         {
             CreateMap<PostingRuleLine, PostingRuleLineDto>()
                 .ForMember(d => d.FixedAccountCode, opt => opt.MapFrom(s => s.FixedAccount != null ? s.FixedAccount.Code : null))
-                .ForMember(d => d.DebitOrCredit, opt => opt.MapFrom(s => s.DebitOrCredit.ToString()));
+                .ForMember(d => d.DebitOrCredit, opt => opt.MapFrom(s => s.DebitOrCredit.ToString()))
+                .ForMember(d => d.AccountSource, opt => opt.MapFrom(s => s.AccountSource.ToString()))
+                .ForMember(d => d.AmountSource, opt => opt.MapFrom(s => s.AmountSource.ToString()));
         }
     }
 }
 
-// T008 — JournalEntryTemplateDto
+// T008 — JournalEntryTemplateDto (US4: lines + totals, computed never stored)
 public class JournalEntryTemplateDto
 {
     public int Id { get; init; }
@@ -295,6 +276,10 @@ public class JournalEntryTemplateDto
     public string TemplateType { get; init; } = string.Empty;
     public bool IsSystemTemplate { get; init; }
     public bool IsActive { get; init; }
+    public List<JournalEntryTemplateLineDto> Lines { get; set; } = [];
+    public decimal TotalDebit { get; set; }
+    public decimal TotalCredit { get; set; }
+    public bool IsBalanced => TotalDebit == TotalCredit && Lines.Count > 0;
 
     private class Mapping : Profile
     {
@@ -302,12 +287,15 @@ public class JournalEntryTemplateDto
         {
             CreateMap<JournalEntryTemplate, JournalEntryTemplateDto>()
                 .ForMember(d => d.JournalName, opt => opt.MapFrom(s => s.Journal.Name))
-                .ForMember(d => d.TemplateType, opt => opt.MapFrom(s => s.TemplateType.ToString()));
+                .ForMember(d => d.TemplateType, opt => opt.MapFrom(s => s.TemplateType.ToString()))
+                .ForMember(d => d.Lines, opt => opt.Ignore())
+                .ForMember(d => d.TotalDebit, opt => opt.Ignore())
+                .ForMember(d => d.TotalCredit, opt => opt.Ignore());
         }
     }
 }
 
-// T077 — JournalEntryTemplateLineDto
+// T077 — JournalEntryTemplateLineDto (mirror JournalEntryLineDto except FK)
 public class JournalEntryTemplateLineDto
 {
     public int Id { get; init; }
@@ -316,15 +304,14 @@ public class JournalEntryTemplateLineDto
     public int AccountId { get; init; }
     public string AccountCode { get; init; } = string.Empty;
     public string AccountName { get; init; } = string.Empty;
-    public decimal DebitAmount { get; init; }
-    public decimal CreditAmount { get; init; }
     public string? Description { get; init; }
-    public int? FundId { get; init; }
+    public int CurrencyId { get; init; }
+    public decimal ExchangeRate { get; init; }
+    public decimal Debit { get; init; }
+    public decimal Credit { get; init; }
     public int? CostCenterId { get; init; }
-    public int? ProjectId { get; init; }
-    public int? OrganizationUnitId { get; init; }
-    public int? CurrencyId { get; init; }
-    public bool IsMandatory { get; init; }
+    public string? CostCenterName { get; init; }
+    public byte[] RowVersion { get; init; } = [];
 
     private class Mapping : Profile
     {
@@ -332,7 +319,8 @@ public class JournalEntryTemplateLineDto
         {
             CreateMap<JournalEntryTemplateLine, JournalEntryTemplateLineDto>()
                 .ForMember(d => d.AccountCode, opt => opt.MapFrom(s => s.Account.Code))
-                .ForMember(d => d.AccountName, opt => opt.MapFrom(s => s.Account.Name));
+                .ForMember(d => d.AccountName, opt => opt.MapFrom(s => s.Account.Name))
+                .ForMember(d => d.CostCenterName, opt => opt.MapFrom(s => s.CostCenter != null ? s.CostCenter.Name : null));
         }
     }
 }

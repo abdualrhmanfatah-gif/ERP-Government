@@ -1,5 +1,5 @@
-using ERP_Government.Application.Budgeting.Commands.Appropriations;
 using ERP_Government.Application.Budgeting.Commands.Budgets;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.CreateBudgetTransaction;
 using ERP_Government.Application.Budgeting.Queries.Budgets;
 using ERP_Government.Domain.Budgeting.Entities;
 using ERP_Government.Domain.Budgeting.Enums;
@@ -85,7 +85,7 @@ public class SequenceImmutabilityTests : TestBase
     }
 
     [Test]
-    public async Task AppropriationNumber_ShouldNotChangeOnLifecycleTransitions()
+    public async Task BudgetTransactionNumber_ShouldBeAssignedAtCreation()
     {
         await TestApp.RunAsAdministratorAsync();
 
@@ -106,14 +106,15 @@ public class SequenceImmutabilityTests : TestBase
         };
         await TestApp.AddAsync(item);
 
-        var createResult = await TestApp.SendAsync(new CreateAppropriationCommand(
-            budgetId, item.Id, AppropriationType.Original, "PO", 1, 5000m));
+        var createResult = await TestApp.SendAsync(new CreateBudgetTransactionCommand(
+            budgetId, BudgetTransactionType.InitialAppropriation,
+            DateOnly.FromDateTime(DateTime.UtcNow), "PO", 1, "Number test",
+            [new BudgetTransactionLineRequest(item.Id, TransactionDirection.Increase, 5000m, null)]));
         createResult.Succeeded.ShouldBeTrue();
-        var appropriationId = createResult.Value;
+        var transactionId = createResult.Value;
 
-        var appropriation = await TestApp.FindAsync<Appropriation>(appropriationId);
-        var originalNumber = appropriation!.AppropriationNumber;
-        originalNumber.ShouldNotBeNullOrWhiteSpace();
-        originalNumber.ShouldStartWith("APR-");
+        var transaction = await TestApp.FindAsync<BudgetTransaction>(transactionId);
+        transaction!.TransactionNumber.ShouldNotBeNullOrWhiteSpace();
+        transaction.TransactionNumber.ShouldStartWith("BTR-");
     }
 }

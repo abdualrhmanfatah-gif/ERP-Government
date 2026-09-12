@@ -1,6 +1,10 @@
+using ERP_Government.Application.Accounting.Commands.TemplateLines.CreateTemplateLine;
+using ERP_Government.Application.Accounting.Commands.TemplateLines.RemoveTemplateLine;
+using ERP_Government.Application.Accounting.Commands.TemplateLines.UpdateTemplateLine;
 using ERP_Government.Application.Accounting.Commands.Templates.CreateTemplate;
 using ERP_Government.Application.Accounting.Commands.Templates.UpdateTemplate;
 using ERP_Government.Application.Accounting.Common;
+using ERP_Government.Application.Accounting.Queries.TemplateLines.GetTemplateLines;
 using ERP_Government.Application.Accounting.Queries.Templates.GetTemplateById;
 using ERP_Government.Application.Accounting.Queries.Templates.GetTemplatesList;
 using ERP_Government.Application.Common.Security;
@@ -28,6 +32,26 @@ public class Templates : IEndpointGroup
 
         groupBuilder.MapPut("/{id:int}", UpdateTemplate)
             .Produces(StatusCodes.Status204NoContent)
+            .RequireAuthorization(PermissionCodes.TemplatesUpdate);
+
+        // TemplateLines — US4 (TemplatesUpdate permission, no separate lines code)
+        groupBuilder.MapGet("/{id:int}/lines", GetTemplateLines)
+            .Produces<List<JournalEntryTemplateLineDto>>()
+            .RequireAuthorization(PermissionCodes.TemplatesRead);
+
+        groupBuilder.MapPost("/{id:int}/lines", CreateTemplateLine)
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .RequireAuthorization(PermissionCodes.TemplatesUpdate);
+
+        groupBuilder.MapPut("/{id:int}/lines/{lineId:int}", UpdateTemplateLine)
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status400BadRequest)
+            .RequireAuthorization(PermissionCodes.TemplatesUpdate);
+
+        groupBuilder.MapDelete("/{id:int}/lines/{lineId:int}", RemoveTemplateLine)
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status400BadRequest)
             .RequireAuthorization(PermissionCodes.TemplatesUpdate);
     }
 
@@ -68,6 +92,58 @@ public class Templates : IEndpointGroup
             return Results.BadRequest("ID mismatch.");
 
         await sender.Send(command);
+        return Results.NoContent();
+    }
+
+    [EndpointSummary("Get template lines")]
+    public static async Task<List<JournalEntryTemplateLineDto>> GetTemplateLines(
+        [FromServices] ISender sender,
+        int id)
+    {
+        return await sender.Send(new GetTemplateLinesQuery { TemplateId = id });
+    }
+
+    [EndpointSummary("Create a template line")]
+    public static async Task<IResult> CreateTemplateLine(
+        [FromServices] ISender sender,
+        int id,
+        [FromBody] CreateTemplateLineCommand command)
+    {
+        if (id != command.TemplateId)
+            return Results.BadRequest("Template ID mismatch.");
+
+        var result = await sender.Send(command);
+        if (!result.Succeeded)
+            return Results.BadRequest(result.Errors);
+        return Results.Ok(new { lineId = result.Value });
+    }
+
+    [EndpointSummary("Update a template line")]
+    public static async Task<IResult> UpdateTemplateLine(
+        [FromServices] ISender sender,
+        int id,
+        int lineId,
+        [FromBody] UpdateTemplateLineCommand command)
+    {
+        if (id != command.TemplateId || lineId != command.Id)
+            return Results.BadRequest("ID mismatch.");
+
+        var result = await sender.Send(command);
+        if (!result.Succeeded)
+            return Results.BadRequest(result.Errors);
+        return Results.NoContent();
+    }
+
+    [EndpointSummary("Remove a template line")]
+    public static async Task<IResult> RemoveTemplateLine(
+        [FromServices] ISender sender,
+        int id,
+        int lineId)
+    {
+        var command = new RemoveTemplateLineCommand { Id = lineId, TemplateId = id };
+        var result = await sender.Send(command);
+        if (!result.Succeeded)
+            return Results.BadRequest(result.Errors);
         return Results.NoContent();
     }
 }

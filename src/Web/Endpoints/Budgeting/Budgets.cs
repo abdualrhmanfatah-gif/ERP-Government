@@ -44,6 +44,11 @@ public class Budgets : IEndpointGroup
             .Produces(StatusCodes.Status400BadRequest)
             .RequireAuthorization(PermissionCodes.BudgetsApprove);
 
+        groupBuilder.MapPatch("/{id:int}/reject", RejectBudget)
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status400BadRequest)
+            .RequireAuthorization(PermissionCodes.BudgetsApprove);
+
         groupBuilder.MapPatch("/{id:int}/activate", ActivateBudget)
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
@@ -161,6 +166,18 @@ public class Budgets : IEndpointGroup
         return Results.NoContent();
     }
 
+    [EndpointSummary("Reject a submitted budget")]
+    public static async Task<IResult> RejectBudget(
+        [FromServices] ISender sender,
+        int id,
+        [FromBody] RejectBudgetRequest body)
+    {
+        var result = await sender.Send(new RejectBudgetCommand(id, body.RowVersion, body.Reason, body.Notes));
+        if (!result.Succeeded)
+            return Results.BadRequest(result.Errors);
+        return Results.NoContent();
+    }
+
     [EndpointSummary("Activate an approved budget")]
     public static async Task<IResult> ActivateBudget(
         [FromServices] ISender sender,
@@ -234,7 +251,7 @@ public class Budgets : IEndpointGroup
         [FromBody] CreateBudgetItemRequest body)
     {
         var result = await sender.Send(new CreateBudgetItemCommand(
-            id, body.ItemCode, body.ItemName, body.ParentId, body.Remarks));
+            id, body.ItemCode, body.ItemName, body.ParentId, body.AccountId, body.FundId, body.CostCenterId, body.BudgetClassificationId, body.Remarks, body.AllowOverrun));
         if (!result.Succeeded)
             return Results.BadRequest(result.Errors);
         return Results.Created($"/api/Budgets/{id}/items/{result.Value}", result.Value);
@@ -248,7 +265,7 @@ public class Budgets : IEndpointGroup
         [FromBody] UpdateBudgetItemRequest body)
     {
         var result = await sender.Send(new UpdateBudgetItemCommand(
-            itemId, body.ItemName, body.Remarks, body.RowVersion));
+            itemId, body.ItemName, body.AccountId, body.CostCenterId, body.BudgetClassificationId, body.AllowOverrun, body.Remarks, body.RowVersion));
         if (!result.Succeeded)
             return Results.BadRequest(result.Errors);
         return Results.NoContent();
@@ -303,13 +320,27 @@ public record CreateBudgetItemRequest(
     string ItemCode,
     string ItemName,
     int? ParentId,
-    string? Remarks);
+    int? AccountId,
+    int? FundId,
+    int? CostCenterId,
+    int? BudgetClassificationId,
+    string? Remarks,
+    bool? AllowOverrun);
 
 public record UpdateBudgetItemRequest(
     string ItemName,
+    int? AccountId,
+    int? CostCenterId,
+    int? BudgetClassificationId,
+    bool? AllowOverrun,
     string? Remarks,
     byte[] RowVersion);
 
 public record MoveBudgetItemRequest(
     int? NewParentId,
     byte[] RowVersion);
+
+public record RejectBudgetRequest(
+    byte[] RowVersion,
+    string? Reason,
+    string? Notes);

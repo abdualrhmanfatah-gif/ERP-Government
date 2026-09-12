@@ -49,6 +49,15 @@ public class BudgetCommandTests
         if (funds != null) _contextMock.Setup(x => x.Funds).Returns(funds.Object);
         if (budgetTypes != null) _contextMock.Setup(x => x.BudgetTypes).Returns(budgetTypes.Object);
         if (approvalHistory != null) _contextMock.Setup(x => x.ApprovalHistory).Returns(approvalHistory.Object);
+
+        var emptyBudgetTransactions = new List<BudgetTransaction>().AsQueryable().BuildMockForAsync();
+        _contextMock.Setup(x => x.BudgetTransactions).Returns(emptyBudgetTransactions.Object);
+
+        var emptyEncumbranceLines = new List<EncumbranceLine>().AsQueryable().BuildMockForAsync();
+        _contextMock.Setup(x => x.EncumbranceLines).Returns(emptyEncumbranceLines.Object);
+
+        var emptyAllocations = new List<BudgetItemAllocation>().AsQueryable().BuildMockForAsync();
+        _contextMock.Setup(x => x.BudgetItemAllocations).Returns(emptyAllocations.Object);
     }
 
     private static void SetupFindAsync(Mock<DbSet<Budget>> mockSet, List<Budget> data)

@@ -40,9 +40,7 @@ public class FundConfiguration : IEntityTypeConfiguration<Fund>
         builder.HasIndex(e => e.FundNumber)
             .IsUnique();
 
-        builder.HasIndex(e => e.FiscalYearId);
-
-        builder.HasIndex(e => e.DefaultRevenueDebitAccountId);
+        builder.HasIndex(e => e.DefaultRevenueAccountId);
 
         builder.Ignore(e => e.DomainEvents);
     }

@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../shared/hooks/useAuth';
+import { Page } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { showToast } from '@/components/ui/Toast';
+import { notify } from '@/features/notifications/notify';
 
 const MIN_PASSWORD_LENGTH = 6;
 
@@ -33,7 +34,7 @@ export function RegisterPage() {
     setLoading(true);
     try {
       await register(email, password);
-      showToast('success', 'تم إنشاء الحساب بنجاح');
+      notify({ type: 'success', title: 'تم إنشاء الحساب بنجاح' });
       navigate('/login');
     } catch {
       setError('فشل إنشاء الحساب. يرجى المحاولة مرة أخرى.');
@@ -43,14 +44,13 @@ export function RegisterPage() {
   };
 
   return (
-    <article className="w-full max-w-sm">
-      <h2 className="text-center mb-6">إنشاء حساب جديد</h2>
+    <Page title="إنشاء حساب جديد" maxWidth="sm">
       {error ? (
         <div role="alert" className="p-3 bg-[color-mix(in_srgb,var(--color-error)_8%,transparent)] rounded-lg text-sm text-[var(--color-error)] mb-4 text-center">
           {error}
         </div>
       ) : null}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} aria-label="إنشاء حساب">
         <Input
           label="البريد الإلكتروني"
           type="email"
@@ -88,6 +88,6 @@ export function RegisterPage() {
           <Link to="/login" className="text-[var(--color-primary)]">تسجيل الدخول</Link>
         </p>
       </form>
-    </article>
+    </Page>
   );
 }

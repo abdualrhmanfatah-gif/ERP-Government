@@ -12,7 +12,7 @@ public class BudgetItemMonthlyPlanConfiguration : IEntityTypeConfiguration<Budge
 
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.Month)
+        builder.Property(e => e.FiscalPeriodId)
             .IsRequired();
 
         builder.Property(e => e.PlannedAmount)
@@ -21,7 +21,7 @@ public class BudgetItemMonthlyPlanConfiguration : IEntityTypeConfiguration<Budge
         builder.Property(e => e.RowVersion)
             .IsRowVersion();
 
-        builder.HasIndex(e => new { e.BudgetItemId, e.Month })
+        builder.HasIndex(e => new { e.BudgetItemId, e.FiscalPeriodId })
             .IsUnique();
 
         builder.HasIndex(e => e.BudgetItemId);

@@ -21,9 +21,6 @@ public class BudgetConfiguration : IEntityTypeConfiguration<Budget>
             .HasMaxLength(200)
             .IsRequired();
 
-        builder.Property(e => e.TotalAmount)
-            .HasColumnType("decimal(23,2)");
-
         builder.Property(e => e.Status)
             .HasConversion<int>();
 

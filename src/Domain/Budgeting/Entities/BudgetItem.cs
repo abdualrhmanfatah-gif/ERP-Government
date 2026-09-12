@@ -9,12 +9,12 @@ public class BudgetItem : BaseAuditableEntity
     public int BudgetId { get; set; }
     public int? ParentId { get; set; }
     public int? AccountId { get; set; }
-    public int? FundId { get; set; }
     public int? CostCenterId { get; set; }
     public int? BudgetClassificationId { get; set; }
-    public string? Remarks { get; set; }
+    public Enums.BudgetControlMethod? ControlMethod { get; set; }
     public bool? AllowOverrun { get; set; }
     public bool IsActive { get; set; } = true;
+    public string? Remarks { get; set; }
     public byte[] RowVersion { get; set; } = [];
 
     public Budget Budget { get; set; } = null!;

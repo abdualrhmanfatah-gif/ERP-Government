@@ -22,7 +22,7 @@ public class CancelDisbursementRequestCommandHandler(
         CancellationToken cancellationToken)
     {
         if (user.Id is not int userId)
-            return Result.Failure(new[] { "User identity is required for this operation." });
+            return Result.Failure(["User identity is required for this operation."]);
 
         var entity = await context.DisbursementRequests
             .FindAsync(request.Id, cancellationToken);
@@ -31,15 +31,16 @@ public class CancelDisbursementRequestCommandHandler(
             return Result.Failure(["Disbursement request not found."]);
 
         if (entity.Status != DisbursementRequestStatus.Draft
+            && entity.Status != DisbursementRequestStatus.PendingApproval
             && entity.Status != DisbursementRequestStatus.Approved)
-            return Result.Failure(["Only draft or approved disbursement requests can be cancelled."]);
+            return Result.Failure(["Only draft, pending, or approved (unpaid) disbursement requests can be cancelled."]);
 
         if (entity.Status == DisbursementRequestStatus.Approved)
         {
-            var hasPayment = await context.Payments
-                .AnyAsync(p => p.DisbursementRequestId == entity.Id, cancellationToken);
-
-            if (hasPayment)
+            // Check if order has been paid
+            var linkedOrder = await context.PaymentOrders
+                .FirstOrDefaultAsync(o => o.DisbursementRequestId == entity.Id, cancellationToken);
+            if (linkedOrder is not null && linkedOrder.Status == PaymentOrderStatus.Paid)
                 return Result.Failure(["Cannot cancel a disbursement request that has already been paid."]);
         }
 
@@ -63,9 +64,18 @@ public class CancelDisbursementRequestCommandHandler(
         context.ApprovalHistory.Add(history);
 
         entity.Status = DisbursementRequestStatus.Cancelled;
-        entity.PaymentOrderId = 0;
         entity.LastModified = DateTimeOffset.UtcNow;
         entity.LastModifiedBy = userId.ToString();
+
+        // Release the linked order if exists
+        var order = await context.PaymentOrders
+            .FirstOrDefaultAsync(o => o.DisbursementRequestId == entity.Id, cancellationToken);
+        if (order is not null && order.Status == PaymentOrderStatus.Draft)
+        {
+            order.DisbursementRequestId = null;
+            order.LastModified = DateTimeOffset.UtcNow;
+            order.LastModifiedBy = userId.ToString();
+        }
 
         await context.SaveChangesAsync(cancellationToken);
 

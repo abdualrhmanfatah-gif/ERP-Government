@@ -1,13 +1,13 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.0 -> 1.3.0 (MINOR: expanded Principle V to full budget control chain)
-- Modified principles: Principle V — extended to cover appropriations → encumbrances → payments chain
-- Added sections: none
+- Version change: 1.3.0 -> 1.3.1 (PATCH: registered feature-scoped TDD exception)
+- Modified principles: none
+- Added sections: Registered Exception #6 — Spec 045 TDD exception
 - Removed sections: none
 - Feature registry: no change
-- Decision record: none (approved inline via /speckit.implement)
-- Follow-up TODOs: none
-- Previous version: 1.2.0 (last amended 2026-09-04)
+- Decision record: DEP-027
+- Follow-up TODOs: capture Spec 045 manual quickstart evidence and run existing five-project regression gate before merge
+- Previous version: 1.3.0 (last amended 2026-09-06)
 -->
 
 # ERP-Government Constitution
@@ -238,6 +238,11 @@ Each entry is a known deviation under Principle XII, pending remediation. Derive
 5. **Stubbed functional scenario tests** — balance, concurrency, and approval-evaluation
    scenarios are always-pass placeholders. Remediation: replace with real assertions under
    Principle XI.
+6. **Spec 045 TDD exception** — work scoped to `specs/045-payments-group/` does not require
+   red-green-refactor cycles or new automated tests (decision trace: DEP-027). Verification uses
+   scoped builds, frontend lint/build, manual quickstart evidence, and the existing five backend
+   test projects as convergence/pre-merge regression gates. Existing tests may not be weakened,
+   skipped, or deleted. This exception does not apply outside Spec 045.
 
 ## Compliance in the Spec-Driven Workflow
 
@@ -283,4 +288,4 @@ This Constitution governs every phase of the Spec-Driven Development workflow
   with owner, rationale, scope, and remediation path, kept in the repository's decision log.
   Unregistered deviation from any principle is treated as a defect in review.
 
-**Version**: 1.3.0 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-09-06
+**Version**: 1.3.1 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-09-09

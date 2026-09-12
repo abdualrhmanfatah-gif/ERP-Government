@@ -1,16 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   BudgetTypesClient,
-  CreateBudgetTypeCommand,
-  ToggleBudgetTypeActiveCommand,
-  UpdateBudgetTypeCommand,
+  CreateBudgetTypeRequest,
+  BudgetTypeToggleActiveRequest,
+  UpdateBudgetTypeRequest,
 } from '../../../web-api-client';
 
 const client = new BudgetTypesClient();
 
 export function useBudgetTypesList(isActive?: boolean) {
   return useQuery({
-    queryKey: ['budget-types', isActive],
+    queryKey: ['budget-types', { isActive }],
     queryFn: () => client.budgetTypesAll(isActive),
   });
 }
@@ -27,7 +27,7 @@ export function useCreateBudgetType() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: Record<string, unknown>) =>
-      client.budgetTypesPOST(CreateBudgetTypeCommand.fromJS(data)),
+      client.budgetTypesPOST(new CreateBudgetTypeRequest(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['budget-types'] }),
   });
 }
@@ -36,7 +36,7 @@ export function useUpdateBudgetType() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...data }: Record<string, unknown> & { id: number }) =>
-      client.budgetTypesPUT(id, UpdateBudgetTypeCommand.fromJS({ id, ...data })),
+      client.budgetTypesPUT(id, new UpdateBudgetTypeRequest({ id, ...data })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['budget-types'] }),
   });
 }
@@ -45,7 +45,7 @@ export function useToggleBudgetTypeActive() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...data }: Record<string, unknown> & { id: number }) =>
-      client.toggleActive2(id, ToggleBudgetTypeActiveCommand.fromJS({ id, ...data })),
+      client.toggleActivePATCH2(id, new BudgetTypeToggleActiveRequest({ id, ...data })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['budget-types'] }),
   });
 }

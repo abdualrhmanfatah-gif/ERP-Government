@@ -38,15 +38,168 @@ public class ReceiptVoucherTests : TestBase
         });
 
         result.Succeeded.ShouldBeTrue();
-        var voucherId = result.Value;
+        var voucherId = result.Value!.Id;
 
         var voucherResult = await TestApp.SendAsync(new GetReceiptVoucherByIdQuery { Id = voucherId });
         voucherResult.Succeeded.ShouldBeTrue();
         var voucher = voucherResult.Value!;
-        voucher.VoucherNumber.ShouldStartWith("RCV-");
+        voucher.VoucherNumber.ShouldStartWith("DSL-");
+        System.Text.RegularExpressions.Regex.IsMatch(voucher.VoucherNumber, @"^DSL-\d{6}$").ShouldBeTrue();
         voucher.Status.ShouldBe(ReceiptVoucherStatus.Draft);
+        voucher.TotalAmount.ShouldBe(5000.00m);
         voucher.PaymentMethod.ShouldBe(PaymentMethod.Cash);
         voucher.Lines.Count.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task CreateVoucher_ShouldReturnFullDtoWithNumberImmediately()
+    {
+        await TestApp.RunAsAdministratorAsync();
+
+        var result = await TestApp.SendAsync(new CreateReceiptVoucherCommand
+        {
+            VoucherDate = DateOnly.FromDateTime(DateTime.Today),
+            PartyId = 1,
+            PaymentMethod = PaymentMethod.Cash,
+            ReceivedFrom = "",
+            Lines =
+            [
+                new Application.Revenue.Common.DTOs.CreateReceiptVoucherLineDto
+                {
+                    RevenueAccountId = 1,
+                    Amount = 2500.00m
+                }
+            ],
+            Checks = []
+        });
+
+        result.Succeeded.ShouldBeTrue();
+        var dto = result.Value!;
+        dto.VoucherNumber.ShouldStartWith("DSL-");
+        dto.Status.ShouldBe(ReceiptVoucherStatus.Draft);
+        dto.TotalAmount.ShouldBe(2500.00m);
+        dto.PartyId.ShouldBe(1);
+        dto.RowVersion.ShouldNotBeNull();
+    }
+
+    [Test]
+    public async Task CreateVoucher_WithEmptyReceivedFrom_ShouldSucceed()
+    {
+        await TestApp.RunAsAdministratorAsync();
+
+        var result = await TestApp.SendAsync(new CreateReceiptVoucherCommand
+        {
+            VoucherDate = DateOnly.FromDateTime(DateTime.Today),
+            PartyId = 1,
+            PaymentMethod = PaymentMethod.Cash,
+            ReceivedFrom = "",
+            Lines =
+            [
+                new Application.Revenue.Common.DTOs.CreateReceiptVoucherLineDto
+                {
+                    RevenueAccountId = 1,
+                    Amount = 1000.00m
+                }
+            ],
+            Checks = []
+        });
+
+        result.Succeeded.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task CreateVoucher_ChecksExceedingTotal_ShouldReject()
+    {
+        await TestApp.RunAsAdministratorAsync();
+
+        var result = await TestApp.SendAsync(new CreateReceiptVoucherCommand
+        {
+            VoucherDate = DateOnly.FromDateTime(DateTime.Today),
+            PartyId = 1,
+            PaymentMethod = PaymentMethod.Check,
+            ReceivedFrom = "Test Party",
+            Lines =
+            [
+                new Application.Revenue.Common.DTOs.CreateReceiptVoucherLineDto
+                {
+                    RevenueAccountId = 1,
+                    Amount = 3000.00m
+                }
+            ],
+            Checks =
+            [
+                new Application.Revenue.Common.DTOs.CreateCheckDto
+                {
+                    BankName = "Bank",
+                    CheckNumber = "001",
+                    CheckDate = DateOnly.FromDateTime(DateTime.Today),
+                    Amount = 3500.00m
+                }
+            ]
+        });
+
+        result.Succeeded.ShouldBeFalse();
+        result.Errors.ShouldContain(e => e.Contains("exceed"));
+    }
+
+    [Test]
+    public async Task CreateVoucher_ChecksBelowTotal_ShouldSucceed()
+    {
+        await TestApp.RunAsAdministratorAsync();
+
+        var result = await TestApp.SendAsync(new CreateReceiptVoucherCommand
+        {
+            VoucherDate = DateOnly.FromDateTime(DateTime.Today),
+            PartyId = 1,
+            PaymentMethod = PaymentMethod.Check,
+            ReceivedFrom = "Test Party",
+            Lines =
+            [
+                new Application.Revenue.Common.DTOs.CreateReceiptVoucherLineDto
+                {
+                    RevenueAccountId = 1,
+                    Amount = 3000.00m
+                }
+            ],
+            Checks =
+            [
+                new Application.Revenue.Common.DTOs.CreateCheckDto
+                {
+                    BankName = "Bank",
+                    CheckNumber = "002",
+                    CheckDate = DateOnly.FromDateTime(DateTime.Today),
+                    Amount = 2500.00m
+                }
+            ]
+        });
+
+        result.Succeeded.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task CreateVoucher_WithUnknownParty_ShouldReject()
+    {
+        await TestApp.RunAsAdministratorAsync();
+
+        var result = await TestApp.SendAsync(new CreateReceiptVoucherCommand
+        {
+            VoucherDate = DateOnly.FromDateTime(DateTime.Today),
+            PartyId = 99999,
+            PaymentMethod = PaymentMethod.Cash,
+            ReceivedFrom = "",
+            Lines =
+            [
+                new Application.Revenue.Common.DTOs.CreateReceiptVoucherLineDto
+                {
+                    RevenueAccountId = 1,
+                    Amount = 1000.00m
+                }
+            ],
+            Checks = []
+        });
+
+        result.Succeeded.ShouldBeFalse();
+        result.Errors.ShouldContain(e => e.Contains("Party not found or inactive"));
     }
 
     [Test]
@@ -82,7 +235,7 @@ public class ReceiptVoucherTests : TestBase
         });
 
         result.Succeeded.ShouldBeTrue();
-        var voucherId = result.Value;
+        var voucherId = result.Value!.Id;
 
         var voucherResult = await TestApp.SendAsync(new GetReceiptVoucherByIdQuery { Id = voucherId });
         voucherResult.Succeeded.ShouldBeTrue();
@@ -185,7 +338,7 @@ public class ReceiptVoucherTests : TestBase
             Checks = []
         });
         createResult.Succeeded.ShouldBeTrue();
-        var voucherId = createResult.Value;
+        var voucherId = createResult.Value!.Id;
 
         var voucherResult = await TestApp.SendAsync(new GetReceiptVoucherByIdQuery { Id = voucherId });
         var submitResult = await TestApp.SendAsync(new SubmitReceiptVoucherCommand
@@ -221,7 +374,7 @@ public class ReceiptVoucherTests : TestBase
             Checks = []
         });
         createResult.Succeeded.ShouldBeTrue();
-        var voucherId = createResult.Value;
+        var voucherId = createResult.Value!.Id;
 
         var voucherResult = await TestApp.SendAsync(new GetReceiptVoucherByIdQuery { Id = voucherId });
         await TestApp.SendAsync(new SubmitReceiptVoucherCommand
@@ -266,7 +419,7 @@ public class ReceiptVoucherTests : TestBase
             Checks = []
         });
         createResult.Succeeded.ShouldBeTrue();
-        var voucherId = createResult.Value;
+        var voucherId = createResult.Value!.Id;
 
         var voucherResult = await TestApp.SendAsync(new GetReceiptVoucherByIdQuery { Id = voucherId });
         var approveResult = await TestApp.SendAsync(new ApproveReceiptVoucherCommand
@@ -301,7 +454,7 @@ public class ReceiptVoucherTests : TestBase
             Checks = []
         });
         createResult.Succeeded.ShouldBeTrue();
-        var voucherId = createResult.Value;
+        var voucherId = createResult.Value!.Id;
 
         var voucherResult = await TestApp.SendAsync(new GetReceiptVoucherByIdQuery { Id = voucherId });
         var cancelResult = await TestApp.SendAsync(new CancelReceiptVoucherCommand

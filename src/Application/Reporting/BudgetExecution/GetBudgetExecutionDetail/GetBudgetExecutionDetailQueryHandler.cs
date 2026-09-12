@@ -16,42 +16,51 @@ internal class GetBudgetExecutionDetailQueryHandler(IApplicationDbContext dbCont
             .Include(bi => bi.Budget)
             .FirstAsync(bi => bi.Id == request.BudgetItemId, cancellationToken);
 
-        var appropriationIds = await dbContext.Appropriations
-            .AsNoTracking()
-            .Where(a => a.BudgetItemId == request.BudgetItemId
-                     && a.Status != Domain.Budgeting.Enums.AppropriationStatus.Cancelled)
-            .Select(a => a.Id)
-            .ToListAsync(cancellationToken);
+        var openEncumbranceStatuses = new[]
+        {
+            Domain.Budgeting.Enums.EncumbranceStatus.Active,
+            Domain.Budgeting.Enums.EncumbranceStatus.PartiallyReleased,
+            Domain.Budgeting.Enums.EncumbranceStatus.PartiallyLiquidated,
+        };
 
-        var encumbrances = await dbContext.Encumbrances
+        var encumbrances = await dbContext.EncumbranceLines
             .AsNoTracking()
-            .Include(e => e.Appropriation)
-            .Where(e => appropriationIds.Contains(e.AppropriationId)
-                     && e.Status != Domain.Budgeting.Enums.EncumbranceStatus.Cancelled)
-            .Select(e => new EncumbranceDetailDto
+            .Where(l => l.BudgetItemId == request.BudgetItemId
+                && openEncumbranceStatuses.Contains(l.Encumbrance.Status)
+                && l.Encumbrance.ReversalOfId == null)
+            .Select(l => new EncumbranceDetailDto
             {
-                EncumbranceId = e.Id,
-                EncumbranceNumber = e.EncumbranceNumber,
-                EncumbranceDate = e.EncumbranceDate,
-                Amount = e.Amount,
-                Status = e.Status.ToString()
+                EncumbranceId = l.Encumbrance.Id,
+                EncumbranceNumber = l.Encumbrance.EncumbranceNumber,
+                EncumbranceDate = l.Encumbrance.EncumbranceDate,
+                Amount = l.Amount - l.LiquidatedAmount - l.CancelledAmount,
+                Status = l.Encumbrance.Status.ToString()
             })
             .ToListAsync(cancellationToken);
 
-        var encumbranceIds = encumbrances.Select(e => e.EncumbranceId).ToList();
+        var executedPaymentStatuses = new[]
+        {
+            Domain.Payments.Enums.PaymentOrderStatus.Approved,
+            Domain.Payments.Enums.PaymentOrderStatus.SentToTreasury,
+            Domain.Payments.Enums.PaymentOrderStatus.Paid,
+        };
 
         var payments = await dbContext.PaymentOrders
             .AsNoTracking()
-            .Where(po => encumbranceIds.Contains(po.EncumbranceId ?? 0)
-                      && po.Status != Domain.Payments.Enums.PaymentOrderStatus.Cancelled)
-            .Select(po => new PaymentDetailDto
+            .Join(dbContext.BudgetItemAllocations,
+                po => po.BudgetItemAllocationId,
+                alloc => alloc.Id,
+                (po, alloc) => new { po, alloc.BudgetItemId })
+            .Where(x => x.BudgetItemId == request.BudgetItemId
+                && executedPaymentStatuses.Contains(x.po.Status))
+            .Select(x => new PaymentDetailDto
             {
-                PaymentOrderId = po.Id,
-                OrderNumber = po.PaymentOrderNumber,
-                OrderDate = po.PaymentOrderDate,
-                Amount = po.AmountGross,
-                Status = po.Status.ToString(),
-                PaidAt = po.PaidAt
+                PaymentOrderId = x.po.Id,
+                OrderNumber = x.po.PaymentOrderNumber,
+                OrderDate = x.po.PaymentOrderDate,
+                Amount = x.po.AmountGross,
+                Status = x.po.Status.ToString(),
+                PaidAt = x.po.PaidAt
             })
             .ToListAsync(cancellationToken);
 

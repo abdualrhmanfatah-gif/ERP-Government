@@ -9,7 +9,12 @@ public record CreateBudgetItemCommand(
     string ItemCode,
     string ItemName,
     int? ParentId,
-    string? Remarks) : IRequest<Result<int>>;
+    int? AccountId,
+    int? FundId,
+    int? CostCenterId,
+    int? BudgetClassificationId,
+    string? Remarks,
+    bool? AllowOverrun) : IRequest<Result<int>>;
 
 public class CreateBudgetItemCommandHandler(
     IApplicationDbContext context) : IRequestHandler<CreateBudgetItemCommand, Result<int>>
@@ -23,6 +28,12 @@ public class CreateBudgetItemCommandHandler(
 
         if (!budgetExists)
             return Result<int>.Failure(["Budget not found."]);
+
+        var budget = await context.Budgets
+            .FirstOrDefaultAsync(x => x.Id == request.BudgetId, cancellationToken);
+
+        if (budget is not null && budget.Status != BudgetStatus.Draft)
+            return Result<int>.Failure(["Only Draft budgets can have items added."]);
 
         var exists = await context.BudgetItems
             .AnyAsync(x => x.BudgetId == request.BudgetId && x.ItemCode == request.ItemCode, cancellationToken);
@@ -45,7 +56,11 @@ public class CreateBudgetItemCommandHandler(
             ItemCode = request.ItemCode,
             ItemName = request.ItemName,
             ParentId = request.ParentId,
+            AccountId = request.AccountId,
+            CostCenterId = request.CostCenterId,
+            BudgetClassificationId = request.BudgetClassificationId,
             Remarks = request.Remarks,
+            AllowOverrun = request.AllowOverrun,
         };
 
         context.BudgetItems.Add(entity);

@@ -1,3 +1,4 @@
+using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Parties.Commands.CreateParty;
 using ERP_Government.Application.Parties.Commands.TogglePartyActive;
@@ -6,6 +7,7 @@ using ERP_Government.Application.Parties.Queries.GetParties;
 using ERP_Government.Application.Parties.Queries.GetPartyById;
 using ERP_Government.Domain.Parties.Enums;
 using ERP_Government.Web.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP_Government.Web.Endpoints.Parties;
 
@@ -23,6 +25,10 @@ public class Parties : IEndpointGroup
             .Produces<Result>();
         group.MapPatch("/{id:int}/toggle-active", HandleToggleActive)
             .Produces<Result>();
+        group.MapGet("/{id:int}/documents", HandleGetDocuments)
+            .Produces<IReadOnlyList<PartyDocumentResponse>>();
+        group.MapGet("/check-tax-number", HandleCheckTaxNumber)
+            .Produces<TaxNumberCheckResponse>();
     }
 
     private static async Task<IResult> HandleGetAll(
@@ -67,7 +73,52 @@ public class Parties : IEndpointGroup
         var result = await sender.Send(new TogglePartyActiveCommand(id));
         return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
     }
+
+    private static async Task<IResult> HandleGetDocuments(
+        IApplicationDbContext dbContext,
+        int id)
+    {
+        var receipts = await dbContext.ReceiptVouchers
+            .Where(r => r.PartyId == id)
+            .ToListAsync();
+
+        var encumbrances = await dbContext.Encumbrances
+            .Where(e => e.VendorPartyId == id)
+            .ToListAsync();
+
+        var all = new List<PartyDocumentResponse>();
+
+        all.AddRange(receipts.Select(r => new PartyDocumentResponse(
+            "ReceiptVoucher", r.Id, r.VoucherNumber, r.Status.ToString(), r.VoucherDate, 0m)));
+
+        all.AddRange(encumbrances.Select(e => new PartyDocumentResponse(
+            "Encumbrance", e.Id, e.EncumbranceNumber, e.Status.ToString(), e.EncumbranceDate, e.TotalAmount)));
+
+        return Results.Ok(all.OrderByDescending(d => d.Date).ToList());
+    }
+
+    private static async Task<IResult> HandleCheckTaxNumber(
+        IApplicationDbContext dbContext,
+        string taxNumber,
+        int? excludeId = null)
+    {
+        if (string.IsNullOrEmpty(taxNumber))
+            return Results.Ok(new TaxNumberCheckResponse(false));
+
+        var exists = await dbContext.Parties
+            .AnyAsync(p => p.TaxNumber == taxNumber && (excludeId == null || p.Id != excludeId));
+
+        return Results.Ok(new TaxNumberCheckResponse(exists));
+    }
 }
+
+public record PartyDocumentResponse(
+    string DocumentType,
+    int DocumentId,
+    string DocumentNumber,
+    string Status,
+    DateOnly Date,
+    decimal Amount);
 
 public record PartyResponse(
     int Id,
@@ -129,3 +180,5 @@ internal static class PartyMappingExtensions
         p.Notes,
         p.IsActive);
 }
+
+public record TaxNumberCheckResponse(bool Exists);

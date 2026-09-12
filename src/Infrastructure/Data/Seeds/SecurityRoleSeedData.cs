@@ -97,6 +97,18 @@ public static class SecurityRoleSeedData
             RoleLevel=RoleLevel.Entity, IsSystem=false, RequiresMfa=false,
             Description="إنشاء أوامر الدفع"
         },
+        new()
+        {
+            Code="AccountsManager", Name="مدير الحسابات",
+            RoleLevel=RoleLevel.Organization, IsSystem=false, RequiresMfa=true,
+            Description="اعتماد طلبات الصرف — التوقيع الأول"
+        },
+        new()
+        {
+            Code="AuthorizingOfficer", Name="جهاز الأمر",
+            RoleLevel=RoleLevel.Organization, IsSystem=false, RequiresMfa=true,
+            Description="اعتماد طلبات الصرف — التوقيع الثاني وإنشاء أمر الصرف"
+        },
 
         // ═══ HR Roles ═══
         new()

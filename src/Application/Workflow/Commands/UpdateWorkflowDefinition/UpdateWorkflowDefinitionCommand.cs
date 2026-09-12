@@ -54,7 +54,7 @@ public class UpdateWorkflowDefinitionCommandHandler(
             definition.Status = request.Status.Value.ToString();
 
         definition.LastModified = DateTimeOffset.UtcNow;
-        definition.LastModifiedBy = "system"; // TODO: Get from current user
+        definition.LastModifiedBy = userId.ToString();
 
         await context.SaveChangesAsync(cancellationToken);
 

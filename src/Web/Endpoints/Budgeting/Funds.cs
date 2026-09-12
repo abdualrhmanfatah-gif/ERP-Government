@@ -58,8 +58,8 @@ public class Funds : IEndpointGroup
     {
         var result = await sender.Send(new CreateFundCommand(
             body.FundNumber, body.FundName, body.FundType, body.FundCategory,
-            body.FiscalYearId, body.LegalAuthority, body.Description,
-            body.DefaultRevenueDebitAccountId));
+            body.LegalAuthority, body.Description,
+            body.DefaultRevenueAccountId, body.CurrencyId));
         if (!result.Succeeded)
             return Results.BadRequest(result.Errors);
         return Results.Created($"/api/Funds/{result.Value}", result.Value);
@@ -73,8 +73,8 @@ public class Funds : IEndpointGroup
     {
         var result = await sender.Send(new UpdateFundCommand(
             id, body.FundNumber, body.FundName, body.FundType, body.FundCategory,
-            body.FiscalYearId, body.LegalAuthority, body.Description,
-            body.DefaultRevenueDebitAccountId, body.RowVersion));
+            body.LegalAuthority, body.Description,
+            body.DefaultRevenueAccountId, body.CurrencyId, body.RowVersion));
         if (!result.Succeeded)
             return Results.BadRequest(result.Errors);
         return Results.NoContent();
@@ -98,10 +98,10 @@ public record CreateFundRequest(
     string FundName,
     ERP_Government.Domain.Budgeting.Enums.FundType FundType,
     ERP_Government.Domain.Budgeting.Enums.FundCategory FundCategory,
-    int? FiscalYearId,
     string LegalAuthority,
     string? Description,
-    int? DefaultRevenueDebitAccountId);
+    int? DefaultRevenueAccountId,
+    int? CurrencyId);
 
 public record FundToggleActiveRequest(byte[] RowVersion);
 
@@ -110,8 +110,8 @@ public record UpdateFundRequest(
     string FundName,
     ERP_Government.Domain.Budgeting.Enums.FundType FundType,
     ERP_Government.Domain.Budgeting.Enums.FundCategory FundCategory,
-    int? FiscalYearId,
     string LegalAuthority,
     string? Description,
-    int? DefaultRevenueDebitAccountId,
+    int? DefaultRevenueAccountId,
+    int? CurrencyId,
     byte[] RowVersion);

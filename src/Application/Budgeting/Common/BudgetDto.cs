@@ -13,6 +13,9 @@ public class BudgetDto
     public int BudgetTypeId { get; init; }
     public BudgetStatus Status { get; init; }
     public bool? AllowOverrun { get; init; }
+    public decimal TotalAmount { get; init; }
+    public DateOnly EffectiveFrom { get; init; }
+    public DateOnly? EffectiveTo { get; init; }
     public string? Description { get; init; }
     public byte[] RowVersion { get; init; } = [];
     public DateTimeOffset Created { get; init; }

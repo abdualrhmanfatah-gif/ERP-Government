@@ -1,20 +1,16 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { StatusBadge } from '@/components/ui/StatusBadge';
-import { DataGrid } from '@/components/ui/DataGrid';
-import { AuditTimeline } from '@/components/ui/AuditTimeline';
-import { Button } from '@/components/ui/Button';
-import { Skeleton } from '@/components/ui/Loading';
+import { Page, StatusBadge, DataGrid, Button, Card, Badge } from '@/components/ui';
 import { useAccountGroupDetail } from '../hooks/useAccountGroupDetail';
 import { useToggleAccountGroupActive } from '../hooks/useToggleAccountGroupActive';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { toast } from 'sonner';
+import { notify } from '@/features/notifications/notify';
 import { useState } from 'react';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { AccountGroupForm } from '../components/AccountGroupForm';
+import { AccountGroupForm } from '@/components/AccountingAccountGroupForm';
 import { useUpdateAccountGroup } from '../hooks/useUpdateAccountGroup';
-import { ArrowRight, Layers, BookOpen, Shield } from 'lucide-react';
+import { ArrowRight, Layers, BookOpen } from 'lucide-react';
+import { getActiveStatusLabel } from '@/shared/constants/labels';
 
 export function AccountGroupDetailPage() {
   const { id } = useParams();
@@ -28,23 +24,8 @@ export function AccountGroupDetailPage() {
 
   const { hasPermission: canEdit } = usePermission(PERMISSIONS.Accounting.ChartOfAccounts.Edit);
 
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <Skeleton variant="table" lines={6} />
-      </div>
-    );
-  }
-
   if (!data) {
-    return (
-      <div className="p-6 text-center">
-        <p className="text-sm text-[var(--color-on-surface-variant)]">المجموعة غير موجودة</p>
-        <Button variant="ghost" className="mt-2" onClick={() => navigate('/accounting/account-groups')}>
-          العودة للقائمة
-        </Button>
-      </div>
-    );
+    return <Page title="" loading={isLoading} />;
   }
 
   const g = data.group;
@@ -52,20 +33,12 @@ export function AccountGroupDetailPage() {
   const handleToggle = async () => {
     try {
       await toggleMut.mutateAsync({ id: g.id, isActive: !g.isActive, rowVersion: g.rowVersion });
-      toast.success(g.isActive ? 'تم التعطيل' : 'تم التفعيل');
+      notify({ type: 'success', title: g.isActive ? 'تم التعطيل' : 'تم التفعيل' });
       setConfirmToggle(false);
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : 'فشل');
+      notify({ type: 'error', title: e instanceof Error ? e.message : 'فشل' });
     }
   };
-
-  const auditEntries = data.audit.map((a) => ({
-    id: a.id,
-    action: (a.action || 'update') as 'create' | 'update' | 'delete',
-    user: a.userName ?? `#${a.userId}`,
-    timestamp: a.timestamp,
-    description: a.changeSummary ?? a.fieldChanges ?? '',
-  }));
 
   const childColumns = [
     { id: 'code', accessorKey: 'code', header: 'الكود' },
@@ -76,7 +49,7 @@ export function AccountGroupDetailPage() {
       header: 'الحالة',
       cell: (row: { isActive: boolean }) => (
         <StatusBadge variant={row.isActive ? 'active' : 'closed'}>
-          {row.isActive ? 'نشط' : 'معطل'}
+          {getActiveStatusLabel(row.isActive)}
         </StatusBadge>
       ),
     },
@@ -100,7 +73,7 @@ export function AccountGroupDetailPage() {
       header: 'الحالة',
       cell: (row: { isActive: boolean }) => (
         <StatusBadge variant={row.isActive ? 'active' : 'closed'}>
-          {row.isActive ? 'نشط' : 'معطل'}
+          {getActiveStatusLabel(row.isActive)}
         </StatusBadge>
       ),
     },
@@ -109,41 +82,41 @@ export function AccountGroupDetailPage() {
       accessorKey: 'isPostable',
       header: 'قابل للترحيل',
       cell: (row: { isPostable: boolean }) => (
-        <span className={row.isPostable ? 'text-[var(--color-success)]' : 'text-[var(--color-on-surface-variant)]'}>
+        <Badge variant={row.isPostable ? 'success' : 'default'}>
           {row.isPostable ? 'نعم' : 'لا'}
-        </span>
+        </Badge>
       ),
     },
   ];
 
   return (
-    <div className="space-y-6 p-6">
-      <PageHeader
-        title={`${g.code} — ${g.name}`}
-        description={`المستوى ${g.level} • النوع ${g.type} • الرصيد ${g.normalBalance}`}
-        actions={
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate('/accounting/account-groups')}>
-              <ArrowRight size={16} className="ms-1" />
-              رجوع
+    <Page
+      title={`${g.code} — ${g.name}`}
+      description={`المستوى ${g.level} • النوع ${g.type} • الرصيد ${g.normalBalance}`}
+      actions={
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate('/accounting/account-groups')}>
+            <ArrowRight size={16} className="ms-1" />
+            رجوع
+          </Button>
+          {canEdit && (
+            <Button onClick={() => setShowEdit(true)}>تعديل</Button>
+          )}
+          {canEdit && (
+            <Button
+              variant={g.isActive ? 'destructive' : 'default'}
+              onClick={() => setConfirmToggle(true)}
+            >
+              {g.isActive ? 'تعطيل' : 'تفعيل'}
             </Button>
-            {canEdit && (
-              <Button onClick={() => setShowEdit(true)}>تعديل</Button>
-            )}
-            {canEdit && (
-              <Button
-                variant={g.isActive ? 'destructive' : 'default'}
-                onClick={() => setConfirmToggle(true)}
-              >
-                {g.isActive ? 'تعطيل' : 'تفعيل'}
-              </Button>
-            )}
-          </div>
-        }
-      />
+          )}
+        </div>
+      }
+      loading={isLoading}
+    >
 
       {/* ═══ Basic Info Card ═══ */}
-      <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border-container)] p-6">
+      <Card>
         <div className="flex items-center gap-2 mb-4">
           <div className="flex items-center justify-center size-8 rounded-lg bg-[var(--color-primary-container)]">
             <BookOpen size={16} className="text-[var(--color-on-primary-container)]" />
@@ -175,7 +148,7 @@ export function AccountGroupDetailPage() {
           <div>
             <span className="text-sm font-semibold text-[var(--color-on-surface-variant)]">الحالة: </span>
             <StatusBadge variant={g.isActive ? 'active' : 'closed'}>
-              {g.isActive ? 'نشط' : 'معطل'}
+              {getActiveStatusLabel(g.isActive)}
             </StatusBadge>
           </div>
           <div>
@@ -187,12 +160,10 @@ export function AccountGroupDetailPage() {
             <span className="text-base">{g.description ?? '—'}</span>
           </div>
         </div>
-      </div>
-
-   
+      </Card>
 
       {/* ═══ Children Section ═══ */}
-      <section className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border-container)] p-6">
+      <Card>
         <div className="flex items-center gap-2 mb-4">
           <div className="flex items-center justify-center size-8 rounded-lg bg-[var(--color-primary-container)]">
             <Layers size={16} className="text-[var(--color-on-primary-container)]" />
@@ -208,10 +179,10 @@ export function AccountGroupDetailPage() {
         ) : (
           <DataGrid data={data.children} rowKey={(row) => row.id} columns={childColumns} />
         )}
-      </section>
+      </Card>
 
       {/* ═══ Accounts Section ═══ */}
-      <section className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border-container)] p-6">
+      <Card>
         <div className="flex items-center gap-2 mb-4">
           <div className="flex items-center justify-center size-8 rounded-lg bg-[var(--color-primary-container)]">
             <BookOpen size={16} className="text-[var(--color-on-primary-container)]" />
@@ -227,8 +198,7 @@ export function AccountGroupDetailPage() {
         ) : (
           <DataGrid data={data.accounts} rowKey={(row) => row.id} columns={accountColumns} />
         )}
-      </section>
-
+      </Card>
    
 
       <ConfirmDialog
@@ -251,10 +221,10 @@ export function AccountGroupDetailPage() {
         initial={g}
         onSubmit={async (payload) => {
           await updateMut.mutateAsync({ id: g.id, rowVersion: g.rowVersion, ...payload } as never);
-          toast.success('تم التحديث');
+          notify({ type: 'success', title: 'تم التحديث' });
         }}
         isPending={updateMut.isPending}
       />
-    </div>
+    </Page>
   );
 }

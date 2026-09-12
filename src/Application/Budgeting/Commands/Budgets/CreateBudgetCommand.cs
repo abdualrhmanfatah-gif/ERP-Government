@@ -39,6 +39,14 @@ public class CreateBudgetCommandHandler(
         if (!budgetTypeExists)
             return Result<int>.Failure(["Budget type not found."]);
 
+        var duplicateExists = await context.Budgets
+            .AnyAsync(x => x.FiscalYearId == request.FiscalYearId
+                && x.FundId == request.FundId
+                && x.BudgetTypeId == request.BudgetTypeId, cancellationToken);
+
+        if (duplicateExists)
+            return Result<int>.Failure(["A budget already exists for this fiscal year, fund, and budget type."]);
+
         var entity = new Domain.Budgeting.Entities.Budget
         {
             BudgetNumber = budgetNumber,

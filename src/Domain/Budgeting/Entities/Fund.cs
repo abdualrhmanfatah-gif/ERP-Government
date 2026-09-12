@@ -8,10 +8,10 @@ public class Fund : BaseAuditableEntity
     public string FundName { get; set; } = string.Empty;
     public Enums.FundType FundType { get; set; }
     public Enums.FundCategory FundCategory { get; set; }
-    public int? FiscalYearId { get; set; }
     public string LegalAuthority { get; set; } = string.Empty;
     public string? Description { get; set; }
-    public int? DefaultRevenueDebitAccountId { get; set; }
+    public int? DefaultRevenueAccountId { get; set; }
+    public int? CurrencyId { get; set; }
     public bool IsActive { get; set; } = true;
     public byte[] RowVersion { get; set; } = [];
 }

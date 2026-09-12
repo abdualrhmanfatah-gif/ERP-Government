@@ -13,7 +13,7 @@ public static class PostingRuleSeedData
         new() { Name="ترحيل سند الاستلام", EventType="GoodsReceiptNoteApproved", JournalId=2, Priority=2 },
         new() { Name="ترحيل المدفوعات", EventType="PaymentOrderExecuted", JournalId=4, Priority=1 },
         new() { Name="ترحيل الإيداعات", EventType="BankReconciliationPosted", JournalId=5, Priority=1 },
-        new() { Name="ترحيل سندات الإيراد", EventType="RevenueReceiptPosted", JournalId=3, Priority=1 },
+        new() { Name="ترحيل سندات الإيراد", EventType="ReceiptVoucherCollected", JournalId=3, Priority=1 },
         new() { Name="ترحيل القيود العامة", EventType="JournalEntryPosted", JournalId=1, Priority=1 },
         new() { Name="ترحيل هلاك الأصول", EventType="DepreciationPosted", JournalId=6, Priority=1 },
         new() { Name="ترحيل إقفال السنة", EventType="FiscalYearClosed", JournalId=7, Priority=1 },
@@ -21,5 +21,6 @@ public static class PostingRuleSeedData
         new() { Name="ترحيل تصفية الأصول", EventType="AssetDisposed", JournalId=6, Priority=1 },
         new() { Name="ترحيل إعادة تقييم الأصول", EventType="AssetRevalued", JournalId=6, Priority=1 },
         new() { Name="ترحيل هلاك الأصول", EventType="AssetImpaired", JournalId=6, Priority=1 },
+        new() { Name="ترحيل تحصيل الشيكات", EventType="CheckCleared", JournalId=3, Priority=1 },
     ];
 }

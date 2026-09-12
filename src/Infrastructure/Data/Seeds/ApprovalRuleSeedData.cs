@@ -11,7 +11,7 @@ public static class ApprovalRuleSeedData
     [
         new() { DocumentType="PurchaseOrder", AmountThreshold=100000, ApproverRole="PROC_MGR", Sequence=1 },
         new() { DocumentType="PurchaseOrder", AmountThreshold=500000, ApproverRole="FIN_MGR", Sequence=2 },
-        new() { DocumentType="PaymentOrder", AmountThreshold=50000, ApproverRole="PAY_MGR", Sequence=1 },
+        new() { DocumentType="PaymentOrder", AmountThreshold=null, ApproverRole="PAY_MGR", Sequence=1 },
         new() { DocumentType="PaymentOrder", AmountThreshold=200000, ApproverRole="FIN_MGR", Sequence=2 },
         new() { DocumentType="PurchaseRequest", AmountThreshold=100000, ApproverRole="PROC_MGR", Sequence=1 },
         new() { DocumentType="PurchaseRequest", AmountThreshold=500000, ApproverRole="FIN_MGR", Sequence=2 },

@@ -1,26 +1,38 @@
-import type { AccountDto, AccountGroupDto } from '../../web-api-client';
+import type { AccountDto, AccountGroupDto, MoveEntryType } from '../../web-api-client';
 
-export type { AccountDto, AccountGroupDto };
+export type { AccountDto, AccountGroupDto, MoveEntryType };
 
 export interface AccountTreeNode extends AccountDto {
   children: AccountTreeNode[];
 }
 
-// ─── Moves (FEATURE-026) ────────────────────────────────────────────────
-export interface MoveDto {
+// ─── EntryStatus Enum ──────────────────────────────────────────────────
+export enum EntryStatus {
+  Draft = "Draft",
+  Submitted = "Submitted",
+  Approved = "Approved",
+  Posted = "Posted",
+  Reversed = "Reversed",
+  Cancelled = "Cancelled",
+}
+
+// ─── JournalEntry DTOs ─────────────────────────────────────────────────
+export interface JournalEntryDto {
   id: number;
   entryNumber: string;
   ref?: string | null;
   documentDate: string;
   postingDate?: string | null;
-  entryType?: number | null;
-  entryStatus: string;
+  entryType?: MoveEntryType | null;
+  entryStatus: EntryStatus;
   journalId?: number | null;
   journalName?: string | null;
   periodId: number;
+  periodName?: string;
   fiscalYearId: number;
+  fiscalYearName?: string;
   narration?: string | null;
-  reversalOfMoveId?: number | null;
+  reversalOfId?: number | null;
   reversalReason?: string | null;
   postedById?: number | null;
   postedByName?: string | null;
@@ -29,45 +41,67 @@ export interface MoveDto {
   cancelledByName?: string | null;
   cancelledAt?: string | null;
   isSystemGenerated: boolean;
+  totalDebit: number;
+  totalCredit: number;
+  baseCurrencyId?: number;
+  totalBaseDebit?: number;
+  totalBaseCredit?: number;
   rowVersion: string;
-  lines: MoveLineDto[];
+  lines: JournalEntryLineDto[];
 }
 
-export interface MoveLineDto {
+export interface JournalEntryLineDto {
   id: number;
-  moveId: number;
+  journalEntryId: number;
   sequence: number;
   accountId: number;
   accountCode: string;
   accountName: string;
   description?: string | null;
   currencyId: number;
+  currencyCode?: string;
   exchangeRate: number;
   debit: number;
   credit: number;
   costCenterId?: number | null;
   costCenterName?: string | null;
+  fundId?: number | null;
+  fundName?: string | null;
+  projectId?: number | null;
+  projectName?: string | null;
+  budgetItemId?: number | null;
+  budgetItemCode?: string | null;
+  encumbranceId?: number | null;
+  encumbranceNumber?: string | null;
+  paymentOrderId?: number | null;
+  paymentOrderNumber?: string | null;
+  baseDebit?: number;
+  baseCredit?: number;
+  resolvedRate?: number;
+  resolvedRateDate?: string;
   rowVersion: string;
 }
 
-export interface CreateMoveCommand {
+// ─── Command Types ─────────────────────────────────────────────────────
+export interface CreateJournalEntryCommand {
   ref?: string | null;
   documentDate: string;
-  entryType?: number | null;
+  entryType?: MoveEntryType | null;
   journalId?: number | null;
   periodId: number;
   fiscalYearId: number;
+  baseCurrencyId?: number;
   narration?: string | null;
 }
 
-export interface UpdateMoveCommand {
+export interface UpdateJournalEntryCommand {
   id: number;
   narration?: string | null;
   ref?: string | null;
   rowVersion: string;
 }
 
-export interface CreateMoveLineCommand {
+export interface CreateJournalEntryLineCommand {
   accountId: number;
   description?: string | null;
   currencyId: number;
@@ -75,11 +109,16 @@ export interface CreateMoveLineCommand {
   debit: number;
   credit: number;
   costCenterId?: number | null;
+  fundId?: number | null;
+  projectId?: number | null;
+  budgetItemId?: number | null;
+  encumbranceId?: number | null;
+  paymentOrderId?: number | null;
 }
 
-export interface UpdateMoveLineCommand {
+export interface UpdateJournalEntryLineCommand {
   id: number;
-  moveId: number;
+  journalEntryId: number;
   accountId: number;
   description?: string | null;
   currencyId: number;
@@ -87,5 +126,31 @@ export interface UpdateMoveLineCommand {
   debit: number;
   credit: number;
   costCenterId?: number | null;
+  fundId?: number | null;
+  projectId?: number | null;
+  budgetItemId?: number | null;
+  encumbranceId?: number | null;
+  paymentOrderId?: number | null;
   rowVersion: string;
+}
+
+// ─── Lifecycle Commands ────────────────────────────────────────────────
+export interface SubmitJournalEntryCommand {
+  reason?: string | null;
+}
+
+export interface ApproveJournalEntryCommand {
+  reason?: string | null;
+}
+
+export interface PostJournalEntryCommand {
+  reason?: string | null;
+}
+
+export interface ReverseJournalEntryCommand {
+  reason: string;
+}
+
+export interface CancelJournalEntryCommand {
+  reason?: string | null;
 }

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-type BadgeVariant = 'draft' | 'pending' | 'approved' | 'active' | 'closed' | 'posted' | 'reversed' | 'cancelled' | 'locked' | 'overBudget' | 'unbalanced';
+export type BadgeVariant = 'draft' | 'pending' | 'approved' | 'active' | 'closed' | 'posted' | 'reversed' | 'cancelled' | 'locked' | 'overBudget' | 'unbalanced' | 'submitted' | 'sentToTreasury' | 'paid' | 'partiallyPaid' | 'rejected' | 'voided' | 'disbursed' | 'failed' | 'warning' | 'overridden' | 'passed';
 type BadgeSize = 'sm' | 'md';
 
 interface StatusBadgeProps {
@@ -9,6 +9,7 @@ interface StatusBadgeProps {
   size?: BadgeSize;
   icon?: ReactNode;
   children: ReactNode;
+  className?: string;
 }
 
 const variantClasses: Record<BadgeVariant, string> = {
@@ -19,10 +20,21 @@ const variantClasses: Record<BadgeVariant, string> = {
   closed: 'bg-status-closed-bg text-status-closed-fg',
   posted: 'bg-status-posted-bg text-status-posted-fg',
   reversed: 'bg-status-reversed-bg text-status-reversed-fg',
-  cancelled: 'bg-status-cancelled-bg text-status-cancelled-fg',
+  cancelled: 'bg-status-closed-bg text-status-closed-fg',
   locked: 'bg-status-locked-bg text-status-locked-fg',
   overBudget: 'bg-status-overBudget-bg text-status-overBudget-fg',
   unbalanced: 'border-2 border-status-unbalanced-border bg-transparent text-status-unbalanced-fg',
+  submitted: 'bg-status-pending-bg text-status-pending-fg',
+  sentToTreasury: 'bg-status-pending-bg text-status-pending-fg',
+  paid: 'bg-status-approved-bg text-status-approved-fg',
+  partiallyPaid: 'bg-status-active-bg text-status-active-fg',
+  rejected: 'bg-status-reversed-bg text-status-reversed-fg',
+  voided: 'bg-status-closed-bg text-status-closed-fg',
+  disbursed: 'bg-status-approved-bg text-status-approved-fg',
+  failed: 'bg-status-reversed-bg text-status-reversed-fg',
+  warning: 'bg-status-overBudget-bg text-status-overBudget-fg',
+  overridden: 'bg-status-overBudget-bg text-status-overBudget-fg',
+  passed: 'bg-status-active-bg text-status-active-fg',
 };
 
 const sizeClasses: Record<BadgeSize, string> = {
@@ -42,6 +54,17 @@ const statusLabels: Record<BadgeVariant, string> = {
   locked: 'مقفل',
   overBudget: 'يتجاوز الميزانية',
   unbalanced: 'غير متوازن',
+  submitted: 'مرسلة',
+  sentToTreasury: 'مرسلة للخزينة',
+  paid: 'مدفوعة',
+  partiallyPaid: 'مدفوعة جزئياً',
+  rejected: 'مرفوضة',
+  voided: 'ملغاة نهائياً',
+  disbursed: 'صرفت',
+  failed: 'فاشلة',
+  warning: 'تحذير',
+  overridden: 'تم التجاوز',
+  passed: 'ناجح',
 };
 
 export function StatusBadge({
@@ -49,6 +72,7 @@ export function StatusBadge({
   size = 'md',
   icon,
   children,
+  className,
 }: StatusBadgeProps) {
   return (
     <span
@@ -57,7 +81,8 @@ export function StatusBadge({
       className={cn(
         'inline-flex items-center gap-1 rounded-full font-medium leading-normal whitespace-nowrap',
         variantClasses[variant],
-        sizeClasses[size]
+        sizeClasses[size],
+        className
       )}
     >
       {icon ? <span aria-hidden="true">{icon}</span> : null}

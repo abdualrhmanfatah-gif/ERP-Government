@@ -27,7 +27,7 @@ public class MonthlyPlanTests : TestBase
         var plan1 = Enumerable.Range(1, 6).Select(m => new BudgetItemMonthlyPlan
         {
             BudgetItemId = item.Id,
-            Month = m,
+            FiscalPeriodId = m,
             PlannedAmount = m * 1000m
         }).ToList();
 
@@ -37,7 +37,7 @@ public class MonthlyPlanTests : TestBase
         var plan2 = Enumerable.Range(1, 12).Select(m => new BudgetItemMonthlyPlan
         {
             BudgetItemId = item.Id,
-            Month = m,
+            FiscalPeriodId = m,
             PlannedAmount = m * 500m
         }).ToList();
 

@@ -1,4 +1,5 @@
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Application.Revenue.Common;
 using ERP_Government.Domain.Revenue.Entities;
 using ERP_Government.Domain.Revenue.Enums;
 using ERP_Government.Domain.Security.Entities;
@@ -30,36 +31,24 @@ public class BounceCheckCommandHandler(
             .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
 
         if (check is null)
-            return Result<int>.Failure(new[] { "Check not found."});
+            return Result<int>.Failure(new[] { "Check not found." });
 
         if (check.Status != CheckStatus.UnderCollection)
-            return Result<int>.Failure(new[] { "Only Under-Collection checks can be bounced."});
+            return Result<int>.Failure(new[] { "Only Under-Collection checks can be bounced." });
+
+        if (check.ReceiptVoucher is null)
+            return Result<int>.Failure(new[] { "Source voucher not found." });
+
+        if (check.ReceiptVoucher.Status == ReceiptVoucherStatus.Cancelled)
+            return Result<int>.Failure(new[] { "Cannot bounce a check whose source voucher is cancelled." });
+
+        var (dateValid, dateError) = CheckDateValidator.ValidateBouncedAt(check.CheckDate, request.BouncedAt);
+        if (!dateValid)
+            return Result<int>.Failure(new[] { dateError! });
 
         check.Status = CheckStatus.Bounced;
         check.BouncedAt = request.BouncedAt;
         check.RowVersion = request.RowVersion;
-
-        var originalVoucher = check.ReceiptVoucher;
-        if (originalVoucher is null)
-            return Result<int>.Failure(new[] { "Original voucher not found."});
-
-        originalVoucher.DepositSlipId = null;
-
-        var newVoucher = new ReceiptVoucher
-        {
-            VoucherNumber = await GenerateVoucherNumber(cancellationToken),
-            VoucherDate = DateOnly.FromDateTime(DateTime.Today),
-            PartyId = originalVoucher.PartyId,
-            PaymentMethod = originalVoucher.PaymentMethod,
-            ReceivedFrom = originalVoucher.ReceivedFrom,
-            Notes = $"Replacement for bounced check {check.CheckNumber}",
-            Status = ReceiptVoucherStatus.Draft
-        };
-
-        context.ReceiptVouchers.Add(newVoucher);
-        await context.SaveChangesAsync(cancellationToken);
-
-        check.ReplacementVoucherId = newVoucher.Id;
 
         context.DocumentStatusLogs.Add(new DocumentStatusLog
         {
@@ -78,24 +67,10 @@ public class BounceCheckCommandHandler(
         }
         catch (DbUpdateConcurrencyException)
         {
-            return Result<int>.Failure(new[] { "Check was modified by another user. Please refresh and try again."});
+            return Result<int>.Failure(new[] { "Check was modified by another user. Please refresh and try again." });
         }
 
-        return Result<int>.Success(newVoucher.Id);
-    }
-
-    private async Task<string> GenerateVoucherNumber(CancellationToken cancellationToken)
-    {
-        var lastNumber = await context.ReceiptVouchers
-            .OrderByDescending(v => v.VoucherNumber)
-            .Select(v => v.VoucherNumber)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (lastNumber is null)
-            return "RCV-000001";
-
-        var lastSeq = int.Parse(lastNumber.Substring(4));
-        return $"RCV-{(lastSeq + 1):D6}";
+        return Result<int>.Success(check.Id);
     }
 }
 

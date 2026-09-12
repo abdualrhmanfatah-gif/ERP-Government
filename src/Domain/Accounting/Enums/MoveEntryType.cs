@@ -10,5 +10,6 @@ public enum MoveEntryType
     Adjusting = 2,
     Closing = 3,
     Opening = 4,
-    SystemGenerated = 5
+    SystemGenerated = 5,
+    Accrual = 6
 }

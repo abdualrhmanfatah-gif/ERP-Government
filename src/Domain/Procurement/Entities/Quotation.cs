@@ -1,14 +1,12 @@
 using ERP_Government.Domain.Common;
+using ERP_Government.Domain.Procurement.Enums;
 
 namespace ERP_Government.Domain.Procurement.Entities;
 
 public class Quotation : BaseAuditableEntity
 {
     public string QuotationNumber { get; set; } = string.Empty;
-    public int RFQId { get; set; }
-    public int RFQSupplierId { get; set; }
-    public int SupplierId { get; set; }
-    public int? PartyId { get; set; }
+    public int SupplierPartyId { get; set; }
     public DateTime QuotationDate { get; set; }
     public DateTime? ValidUntil { get; set; }
     public string? CurrencyCode { get; set; }
@@ -23,11 +21,13 @@ public class Quotation : BaseAuditableEntity
     public string? DeliveryTerms { get; set; }
     public int? LeadTimeDays { get; set; }
     public int? WarrantyPeriodMonths { get; set; }
-    public string Status { get; set; } = string.Empty;
-    public bool IsSelected { get; set; }
+    public QuotationStatus Status { get; set; }
+    public decimal? TechnicalScore { get; set; }
+    public decimal? FinancialScore { get; set; }
     public string? SelectionReason { get; set; }
+    public string? RejectionReason { get; set; }
     public string? Notes { get; set; }
     public byte[] RowVersion { get; set; } = [];
 
-    public RequestForQuotation? RequestForQuotation { get; set; }
+    public ICollection<QuotationDetail> Details { get; set; } = [];
 }

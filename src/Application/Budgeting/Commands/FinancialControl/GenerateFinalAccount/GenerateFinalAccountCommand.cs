@@ -41,50 +41,91 @@ public class GenerateFinalAccountCommandHandler(
             return Result<GenerateFinalAccountResult>.Failure(new[]
                 { $"Final account already exists for fiscal year {fiscalYear.Name}." });
 
+        var closingRun = await context.YearClosingRuns
+            .Where(r => r.FiscalYearId == request.FiscalYearId && r.Status == YearClosingRunStatus.Completed)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (closingRun is null)
+        {
+            var failedRun = await context.YearClosingRuns
+                .Where(r => r.FiscalYearId == request.FiscalYearId && r.Status == YearClosingRunStatus.Failed)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (failedRun is not null)
+                return Result<GenerateFinalAccountResult>.Failure(new[]
+                    { $"Year closing run failed for fiscal year {fiscalYear.Name} (Run ID: {failedRun.Id}). Retry or investigate before generating final account." });
+
+            return Result<GenerateFinalAccountResult>.Failure(new[]
+                { $"No completed year closing run found for fiscal year {fiscalYear.Name}." });
+        }
+
+        var budgetIds = await context.Budgets
+            .Where(b => b.FiscalYearId == request.FiscalYearId)
+            .Select(b => b.Id)
+            .ToListAsync(cancellationToken);
+
+        var budgetItems = await context.BudgetItems
+            .Where(bi => budgetIds.Contains(bi.BudgetId))
+            .ToListAsync(cancellationToken);
+
         var finalAccount = new FinalAccount
         {
             FiscalYearId = request.FiscalYearId,
+            FundId = budgetItems.FirstOrDefault()?.Budget?.FundId ?? 0,
+            YearClosingRunId = closingRun.Id,
             GeneratedAt = DateTimeOffset.UtcNow,
             GeneratedById = user.Id ?? 0,
             Status = FinalAccountStatus.Draft
         };
 
-        var appropriations = await context.Appropriations
-            .Where(a => a.BudgetItem.Budget.FiscalYearId == request.FiscalYearId)
-            .ToListAsync(cancellationToken);
+        var lines = new List<FinalAccountLine>();
 
-        var appropriationIds = appropriations.Select(a => a.Id).ToList();
+        foreach (var budgetItem in budgetItems)
+        {
+            var postedTransactions = await context.BudgetTransactions
+                .Where(t => t.BudgetItemAllocation.BudgetItemId == budgetItem.Id
+                    && t.Status == BudgetTransactionStatus.Posted)
+                .ToListAsync(cancellationToken);
 
-        var actualAmounts = await context.PaymentOrders
-            .Where(po => appropriationIds.Contains(po.AppropriationId)
-                && po.Status == Domain.Payments.Enums.PaymentOrderStatus.Paid)
-            .GroupBy(po => po.AppropriationId)
-            .Select(g => new { AppropriationId = g.Key, Amount = g.Sum(po => po.AmountGross - po.DeductionAmount) })
-            .ToDictionaryAsync(g => g.AppropriationId, g => g.Amount, cancellationToken);
+            var originalBudgetAmount = postedTransactions
+                .Where(t => t.TransactionType == BudgetTransactionType.InitialAppropriation)
+                .Sum(t => t.Direction == TransactionDirection.Increase ? t.Amount : -t.Amount);
 
-        var lines = appropriations
-            .GroupBy(a => new { a.BudgetItemId, a.BudgetItem.ItemCode })
-            .Select(g =>
+            var revisedBudgetAmount = postedTransactions
+                .Sum(t => t.Direction == TransactionDirection.Increase ? t.Amount : -t.Amount);
+
+            var outstandingEncumbrance = await context.EncumbranceLines
+                .Where(l => l.BudgetItemId == budgetItem.Id
+                    && (l.Encumbrance.Status == EncumbranceStatus.Active
+                        || l.Encumbrance.Status == EncumbranceStatus.PartiallyReleased
+                        || l.Encumbrance.Status == EncumbranceStatus.PartiallyLiquidated)
+                    && l.Encumbrance.ReversalOfId == null)
+                .SumAsync(l => l.Amount - l.LiquidatedAmount - l.CancelledAmount, cancellationToken);
+
+            var actualAmount = await context.PaymentOrders
+                .Join(context.BudgetItemAllocations,
+                    po => po.BudgetItemAllocationId,
+                    alloc => alloc.Id,
+                    (po, alloc) => new { po, alloc.BudgetItemId })
+                .Where(x => x.BudgetItemId == budgetItem.Id
+                    && x.po.Status == Domain.Payments.Enums.PaymentOrderStatus.Paid)
+                .SumAsync(x => x.po.AmountGross - x.po.DeductionAmount, cancellationToken);
+
+            var varianceAmount = revisedBudgetAmount - actualAmount - outstandingEncumbrance;
+
+            lines.Add(new FinalAccountLine
             {
-                var budgetedAmount = g.Sum(a => a.AppropriationType == AppropriationType.Original ? a.Amount :
-                    a.AppropriationType == AppropriationType.Supplement ? a.Amount :
-                    a.AppropriationType == AppropriationType.Reduction ? -a.Amount :
-                    a.AppropriationType == AppropriationType.Adjustment ? a.Amount : 0m);
-
-                var actualAmount = g.Sum(a => actualAmounts.GetValueOrDefault(a.Id, 0m));
-
-                return new FinalAccountLine
-                {
-                    Dimension = FinalAccountLineDimension.Item,
-                    DimensionId = g.Key.BudgetItemId,
-                    DimensionCode = g.Key.ItemCode,
-                    DimensionName = g.Key.ItemCode,
-                    BudgetedAmount = budgetedAmount,
-                    ActualAmount = actualAmount,
-                    Variance = budgetedAmount - actualAmount
-                };
-            })
-            .ToList();
+                Dimension = FinalAccountLineDimension.Item,
+                DimensionId = budgetItem.Id,
+                DimensionCode = budgetItem.ItemCode,
+                DimensionName = budgetItem.ItemName,
+                OriginalBudgetAmount = originalBudgetAmount,
+                RevisedBudgetAmount = revisedBudgetAmount,
+                EncumberedAmount = outstandingEncumbrance,
+                ActualAmount = actualAmount,
+                VarianceAmount = varianceAmount
+            });
+        }
 
         foreach (var line in lines)
         {

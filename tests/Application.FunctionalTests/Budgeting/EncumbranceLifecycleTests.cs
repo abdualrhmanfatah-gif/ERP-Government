@@ -1,5 +1,8 @@
-using ERP_Government.Application.Budgeting.Commands.Appropriations;
 using ERP_Government.Application.Budgeting.Commands.Budgets;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.ApproveBudgetTransaction;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.CreateBudgetTransaction;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.PostBudgetTransaction;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.SubmitBudgetTransaction;
 using ERP_Government.Application.Budgeting.Commands.Encumbrances;
 using ERP_Government.Domain.Budgeting.Entities;
 using ERP_Government.Domain.Budgeting.Enums;
@@ -14,7 +17,6 @@ public class EncumbranceLifecycleTests : TestBase
 {
     private int _budgetId;
     private int _budgetItemId;
-    private int _appropriationId;
 
     [SetUp]
     public async Task SeedTestData()
@@ -39,22 +41,27 @@ public class EncumbranceLifecycleTests : TestBase
         await TestApp.AddAsync(item);
         _budgetItemId = item.Id;
 
-        var appResult = await TestApp.SendAsync(new CreateAppropriationCommand(
-            _budgetId, _budgetItemId, AppropriationType.Original, "PO", 1, 50000m));
-        appResult.Succeeded.ShouldBeTrue();
-        _appropriationId = appResult.Value;
+        var txResult = await TestApp.SendAsync(new CreateBudgetTransactionCommand(
+            _budgetId, BudgetTransactionType.InitialAppropriation,
+            DateOnly.FromDateTime(DateTime.UtcNow), "PO", 1, "Seed appropriation",
+            [new BudgetTransactionLineRequest(_budgetItemId, TransactionDirection.Increase, 50000m, null)]));
+        txResult.Succeeded.ShouldBeTrue();
 
-        var appropriation = await TestApp.FindAsync<Appropriation>(_appropriationId);
-        appropriation!.Status = AppropriationStatus.Active;
-        await TestApp.AddAsync(appropriation);
+        var tx = await TestApp.FindAsync<BudgetTransaction>(txResult.Value);
+        await TestApp.SendAsync(new SubmitBudgetTransactionCommand(tx!.Id, tx.RowVersion));
+        tx = await TestApp.FindAsync<BudgetTransaction>(txResult.Value);
+        await TestApp.SendAsync(new ApproveBudgetTransactionCommand(tx!.Id, tx.RowVersion, null));
+        tx = await TestApp.FindAsync<BudgetTransaction>(txResult.Value);
+        await TestApp.SendAsync(new PostBudgetTransactionCommand(tx!.Id, tx.RowVersion));
     }
 
     [Test]
     public async Task FullLifecycle_DraftToActive_ShouldHaveOneApprovalHistoryPerTransition()
     {
         var createResult = await TestApp.SendAsync(new CreateEncumbranceCommand(
-            _appropriationId, EncumbranceType.Commitment, null, null,
-            "PO", 1, "Test encumbrance", DateOnly.FromDateTime(DateTime.UtcNow), 10000m));
+            EncumbranceType.Commitment, null, null,
+            "PO", 1, "Test encumbrance", DateOnly.FromDateTime(DateTime.UtcNow),
+            [new EncumbranceLineRequest(_budgetItemId, 10000m, null)]));
         createResult.Succeeded.ShouldBeTrue();
         var encumbranceId = createResult.Value;
 
@@ -92,15 +99,16 @@ public class EncumbranceLifecycleTests : TestBase
     public async Task DraftOnly_UpdateAndDelete_ShouldOnlyWorkOnDraft()
     {
         var createResult = await TestApp.SendAsync(new CreateEncumbranceCommand(
-            _appropriationId, EncumbranceType.Commitment, null, null,
-            "PO", 1, "Draft encumbrance", DateOnly.FromDateTime(DateTime.UtcNow), 5000m));
+            EncumbranceType.Commitment, null, null,
+            "PO", 1, "Draft encumbrance", DateOnly.FromDateTime(DateTime.UtcNow),
+            [new EncumbranceLineRequest(_budgetItemId, 5000m, null)]));
         createResult.Succeeded.ShouldBeTrue();
         var encumbranceId = createResult.Value;
 
         var encumbrance = await TestApp.FindAsync<Encumbrance>(encumbranceId);
 
         var updateResult = await TestApp.SendAsync(new UpdateEncumbranceCommand(
-            encumbranceId, "Updated desc", null, null, null, null, encumbrance!.RowVersion));
+            encumbranceId, "Updated desc", null, null, encumbrance!.RowVersion));
         updateResult.Succeeded.ShouldBeTrue();
 
         var submitResult = await TestApp.SendAsync(new SubmitEncumbranceCommand(
@@ -109,7 +117,7 @@ public class EncumbranceLifecycleTests : TestBase
 
         encumbrance = await TestApp.FindAsync<Encumbrance>(encumbranceId);
         var updateAfterSubmit = await TestApp.SendAsync(new UpdateEncumbranceCommand(
-            encumbranceId, "Should fail", null, null, null, null, encumbrance!.RowVersion));
+            encumbranceId, "Should fail", null, null, encumbrance!.RowVersion));
         updateAfterSubmit.Succeeded.ShouldBeFalse();
     }
 
@@ -117,8 +125,9 @@ public class EncumbranceLifecycleTests : TestBase
     public async Task Cancel_ShouldWorkFromDraftAndActive()
     {
         var createResult = await TestApp.SendAsync(new CreateEncumbranceCommand(
-            _appropriationId, EncumbranceType.Commitment, null, null,
-            "PO", 1, "Cancel test", DateOnly.FromDateTime(DateTime.UtcNow), 2000m));
+            EncumbranceType.Commitment, null, null,
+            "PO", 1, "Cancel test", DateOnly.FromDateTime(DateTime.UtcNow),
+            [new EncumbranceLineRequest(_budgetItemId, 2000m, null)]));
         createResult.Succeeded.ShouldBeTrue();
         var encumbranceId = createResult.Value;
 

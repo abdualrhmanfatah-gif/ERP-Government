@@ -23,12 +23,12 @@ public record FinalAccountDetailResult(
 
 public record FinalAccountLineDetailResult(
     FinalAccountLineDimension Dimension,
-    int DimensionId,
+    int? DimensionId,
     string DimensionCode,
     string DimensionName,
-    decimal BudgetedAmount,
+    decimal OriginalBudgetAmount,
     decimal ActualAmount,
-    decimal Variance);
+    decimal VarianceAmount);
 
 public class GetFinalAccountQueryHandler(
     IApplicationDbContext context) : IRequestHandler<GetFinalAccountQuery, FinalAccountDetailResult?>
@@ -51,9 +51,9 @@ public class GetFinalAccountQueryHandler(
                 l.DimensionId,
                 l.DimensionCode,
                 l.DimensionName,
-                l.BudgetedAmount,
+                l.OriginalBudgetAmount,
                 l.ActualAmount,
-                l.Variance))
+                l.VarianceAmount))
             .ToListAsync(cancellationToken);
 
         return new FinalAccountDetailResult(

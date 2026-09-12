@@ -1,6 +1,7 @@
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Parties.Common;
 using ERP_Government.Domain.Budgeting.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP_Government.Application.Budgeting.Commands.Budgets;
 
@@ -32,6 +33,22 @@ public class CloseBudgetCommandHandler(
 
         if (!request.RowVersion.SequenceEqual(entity.RowVersion))
             return Result.Failure(["Concurrency conflict. The record has been modified by another user."]);
+
+        var hasPostedTransactions = await context.BudgetTransactions
+            .AnyAsync(x => x.BudgetId == entity.Id
+                && x.Status == BudgetTransactionStatus.Posted, cancellationToken);
+
+        if (hasPostedTransactions)
+            return Result.Failure(["Cannot close budget with posted transactions. Reverse or lapse them first."]);
+
+        var hasActiveEncumbrances = await context.EncumbranceLines
+            .AnyAsync(x => x.BudgetItem.BudgetId == entity.Id
+                && (x.Encumbrance.Status == EncumbranceStatus.Active
+                    || x.Encumbrance.Status == EncumbranceStatus.PartiallyReleased
+                    || x.Encumbrance.Status == EncumbranceStatus.PartiallyLiquidated), cancellationToken);
+
+        if (hasActiveEncumbrances)
+            return Result.Failure(["Cannot close budget with active encumbrances. Cancel or reverse them first."]);
 
         var previousStatus = entity.Status;
         entity.Status = BudgetStatus.Closed;

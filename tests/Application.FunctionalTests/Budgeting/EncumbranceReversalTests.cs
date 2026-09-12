@@ -1,5 +1,8 @@
-using ERP_Government.Application.Budgeting.Commands.Appropriations;
 using ERP_Government.Application.Budgeting.Commands.Budgets;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.ApproveBudgetTransaction;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.CreateBudgetTransaction;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.PostBudgetTransaction;
+using ERP_Government.Application.Budgeting.Commands.BudgetTransactions.SubmitBudgetTransaction;
 using ERP_Government.Application.Budgeting.Commands.Encumbrances;
 using ERP_Government.Domain.Budgeting.Entities;
 using ERP_Government.Domain.Budgeting.Enums;
@@ -13,7 +16,6 @@ public class EncumbranceReversalTests : TestBase
 {
     private int _budgetId;
     private int _budgetItemId;
-    private int _appropriationId;
 
     [SetUp]
     public async Task SeedTestData()
@@ -38,21 +40,26 @@ public class EncumbranceReversalTests : TestBase
         await TestApp.AddAsync(item);
         _budgetItemId = item.Id;
 
-        var appResult = await TestApp.SendAsync(new CreateAppropriationCommand(
-            _budgetId, _budgetItemId, AppropriationType.Original, "PO", 1, 100000m));
-        appResult.Succeeded.ShouldBeTrue();
-        _appropriationId = appResult.Value;
+        var txResult = await TestApp.SendAsync(new CreateBudgetTransactionCommand(
+            _budgetId, BudgetTransactionType.InitialAppropriation,
+            DateOnly.FromDateTime(DateTime.UtcNow), "PO", 1, "Seed appropriation",
+            [new BudgetTransactionLineRequest(_budgetItemId, TransactionDirection.Increase, 100000m, null)]));
+        txResult.Succeeded.ShouldBeTrue();
 
-        var appropriation = await TestApp.FindAsync<Appropriation>(_appropriationId);
-        appropriation!.Status = AppropriationStatus.Active;
-        await TestApp.AddAsync(appropriation);
+        var tx = await TestApp.FindAsync<BudgetTransaction>(txResult.Value);
+        await TestApp.SendAsync(new SubmitBudgetTransactionCommand(tx!.Id, tx.RowVersion));
+        tx = await TestApp.FindAsync<BudgetTransaction>(txResult.Value);
+        await TestApp.SendAsync(new ApproveBudgetTransactionCommand(tx!.Id, tx.RowVersion, null));
+        tx = await TestApp.FindAsync<BudgetTransaction>(txResult.Value);
+        await TestApp.SendAsync(new PostBudgetTransactionCommand(tx!.Id, tx.RowVersion));
     }
 
     private async Task<int> CreateAndActivateEncumbrance(decimal amount)
     {
         var createResult = await TestApp.SendAsync(new CreateEncumbranceCommand(
-            _appropriationId, EncumbranceType.Commitment, null, null,
-            "PO", 1, "Reversal test", DateOnly.FromDateTime(DateTime.UtcNow), amount));
+            EncumbranceType.Commitment, null, null,
+            "PO", 1, "Reversal test", DateOnly.FromDateTime(DateTime.UtcNow),
+            [new EncumbranceLineRequest(_budgetItemId, amount, null)]));
         createResult.Succeeded.ShouldBeTrue();
         var id = createResult.Value;
 
@@ -79,15 +86,16 @@ public class EncumbranceReversalTests : TestBase
         var original = await TestApp.FindAsync<Encumbrance>(encumbranceId);
         original!.Status.ShouldBe(EncumbranceStatus.Reversed);
         original.ReversalOfId.ShouldBeNull();
-        original.Amount.ShouldBe(15000m);
+        original.TotalAmount.ShouldBe(15000m);
     }
 
     [Test]
     public async Task Reverse_DraftEncumbrance_ShouldFail()
     {
         var createResult = await TestApp.SendAsync(new CreateEncumbranceCommand(
-            _appropriationId, EncumbranceType.Commitment, null, null,
-            "PO", 1, "Draft only", DateOnly.FromDateTime(DateTime.UtcNow), 5000m));
+            EncumbranceType.Commitment, null, null,
+            "PO", 1, "Draft only", DateOnly.FromDateTime(DateTime.UtcNow),
+            [new EncumbranceLineRequest(_budgetItemId, 5000m, null)]));
         createResult.Succeeded.ShouldBeTrue();
         var id = createResult.Value;
 

@@ -5,15 +5,15 @@ public record AvailabilitySnapshotDetailDto
     public int BudgetItemId { get; init; }
     public string ItemCode { get; init; } = string.Empty;
     public string ItemName { get; init; } = string.Empty;
-    public List<AppropriationDetailDto> Appropriations { get; init; } = [];
+    public List<BudgetTransactionDetailDto> Transactions { get; init; } = [];
     public List<EncumbranceDetailDto> Encumbrances { get; init; } = [];
     public List<PaymentDetailDto> Payments { get; init; } = [];
 }
 
-public record AppropriationDetailDto
+public record BudgetTransactionDetailDto
 {
-    public int AppropriationId { get; init; }
-    public string AppropriationNumber { get; init; } = string.Empty;
+    public int TransactionId { get; init; }
+    public string TransactionNumber { get; init; } = string.Empty;
     public string Type { get; init; } = string.Empty;
     public decimal Amount { get; init; }
     public string Status { get; init; } = string.Empty;

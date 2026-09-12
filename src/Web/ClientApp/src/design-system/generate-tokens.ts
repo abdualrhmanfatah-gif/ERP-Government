@@ -71,6 +71,27 @@ function generateCssScss(): string {
   }
   lines.push('');
 
+  // shadcn-compatible aliases (bridge design tokens → shadcn Tailwind config)
+  lines.push(cssVar('background', semanticColors.surface));
+  lines.push(cssVar('foreground', semanticColors.onSurface));
+  lines.push(cssVar('primary', semanticColors.primary));
+  lines.push(cssVar('primary-foreground', semanticColors.onPrimary));
+  lines.push(cssVar('secondary', semanticColors.secondary));
+  lines.push(cssVar('secondary-foreground', semanticColors.onSecondary));
+  lines.push(cssVar('destructive', semanticColors.error));
+  lines.push(cssVar('destructive-foreground', semanticColors.onError));
+  lines.push(cssVar('muted', semanticColors.surfaceContainerLow));
+  lines.push(cssVar('muted-foreground', semanticColors.onSurfaceVariant));
+  lines.push(cssVar('accent', semanticColors.surfaceContainer));
+  lines.push(cssVar('accent-foreground', semanticColors.onSurface));
+  lines.push(cssVar('popover', semanticColors.surface));
+  lines.push(cssVar('popover-foreground', semanticColors.onSurface));
+  lines.push(cssVar('card', semanticColors.surface));
+  lines.push(cssVar('card-foreground', semanticColors.onSurface));
+  lines.push(cssVar('input', semanticColors.inputBorder));
+  lines.push(cssVar('ring', semanticColors.focusRing));
+  lines.push('');
+
   // Status Colors
   for (const [status, pair] of Object.entries(statusColors)) {
     lines.push(cssVar(`status-${status}-bg`, pair.bg));
@@ -194,6 +215,27 @@ function generateCssScss(): string {
     const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
     lines.push(cssVar(`color-${cssKey}`, val));
   }
+  lines.push('');
+
+  // shadcn-compatible aliases (dark theme)
+  lines.push(cssVar('background', semanticColorsDark.surface));
+  lines.push(cssVar('foreground', semanticColorsDark.onSurface));
+  lines.push(cssVar('primary', semanticColorsDark.primary));
+  lines.push(cssVar('primary-foreground', semanticColorsDark.onPrimary));
+  lines.push(cssVar('secondary', semanticColorsDark.secondary));
+  lines.push(cssVar('secondary-foreground', semanticColorsDark.onSecondary));
+  lines.push(cssVar('destructive', semanticColorsDark.error));
+  lines.push(cssVar('destructive-foreground', semanticColorsDark.onError));
+  lines.push(cssVar('muted', semanticColorsDark.surfaceContainerLow));
+  lines.push(cssVar('muted-foreground', semanticColorsDark.onSurfaceVariant));
+  lines.push(cssVar('accent', semanticColorsDark.surfaceContainer));
+  lines.push(cssVar('accent-foreground', semanticColorsDark.onSurface));
+  lines.push(cssVar('popover', semanticColorsDark.surface));
+  lines.push(cssVar('popover-foreground', semanticColorsDark.onSurface));
+  lines.push(cssVar('card', semanticColorsDark.surface));
+  lines.push(cssVar('card-foreground', semanticColorsDark.onSurface));
+  lines.push(cssVar('input', semanticColorsDark.inputBorder));
+  lines.push(cssVar('ring', semanticColorsDark.focusRing));
   lines.push('');
 
   for (const [status, pair] of Object.entries(statusColorsDark)) {

@@ -10,8 +10,6 @@ public record UpdateEncumbranceCommand(
     int Id,
     string? Description,
     DateOnly? EncumbranceDate,
-    decimal? Amount,
-    int? VendorId,
     int? PurchaseOrderId,
     byte[] RowVersion) : IRequest<Result>;
 
@@ -32,8 +30,6 @@ public class UpdateEncumbranceCommandHandler(
 
         if (request.Description is not null) entity.Description = request.Description;
         if (request.EncumbranceDate.HasValue) entity.EncumbranceDate = request.EncumbranceDate.Value;
-        if (request.Amount.HasValue) entity.Amount = request.Amount.Value;
-        if (request.VendorId.HasValue) entity.VendorId = request.VendorId;
         if (request.PurchaseOrderId.HasValue) entity.PurchaseOrderId = request.PurchaseOrderId;
 
         await context.SaveChangesAsync(cancellationToken);

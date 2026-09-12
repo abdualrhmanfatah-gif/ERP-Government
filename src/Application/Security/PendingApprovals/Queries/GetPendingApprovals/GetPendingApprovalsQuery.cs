@@ -24,7 +24,7 @@ public class GetPendingApprovalsQueryHandler(
         if (string.IsNullOrEmpty(request.DocumentType) || request.DocumentType == "PurchaseOrder")
         {
             var submittedPOs = await context.PurchaseOrders
-                .Where(po => po.Status == "Submitted")
+                .Where(po => po.Status == ERP_Government.Domain.Procurement.Enums.PurchaseOrderStatus.Submitted)
                 .ToListAsync(cancellationToken);
 
             foreach (var po in submittedPOs)

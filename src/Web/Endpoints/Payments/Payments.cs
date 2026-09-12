@@ -1,4 +1,5 @@
 using ERP_Government.Application.Common.Models;
+using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Payments.Commands.Payments.RecordPayment;
 using ERP_Government.Application.Payments.Queries.Payments.GetPayments;
 using ERP_Government.Domain.Payments.Enums;
@@ -11,11 +12,16 @@ public class Payments : IEndpointGroup
     public static void Map(RouteGroupBuilder group)
     {
         group.MapGet("/", HandleGetAll)
-            .Produces<IReadOnlyList<Application.Payments.Common.DTOs.PaymentDto>>();
+            .Produces<IReadOnlyList<Application.Payments.Common.DTOs.PaymentDto>>()
+            .RequireAuthorization(PermissionCodes.PaymentsView);
+
         group.MapGet("/{id:int}", HandleGetById)
-            .Produces<Application.Payments.Common.DTOs.PaymentDto?>();
+            .Produces<Application.Payments.Common.DTOs.PaymentDto?>()
+            .RequireAuthorization(PermissionCodes.PaymentsView);
+
         group.MapPost("/", HandleCreate)
-            .Produces<Application.Payments.Common.DTOs.PaymentDto>();
+            .Produces<Application.Payments.Common.DTOs.PaymentDto>()
+            .RequireAuthorization(PermissionCodes.PaymentsCreate);
     }
 
     private static async Task<IResult> HandleGetAll(
@@ -44,20 +50,20 @@ public class Payments : IEndpointGroup
     {
         var result = await sender.Send(request.ToCommand());
         return result.Succeeded
-            ? Results.Created($"/api/Payments/{result.Value!.Id}", result.Value)
+            ? Results.Ok(result.Value)
             : Results.BadRequest(result.Errors);
     }
 }
 
 public record RecordPaymentRequest(
-    int DisbursementRequestId,
+    int PaymentOrderId,
     PaymentMethod PaymentMethod,
     string? ReferenceNumber,
     string? Notes)
 {
     public RecordPaymentCommand ToCommand() => new()
     {
-        DisbursementRequestId = DisbursementRequestId,
+        PaymentOrderId = PaymentOrderId,
         PaymentMethod = PaymentMethod,
         ReferenceNumber = ReferenceNumber,
         Notes = Notes

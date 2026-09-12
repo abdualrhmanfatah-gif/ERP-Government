@@ -5,32 +5,41 @@ namespace ERP_Government.Application.Payments.Common.DTOs;
 public record DisbursementRequestDto(
     int Id,
     string RequestNumber,
-    int PaymentOrderId,
-    string PaymentOrderNumber,
     int RequestedById,
     string RequestedByName,
+    string BeneficiaryName,
+    decimal RequestedAmount,
+    int CurrencyId,
+    string Purpose,
+    int FinancialYearId,
     DateOnly RequestDate,
     DisbursementRequestStatus Status,
-    bool HasWarning,
     string? Notes,
-    decimal RequestedAmount,
-    string? PayeeName,
-    string? FundName,
-    DateTimeOffset? ApprovalDate,
-    DateTimeOffset? PaymentDate);
+    DateTimeOffset? PaymentDate,
+    int? PaymentOrderId,
+    string? PaymentOrderNumber,
+    int? AccrualJournalEntryId,
+    string? AccrualEntryNumber,
+    List<ApprovalStepDto> Approvals);
 
 public record DisbursementRequestDetailDto(
     int Id,
     string RequestNumber,
-    int PaymentOrderId,
-    string PaymentOrderNumber,
     int RequestedById,
     string RequestedByName,
+    string BeneficiaryName,
+    decimal RequestedAmount,
+    int CurrencyId,
+    string Purpose,
+    int FinancialYearId,
     DateOnly RequestDate,
     DisbursementRequestStatus Status,
-    bool HasWarning,
     string? Notes,
-    decimal RequestedAmount,
+    DateTimeOffset? PaymentDate,
+    int? PaymentOrderId,
+    string? PaymentOrderNumber,
+    int? AccrualJournalEntryId,
+    string? AccrualEntryNumber,
     List<ApprovalStepDto> Approvals);
 
 public record ApprovalStepDto(
@@ -39,4 +48,5 @@ public record ApprovalStepDto(
     string ApproverName,
     string Role,
     string Decision,
-    DateTimeOffset DecisionAt);
+    DateTimeOffset DecisionAt,
+    decimal? ApprovedAmount);

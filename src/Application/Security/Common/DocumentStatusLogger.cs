@@ -34,6 +34,5 @@ public class DocumentStatusLogger : IDocumentStatusLogger
         };
 
         _context.DocumentStatusLogs.Add(log);
-        await _context.SaveChangesAsync(ct);
     }
 }

@@ -98,7 +98,7 @@ public class AdvanceWorkflowInstanceCommandHandler(
         }
 
         instance.LastModified = DateTimeOffset.UtcNow;
-        instance.LastModifiedBy = "system"; // TODO: Get from current user
+        instance.LastModifiedBy = userId.ToString();
 
         // Create history entry
         context.WorkflowHistory.Add(new Domain.Workflow.Entities.WorkflowHistory

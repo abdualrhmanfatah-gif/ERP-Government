@@ -17,6 +17,18 @@ public class GetGeneralLedgerQueryHandler(
             var startDate = DateOnly.TryParse(request.StartDate, out var s) ? s : (DateOnly?)null;
             var endDate = DateOnly.TryParse(request.EndDate, out var e) ? e : (DateOnly?)null;
 
+            // If FiscalPeriodId is provided, resolve its date range
+            if (request.FiscalPeriodId.HasValue && (!startDate.HasValue || !endDate.HasValue))
+            {
+                var period = await context.FiscalPeriods
+                    .FirstOrDefaultAsync(p => p.Id == request.FiscalPeriodId.Value, cancellationToken);
+                if (period != null)
+                {
+                    startDate ??= period.StartDate;
+                    endDate ??= period.EndDate;
+                }
+            }
+
             var query = context.JournalEntryLines
                 .Include(ml => ml.JournalEntry)
                 .Include(ml => ml.Account)
@@ -45,7 +57,7 @@ public class GetGeneralLedgerQueryHandler(
                 .ThenBy(ml => ml.Sequence)
                 .ToListAsync(cancellationToken);
 
-            // Compute running balance per account
+            // Compute running balance per account from all filtered lines
             var runningBalances = new Dictionary<int, decimal>();
             foreach (var line in allLines)
             {

@@ -22,7 +22,8 @@ public class Users : IEndpointGroup
     public static async Task<IResult> Login(
         [FromBody] LoginRequest request,
         [FromServices] IApplicationDbContext db,
-        [FromServices] IConfiguration config)
+        [FromServices] IConfiguration config,
+        [FromServices] Microsoft.AspNetCore.Identity.IPasswordHasher<ERP_Government.Domain.Security.Entities.User> hasher)
     {
         var user = await db.Users
             .Include(u => u.Role)
@@ -34,7 +35,6 @@ public class Users : IEndpointGroup
         if (user.LockedUntil.HasValue && user.LockedUntil > DateTimeOffset.UtcNow)
             return Results.Json(new { error = "Account is locked." }, statusCode: 423);
 
-        var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<User>();
         var result = hasher.VerifyHashedPassword(user, user.PasswordHash ?? string.Empty, request.Password);
 
         if (result == Microsoft.AspNetCore.Identity.PasswordVerificationResult.Failed)
@@ -66,7 +66,8 @@ public class Users : IEndpointGroup
         foreach (var permission in permissions)
             claims.Add(new Claim("permission", permission));
 
-        var jwtKey = config["Jwt:Key"] ?? "ERP_Government_DefaultKey_2026!ChangeInProduction";
+        var jwtKey = config["Jwt:Key"]
+            ?? throw new InvalidOperationException("Jwt:Key is not configured. Set Jwt:Key in configuration.");
         var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 

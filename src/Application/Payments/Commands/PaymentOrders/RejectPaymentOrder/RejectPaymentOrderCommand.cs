@@ -1,4 +1,6 @@
+using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Application.Parties.Common;
 using ERP_Government.Domain.Payments.Enums;
 
 namespace ERP_Government.Application.Payments.Commands.PaymentOrders.RejectPaymentOrder;
@@ -12,12 +14,17 @@ public class RejectPaymentOrderCommand : IRequest<Result>
 }
 
 public class RejectPaymentOrderCommandHandler(
-    IApplicationDbContext context) : IRequestHandler<RejectPaymentOrderCommand, Result>
+    IApplicationDbContext context,
+    IDocumentStatusLogger statusLogger,
+    IUser user) : IRequestHandler<RejectPaymentOrderCommand, Result>
 {
     public async Task<Result> Handle(
         RejectPaymentOrderCommand request,
         CancellationToken cancellationToken)
     {
+        if (user.Id is not int userId)
+            return Result.Failure(["User identity is required for this operation."]);
+
         var entity = await context.PaymentOrders
             .FindAsync(request.Id, cancellationToken);
 
@@ -27,10 +34,23 @@ public class RejectPaymentOrderCommandHandler(
         if (entity.Status != PaymentOrderStatus.Submitted)
             return Result.Failure(["Only submitted payment orders can be rejected."]);
 
+        if (entity.RowVersion.Length > 0 && request.RowVersion.Length > 0
+            && !entity.RowVersion.SequenceEqual(request.RowVersion))
+            return Result.Failure(["RowVersion conflict — record modified by another user. Reload."]);
+
         if (string.IsNullOrWhiteSpace(request.RejectionReason))
             return Result.Failure(["Rejection reason is required."]);
 
         entity.Status = PaymentOrderStatus.Rejected;
+
+        await statusLogger.LogAsync(
+            "paymentorders",
+            entity.Id,
+            PaymentOrderStatus.Submitted.ToString(),
+            PaymentOrderStatus.Rejected.ToString(),
+            userId,
+            request.RejectionReason,
+            cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
 

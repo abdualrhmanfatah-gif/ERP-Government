@@ -22,6 +22,7 @@ public class GetReceiptVouchersByPartyQueryHandler(
             .Include(v => v.Party)
             .Include(v => v.Lines)
             .Include(v => v.Checks)
+            .Include(v => v.DepositSlip)
             .Where(v => v.PartyId == request.PartyId)
             .OrderByDescending(v => v.Created)
             .Skip((request.Page - 1) * request.PageSize)
@@ -38,6 +39,7 @@ public class GetReceiptVouchersByPartyQueryHandler(
                 ReceivedFrom = v.ReceivedFrom,
                 Notes = v.Notes,
                 DepositSlipId = v.DepositSlipId,
+                DepositSlipNumber = v.DepositSlip != null ? v.DepositSlip.SlipNumber : null,
                 Status = v.Status,
                 StatusName = v.Status.ToString(),
                 TotalAmount = v.Lines.Sum(l => l.Amount),

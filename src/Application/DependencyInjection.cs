@@ -33,14 +33,12 @@ public static class DependencyInjection
         // Authorization services
         builder.Services.AddScoped<IPermissionService, PermissionService>();
 
-        builder.Services.AddScoped<IDatabaseTransactionFactory, DatabaseTransactionFactory>();
         builder.Services.AddScoped<IDocumentSequenceService, DocumentSequenceService>();
         builder.Services.AddScoped<IExchangeRateResolver, ExchangeRateResolver>();
         builder.Services.AddScoped<ICurrencyConversionService, CurrencyConversionService>();
         builder.Services.AddScoped<IBudgetAvailabilityService, BudgetAvailabilityService>();
         builder.Services.AddScoped<PostingRuleMatcher>();
         builder.Services.AddScoped<JournalEntryGenerator>();
-        builder.Services.AddScoped<AccountingEventAuditor>();
-        builder.Services.AddScoped<RetryPolicy>();
+        builder.Services.AddScoped<PostingPipelineHandler>();
     }
 }

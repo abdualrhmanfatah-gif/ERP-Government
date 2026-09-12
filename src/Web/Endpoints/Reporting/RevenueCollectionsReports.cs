@@ -1,9 +1,12 @@
+using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Reporting.RevenueCollections.GetRevenueCollectionsDetail;
 using ERP_Government.Application.Reporting.RevenueCollections.GetRevenueCollectionsReport;
+using ERP_Government.Application.Reporting.Common;
 using ERP_Government.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP_Government.Web.Endpoints.Reporting;
 
@@ -43,36 +46,21 @@ public class RevenueCollectionsReports : IEndpointGroup
     [EndpointSummary("Export revenue collections report to Excel or PDF")]
     public static async Task<IResult> ExportRevenueCollectionsReport(
         ISender sender,
+        [FromServices] IApplicationDbContext context,
         [FromQuery] string format,
         [AsParameters] GetRevenueCollectionsReportQuery query)
     {
         var result = await sender.Send(query);
+        var currencyCode = await context.Currencies
+            .Where(c => c.IsBase)
+            .Select(c => c.Code)
+            .FirstOrDefaultAsync();
         var stream = new MemoryStream();
         var exporter = format?.ToLower() == "pdf"
             ? (ERP_Government.Application.Accounting.Reports.Common.IReportExporter)new ERP_Government.Infrastructure.Services.PdfReportExporter()
             : new ERP_Government.Infrastructure.Services.ExcelReportExporter();
 
-        var reportResult = new ERP_Government.Application.Accounting.Reports.Common.ReportResult
-        {
-            Currency = "SAR",
-            GeneratedAt = DateTimeOffset.UtcNow,
-            Sections =
-            [
-                new ERP_Government.Application.Accounting.Reports.Common.ReportSection
-                {
-                    Title = "Revenue Collections",
-                    Lines = result.Lines.Select(l => new ERP_Government.Application.Accounting.Reports.Common.ReportLine
-                    {
-                        AccountCode = l.AccountCode,
-                        AccountName = $"{l.AccountName} - {l.PartyName}",
-                        Debit = l.Amount,
-                        Credit = 0,
-                        Balance = l.Amount
-                    }).ToList(),
-                    Total = result.Totals.TotalAmount
-                }
-            ]
-        };
+        var reportResult = result.ToReportResult(currencyCode);
 
         await exporter.ExportExcelAsync(reportResult, "Revenue Collections", stream);
         stream.Position = 0;

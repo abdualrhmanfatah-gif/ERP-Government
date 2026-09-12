@@ -1,16 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Power, PowerOff, Eye, Pencil } from 'lucide-react';
-import { toast } from 'sonner';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { DataGrid } from '@/components/ui/DataGrid';
-import { Button } from '@/components/ui/Button';
-import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { Input } from '@/components/ui/Input';
-import { FilterBar, FilterSelect } from '@/components/ui';
-import { StatusBadge } from '@/components/ui/StatusBadge';
-import { GroupTree } from '../components/GroupTree';
-import { AccountGroupForm } from '../components/AccountGroupForm';
+import { notify } from '@/features/notifications/notify';
+import { Page, DataGrid, Button, ConfirmDialog, Input, FilterBar, FilterSelect, StatusBadge, Pagination } from '@/components/ui';
+import { GroupTree } from '@/components/AccountingGroupTree';
+import { AccountGroupForm } from '@/components/AccountingAccountGroupForm';
 import { useAccountGroupsList } from '../hooks/useAccountGroupsList';
 import { useCreateAccountGroup } from '../hooks/useCreateAccountGroup';
 import { useUpdateAccountGroup } from '../hooks/useUpdateAccountGroup';
@@ -18,6 +12,7 @@ import { useToggleAccountGroupActive } from '../hooks/useToggleAccountGroupActiv
 import type { AccountGroupDto } from '../types';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
+import { activeStatusLabels, getActiveStatusLabel } from '@/shared/constants/labels';
 
 export function AccountGroupsListPage() {
   const navigate = useNavigate();
@@ -47,10 +42,10 @@ export function AccountGroupsListPage() {
   const handleCreate = async (payload: Parameters<ReturnType<typeof useCreateAccountGroup>['mutateAsync']>[0]) => {
     try {
       await createMut.mutateAsync(payload);
-      toast.success('تم إنشاء المجموعة بنجاح');
+      notify({ type: 'success', title: 'تم إنشاء المجموعة بنجاح' });
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'فشل الإنشاء';
-      toast.error(msg);
+      notify({ type: 'error', title: msg });
       throw e;
     }
   };
@@ -59,10 +54,10 @@ export function AccountGroupsListPage() {
     if (!confirmToggle) return;
     try {
       await toggleMut.mutateAsync({ id: confirmToggle.id, isActive: !confirmToggle.isActive, rowVersion: confirmToggle.rowVersion });
-      toast.success(confirmToggle.isActive ? 'تم التعطيل' : 'تم التفعيل');
+      notify({ type: 'success', title: confirmToggle.isActive ? 'تم التعطيل' : 'تم التفعيل' });
       setConfirmToggle(null);
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : 'فشل العملية');
+      notify({ type: 'error', title: e instanceof Error ? e.message : 'فشل العملية' });
     }
   };
 
@@ -70,11 +65,11 @@ export function AccountGroupsListPage() {
     if (!editingGroup) return;
     try {
       await updateMut.mutateAsync({ id: editingGroup.id, rowVersion: editingGroup.rowVersion, ...(payload as { name:string; type:string; normalBalance:string; description?:string; parentId?:number|null }) } as never);
-      toast.success('تم التحديث بنجاح');
+      notify({ type: 'success', title: 'تم التحديث بنجاح' });
       setEditingGroup(null);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'فشل التحديث';
-      toast.error(msg);
+      notify({ type: 'error', title: msg });
       throw e;
     }
   };
@@ -83,15 +78,19 @@ export function AccountGroupsListPage() {
   const items = data?.items ?? [];
 
   return (
-    <div className="space-y-4 p-4">
-      <PageHeader title="مجموعات الحسابات" description="إدارة هرمية لتصنيف دليل الحسابات (5 مستويات كحد أقصى)" actions={canCreate && <Button onClick={()=>setShowCreate(true)}><Plus className="h-4 w-4" />إنشاء مجموعة</Button>} />
-      <FilterBar>
-        <Input placeholder="بحث بالكود أو الاسم..." value={search} onChange={(e)=>{setSearch(e.target.value); setPage(1);}} className="max-w-sm" />
-        <FilterSelect label="النوع" value={filterType} onChange={(v: string)=>{setFilterType(v); setPage(1);}} options={[{value:'All',label:'الكل'},{value:'Asset',label:'أصل'},{value:'Liability',label:'التزام'},{value:'Equity',label:'حقوق ملكية'},{value:'Revenue',label:'إيراد'},{value:'Expense',label:'مصروف'}]} />
-        <FilterSelect label="الحالة" value={filterActive} onChange={(v: string)=>{setFilterActive(v); setPage(1);}} options={[{value:'All',label:'الكل'},{value:'active',label:'نشط'},{value:'inactive',label:'معطل'}]} />
-      </FilterBar>
-
-      {isLoading && <p className="text-sm text-[var(--color-on-surface-variant)]">جاري التحميل...</p>}
+    <Page
+      title="مجموعات الحسابات"
+      description="إدارة هرمية لتصنيف دليل الحسابات (5 مستويات كحد أقصى)"
+      actions={canCreate && <Button onClick={()=>setShowCreate(true)}><Plus className="h-4 w-4" />إنشاء مجموعة</Button>}
+      toolbar={
+        <FilterBar>
+          <Input placeholder="بحث بالكود أو الاسم..." value={search} onChange={(e)=>{setSearch(e.target.value); setPage(1);}} className="max-w-sm" />
+          <FilterSelect label="النوع" value={filterType} onChange={(v: string)=>{setFilterType(v); setPage(1);}} options={[{value:'All',label:'الكل'},{value:'Asset',label:'أصل'},{value:'Liability',label:'التزام'},{value:'Equity',label:'حقوق ملكية'},{value:'Revenue',label:'إيراد'},{value:'Expense',label:'مصروف'}]} />
+          <FilterSelect label="الحالة" value={filterActive} onChange={(v: string)=>{setFilterActive(v); setPage(1);}} options={[{value:'All',label:'الكل'},{value:'active',label:activeStatusLabels.active},{value:'inactive',label:activeStatusLabels.disabled}]} />
+        </FilterBar>
+      }
+      loading={isLoading}
+    >
       {error && <p className="text-sm text-[var(--color-error)]">خطأ في التحميل</p>}
 
       {isTreeMode ? (
@@ -112,7 +111,7 @@ export function AccountGroupsListPage() {
             { id:'type', accessorKey:'type', header:'النوع' },
             { id:'normalBalance', accessorKey:'normalBalance', header:'الرصيد' },
             { id:'level', accessorKey:'level', header:'المستوى' },
-            { id:'isActive', accessorKey:'isActive', header:'الحالة', cell: (row)=> <StatusBadge variant={row.isActive?'active':'closed'}>{row.isActive?'نشط':'معطل'}</StatusBadge> },
+            { id:'isActive', accessorKey:'isActive', header:'الحالة', cell: (row)=> <StatusBadge variant={row.isActive?'active':'closed'}>{getActiveStatusLabel(row.isActive ?? false)}</StatusBadge> },
             { id:'ancestorPath', accessorKey:'ancestorPath', header:'المسار', cell: (row)=> <span className="text-xs">{(row.ancestorPath ?? []).map((a)=>a.code).join(' / ')}</span> },
             { id:'actions', header:'إجراءات', cell: (row)=> {
               return <div className="flex gap-1">
@@ -125,9 +124,9 @@ export function AccountGroupsListPage() {
         />
       )}
 
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-[var(--color-on-surface-variant)]">الصفحة {data?.page ?? 1} من {data?.totalPages ?? 1} — الإجمالي {data?.totalCount ?? 0}</span>
-        <div className="flex gap-2"><Button variant="outline" disabled={page<=1} onClick={()=>setPage(p=>p-1)}>السابق</Button><Button variant="outline" disabled={page>= (data?.totalPages ?? 1)} onClick={()=>setPage(p=>p+1)}>التالي</Button></div>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <span className="text-sm text-[var(--color-on-surface-variant)]">الإجمالي {data?.totalCount ?? 0}</span>
+        <Pagination page={page} total={data?.totalCount ?? 0} pageSize={20} onChange={setPage} />
       </div>
 
       <AccountGroupForm open={showCreate} onOpenChange={setShowCreate} onSubmit={handleCreate} isPending={createMut.isPending} />
@@ -142,6 +141,6 @@ export function AccountGroupsListPage() {
         confirmLabel={confirmToggle?.isActive ? 'تعطيل' : 'تفعيل'}
         destructive={!!confirmToggle?.isActive}
       />
-    </div>
+    </Page>
   );
 }

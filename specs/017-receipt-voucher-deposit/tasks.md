@@ -175,8 +175,8 @@
 **Purpose**: Migrate from RevenueReceipt to ReceiptVoucher system
 
 - [ ] T055 Implement data migration script in src/Infrastructure/Data/Migrations/
-- [ ] T056 Update PostingRules EventType from "RevenueReceiptPosted" to "ReceiptVoucherCollected"
-- [ ] T057 Register new event types in AccountingEvent configuration
+- [x] T056 Update PostingRules EventType from "RevenueReceiptPosted" to "ReceiptVoucherCollected"
+- [x] T057 Register new event types in AccountingEvent configuration
 - [ ] T058 Drop RevenueReceipt and RevenueReceiptLine tables after verification
 
 ---
@@ -185,12 +185,12 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T059 [P] Add status history logging using IDocumentStatusLogger across all commands
-- [ ] T060 [P] Add ApprovalHistory recording for voucher and slip approvals
+- [x] T059 [P] Add status history logging using IDocumentStatusLogger across all commands
+- [x] T060 [P] Add ApprovalHistory recording for voucher and slip approvals
 - [ ] T061 [P] Run quickstart.md validation scenarios
-- [ ] T062 [P] Update OpenAPI documentation for new endpoints
-- [ ] T063 Code cleanup and remove old RevenueReceipt code
-- [ ] T064 Verify all tests pass and mark any stub tests as debt
+- [x] T062 [P] Update OpenAPI documentation for new endpoints
+- [x] T063 Code cleanup and remove old RevenueReceipt code
+- [x] T064 Verify all tests pass and mark any stub tests as debt
 
 ---
 
