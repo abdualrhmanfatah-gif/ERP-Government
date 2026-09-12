@@ -217,8 +217,11 @@ export function AccountingJournalEntryDetail({ entry, editing = false, onToggleE
               value={entry.entryType ? String(entry.entryType) : ''}
               disabled
               options={[
-                { value: '', label: entryTypeLabels[entry.entryType ? String(entry.entryType) : ''] || 'اختر النوع...' },
+                { value: '', label: 'اختر النوع...' },
                 ...manualEntryTypes.map((t) => ({ value: t, label: entryTypeLabels[t] })),
+                ...(entry.entryType && !manualEntryTypes.includes(entry.entryType as any)
+                  ? [{ value: String(entry.entryType), label: entryTypeLabels[entry.entryType as keyof typeof entryTypeLabels] || String(entry.entryType) }]
+                  : []),
               ]}
             />
             <Select

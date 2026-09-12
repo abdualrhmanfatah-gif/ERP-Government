@@ -141,6 +141,7 @@ export function NotificationDropdown({ onClose: _onClose }: Props) {
               className="text-[var(--color-primary)]"
               onClick={handleMarkAllAsRead}
               disabled={markAllAsRead.isPending}
+              loading={markAllAsRead.isPending}
             >
               تحديد الكل كمقروء
             </Button>
@@ -152,6 +153,7 @@ export function NotificationDropdown({ onClose: _onClose }: Props) {
               className="text-[var(--color-error)]"
               onClick={handleClearAll}
               disabled={clearAll.isPending}
+              loading={clearAll.isPending}
             >
               مسح الكل
             </Button>

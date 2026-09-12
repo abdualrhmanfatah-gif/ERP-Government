@@ -21,9 +21,12 @@ public class GetDisbursementRequestByIdQueryHandler(
         if (entity is null)
             return null;
 
-        // Find linked order (one-directional: PaymentOrder.DisbursementRequestId)
-        var linkedOrder = await context.PaymentOrders
-            .FirstOrDefaultAsync(o => o.DisbursementRequestId == entity.Id, cancellationToken);
+        var linkedOrder = entity.AccrualJournalEntryId.HasValue
+            ? await context.PaymentOrders
+                .FirstOrDefaultAsync(
+                    o => o.AccrualJournalEntryId == entity.AccrualJournalEntryId.Value,
+                    cancellationToken)
+            : null;
 
         var approvalEntities = await context.ApprovalHistory
             .Where(a => a.DocumentType == "DisbursementRequest" && a.DocumentId == entity.Id)

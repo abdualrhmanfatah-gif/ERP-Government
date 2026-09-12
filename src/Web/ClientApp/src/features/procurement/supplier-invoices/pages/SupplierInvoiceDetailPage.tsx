@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Page, Button, Card, CardContent, CardHeader, CardTitle, Dialog, Textarea, ErrorState, Skeleton } from '@/components/ui';
+import { Page, Button, Card, CardContent, CardHeader, CardTitle, Dialog, Textarea, Skeleton } from '@/components/ui';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { MetaItem } from '@/components/MetaItem';
 import { ArrowRight } from 'lucide-react';
 import { useSupplierInvoiceDetail, useSubmitSupplierInvoice, useMatchSupplierInvoice, useCancelSupplierInvoice } from '../hooks/useSupplierInvoices';
 import { supplierInvoiceStatusLabels, supplierInvoiceStatusVariant, type SupplierInvoiceStatus } from '../shared/types';
@@ -10,7 +11,7 @@ export default function SupplierInvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const invoiceId = parseInt(id || '0');
-  const { data: invoice, isLoading, isError } = useSupplierInvoiceDetail(invoiceId);
+  const { data: invoice, isLoading, isError, refetch } = useSupplierInvoiceDetail(invoiceId);
   const submitMutation = useSubmitSupplierInvoice();
   const matchMutation = useMatchSupplierInvoice();
   const cancelMutation = useCancelSupplierInvoice();
@@ -18,7 +19,7 @@ export default function SupplierInvoiceDetailPage() {
   const [cancelNotes, setCancelNotes] = useState('');
 
   if (isLoading) return <Skeleton className="h-96" />;
-  if (isError || !invoice) return <ErrorState message="لم يتم العثور على الفاتورة" />;
+  if (isError || !invoice) return <Page title="فاتورة مورد" error="لم يتم العثور على الفاتورة" onRetry={() => refetch()} />;
 
   const status = invoice.status as SupplierInvoiceStatus;
 
@@ -56,21 +57,48 @@ export default function SupplierInvoiceDetailPage() {
   const canCancel = status === 'Draft' || status === 'Submitted' || status === 'Matched' || status === 'Disputed';
 
   return (
-    <Page title={`فاتورة مورد — ${invoice.invoiceNumber}`}>
-      <Button variant="ghost" size="icon" onClick={() => navigate('/procurement/supplier-invoices')} aria-label="العودة" className="mb-4">
-        <ArrowRight size={18} />
-      </Button>
+    <Page
+      title={`فاتورة مورد — ${invoice.invoiceNumber}`}
+      actions={
+        <div className="flex items-center gap-2">
+          {canCancel && (
+            <Button variant="destructive" size="sm" onClick={() => setCancelOpen(true)} disabled={cancelMutation.isPending} loading={cancelMutation.isPending}>
+              إلغاء
+            </Button>
+          )}
+          {canMatch && (
+            <Button size="sm" onClick={handleMatch} disabled={matchMutation.isPending} loading={matchMutation.isPending}>
+              مطابقة
+            </Button>
+          )}
+          {canSubmit && (
+            <Button size="sm" onClick={handleSubmit} disabled={submitMutation.isPending} loading={submitMutation.isPending}>
+              تقديم
+            </Button>
+          )}
+          <Button variant="ghost" size="icon" onClick={() => navigate('/procurement/supplier-invoices')} aria-label="العودة">
+            <ArrowRight size={18} />
+          </Button>
+        </div>
+      }
+      toolbar={
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <StatusBadge variant={supplierInvoiceStatusVariant[status]}>
+            {supplierInvoiceStatusLabels[status]}
+          </StatusBadge>
+          <span className="text-muted-foreground">|</span>
+          <MetaItem label="رقم أمر الشراء" value={invoice.purchaseOrderNumber || `#${invoice.purchaseOrderId}`} />
+          <span className="text-muted-foreground">|</span>
+          <MetaItem label="المورد" value={invoice.supplierName || `#${invoice.supplierPartyId}`} />
+          <span className="text-muted-foreground">|</span>
+          <MetaItem label="الإجمالي" value={invoice.grandTotal?.toLocaleString('ar-YE')} />
+        </div>
+      }
+    >
 
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>تفاصيل الفاتورة</CardTitle>
-            <StatusBadge
-              status={status}
-              labels={supplierInvoiceStatusLabels}
-              variants={supplierInvoiceStatusVariant}
-            />
-          </div>
+          <CardTitle>تفاصيل الفاتورة</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 mb-6">
@@ -188,17 +216,17 @@ export default function SupplierInvoiceDetailPage() {
               </Button>
             )}
             {canCancel && (
-              <Button variant="destructive" onClick={() => setCancelOpen(true)} disabled={cancelMutation.isPending}>
+              <Button variant="destructive" onClick={() => setCancelOpen(true)} disabled={cancelMutation.isPending} loading={cancelMutation.isPending}>
                 إلغاء
               </Button>
             )}
             {canMatch && (
-              <Button onClick={handleMatch} disabled={matchMutation.isPending}>
+              <Button onClick={handleMatch} disabled={matchMutation.isPending} loading={matchMutation.isPending}>
                 مطابقة
               </Button>
             )}
             {canSubmit && (
-              <Button onClick={handleSubmit} disabled={submitMutation.isPending}>
+              <Button onClick={handleSubmit} disabled={submitMutation.isPending} loading={submitMutation.isPending}>
                 تقديم
               </Button>
             )}
@@ -206,7 +234,16 @@ export default function SupplierInvoiceDetailPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={cancelOpen} onClose={() => { setCancelOpen(false); setCancelNotes(''); }} title="إلغاء الفاتورة">
+      <Dialog open={cancelOpen} onClose={() => { setCancelOpen(false); setCancelNotes(''); }} title="إلغاء الفاتورة"
+        footer={
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => { setCancelOpen(false); setCancelNotes(''); }}>إلغاء</Button>
+            <Button variant="destructive" onClick={handleCancel} loading={cancelMutation.isPending} disabled={cancelMutation.isPending}>
+              تأكيد الإلغاء
+            </Button>
+          </div>
+        }
+      >
         <div className="space-y-4">
           <p>هل أنت متأكد من إلغاء هذه الفاتورة؟</p>
           <Textarea
@@ -215,12 +252,6 @@ export default function SupplierInvoiceDetailPage() {
             placeholder="ملاحظات الإلغاء (اختياري)"
             rows={3}
           />
-          <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => { setCancelOpen(false); setCancelNotes(''); }}>إلغاء</Button>
-            <Button variant="destructive" onClick={handleCancel} loading={cancelMutation.isPending} disabled={cancelMutation.isPending}>
-              تأكيد الإلغاء
-            </Button>
-          </div>
         </div>
       </Dialog>
     </Page>

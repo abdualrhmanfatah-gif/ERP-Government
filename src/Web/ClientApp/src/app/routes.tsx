@@ -541,19 +541,19 @@ export const AppRoutes: RouteConfig[] = [
   {
     path: '/parties',
     element: <PartiesListPage />,
-    label: 'الأطراف',
+    label: 'الموردون',
     protected: true,
   },
   {
     path: '/parties/create',
     element: <PartyCreatePage />,
-    label: 'طرف جديد',
+    label: 'مورد جديد',
     protected: true,
   },
   {
     path: '/parties/:id',
     element: <PartyDetailPage />,
-    label: 'تفاصيل الطرف',
+    label: 'تفاصيل المورد',
     protected: true,
   },
   // Financial Settings

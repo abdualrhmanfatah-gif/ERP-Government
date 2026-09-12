@@ -16,6 +16,7 @@ public class UpdateDisbursementRequestCommand : IRequest<Result<DisbursementRequ
     public string? Purpose { get; init; }
     public int? FinancialYearId { get; init; }
     public string? Notes { get; init; }
+    public int? AccrualJournalEntryId { get; init; }
     public byte[] RowVersion { get; init; } = [];
 }
 
@@ -121,10 +122,27 @@ public class UpdateDisbursementRequestCommandHandler(
                 entity.Notes = request.Notes;
         }
 
+        if (request.AccrualJournalEntryId.HasValue)
+        {
+            var journalEntry = await context.JournalEntries
+                .FindAsync(request.AccrualJournalEntryId.Value, cancellationToken);
+            if (journalEntry is null)
+                return Result<DisbursementRequestDto>.Failure(["Invalid accrual journal entry."]);
+            entity.AccrualJournalEntryId = request.AccrualJournalEntryId.Value;
+        }
+
         entity.LastModified = DateTimeOffset.UtcNow;
         entity.LastModifiedBy = userId.ToString();
 
         await context.SaveChangesAsync(cancellationToken);
+
+        string? accrualEntryNumber = null;
+        if (entity.AccrualJournalEntryId.HasValue)
+        {
+            var accrualEntry = await context.JournalEntries
+                .FindAsync(entity.AccrualJournalEntryId.Value, cancellationToken);
+            accrualEntryNumber = accrualEntry?.EntryNumber;
+        }
 
         return Result<DisbursementRequestDto>.Success(new DisbursementRequestDto(
             entity.Id,
@@ -142,8 +160,8 @@ public class UpdateDisbursementRequestCommandHandler(
             entity.PaymentDate,
             null,
             null,
-            null,
-            null,
+            entity.AccrualJournalEntryId,
+            accrualEntryNumber,
             new()));
     }
 }

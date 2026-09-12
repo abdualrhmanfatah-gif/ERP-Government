@@ -49,6 +49,8 @@ public class GetPaymentOrderByIdQueryHandler(
                 Notes = x.Notes,
                 DisbursementRequestId = x.DisbursementRequestId,
                 DisbursementRequestNumber = x.DisbursementRequest != null ? x.DisbursementRequest.RequestNumber : null,
+                AccrualJournalEntryId = x.AccrualJournalEntryId,
+                AccrualEntryNumber = x.AccrualJournalEntry != null ? x.AccrualJournalEntry.EntryNumber : null,
                 RowVersion = x.RowVersion
             })
             .FirstOrDefaultAsync(cancellationToken);

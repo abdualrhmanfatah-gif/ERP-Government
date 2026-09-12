@@ -72,7 +72,7 @@ export function PartyForm({
     return (
       <div className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">بيانات الطرف</h3>
+          <h3 className="text-lg font-semibold">بيانات المورد</h3>
           {onEdit && (
             <Button variant="outline" size="sm" onClick={onEdit}>
               تعديل
@@ -136,7 +136,7 @@ export function PartyForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6" aria-label="بيانات الطرف">
+    <form onSubmit={handleSubmit} className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6" aria-label="بيانات المورد">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <Select
@@ -233,8 +233,8 @@ export function PartyForm({
         <Button variant="ghost" type="button" onClick={onCancel}>
           إلغاء
         </Button>
-        <Button variant="primary" type="submit" disabled={isPending}>
-          {isPending ? 'جارٍ الحفظ...' : 'حفظ'}
+        <Button variant="primary" type="submit" disabled={isPending} loading={isPending}>
+          حفظ
         </Button>
       </div>
     </form>

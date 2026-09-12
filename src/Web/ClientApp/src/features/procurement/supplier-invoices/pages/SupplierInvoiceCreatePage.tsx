@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Page, Button, Card, CardContent, CardHeader, CardTitle, Input, Textarea, ErrorState, Skeleton } from '@/components/ui';
+import { Page, Button, Card, CardContent, CardHeader, CardTitle, Input, Textarea, Skeleton } from '@/components/ui';
 import { createSupplierInvoiceSchema, type CreateSupplierInvoiceFormData } from '../shared/schemas';
 import { useCreateSupplierInvoice } from '../hooks/useSupplierInvoices';
 import { useItems } from '../shared/catalog-hooks';
@@ -117,10 +117,10 @@ export default function SupplierInvoiceCreatePage() {
     }
   };
 
-  if (poIdParam <= 0) return <ErrorState message="يجب تحديد أمر الشراء. يرجى الإنشاء من صفحة أمر الشراء." />;
+  if (poIdParam <= 0) return <Page title="خطأ" error="يجب تحديد أمر الشراء. يرجى الإنشاء من صفحة أمر الشراء." />;
   if (poLoading) return <Skeleton className="h-96" />;
-  if (poError) return <ErrorState message={poError} />;
-  if (!purchaseOrder) return <ErrorState message="لم يتم العثور على أمر الشراء" />;
+  if (poError) return <Page title="خطأ" error={poError} />;
+  if (!purchaseOrder) return <Page title="خطأ" error="لم يتم العثور على أمر الشراء" />;
 
   return (
     <Page title="إنشاء فاتورة مورد">
@@ -257,8 +257,8 @@ export default function SupplierInvoiceCreatePage() {
               <Button type="button" variant="outline" onClick={() => navigate('/procurement/supplier-invoices')}>
                 إلغاء
               </Button>
-              <Button type="submit" disabled={createInvoice.isPending}>
-                {createInvoice.isPending ? 'جاري الإنشاء...' : 'إنشاء'}
+              <Button type="submit" disabled={createInvoice.isPending} loading={createInvoice.isPending}>
+                إنشاء
               </Button>
             </div>
           </form>

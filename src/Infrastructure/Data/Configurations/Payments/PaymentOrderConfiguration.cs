@@ -89,6 +89,16 @@ public class PaymentOrderConfiguration : IEntityTypeConfiguration<PaymentOrder>
             .HasForeignKey(e => e.DisbursementRequestId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(e => e.AccrualJournalEntry)
+            .WithMany()
+            .HasForeignKey(e => e.AccrualJournalEntryId)
+            .OnDelete(DeleteBehavior.SetNull)
+            .IsRequired(false);
+
+        builder.HasIndex(e => e.AccrualJournalEntryId)
+            .IsUnique()
+            .HasFilter("[AccrualJournalEntryId] IS NOT NULL");
+
         builder.Ignore(e => e.DomainEvents);
     }
 }

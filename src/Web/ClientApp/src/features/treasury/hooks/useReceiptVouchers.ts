@@ -1,5 +1,6 @@
 // Receipt voucher hooks — generated NSwag client + React Query.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { handleLifecycleError } from '@/shared/api/result-to-ui';
 import {
   ReceiptVouchersClient,
   SubmitReceiptVoucherCommand,
@@ -49,6 +50,7 @@ export function useCreateReceiptVoucher() {
   return useMutation({
     mutationFn: (data: CreateReceiptVoucherCommand) => client.receiptVouchersPOST(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['receipt-vouchers'] }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -58,6 +60,7 @@ export function useSubmitReceiptVoucher() {
     mutationFn: (args: { id: number; rowVersion: string }) =>
       client.submitPOST(args.id, new SubmitReceiptVoucherCommand({ id: args.id, rowVersion: args.rowVersion })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['receipt-vouchers'] }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -70,6 +73,7 @@ export function useApproveReceiptVoucher() {
         new ApproveReceiptVoucherCommand({ id: args.id, rowVersion: args.rowVersion, reason: args.reason }),
       ),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['receipt-vouchers'] }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -82,5 +86,6 @@ export function useCancelReceiptVoucher() {
         new CancelReceiptVoucherCommand({ id: args.id, rowVersion: args.rowVersion, reason: args.reason }),
       ),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['receipt-vouchers'] }),
+    onError: handleLifecycleError,
   });
 }

@@ -153,8 +153,9 @@ export function DepositSlipForm({
               <Button
                 onClick={() => onSubmit({ slipDate, formType, voucherIds: selectedIds })}
                 disabled={isPending || selectedIds.length === 0}
+                loading={isPending}
               >
-                {isPending ? 'جارٍ الحفظ...' : 'إنشاء البطاقة'}
+                إنشاء البطاقة
               </Button>
             </div>
           </div>

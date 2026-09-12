@@ -7,8 +7,9 @@ import type { JournalEntryDto } from '@/web-api-client';
 import { Button, Card, Input, Badge, Page } from '@/components/ui';
 import { Download, FileText } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
-import { statusFilters } from '../shared/types';
+import { statusFilters, entryTypeLabels } from '../shared/types';
 import { downloadBlobExport, buildExportUrl } from '@/shared/utils/download';
+import { formatDate } from '@/shared/utils/formatters';
 
 export function JournalEntriesListPage() {
   const navigate = useNavigate();
@@ -71,18 +72,19 @@ export function JournalEntriesListPage() {
       id: 'documentDate',
       key: 'documentDate',
       header: 'التاريخ',
-      cell: (row) => {
-        const v = row.documentDate;
-        if (!v) return '-';
-        if (typeof v === 'string') return v;
-        return String(v);
-      },
+      cell: (row) => <span className="text-sm">{formatDate(row.documentDate)}</span>,
     },
     {
       id: 'entryStatus',
       key: 'entryStatus',
       header: 'الحالة',
       cell: (row) => <StatusBadge status={row.entryStatus as any} />,
+    },
+    {
+      id: 'entryType',
+      key: 'entryType',
+      header: 'نوع القيد',
+      cell: (row) => entryTypeLabels[row.entryType as keyof typeof entryTypeLabels] || '-',
     },
     {
       id: 'journalName',

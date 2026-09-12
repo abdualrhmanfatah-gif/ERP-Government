@@ -35,15 +35,8 @@ public class SubmitPaymentOrderCommandHandler(
         if (entity.Status != PaymentOrderStatus.Draft)
             return Result.Failure(["Only draft payment orders can be submitted."]);
 
-        // Validate that an accrual journal entry exists for the linked disbursement request
-        if (entity.DisbursementRequestId.HasValue)
-        {
-            var disbursementRequest = await context.DisbursementRequests
-                .FindAsync(entity.DisbursementRequestId.Value, cancellationToken);
-
-            if (disbursementRequest?.AccrualJournalEntryId is null)
-                return Result.Failure(["An accrual entry must be created before submitting the payment order."]);
-        }
+        if (!entity.AccrualJournalEntryId.HasValue)
+            return Result.Failure(["An accrual journal entry must be linked before submitting the payment order."]);
 
         // ADR-001 D-3/D-4: FundId required at submit
         entity.FundId = request.FundId;

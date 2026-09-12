@@ -30,6 +30,12 @@ public class ExcelReportExporter : IReportExporter
             worksheet.Cell(row, 1).Style.Font.Bold = true;
             row++;
 
+            if (!string.IsNullOrWhiteSpace(section.Description))
+            {
+                worksheet.Cell(row, 1).Value = section.Description;
+                row++;
+            }
+
             if (section.ColumnHeaders is not null)
             {
                 WriteExtendedSection(worksheet, section, ref row);

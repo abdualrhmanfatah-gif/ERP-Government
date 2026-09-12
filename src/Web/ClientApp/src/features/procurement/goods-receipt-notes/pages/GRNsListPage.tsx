@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Page, Button, FilterBar, FilterSearch, FilterSelect, Skeleton, ErrorState } from '@/components/ui';
+import { Page, Button, FilterBar, FilterSearch, FilterSelect, Skeleton } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Eye, Plus } from 'lucide-react';
 import { grnStatusLabels, grnStatusVariant } from '../shared/types';
@@ -19,7 +19,7 @@ export default function GRNsListPage() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [page, setPage] = useState(1);
 
-  const { data: response, isLoading, isError } = useGRNsList({
+  const { data: response, isLoading, isError, refetch } = useGRNsList({
     search: search || undefined,
     status: statusFilter || undefined,
     page,
@@ -39,11 +39,9 @@ export default function GRNsListPage() {
       header: 'الحالة',
       width: '120px',
       render: (v) => (
-        <StatusBadge
-          status={v as GRNStatus}
-          labels={grnStatusLabels}
-          variants={grnStatusVariant}
-        />
+        <StatusBadge variant={grnStatusVariant[v as GRNStatus]}>
+          {grnStatusLabels[v as GRNStatus]}
+        </StatusBadge>
       ),
     },
     { key: 'created', header: 'تاريخ الإنشاء', width: '120px', render: (v) => new Date(v).toLocaleDateString('ar-YE') },
@@ -67,7 +65,7 @@ export default function GRNsListPage() {
 
   const hasFilters = !!search || !!statusFilter;
 
-  if (isError) return <ErrorState message="خطأ في تحميل إشعارات الاستلام" />;
+  if (isError) return <Page title="إشعارات الاستلام" error="خطأ في تحميل إشعارات الاستلام" onRetry={() => refetch()} />;
 
   return (
     <Page

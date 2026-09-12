@@ -38,14 +38,15 @@ public class GetDisbursementRequestsQueryHandler(
             .GroupBy(a => a.DocumentId)
             .ToDictionaryAsync(g => g.Key, g => g.ToList(), cancellationToken);
 
-        var orders = await context.PaymentOrders
-            .Where(o => o.DisbursementRequestId.HasValue && ids.Contains(o.DisbursementRequestId.Value))
-            .ToDictionaryAsync(o => o.DisbursementRequestId!.Value, o => o, cancellationToken);
-
         var accrualJournalEntryIds = entities
             .Where(d => d.AccrualJournalEntryId.HasValue)
             .Select(d => d.AccrualJournalEntryId!.Value)
             .ToList();
+
+        var orders = await context.PaymentOrders
+            .Where(o => o.AccrualJournalEntryId.HasValue
+                && accrualJournalEntryIds.Contains(o.AccrualJournalEntryId.Value))
+            .ToDictionaryAsync(o => o.AccrualJournalEntryId!.Value, o => o, cancellationToken);
 
         var journalEntries = await context.JournalEntries
             .Where(j => accrualJournalEntryIds.Contains(j.Id))
@@ -75,7 +76,10 @@ public class GetDisbursementRequestsQueryHandler(
                     approvedAmount);
             }).ToList();
 
-            orders.TryGetValue(d.Id, out var linkedOrder);
+            var linkedOrder = d.AccrualJournalEntryId.HasValue
+                && orders.TryGetValue(d.AccrualJournalEntryId.Value, out var order)
+                    ? order
+                    : null;
 
             string? accrualNumber = null;
             if (d.AccrualJournalEntryId.HasValue)

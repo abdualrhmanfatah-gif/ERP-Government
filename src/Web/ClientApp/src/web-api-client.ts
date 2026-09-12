@@ -15902,6 +15902,55 @@ export class PaymentOrdersClient {
     }
 
     /**
+     * Export payment order as PDF
+     * @return OK
+     */
+    exportPdf(id: number): Promise<void> {
+        let url_ = this.baseUrl + "/api/PaymentOrders/{id}/export-pdf";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processExportPdf(_response);
+        });
+    }
+
+    protected processExportPdf(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
      * Submit payment order for approval
      * @return No Content
      */
@@ -32741,6 +32790,7 @@ export class CreatePaymentOrderCommand implements ICreatePaymentOrderCommand {
     beneficiaryAccountNumber?: string | undefined;
     beneficiaryBankName?: string | undefined;
     notes?: string | undefined;
+    accrualJournalEntryId?: number | undefined;
     deductions?: CreatePaymentOrderDeductionDto[];
 
     [key: string]: any;
@@ -32781,6 +32831,7 @@ export class CreatePaymentOrderCommand implements ICreatePaymentOrderCommand {
             this.beneficiaryAccountNumber = _data["beneficiaryAccountNumber"];
             this.beneficiaryBankName = _data["beneficiaryBankName"];
             this.notes = _data["notes"];
+            this.accrualJournalEntryId = _data["accrualJournalEntryId"];
             if (Array.isArray(_data["deductions"])) {
                 this.deductions = [] as any;
                 for (let item of _data["deductions"])
@@ -32823,6 +32874,7 @@ export class CreatePaymentOrderCommand implements ICreatePaymentOrderCommand {
         data["beneficiaryAccountNumber"] = this.beneficiaryAccountNumber;
         data["beneficiaryBankName"] = this.beneficiaryBankName;
         data["notes"] = this.notes;
+        data["accrualJournalEntryId"] = this.accrualJournalEntryId;
         if (Array.isArray(this.deductions)) {
             data["deductions"] = [];
             for (let item of this.deductions)
@@ -32854,6 +32906,7 @@ export interface ICreatePaymentOrderCommand {
     beneficiaryAccountNumber?: string | undefined;
     beneficiaryBankName?: string | undefined;
     notes?: string | undefined;
+    accrualJournalEntryId?: number | undefined;
     deductions?: CreatePaymentOrderDeductionDto[];
 
     [key: string]: any;
@@ -40681,6 +40734,8 @@ export class PaymentOrderDto implements IPaymentOrderDto {
     notes?: string | undefined;
     disbursementRequestId?: number | undefined;
     disbursementRequestNumber?: string | undefined;
+    accrualJournalEntryId?: number | undefined;
+    accrualEntryNumber?: string | undefined;
     rowVersion?: string | undefined;
     deductions?: PaymentOrderDeductionDto[];
 
@@ -40731,6 +40786,8 @@ export class PaymentOrderDto implements IPaymentOrderDto {
             this.notes = _data["notes"];
             this.disbursementRequestId = _data["disbursementRequestId"];
             this.disbursementRequestNumber = _data["disbursementRequestNumber"];
+            this.accrualJournalEntryId = _data["accrualJournalEntryId"];
+            this.accrualEntryNumber = _data["accrualEntryNumber"];
             this.rowVersion = _data["rowVersion"];
             if (Array.isArray(_data["deductions"])) {
                 this.deductions = [] as any;
@@ -40783,6 +40840,8 @@ export class PaymentOrderDto implements IPaymentOrderDto {
         data["notes"] = this.notes;
         data["disbursementRequestId"] = this.disbursementRequestId;
         data["disbursementRequestNumber"] = this.disbursementRequestNumber;
+        data["accrualJournalEntryId"] = this.accrualJournalEntryId;
+        data["accrualEntryNumber"] = this.accrualEntryNumber;
         data["rowVersion"] = this.rowVersion;
         if (Array.isArray(this.deductions)) {
             data["deductions"] = [];
@@ -40824,6 +40883,8 @@ export interface IPaymentOrderDto {
     notes?: string | undefined;
     disbursementRequestId?: number | undefined;
     disbursementRequestNumber?: string | undefined;
+    accrualJournalEntryId?: number | undefined;
+    accrualEntryNumber?: string | undefined;
     rowVersion?: string | undefined;
     deductions?: PaymentOrderDeductionDto[];
 
@@ -43682,6 +43743,7 @@ export interface IReplaceCheckCommand {
 export class ReportLine implements IReportLine {
     accountCode?: string;
     accountName?: string;
+    description?: string | undefined;
     debit?: number;
     credit?: number;
     balance?: number;
@@ -43706,6 +43768,7 @@ export class ReportLine implements IReportLine {
             }
             this.accountCode = _data["accountCode"];
             this.accountName = _data["accountName"];
+            this.description = _data["description"];
             this.debit = _data["debit"];
             this.credit = _data["credit"];
             this.balance = _data["balance"];
@@ -43732,6 +43795,7 @@ export class ReportLine implements IReportLine {
         }
         data["accountCode"] = this.accountCode;
         data["accountName"] = this.accountName;
+        data["description"] = this.description;
         data["debit"] = this.debit;
         data["credit"] = this.credit;
         data["balance"] = this.balance;
@@ -43747,6 +43811,7 @@ export class ReportLine implements IReportLine {
 export interface IReportLine {
     accountCode?: string;
     accountName?: string;
+    description?: string | undefined;
     debit?: number;
     credit?: number;
     balance?: number;
@@ -43758,6 +43823,7 @@ export interface IReportLine {
 export class ReportSection implements IReportSection {
     title?: string;
     titleEn?: string;
+    description?: string | undefined;
     lines?: ReportLine[];
     total?: number;
     columnHeaders?: string[] | undefined;
@@ -43782,6 +43848,7 @@ export class ReportSection implements IReportSection {
             }
             this.title = _data["title"];
             this.titleEn = _data["titleEn"];
+            this.description = _data["description"];
             if (Array.isArray(_data["lines"])) {
                 this.lines = [] as any;
                 for (let item of _data["lines"])
@@ -43816,6 +43883,7 @@ export class ReportSection implements IReportSection {
         }
         data["title"] = this.title;
         data["titleEn"] = this.titleEn;
+        data["description"] = this.description;
         if (Array.isArray(this.lines)) {
             data["lines"] = [];
             for (let item of this.lines)
@@ -43839,6 +43907,7 @@ export class ReportSection implements IReportSection {
 export interface IReportSection {
     title?: string;
     titleEn?: string;
+    description?: string | undefined;
     lines?: ReportLine[];
     total?: number;
     columnHeaders?: string[] | undefined;
@@ -47215,6 +47284,7 @@ export class UpdateDisbursementRequestRequest implements IUpdateDisbursementRequ
     purpose!: string | undefined;
     financialYearId!: number | undefined;
     notes!: string | undefined;
+    accrualJournalEntryId!: number | undefined;
     rowVersion!: string;
 
     [key: string]: any;
@@ -47240,6 +47310,7 @@ export class UpdateDisbursementRequestRequest implements IUpdateDisbursementRequ
             this.purpose = _data["purpose"];
             this.financialYearId = _data["financialYearId"];
             this.notes = _data["notes"];
+            this.accrualJournalEntryId = _data["accrualJournalEntryId"];
             this.rowVersion = _data["rowVersion"];
         }
     }
@@ -47263,6 +47334,7 @@ export class UpdateDisbursementRequestRequest implements IUpdateDisbursementRequ
         data["purpose"] = this.purpose;
         data["financialYearId"] = this.financialYearId;
         data["notes"] = this.notes;
+        data["accrualJournalEntryId"] = this.accrualJournalEntryId;
         data["rowVersion"] = this.rowVersion;
         return data;
     }
@@ -47275,6 +47347,7 @@ export interface IUpdateDisbursementRequestRequest {
     purpose: string | undefined;
     financialYearId: number | undefined;
     notes: string | undefined;
+    accrualJournalEntryId: number | undefined;
     rowVersion: string;
 
     [key: string]: any;

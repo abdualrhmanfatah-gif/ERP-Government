@@ -66,7 +66,7 @@ export default function DocumentSequencesListPage() {
     ...(canManage ? [{
       header: 'إجراءات',
       cell: (row: typeof items[0]) => editItem?.id === row.id
-        ? <div className="flex gap-1"><Button size="xs" onClick={saveEdit} disabled={updateMutation.isPending} className="cursor-pointer">حفظ</Button><Button size="xs" variant="ghost" onClick={() => setEditItem(null)} className="cursor-pointer">إلغاء</Button></div>
+        ? <div className="flex gap-1"><Button size="xs" onClick={saveEdit} disabled={updateMutation.isPending} loading={updateMutation.isPending} className="cursor-pointer">حفظ</Button><Button size="xs" variant="ghost" onClick={() => setEditItem(null)} className="cursor-pointer">إلغاء</Button></div>
         : <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="cursor-pointer">✏️</Button>,
     }] : []),
   ];

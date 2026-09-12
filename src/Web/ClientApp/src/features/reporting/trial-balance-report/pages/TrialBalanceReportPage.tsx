@@ -61,9 +61,9 @@ export default function TrialBalanceReportPage() {
     { header: 'النوع', cell: (row) => <span className="text-sm">{accountTypeLabels[row.accountType ?? ''] ?? row.accountType ?? '—'}</span> },
     { header: 'مدين افتتاحي', align: 'right', cell: (row) => <MoneyDisplay value={row.openingDebit ?? 0} /> },
     { header: 'دائن افتتاحي', align: 'right', cell: (row) => <MoneyDisplay value={row.openingCredit ?? 0} /> },
-    { header: 'الرصيد الافتتاحي', align: 'right', cell: (row) => <MoneyDisplay value={row.openingBalance ?? 0} /> },
-    { header: 'إجمالي المدين', align: 'right', cell: (row) => <MoneyDisplay value={row.debitTotal ?? 0} /> },
-    { header: 'إجمالي الدائن', align: 'right', cell: (row) => <MoneyDisplay value={row.creditTotal ?? 0} /> },
+   
+    { header: 'حركة المدين', align: 'right', cell: (row) => <MoneyDisplay value={row.debitTotal ?? 0} /> },
+    { header: 'حركة الدائن', align: 'right', cell: (row) => <MoneyDisplay value={row.creditTotal ?? 0} /> },
     { header: 'الرصيد الختامي', align: 'right', cell: (row) => <MoneyDisplay value={row.closingBalance ?? 0} /> },
   ];
 

@@ -127,7 +127,7 @@ export default function FiscalYearDetailPage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-title-md font-semibold text-[var(--color-on-surface)]">الفترات المحاسبية</h2>
               {fy.status !== 'HardClosed' && periods.length === 0 && (
-                <Button onClick={handleBulkGenerate} icon={<CalendarPlus size={16} />} disabled={bulkGenerate.isPending} className="cursor-pointer">
+                <Button onClick={handleBulkGenerate} icon={<CalendarPlus size={16} />} disabled={bulkGenerate.isPending} loading={bulkGenerate.isPending} className="cursor-pointer">
                   إنشاء فترات شهرية
                 </Button>
               )}
@@ -153,6 +153,7 @@ export default function FiscalYearDetailPage() {
                         size="icon"
                         onClick={() => row.isLockedForPosting ? handleUnlockPeriod(row.id) : handleLockPeriod(row.id)}
                         disabled={lockMutation.isPending || unlockMutation.isPending}
+                        loading={lockMutation.isPending || unlockMutation.isPending}
                         className="cursor-pointer"
                       >
                         {row.isLockedForPosting ? <Unlock size={16} /> : <Lock size={16} />}

@@ -32,7 +32,9 @@ public class PaymentOrder : BaseAuditableEntity
     public int? JournalEntryId { get; set; }
     public string? Notes { get; set; }
     public int? DisbursementRequestId { get; set; }
+    public int? AccrualJournalEntryId { get; set; }
     public byte[] RowVersion { get; set; } = [];
 
     public DisbursementRequest? DisbursementRequest { get; set; }
+    public ERP_Government.Domain.Accounting.Entities.JournalEntry? AccrualJournalEntry { get; set; }
 }

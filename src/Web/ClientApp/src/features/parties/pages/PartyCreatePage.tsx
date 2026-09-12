@@ -26,7 +26,7 @@ export default function PartyCreatePage() {
   }
 
   return (
-    <Page title="طرف جديد">
+    <Page title="مورد جديد">
       <PartyForm
         onSubmit={onSubmit}
         onCancel={() => navigate('/parties')}

@@ -1,6 +1,7 @@
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.FinancialSettings.Common.Services;
 using ERP_Government.Application.Parties.Common;
+using ERP_Government.Domain.Accounting.Enums;
 using ERP_Government.Domain.Payments.Entities;
 using ERP_Government.Domain.Payments.Enums;
 
@@ -30,6 +31,7 @@ public class CreatePaymentOrderCommand : IRequest<Result>
     public string? BeneficiaryAccountNumber { get; init; }
     public string? BeneficiaryBankName { get; init; }
     public string? Notes { get; init; }
+    public int? AccrualJournalEntryId { get; init; }
     public List<CreatePaymentOrderDeductionDto> Deductions { get; init; } = [];
 }
 
@@ -109,6 +111,30 @@ public class CreatePaymentOrderCommandHandler(
         if (Math.Abs(deductionsSum - request.DeductionAmount) > 0.01m)
             return Result.Failure(["Deductions must sum to the deduction amount."]);
 
+        if (request.AccrualJournalEntryId.HasValue)
+        {
+            var accrualEntry = await context.JournalEntries
+                .FirstOrDefaultAsync(j => j.Id == request.AccrualJournalEntryId.Value, cancellationToken);
+            if (accrualEntry is null)
+                return Result.Failure(["Accrual journal entry not found."]);
+
+            if (accrualEntry.EntryType != MoveEntryType.Accrual)
+                return Result.Failure(["Payment order must be linked to an accrual journal entry."]);
+
+            var hasLiabilityCreditLine = await context.JournalEntryLines
+                .AnyAsync(l => l.JournalEntryId == accrualEntry.Id && l.Credit > 0, cancellationToken);
+            if (!hasLiabilityCreditLine)
+                return Result.Failure(["Accrual journal entry must contain a liability credit line."]);
+
+            var accrualAlreadyUsed = await context.PaymentOrders
+                .AnyAsync(o => o.AccrualJournalEntryId == accrualEntry.Id
+                    && o.Status != PaymentOrderStatus.Cancelled
+                    && o.Status != PaymentOrderStatus.Voided,
+                    cancellationToken);
+            if (accrualAlreadyUsed)
+                return Result.Failure(["A payment order already exists for this accrual journal entry."]);
+        }
+
         string paymentOrderNumber;
         try
         {
@@ -143,7 +169,8 @@ public class CreatePaymentOrderCommandHandler(
             BeneficiaryAccountNumber = request.BeneficiaryAccountNumber,
             BeneficiaryBankName = request.BeneficiaryBankName,
             Status = PaymentOrderStatus.Draft,
-            Notes = request.Notes
+            Notes = request.Notes,
+            AccrualJournalEntryId = request.AccrualJournalEntryId
         };
 
         context.PaymentOrders.Add(entity);
@@ -210,5 +237,9 @@ public class CreatePaymentOrderCommandValidator : AbstractValidator<CreatePaymen
 
         RuleFor(x => x.AmountGross)
             .GreaterThan(0).WithMessage("Gross amount must be greater than zero.");
+
+        RuleFor(x => x.AccrualJournalEntryId)
+            .GreaterThan(0).When(x => x.AccrualJournalEntryId.HasValue)
+            .WithMessage("Invalid accrual journal entry ID.");
     }
 }

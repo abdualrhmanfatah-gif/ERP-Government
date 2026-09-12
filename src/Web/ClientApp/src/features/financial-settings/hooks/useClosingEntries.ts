@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { handleLifecycleError } from '@/shared/api/result-to-ui';
 import { financialSettingsKeys, closingEntriesClient } from '../shared/client';
 import type { GenerateYearEndClosingCommand, ReverseClosingEntryCommand } from '../shared/types';
 
@@ -26,6 +27,7 @@ export function useGenerateClosingEntry() {
       qc.invalidateQueries({ queryKey: financialSettingsKeys.closingEntries.all });
       qc.invalidateQueries({ queryKey: financialSettingsKeys.fiscalYears.detail(variables.fiscalYearId) });
     },
+    onError: handleLifecycleError,
   });
 }
 
@@ -34,6 +36,7 @@ export function useApproveClosingEntry() {
   return useMutation({
     mutationFn: (id: number) => closingEntriesClient.approve(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: financialSettingsKeys.closingEntries.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -42,5 +45,6 @@ export function useReverseClosingEntry() {
   return useMutation({
     mutationFn: ({ id, ...data }: ReverseClosingEntryCommand) => closingEntriesClient.reverse(id, { id, ...data }),
     onSuccess: () => qc.invalidateQueries({ queryKey: financialSettingsKeys.closingEntries.all }),
+    onError: handleLifecycleError,
   });
 }

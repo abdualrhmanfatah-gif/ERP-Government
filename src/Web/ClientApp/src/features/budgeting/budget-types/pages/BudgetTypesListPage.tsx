@@ -193,7 +193,7 @@ export default function BudgetTypesListPage() {
         onClose={() => setDialogOpen(false)}
         title={editItem ? 'تعديل نوع الميزانية' : 'إضافة نوع ميزانية جديد'}
         footer={
-          <Button type="submit" form="budget-type-form" disabled={createMutation.isPending || updateMutation.isPending}>
+          <Button type="submit" form="budget-type-form" disabled={createMutation.isPending || updateMutation.isPending} loading={createMutation.isPending || updateMutation.isPending}>
             {editItem ? 'حفظ التعديلات' : 'إنشاء'}
           </Button>
         }

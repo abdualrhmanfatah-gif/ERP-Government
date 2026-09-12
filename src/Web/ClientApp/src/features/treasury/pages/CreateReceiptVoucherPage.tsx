@@ -22,11 +22,11 @@ export default function CreateReceiptVoucherPage() {
   }
 
   return (
-    <Page title="سند قبض جديد">
-      <Button variant="ghost" size="icon" onClick={() => navigate('/treasury/receipt-vouchers')} aria-label="العودة" className="mb-4">
-        <ArrowRight size={18} />
-      </Button>
-
+    <Page 
+      title="سند قبض جديد"
+      // إضافة الخاصية هنا لإظهار سهم الرجوع
+      onBack={() => navigate('/treasury/receipt-vouchers')} 
+    >
       <ReceiptVoucherForm
         onSubmit={handleSubmit}
         onCancel={() => navigate('/treasury/receipt-vouchers')}

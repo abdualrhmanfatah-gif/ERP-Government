@@ -61,14 +61,14 @@ export default function PartyDetailPage() {
   async function handleToggleActive() {
     try {
       await toggleActive.mutateAsync();
-      notify({ type: 'success', title: party!.isActive ? 'تم تعطيل الطرف' : 'تم تفعيل الطرف' });
+      notify({ type: 'success', title: party!.isActive ? 'تم تعطيل المورد' : 'تم تفعيل المورد' });
     } catch (err) {
       handleLifecycleError(err);
     }
   }
 
   if (isLoading) return <Page title="..." loading>{null}</Page>;
-  if (error || !party) return <Page title="تفاصيل الطرف"><p className="text-[var(--color-error)]">لم يتم العثور على الطرف</p></Page>;
+  if (error || !party) return <Page title="تفاصيل المورد"><p className="text-[var(--color-error)]">لم يتم العثور على المورد</p></Page>;
 
   const fv = isEditing ? form! : {
     partyType: party.partyType,
@@ -107,6 +107,7 @@ export default function PartyDetailPage() {
           size="sm"
           onClick={handleToggleActive}
           disabled={toggleActive.isPending}
+          loading={toggleActive.isPending}
         >
           {party.isActive ? 'تعطيل' : 'تفعيل'}
         </Button>
@@ -140,7 +141,7 @@ export default function PartyDetailPage() {
       }
     >
       <Card className="bg-[var(--color-surface-container-lowest)]">
-        <h2 className="text-[var(--typography-label-md-size)] font-semibold mb-4 text-[var(--color-on-surface)]">بيانات الطرف</h2>
+        <h2 className="text-[var(--typography-label-md-size)] font-semibold mb-4 text-[var(--color-on-surface)]">بيانات المورد</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Select

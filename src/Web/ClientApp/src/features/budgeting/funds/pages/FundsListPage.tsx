@@ -176,7 +176,7 @@ export default function FundsListPage() {
         onClose={() => setDialogOpen(false)}
         title={editItem ? 'تعديل الصندوق' : 'إضافة صندوق جديد'}
         footer={
-          <Button type="submit" form="fund-form" disabled={createMutation.isPending || updateMutation.isPending}>
+          <Button type="submit" form="fund-form" disabled={createMutation.isPending || updateMutation.isPending} loading={createMutation.isPending || updateMutation.isPending}>
             {editItem ? 'حفظ التعديلات' : 'إنشاء'}
           </Button>
         }

@@ -93,6 +93,7 @@ public static class DependencyInjection
         // Report Exporters
         builder.Services.AddScoped<ERP_Government.Infrastructure.Services.PdfReportExporter>();
         builder.Services.AddScoped<ERP_Government.Infrastructure.Services.ExcelReportExporter>();
+        builder.Services.AddScoped<ERP_Government.Infrastructure.Services.PaymentOrderPdfExporter>();
 
         // Document Services
         builder.Services.AddScoped<ERP_Government.Application.Parties.Common.IDocumentStatusLogger,

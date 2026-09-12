@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { handleLifecycleError } from '@/shared/api/result-to-ui';
 import { disbursementRequestsClient, partiesForBeneficiaryClient } from '../shared/client';
 import type { PartyFilters } from '@/features/parties/shared/types';
 
@@ -22,6 +23,7 @@ export function useCreateDisbursementRequest() {
   return useMutation({
     mutationFn: (cmd: any) => disbursementRequestsClient.create(cmd),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['disbursement-requests'] }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -33,6 +35,7 @@ export function useUpdateDisbursementRequest() {
       qc.invalidateQueries({ queryKey: ['disbursement-requests'] });
       qc.invalidateQueries({ queryKey: ['disbursement-requests', variables.id] });
     },
+    onError: handleLifecycleError,
   });
 }
 
@@ -44,6 +47,7 @@ export function useSubmitDisbursementRequest() {
       qc.invalidateQueries({ queryKey: ['disbursement-requests'] });
       qc.invalidateQueries({ queryKey: ['disbursement-requests', variables] });
     },
+    onError: handleLifecycleError,
   });
 }
 
@@ -55,6 +59,7 @@ export function useApproveDisbursementRequest() {
       qc.invalidateQueries({ queryKey: ['disbursement-requests'] });
       qc.invalidateQueries({ queryKey: ['disbursement-requests', variables.id] });
     },
+    onError: handleLifecycleError,
   });
 }
 
@@ -66,6 +71,7 @@ export function useRejectDisbursementRequest() {
       qc.invalidateQueries({ queryKey: ['disbursement-requests'] });
       qc.invalidateQueries({ queryKey: ['disbursement-requests', variables.id] });
     },
+    onError: handleLifecycleError,
   });
 }
 
@@ -77,6 +83,7 @@ export function useCancelDisbursementRequest() {
       qc.invalidateQueries({ queryKey: ['disbursement-requests'] });
       qc.invalidateQueries({ queryKey: ['disbursement-requests', variables.id] });
     },
+    onError: handleLifecycleError,
   });
 }
 
@@ -97,6 +104,7 @@ export function useCreateAccrualEntry() {
       qc.invalidateQueries({ queryKey: ['disbursement-requests', variables.id] });
       qc.invalidateQueries({ queryKey: ['disbursement-requests', variables.id, 'accrual-entry'] });
     },
+    onError: handleLifecycleError,
   });
 }
 

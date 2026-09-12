@@ -41,22 +41,9 @@ internal class GetDisbursementRegisterQueryHandler(IApplicationDbContext dbConte
             .Where(f => fundIds.Contains(f.Id))
             .ToDictionaryAsync(f => f.Id, f => (f.FundNumber, f.FundName), cancellationToken);
 
-        // Get disbursement requests linked to payment orders
-        var disbursementRequestIds = paymentOrders
-            .Where(po => po.DisbursementRequestId.HasValue)
-            .Select(po => po.DisbursementRequestId!.Value)
-            .Distinct()
-            .ToList();
-
-        var disbursementRequests = await dbContext.DisbursementRequests
-            .AsNoTracking()
-            .Where(dr => disbursementRequestIds.Contains(dr.Id))
-            .ToDictionaryAsync(dr => dr.Id, cancellationToken);
-
-        // Get accrual journal entries
-        var accrualJournalEntryIds = disbursementRequests.Values
-            .Where(dr => dr.AccrualJournalEntryId.HasValue)
-            .Select(dr => dr.AccrualJournalEntryId!.Value)
+        var accrualJournalEntryIds = paymentOrders
+            .Where(po => po.AccrualJournalEntryId.HasValue)
+            .Select(po => po.AccrualJournalEntryId!.Value)
             .Distinct()
             .ToList();
 
@@ -74,10 +61,8 @@ internal class GetDisbursementRegisterQueryHandler(IApplicationDbContext dbConte
                 string? accrualEntryNumber = null;
                 string? accrualEntryStatus = null;
 
-                if (po.DisbursementRequestId.HasValue
-                    && disbursementRequests.TryGetValue(po.DisbursementRequestId.Value, out var dr)
-                    && dr.AccrualJournalEntryId.HasValue
-                    && accrualJournalEntries.TryGetValue(dr.AccrualJournalEntryId.Value, out var accrualEntry))
+                if (po.AccrualJournalEntryId.HasValue
+                    && accrualJournalEntries.TryGetValue(po.AccrualJournalEntryId.Value, out var accrualEntry))
                 {
                     accrualJournalEntryId = accrualEntry.Id;
                     accrualEntryNumber = accrualEntry.EntryNumber;

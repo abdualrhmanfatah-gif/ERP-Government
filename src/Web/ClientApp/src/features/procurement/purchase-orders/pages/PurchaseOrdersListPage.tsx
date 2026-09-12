@@ -27,7 +27,7 @@ export default function PurchaseOrdersListPage() {
   const prsQuery = usePurchaseRequestsList({ status: 'Approved', pageSize: 200 });
   const quotationsQuery = useQuotationsList({ status: 'Awarded', pageSize: 200 });
 
-  const { data: response, isLoading } = usePurchaseOrdersList({
+  const { data: response, isLoading, isError, refetch } = usePurchaseOrdersList({
     search: search || undefined,
     status: statusFilter || undefined,
     expectedDeliveryDateFrom: dateFrom || undefined,
@@ -209,6 +209,8 @@ export default function PurchaseOrdersListPage() {
   }));
 
   const hasFilters = !!search || !!statusFilter || !!dateFrom || !!dateTo;
+
+  if (isError) return <Page title="أوامر الشراء" error="خطأ في تحميل أوامر الشراء" onRetry={() => refetch()} />;
 
   return (
     <Page title="أوامر الشراء" actions={<Button onClick={() => setCreateModeOpen(true)}><Plus className="h-4 w-4 ms-1" />أمر شراء جديد</Button>}>

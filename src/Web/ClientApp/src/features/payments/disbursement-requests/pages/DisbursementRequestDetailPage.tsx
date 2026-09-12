@@ -81,6 +81,7 @@ export default function DisbursementRequestDetailPage() {
   const canReject = status === 'PendingApproval';
   const canCancel = status === 'Draft' || status === 'PendingApproval';
   const canCreateAccrual = status === 'Approved' && !accrualEntry && !isLoadingAccrual;
+  const canCreatePaymentOrder = status === 'Approved' && accrualEntry && !(request as any).paymentOrderId;
 
   const handleSubmit = async () => {
     try {
@@ -194,6 +195,24 @@ export default function DisbursementRequestDetailPage() {
     setAccrualNarration('');
   };
 
+  const navigateToCreatePaymentOrder = () => {
+    if (!accrualEntry) {
+      notify({ type: 'error', title: 'يجب إنشاء قيد الاستحقاق أولاً' });
+      return;
+    }
+
+    const params = new URLSearchParams({
+      accrualJournalEntryId: String(accrualEntry.id),
+      amountGross: String(accrualEntry.amount ?? request.requestedAmount),
+      currencyId: String(request.currencyId),
+      fiscalYearId: String(request.financialYearId),
+      beneficiaryName: request.beneficiaryName,
+      requestNumber: request.requestNumber,
+    });
+
+    navigate(`/payments/payment-orders/create?${params.toString()}`);
+  };
+
   const headerActions = isEditing ? (
     <div className="flex items-center gap-2 flex-wrap">
       <Button
@@ -267,6 +286,11 @@ export default function DisbursementRequestDetailPage() {
           setDialogState('accrual');
         }}>
           إنشاء قيد الاستحقاق
+        </Button>
+      )}
+      {canCreatePaymentOrder && (
+        <Button variant="primary" size="sm" onClick={navigateToCreatePaymentOrder}>
+          إنشاء أمر دفع
         </Button>
       )}
       <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="العودة">
@@ -480,8 +504,8 @@ export default function DisbursementRequestDetailPage() {
         footer={
           <>
             <Button variant="outline" onClick={() => setDialogState(null)}>إلغاء</Button>
-            <Button onClick={handleApprove} disabled={approveMutation.isPending}>
-              {approveMutation.isPending ? 'جارٍ التنفيذ...' : currentStep === 1 ? 'تأكيد التوقيع الأول' : 'تأكيد التوقيع الثاني والاعتماد النهائي'}
+            <Button onClick={handleApprove} disabled={approveMutation.isPending} loading={approveMutation.isPending}>
+              {currentStep === 1 ? 'تأكيد التوقيع الأول' : 'تأكيد التوقيع الثاني والاعتماد النهائي'}
             </Button>
           </>
         }
@@ -542,8 +566,8 @@ export default function DisbursementRequestDetailPage() {
         footer={
           <>
             <Button variant="outline" onClick={() => setDialogState(null)}>إلغاء</Button>
-            <Button variant="destructive" onClick={handleReject} disabled={rejectMutation.isPending}>
-              {rejectMutation.isPending ? 'جارٍ الرفض...' : 'تأكيد الرفض'}
+            <Button variant="destructive" onClick={handleReject} disabled={rejectMutation.isPending} loading={rejectMutation.isPending}>
+              تأكيد الرفض
             </Button>
           </>
         }
@@ -565,8 +589,8 @@ export default function DisbursementRequestDetailPage() {
         footer={
           <>
             <Button variant="outline" onClick={() => setDialogState(null)}>إلغاء</Button>
-            <Button variant="destructive" onClick={handleCancel} disabled={cancelMutation.isPending}>
-              {cancelMutation.isPending ? 'جارٍ الإلغاء...' : 'تأكيد الإلغاء'}
+            <Button variant="destructive" onClick={handleCancel} disabled={cancelMutation.isPending} loading={cancelMutation.isPending}>
+              تأكيد الإلغاء
             </Button>
           </>
         }
@@ -588,8 +612,8 @@ export default function DisbursementRequestDetailPage() {
         footer={
           <>
             <Button variant="outline" onClick={() => { setDialogState(null); resetAccrualForm(); }}>إلغاء</Button>
-            <Button onClick={handleCreateAccrual} disabled={createAccrualMutation.isPending}>
-              {createAccrualMutation.isPending ? 'جارٍ الإنشاء...' : 'تأكيد الإنشاء'}
+            <Button onClick={handleCreateAccrual} disabled={createAccrualMutation.isPending} loading={createAccrualMutation.isPending}>
+              تأكيد الإنشاء
             </Button>
           </>
         }

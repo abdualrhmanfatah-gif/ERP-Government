@@ -38,24 +38,17 @@ internal class GetDisbursementRegisterDetailQueryHandler(IApplicationDbContext d
         string? accrualEntryNumber = null;
         string? accrualEntryStatus = null;
 
-        if (paymentOrder.DisbursementRequestId.HasValue)
+        if (paymentOrder.AccrualJournalEntryId.HasValue)
         {
-            var disbursementRequest = await dbContext.DisbursementRequests
+            var accrualEntry = await dbContext.JournalEntries
                 .AsNoTracking()
-                .FirstOrDefaultAsync(dr => dr.Id == paymentOrder.DisbursementRequestId.Value, cancellationToken);
+                .FirstOrDefaultAsync(je => je.Id == paymentOrder.AccrualJournalEntryId.Value, cancellationToken);
 
-            if (disbursementRequest?.AccrualJournalEntryId.HasValue == true)
+            if (accrualEntry is not null)
             {
-                var accrualEntry = await dbContext.JournalEntries
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(je => je.Id == disbursementRequest.AccrualJournalEntryId.Value, cancellationToken);
-
-                if (accrualEntry is not null)
-                {
-                    accrualJournalEntryId = accrualEntry.Id;
-                    accrualEntryNumber = accrualEntry.EntryNumber;
-                    accrualEntryStatus = accrualEntry.EntryStatus.ToString();
-                }
+                accrualJournalEntryId = accrualEntry.Id;
+                accrualEntryNumber = accrualEntry.EntryNumber;
+                accrualEntryStatus = accrualEntry.EntryStatus.ToString();
             }
         }
 

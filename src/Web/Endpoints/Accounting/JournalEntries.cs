@@ -284,11 +284,13 @@ public class JournalEntries : IEndpointGroup
         {
             Title = $"قيد رقم {e.EntryNumber}",
             TitleEn = $"Entry {e.EntryNumber}",
+            Description = e.Narration,
             Lines = linesByEntry.TryGetValue(e.Id, out var entryLines)
                 ? entryLines.Select(l => new Application.Accounting.Reports.Common.ReportLine
                 {
                     AccountCode = l.Account?.Code ?? "",
                     AccountName = l.Account?.Name ?? "",
+                    Description = l.Description,
                     Debit = l.Debit,
                     Credit = l.Credit,
                 }).ToList()

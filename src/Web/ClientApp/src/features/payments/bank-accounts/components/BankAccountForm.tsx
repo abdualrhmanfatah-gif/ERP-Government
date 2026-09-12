@@ -119,7 +119,7 @@ export function BankAccountForm({
       </Card>
       <div className="flex gap-4 justify-end">
         <Button type="button" variant="outline" onClick={onCancel}>إلغاء</Button>
-        <Button type="submit" disabled={isPending}>{isPending ? 'جارٍ الحفظ...' : 'حفظ'}</Button>
+        <Button type="submit" disabled={isPending} loading={isPending}>حفظ</Button>
       </div>
     </form>
   );

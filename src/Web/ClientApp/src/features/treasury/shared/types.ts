@@ -29,8 +29,8 @@ export {
 } from '../../../web-api-client';
 
 export const paymentMethodLabels: Record<string, string> = {
-  Cash: 'نقدي',
-  Check: 'شيكات',
+  '1': 'نقدي',
+  '2': 'شيكات',
 };
 
 export const voucherStatusLabels: Record<string, string> = {
@@ -69,6 +69,7 @@ export const checkStatusLabels: Record<string, string> = {
 
 export interface AccountLookupDto {
   id: number;
+  code: string;
   name: string;
 }
 

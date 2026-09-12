@@ -1,15 +1,18 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Button, Input, Select, Textarea, DatePicker, EmptyState } from '@/components/ui';
+import { Button, Input, Select, DatePicker } from '@/components/ui';
 import { partiesClient } from '../../parties/shared/client';
-import { AccountsClient } from '../../../web-api-client';
-import { CreateReceiptVoucherCommand, CreateCheckDto, CreateReceiptVoucherLineDto } from '../../../web-api-client';
+import { useAccountsList } from '@/features/accounting/hooks/useAccountsList';
+import {
+  CreateReceiptVoucherCommand,
+  CreateCheckDto,
+  CreateReceiptVoucherLineDto,
+  PaymentMethod,
+} from '../../../web-api-client';
 import { VoucherLinesEditor } from '@/components/TreasuryVoucherLinesEditor';
 import { ChecksSection } from '@/components/TreasuryChecksSection';
 import { paymentMethodLabels } from '../shared/types';
 import type { LineFormRow, CheckFormRow } from '../shared/types';
-
-const accountsClient = new AccountsClient();
 
 interface ReceiptVoucherFormProps {
   onSubmit: (dto: CreateReceiptVoucherCommand) => void;
@@ -40,27 +43,25 @@ export function ReceiptVoucherForm({
     queryKey: ['parties', 'active'],
     queryFn: () => partiesClient.list({ isActive: true }),
   });
-  const { data: accounts = [] } = useQuery({
-    queryKey: ['accounts', 'postable'],
-    queryFn: () => accountsClient.accountsAll(true, undefined, true, undefined),
-  });
+  const { data: accounts = [] } = useAccountsList({ isActive: true, isPostable: true });
 
   const [voucherDate, setVoucherDate] = useState(initialData?.voucherDate ?? new Date().toISOString().slice(0, 10));
   const [partyId, setPartyId] = useState(initialData?.partyId ?? 0);
-  const [paymentMethod, setPaymentMethod] = useState<number>(initialData?.paymentMethod ?? 0);
+  const [paymentMethod, setPaymentMethod] = useState<string>(String(initialData?.paymentMethod ?? ''));
   const [receivedFrom, setReceivedFrom] = useState(initialData?.receivedFrom ?? '');
   const [notes, setNotes] = useState(initialData?.notes ?? '');
   const [lines, setLines] = useState<LineFormRow[]>(initialData?.lines ?? [{ revenueAccountId: 0, amount: 0 }]);
   const [checks, setChecks] = useState<CheckFormRow[]>(initialData?.checks ?? []);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const isCheck = paymentMethod === 1;
+  const isCheck = paymentMethod === '2';
   const totalAmount = useMemo(() => lines.reduce((sum, l) => sum + (l.amount || 0), 0), [lines]);
 
   function validate(): boolean {
     const e: Record<string, string> = {};
     if (!voucherDate) e.voucherDate = 'تاريخ السند مطلوب';
     if (!partyId) e.partyId = 'الجهة مطلوبة';
+    if (!paymentMethod) e.paymentMethod = 'طريقة الدفع مطلوبة';
     if (lines.length === 0) e.lines = 'بند إيراد واحد على الأقل مطلوب';
     if (lines.some((l) => !l.revenueAccountId)) e.lines = 'يجب اختيار حساب الإيراد لكل بند';
     if (lines.some((l) => l.amount <= 0)) e.lines = 'مبلغ البند يجب أن يكون أكبر من صفر';
@@ -82,7 +83,7 @@ export function ReceiptVoucherForm({
       new CreateReceiptVoucherCommand({
         voucherDate: new Date(voucherDate),
         partyId,
-        paymentMethod: paymentMethod as never,
+        paymentMethod: Number(paymentMethod) as PaymentMethod,
         receivedFrom: receivedFrom || undefined,
         notes: notes || undefined,
         lines: lines.map(
@@ -205,7 +206,7 @@ export function ReceiptVoucherForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6" aria-label="سند قبض">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
           <DatePicker
             label="تاريخ السند *"
@@ -214,6 +215,27 @@ export function ReceiptVoucherForm({
             required
             error={errors.voucherDate}
           />
+        </div>
+
+        <div>
+          <Select
+            label="طريقة الدفع *"
+            value={paymentMethod}
+            onChange={(e) => {
+              const method = e.target.value;
+              setPaymentMethod(method);
+              if (method === '2' && checks.length === 0) {
+                setChecks([{ bankName: '', checkNumber: '', checkDate: '', amount: 0 }]);
+              } else if (method === '1') {
+                setChecks([]);
+              }
+            }}
+            options={[
+              { value: '', label: 'اختر طريقة الدفع...' },
+              ...Object.entries(paymentMethodLabels).map(([value, label]) => ({ value, label })),
+            ]}
+          />
+          {errors.paymentMethod && <p className="text-xs text-[var(--color-error)] mt-1">{errors.paymentMethod}</p>}
         </div>
 
         <div>
@@ -230,21 +252,6 @@ export function ReceiptVoucherForm({
         </div>
 
         <div>
-          <Select
-            label="طريقة الدفع *"
-            value={String(paymentMethod)}
-            onChange={(e) => {
-              const method = Number(e.target.value);
-              setPaymentMethod(method);
-              if (method === 1 && checks.length === 0) {
-                setChecks([{ bankName: '', checkNumber: '', checkDate: '', amount: 0 }]);
-              }
-            }}
-            options={Object.entries(paymentMethodLabels).map(([value, label]) => ({ value, label }))}
-          />
-        </div>
-
-        <div>
           <Input
             label="وارد من"
             type="text"
@@ -255,18 +262,18 @@ export function ReceiptVoucherForm({
         </div>
 
         <div className="md:col-span-2">
-          <Textarea
+          <Input
             label="ملاحظات"
+            type="text"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            rows={2}
           />
         </div>
       </div>
 
       <VoucherLinesEditor
         rows={lines}
-        accounts={accounts.map((a) => ({ id: a.id ?? 0, name: a.name ?? a.code ?? '' }))}
+        accounts={accounts.map((a) => ({ id: a.id ?? 0, code: a.code ?? '', name: a.name ?? '' }))}
         onChange={setLines}
         error={errors.lines}
       />
@@ -280,7 +287,7 @@ export function ReceiptVoucherForm({
 
       <div className="flex items-center justify-between rounded bg-[var(--color-surface-container)] px-4 py-3">
         <span className="text-sm text-[var(--color-on-surface-variant)]">
-          الإجمالي (يُحسب خادمياً عند الحفظ)
+          الإجمالي
         </span>
         <span className="text-lg font-semibold tabular-nums text-[var(--color-on-surface)]">
           {totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
@@ -293,8 +300,8 @@ export function ReceiptVoucherForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           إلغاء
         </Button>
-        <Button type="submit" disabled={isPending}>
-          {isPending ? 'جارٍ الحفظ...' : 'حفظ السند'}
+        <Button type="submit" disabled={isPending} loading={isPending}>
+          حفظ السند
         </Button>
       </div>
     </form>

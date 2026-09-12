@@ -13,4 +13,6 @@ export const paymentOrdersClient = {
   cancel: (id: number, cmd: any) => generatedClient.cancel(id, cmd),
   sendToTreasury: (id: number, cmd: any) => generatedClient.sendToTreasury(id, cmd),
   void: (id: number, cmd: any) => generatedClient.void(id, cmd),
+  exportPaymentOrderPdf: (id: number) =>
+    `/api/PaymentOrders/${id}/export-pdf`,
 };

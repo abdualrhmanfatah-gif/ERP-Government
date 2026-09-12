@@ -34,6 +34,8 @@ public class PaymentOrderDto
     public string? Notes { get; init; }
     public int? DisbursementRequestId { get; init; }
     public string? DisbursementRequestNumber { get; init; }
+    public int? AccrualJournalEntryId { get; init; }
+    public string? AccrualEntryNumber { get; init; }
     public byte[]? RowVersion { get; init; }
     public List<PaymentOrderDeductionDto> Deductions { get; set; } = [];
 }

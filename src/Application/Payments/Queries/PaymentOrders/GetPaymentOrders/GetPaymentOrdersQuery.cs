@@ -50,6 +50,8 @@ public class GetPaymentOrdersQueryHandler(
                 Status = x.Status,
                 Notes = x.Notes,
                 DisbursementRequestId = x.DisbursementRequestId,
+                AccrualJournalEntryId = x.AccrualJournalEntryId,
+                AccrualEntryNumber = x.AccrualJournalEntry != null ? x.AccrualJournalEntry.EntryNumber : null,
                 RowVersion = x.RowVersion
             })
             .ToListAsync(cancellationToken);

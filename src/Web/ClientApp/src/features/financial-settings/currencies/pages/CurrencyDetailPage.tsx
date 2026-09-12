@@ -181,8 +181,8 @@ export default function CurrencyDetailPage() {
                   <Button variant="ghost" onClick={cancelEdit} className="cursor-pointer" icon={<X size={16} />}>
                     إلغاء
                   </Button>
-                  <Button onClick={handleSave} disabled={updateMutation.isPending} className="cursor-pointer" icon={<Check size={16} />}>
-                    {updateMutation.isPending ? 'جاري الحفظ...' : 'حفظ'}
+                  <Button onClick={handleSave} disabled={updateMutation.isPending} loading={updateMutation.isPending} className="cursor-pointer" icon={<Check size={16} />}>
+                    حفظ
                   </Button>
                 </div>
               </div>

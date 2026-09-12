@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/shared/api';
+import { handleLifecycleError } from '@/shared/api/result-to-ui';
 import type { PurchaseRequest, PurchaseRequestDetail, PaginatedList } from '../shared/types';
 
 const queryKeys = {
@@ -42,6 +43,7 @@ export function useCreatePurchaseRequest() {
   return useMutation({
     mutationFn: (data: unknown) => api.post<number>('/api/PurchaseRequests', sanitizeDates(data as Record<string, unknown>)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -53,6 +55,7 @@ export function useUpdatePurchaseRequest() {
       return api.put(`/api/PurchaseRequests/${id}`, payload);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -61,6 +64,7 @@ export function useSubmitPurchaseRequest() {
   return useMutation({
     mutationFn: (id: number) => api.patch(`/api/PurchaseRequests/${id}/submit`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -69,6 +73,7 @@ export function useApprovePurchaseRequest() {
   return useMutation({
     mutationFn: (id: number) => api.patch(`/api/PurchaseRequests/${id}/approve`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -78,6 +83,7 @@ export function useRejectPurchaseRequest() {
     mutationFn: ({ id, reason }: { id: number; reason: string }) =>
       api.patch(`/api/PurchaseRequests/${id}/reject`, { reason }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -87,5 +93,6 @@ export function useCancelPurchaseRequest() {
     mutationFn: ({ id, reason }: { id: number; reason?: string }) =>
       api.patch(`/api/PurchaseRequests/${id}/cancel`, { reason }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }

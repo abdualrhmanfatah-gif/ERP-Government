@@ -100,7 +100,7 @@ export function BudgetForm({
       {errors.submit && <p className="text-sm text-[var(--color-error)] mt-4">{errors.submit}</p>}
       <div className="flex justify-end gap-2 mt-6">
         <Button variant="ghost" type="button" onClick={onCancel}>إلغاء</Button>
-        <Button variant="primary" type="submit" disabled={isPending}>{isPending ? 'جارٍ الحفظ...' : 'حفظ'}</Button>
+        <Button variant="primary" type="submit" disabled={isPending} loading={isPending}>حفظ</Button>
       </div>
     </form>
   );

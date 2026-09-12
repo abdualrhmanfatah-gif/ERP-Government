@@ -6,6 +6,8 @@ public class ReportSection
 
     public string TitleEn { get; init; } = string.Empty;
 
+    public string? Description { get; init; }
+
     public List<ReportLine> Lines { get; init; } = [];
 
     public decimal Total { get; init; }

@@ -33,6 +33,9 @@ public class SendToTreasuryCommandHandler(
         if (entity.Status != PaymentOrderStatus.Approved)
             return Result.Failure(["Only approved payment orders can be sent to treasury."]);
 
+        if (!entity.AccrualJournalEntryId.HasValue)
+            return Result.Failure(["An accrual journal entry must be linked before sending the payment order to treasury."]);
+
         if (entity.RowVersion.Length > 0 && request.RowVersion.Length > 0
             && !entity.RowVersion.SequenceEqual(request.RowVersion))
             return Result.Failure(["RowVersion conflict — record modified by another user. Reload."]);

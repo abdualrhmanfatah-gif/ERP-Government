@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { Page, Button, FilterBar, FilterSearch, FilterSelect, Skeleton, ErrorState } from '@/components/ui';
+import { Page, Button, FilterBar, FilterSearch, FilterSelect, Skeleton } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Eye, Plus } from 'lucide-react';
 import { supplierInvoiceStatusLabels, supplierInvoiceStatusVariant } from '../shared/types';
@@ -23,7 +23,7 @@ export default function SupplierInvoicesListPage() {
   );
   const [page, setPage] = useState(1);
 
-  const { data: response, isLoading, isError } = useSupplierInvoicesList({
+  const { data: response, isLoading, isError, refetch } = useSupplierInvoicesList({
     search: search || undefined,
     status: statusFilter || undefined,
     purchaseOrderId: purchaseOrderIdFilter,
@@ -57,11 +57,9 @@ export default function SupplierInvoicesListPage() {
       header: 'الحالة',
       width: '120px',
       render: (v) => (
-        <StatusBadge
-          status={v as SupplierInvoiceStatus}
-          labels={supplierInvoiceStatusLabels}
-          variants={supplierInvoiceStatusVariant}
-        />
+        <StatusBadge variant={supplierInvoiceStatusVariant[v as SupplierInvoiceStatus]}>
+          {supplierInvoiceStatusLabels[v as SupplierInvoiceStatus]}
+        </StatusBadge>
       ),
     },
     { key: 'grandTotal', header: 'الإجمالي', width: '150px', render: (v) => v ? `${v.toLocaleString('ar-YE')} ر.ي` : '-' },
@@ -86,7 +84,7 @@ export default function SupplierInvoicesListPage() {
 
   const hasFilters = !!search || !!statusFilter || !!purchaseOrderIdFilter;
 
-  if (isError) return <ErrorState message="خطأ في تحميل فواتير الموردين" />;
+  if (isError) return <Page title="فواتير الموردين" error="خطأ في تحميل فواتير الموردين" onRetry={() => refetch()} />;
 
   return (
     <Page

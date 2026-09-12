@@ -261,7 +261,7 @@ export function DisbursementRequestForm({
                 options={partyOptions}
                 value={selectedPartyId ? String(selectedPartyId) : ''}
                 onChange={handlePartySelect}
-                placeholder="اختر طرفًا أو اكتب اسمًا"
+                placeholder="اختر موردًا أو اكتب اسمًا"
                 searchPlaceholder="بحث..."
                 loading={partiesLoading}
                 emptyMessage="لا توجد نتائج"
@@ -312,7 +312,7 @@ export function DisbursementRequestForm({
           />
 
           {isDetail && initialData?.beneficiaryPartyId && (
-            <p className="text-xs text-[var(--color-primary)] md:col-span-2">مرتبط بطرف مسجل</p>
+            <p className="text-xs text-[var(--color-primary)] md:col-span-2">مرتبط بمورد مسجل</p>
           )}
         </div>
 

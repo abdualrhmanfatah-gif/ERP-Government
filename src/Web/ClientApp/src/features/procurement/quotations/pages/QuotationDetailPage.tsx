@@ -95,6 +95,7 @@ export default function QuotationDetailPage() {
               <Button
                 onClick={() => submitMutation.mutate(numericId, { onError: handleLifecycleError })}
                 disabled={submitMutation.isPending}
+                loading={submitMutation.isPending}
               >
                 تقديم
               </Button>
@@ -104,6 +105,7 @@ export default function QuotationDetailPage() {
             <Button
               onClick={() => startEvalMutation.mutate(numericId, { onError: handleLifecycleError })}
               disabled={startEvalMutation.isPending}
+              loading={startEvalMutation.isPending}
             >
               بدء التقييم
             </Button>
@@ -123,6 +125,7 @@ export default function QuotationDetailPage() {
             <Button
               onClick={() => awardMutation.mutate(numericId, { onError: handleLifecycleError })}
               disabled={awardMutation.isPending}
+              loading={awardMutation.isPending}
             >
               ترسية
             </Button>
@@ -215,8 +218,9 @@ export default function QuotationDetailPage() {
                 );
               }}
               disabled={completeEvalMutation.isPending || !technicalScore || !financialScore}
+              loading={completeEvalMutation.isPending}
             >
-              {completeEvalMutation.isPending ? 'جاري الحفظ...' : 'تأكيد'}
+              تأكيد
             </Button>
           </>
         }
@@ -258,8 +262,9 @@ export default function QuotationDetailPage() {
                 );
               }}
               disabled={selectMutation.isPending || !selectionReason.trim()}
+              loading={selectMutation.isPending}
             >
-              {selectMutation.isPending ? 'جاري الحفظ...' : 'تأكيد'}
+              تأكيد
             </Button>
           </>
         }
@@ -293,8 +298,9 @@ export default function QuotationDetailPage() {
                 );
               }}
               disabled={rejectMutation.isPending || !rejectionReason.trim()}
+              loading={rejectMutation.isPending}
             >
-              {rejectMutation.isPending ? 'جاري الحفظ...' : 'رفض'}
+              رفض
             </Button>
           </>
         }

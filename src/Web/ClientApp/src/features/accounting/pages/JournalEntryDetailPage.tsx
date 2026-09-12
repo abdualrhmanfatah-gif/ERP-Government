@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { Download, FileText } from 'lucide-react';
 import {
   useJournalEntry,
   useSubmitJournalEntry,
@@ -12,12 +13,12 @@ import { usePermission } from '../../../shared/hooks/usePermission';
 import { useFiscalYearByDate } from '../hooks/useFiscalYearByDate';
 import { ReverseDialog } from '@/components/AccountingReverseDialog';
 import { ApprovalsPanel } from '@/components/DocumentsApprovalsPanel';
-import { StatusLogPanel } from '@/components/DocumentsStatusLogPanel';
+import { AttachmentsPanel } from '@/components/DocumentsAttachmentsPanel';
 import { AccountingJournalEntryDetail } from '@/components/AccountingJournalEntryDetail';
 import { StatusBadge } from '@/components/AccountingStatusBadge';
 import { Page, Button, Card, Badge } from '@/components/ui';
-import { MetaItem } from '@/components/MetaItem';
 import { formatDate, toDateInput } from '@/shared/utils/formatters';
+import { downloadBlobExport, buildExportUrl } from '@/shared/utils/download';
 
 function getActionsForStatus(status: string) {
   switch (status) {
@@ -56,6 +57,20 @@ export function JournalEntryDetailPage() {
   const [showReverseDialog, setShowReverseDialog] = useState(false);
   const [conflictError, setConflictError] = useState<string | null>(null);
   const [editState, setEditState] = useState({ isEditing: false, canSave: false, isSaving: false });
+
+  const handleExportEntry = async (format: 'pdf' | 'xlsx') => {
+    const url = buildExportUrl('/api/JournalEntries/export', {
+      format,
+      entryId,
+      pageSize: 'A5',
+      isLandscape: true,
+    });
+    await downloadBlobExport(url, `JournalEntry-${entry?.entryNumber ?? entryId}.${format === 'pdf' ? 'pdf' : 'xlsx'}`);
+  };
+
+  const handleStateChange = useCallback((state: { canSave?: boolean; isSaving?: boolean }) => {
+    setEditState((prev) => ({ ...prev, ...state }));
+  }, []);
 
   const handleAction = async (action: string) => {
     setConflictError(null);
@@ -136,27 +151,46 @@ export function JournalEntryDetailPage() {
           تعديل
         </Button>
       )}
+      <span className="h-4 w-px bg-[var(--color-outline-variant)]" aria-hidden="true" />
+      <Button type="button" variant="ghost" size="icon-sm" onClick={() => handleExportEntry('pdf')} title="تصدير PDF">
+        <FileText className="h-4 w-4" />
+      </Button>
+      <Button type="button" variant="ghost" size="icon-sm" onClick={() => handleExportEntry('xlsx')} title="تصدير Excel">
+        <Download className="h-4 w-4" />
+      </Button>
     </>
   );
 
   return (
     <Page
       title={entry.entryNumber}
+      description={
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[var(--color-on-surface-variant)]">
+          <StatusBadge status={entry.entryStatus} />
+          {entry.isSystemGenerated && <Badge variant="default">نظام</Badge>}
+          <span className="h-3 w-px bg-[var(--color-outline-variant)]" aria-hidden="true" />
+          <span className="font-medium">السنة المالية: {fiscal.data?.fiscalYearCode ?? '—'}</span>
+          <span className="h-3 w-px bg-[var(--color-outline-variant)]" aria-hidden="true" />
+          <span className="font-medium">الفترة: {fiscal.data?.fiscalPeriodName ?? '—'}</span>
+          <span className="h-3 w-px bg-[var(--color-outline-variant)]" aria-hidden="true" />
+          <span className="font-medium">التاريخ: {formatDate(entry.documentDate)}</span>
+          {entry.ref && (
+            <>
+              <span className="h-3 w-px bg-[var(--color-outline-variant)]" aria-hidden="true" />
+              <span className="font-medium">المرجع: {entry.ref}</span>
+            </>
+          )}
+          {entry.journal && (
+            <>
+              <span className="h-3 w-px bg-[var(--color-outline-variant)]" aria-hidden="true" />
+              <span className="font-medium">الدفتر: {entry.journal.name}</span>
+            </>
+          )}
+        </div>
+      }
       loading={isLoading}
       error={error ? 'خطأ في تحميل القيد' : undefined}
       actions={headerActions}
-      toolbar={
-        <div className="flex flex-wrap items-center gap-3 rounded-lg bg-[var(--color-surface-container-low)] px-4 py-2.5">
-          <StatusBadge status={entry.entryStatus} />
-          {entry.isSystemGenerated && <Badge variant="default">نظام</Badge>}
-          <span className="h-4 w-px bg-[var(--color-outline-variant)]" aria-hidden="true" />
-          <MetaItem label="السنة المالية" value={fiscal.data?.fiscalYearCode} />
-          <span className="h-4 w-px bg-[var(--color-outline-variant)]" aria-hidden="true" />
-          <MetaItem label="الفترة" value={fiscal.data?.fiscalPeriodName} />
-          <span className="h-4 w-px bg-[var(--color-outline-variant)]" aria-hidden="true" />
-          <MetaItem label="التاريخ" value={formatDate(entry.documentDate)} />
-        </div>
-      }
     >
       {conflictError && (
         <Card variant="default" padding="sm" className="mb-6 text-sm flex items-center justify-between bg-[var(--color-error-container)] text-[var(--color-error)]">
@@ -176,7 +210,7 @@ export function JournalEntryDetailPage() {
           entry={entry}
           editing={editState.isEditing}
           onToggleEditing={(editing) => setEditState({ ...editState, isEditing: editing })}
-          onStateChange={(state) => setEditState((prev) => ({ ...prev, ...state }))}
+          onStateChange={handleStateChange}
           onSaved={() => refetch()}
         />
 
@@ -192,17 +226,17 @@ export function JournalEntryDetailPage() {
           </Card>
         )}
 
-        {/* سجل الحالة */}
-        <Card variant="default">
-          <div className="p-6"><StatusLogPanel documentType="JournalEntry" documentId={entry.id} /></div>
-        </Card>
-
         {/* الموافقات */}
         {(entry.entryStatus === 'Submitted' || entry.entryStatus === 'Approved') && (
           <Card variant="default">
             <div className="p-6"><ApprovalsPanel documentType="JournalEntry" documentId={entry.id} /></div>
           </Card>
         )}
+
+        {/* المرفقات */}
+        <Card variant="default">
+          <div className="p-6"><AttachmentsPanel documentType="JournalEntry" documentId={entry.id} /></div>
+        </Card>
       </div>
 
       <ReverseDialog open={showReverseDialog} entryId={entry.id} entryNumber={entry.entryNumber} lines={entry.lines}

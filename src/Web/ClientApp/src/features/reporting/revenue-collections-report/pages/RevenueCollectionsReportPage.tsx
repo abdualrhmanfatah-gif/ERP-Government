@@ -46,7 +46,7 @@ export default function RevenueCollectionsReportPage() {
   const columns: DataGridColumn<RevenueCollectionsLineDto>[] = [
     { header: 'رقم السند', cell: (row) => <span dir="ltr" className="font-mono text-sm">{row.voucherNumber}</span> },
     { header: 'التاريخ', cell: (row) => <span className="text-sm">{row.voucherDate ? new Date(row.voucherDate).toLocaleDateString('ar-YE') : '—'}</span> },
-    { header: 'الطرف', cell: (row) => <span className="text-sm">{row.partyName ?? '—'}</span> },
+    { header: 'المورد', cell: (row) => <span className="text-sm">{row.partyName ?? '—'}</span> },
     { header: 'المبلغ', align: 'right', cell: (row) => <MoneyDisplay value={row.amount ?? 0} /> },
     { header: 'طريقة الدفع', cell: (row) => <span className="text-sm">{paymentMethodLabels[row.paymentMethod ?? ''] ?? row.paymentMethod ?? '—'}</span> },
     {

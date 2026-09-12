@@ -1,6 +1,6 @@
 // Revenue lines editor — at least one line required (FR-002).
 import { Plus, Trash2 } from 'lucide-react';
-import { Button, FormField, Input, Select } from '@/components/ui';
+import { Button, Combobox, FormField, Input } from '@/components/ui';
 import type { LineFormRow, AccountLookupDto } from '@/features/treasury/shared/types';
 
 interface VoucherLinesEditorProps {
@@ -24,6 +24,11 @@ export function VoucherLinesEditor({ rows, accounts, disabled, onChange, error }
     onChange(rows.filter((_, i) => i !== index));
   }
 
+  const accountOptions = accounts.map((a) => ({
+    value: String(a.id),
+    label: `${a.code} - ${a.name}`,
+  }));
+
   return (
     <section aria-label="بنود الإيراد" className="space-y-3">
       <div className="flex items-center justify-between">
@@ -40,16 +45,15 @@ export function VoucherLinesEditor({ rows, accounts, disabled, onChange, error }
           className="grid grid-cols-1 md:grid-cols-3 gap-3 rounded border border-[var(--color-outline-variant)] p-3"
           data-testid={`line-row-${index}`}
         >
-          <Select
+          <Combobox
             label="حساب الإيراد"
-            id={`revenueAccountId-${index}`}
-            value={String(row.revenueAccountId)}
+            value={row.revenueAccountId ? String(row.revenueAccountId) : ''}
+            onChange={(val) => updateRow(index, { revenueAccountId: val ? Number(val) : 0 })}
+            options={accountOptions}
+            placeholder="اختر الحساب..."
+            searchPlaceholder="بحث بالرمز أو الاسم..."
+            emptyMessage="لا توجد حسابات"
             disabled={disabled}
-            onChange={(e) => updateRow(index, { revenueAccountId: Number(e.target.value) })}
-            options={[
-              { value: '0', label: 'اختر الحساب...' },
-              ...accounts.map((a) => ({ value: String(a.id), label: a.name })),
-            ]}
           />
           <FormField label="المبلغ" htmlFor={`amount-${index}`} required>
             <Input

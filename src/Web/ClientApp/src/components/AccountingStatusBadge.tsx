@@ -14,7 +14,7 @@ const statusLabels: Record<EntryStatus, string> = {
   [EntryStatus.Draft]: 'مسودة',
   [EntryStatus.Submitted]: 'مرسلة للمراجعة',
   [EntryStatus.Approved]: 'موافق عليها',
-  [EntryStatus.Posted]: 'محاسبة',
+  [EntryStatus.Posted]: 'مرحل',
   [EntryStatus.Reversed]: 'معكوسة',
   [EntryStatus.Cancelled]: 'ملغاة',
 };

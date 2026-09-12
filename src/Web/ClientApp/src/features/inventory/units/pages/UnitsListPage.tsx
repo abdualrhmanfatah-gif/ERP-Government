@@ -187,7 +187,7 @@ export default function UnitsListPage() {
         onClose={() => setDialogOpen(false)}
         title={editItem ? 'تعديل الوحدة' : 'إضافة وحدة جديدة'}
         footer={
-          <Button type="submit" form="unit-form" disabled={createMutation.isPending || updateMutation.isPending}>
+          <Button type="submit" form="unit-form" disabled={createMutation.isPending || updateMutation.isPending} loading={createMutation.isPending || updateMutation.isPending}>
             {editItem ? 'حفظ التعديلات' : 'إنشاء'}
           </Button>
         }

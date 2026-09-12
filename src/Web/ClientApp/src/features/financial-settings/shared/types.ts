@@ -50,7 +50,7 @@ export const closingEntryStatusLabels: Record<ClosingEntryStatus, string> = {
   [ClosingEntryStatus.Draft]: 'مسودة',
   [ClosingEntryStatus.PendingApproval]: 'بانتظار الاعتماد',
   [ClosingEntryStatus.Approved]: 'معتمد',
-  [ClosingEntryStatus.Posted]: 'مقيّد',
+  [ClosingEntryStatus.Posted]: 'مرحل',
   [ClosingEntryStatus.Cancelled]: 'ملغي',
 };
 

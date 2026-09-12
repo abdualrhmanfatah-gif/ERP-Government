@@ -19,6 +19,7 @@ export const createPaymentOrderSchema = z.object({
   paymentOrderType: z.string().min(1, 'نوع أمر الدفع مطلوب').max(20),
   accountId: z.number().optional(),
   disbursementRequestId: z.number().optional(),
+  accrualJournalEntryId: z.number().optional(),
   fundId: z.number().min(1, 'الصندوق مطلوب'),
   fiscalYearId: z.number().optional(),
   budgetItemAllocationId: z.number().optional(),

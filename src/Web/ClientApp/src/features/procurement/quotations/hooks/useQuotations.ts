@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/shared/api';
+import { handleLifecycleError } from '@/shared/api/result-to-ui';
 import type { Quotation, QuotationDetail, PaginatedList } from '../shared/types';
 
 const queryKeys = {
@@ -34,6 +35,7 @@ export function useCreateQuotation() {
   return useMutation({
     mutationFn: (data: unknown) => api.post<number>('/api/Quotations', data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -43,6 +45,7 @@ export function useUpdateQuotation() {
     mutationFn: ({ id, data }: { id: number; data: unknown }) =>
       api.put(`/api/Quotations/${id}`, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -51,6 +54,7 @@ export function useSubmitQuotation() {
   return useMutation({
     mutationFn: (id: number) => api.patch(`/api/Quotations/${id}/submit`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -59,6 +63,7 @@ export function useStartEvaluation() {
   return useMutation({
     mutationFn: (id: number) => api.patch(`/api/Quotations/${id}/start-evaluation`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -68,6 +73,7 @@ export function useCompleteEvaluation() {
     mutationFn: ({ id, technicalScore, financialScore }: { id: number; technicalScore: number; financialScore: number }) =>
       api.patch(`/api/Quotations/${id}/complete-evaluation`, { technicalScore, financialScore }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -77,6 +83,7 @@ export function useSelectQuotation() {
     mutationFn: ({ id, selectionReason }: { id: number; selectionReason: string }) =>
       api.patch(`/api/Quotations/${id}/select`, { selectionReason }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -85,6 +92,7 @@ export function useAwardQuotation() {
   return useMutation({
     mutationFn: (id: number) => api.patch(`/api/Quotations/${id}/award`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -94,5 +102,6 @@ export function useRejectQuotation() {
     mutationFn: ({ id, rejectionReason }: { id: number; rejectionReason: string }) =>
       api.patch(`/api/Quotations/${id}/reject`, { rejectionReason }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }

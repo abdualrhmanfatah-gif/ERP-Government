@@ -237,7 +237,7 @@ public static class RolePermissionSeedData
             Make("RFQ.View"), Make("RFQ.Create"), Make("RFQ.Publish"), Make("RFQ.Complete"), Make("RFQ.Cancel"),
             Make("Quotations.View"), Make("Quotations.Create"),
             Make("PurchaseOrders.View"), Make("PurchaseOrders.Create"), Make("PurchaseOrders.Submit"),
-            Make("PurchaseOrders.Approve"), Make("PurchaseOrders.Cancel"),
+            Make("PurchaseOrders.Approve"), Make("PurchaseOrders.Issue"), Make("PurchaseOrders.Close"), Make("PurchaseOrders.Cancel"),
 
             // Payments
             Make("BankAccounts.View"), Make("BankAccounts.Create"), Make("BankAccounts.Update"), Make("BankAccounts.Activate"), Make("BankAccounts.Deactivate"),

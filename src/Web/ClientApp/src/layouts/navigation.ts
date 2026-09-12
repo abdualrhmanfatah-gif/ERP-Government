@@ -24,12 +24,6 @@ export const moduleGroups: ModuleGroup[] = [
   },
 
   {
-    label: 'الأطراف',
-    items: [
-      { path: '/parties', label: 'الأطراف', permission: 'Parties.View' },
-    ],
-  },
-  {
     label: 'الموازنة',
     items: [
       { path: '/budgeting/budget-types', label: 'أنواع الموازنات', permission: 'BudgetTypes.View' },
@@ -93,6 +87,7 @@ export const moduleGroups: ModuleGroup[] = [
     label: 'المشتريات',
     items: [
       { path: '/procurement/dashboard', label: 'لوحة المشتريات', permission: 'PurchaseRequests.View' },
+      { path: '/parties', label: 'الموردون', permission: 'Parties.View' },
       { path: '/procurement/purchase-requests', label: 'طلبات الشراء', permission: 'PurchaseRequests.View' },
       { path: '/procurement/quotations', label: 'عروض الأسعار', permission: 'Quotations.View' },
       { path: '/procurement/purchase-orders', label: 'أوامر الشراء', permission: 'PurchaseOrdersCreate' },

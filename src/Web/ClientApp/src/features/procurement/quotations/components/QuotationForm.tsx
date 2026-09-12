@@ -408,8 +408,8 @@ export function QuotationForm({
             <Button type="button" variant="outline" onClick={onCancel}>
               إلغاء
             </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? 'جاري الحفظ...' : 'حفظ'}
+            <Button type="submit" disabled={isPending} loading={isPending}>
+              حفظ
             </Button>
           </>
         )}

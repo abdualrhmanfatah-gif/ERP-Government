@@ -2,10 +2,11 @@ import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Page, Button, Card, CardContent, CardHeader, CardTitle, Input, Textarea, ErrorState, Skeleton } from '@/components/ui';
+import { Page, Button, Card, CardContent, CardHeader, CardTitle, Input, Textarea, Skeleton, Combobox } from '@/components/ui';
 import { createGRNSchema, type CreateGRNFormData } from '../shared/schemas';
 import { useCreateGRN } from '../hooks/useGRNs';
 import { useWarehouses, useLocations, usePurchaseOrderForGRN } from '../shared/catalog-hooks';
+import type { ComboboxOption } from '@/components/ui/Combobox';
 
 export default function GRNCreatePage() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function GRNCreatePage() {
   const { data: locations } = useLocations();
   const { data: purchaseOrder, isLoading: poLoading } = usePurchaseOrderForGRN(poIdParam);
 
-  const { register, handleSubmit, formState: { errors }, setValue, control } = useForm<CreateGRNFormData>({
+  const { register, handleSubmit, formState: { errors }, setValue, control, watch } = useForm<CreateGRNFormData>({
     resolver: zodResolver(createGRNSchema),
     defaultValues: {
       purchaseOrderId: poIdParam || 0,
@@ -46,6 +47,8 @@ export default function GRNCreatePage() {
           receivedQuantity: 0,
           acceptedQuantity: null as number | null,
           rejectedQuantity: null as number | null,
+          batchNumber: null as string | null,
+          expiryDate: null as string | null,
           notes: null as string | null,
         }));
       replace(eligibleLines);
@@ -57,12 +60,15 @@ export default function GRNCreatePage() {
       await createGRN.mutateAsync(data);
       navigate('/procurement/goods-receipt-notes');
     } catch {
-      // Error handled by mutation
+      // error handled by mutation onError
     }
   };
 
   if (warehousesLoading || poLoading) return <Skeleton className="h-96" />;
-  if (poIdParam > 0 && !purchaseOrder) return <ErrorState message="لم يتم العثور على أمر الشراء" />;
+  if (poIdParam > 0 && !purchaseOrder) return <Page title="خطأ" error="لم يتم العثور على أمر الشراء" />;
+
+  const warehouseOptions: ComboboxOption[] = (warehouses ?? []).map((w) => ({ value: String(w.id), label: `${w.code} - ${w.name}` }));
+  const locationOptions: ComboboxOption[] = (locations ?? []).map((l) => ({ value: String(l.id), label: l.name }));
 
   return (
     <Page title="إنشاء إشعار استلام">
@@ -84,24 +90,26 @@ export default function GRNCreatePage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium">المستودع</label>
-                <select {...register('warehouseId', { valueAsNumber: true })} className="w-full border rounded p-2">
-                  <option value="">اختر المستودع</option>
-                  {warehouses?.map((w) => (
-                    <option key={w.id} value={w.id}>{w.name}</option>
-                  ))}
-                </select>
-                {errors.warehouseId && <p className="text-destructive text-sm">{errors.warehouseId.message}</p>}
+                <Combobox
+                  label="المستودع *"
+                  options={warehouseOptions}
+                  value={String(watch('warehouseId') || '')}
+                  onChange={(val) => setValue('warehouseId', Number(val) || 0, { shouldValidate: true })}
+                  placeholder="اختر المستودع..."
+                  searchPlaceholder="بحث..."
+                  error={errors.warehouseId?.message}
+                />
               </div>
 
               <div>
-                <label className="text-sm font-medium">الموقع</label>
-                <select {...register('locationId', { valueAsNumber: true })} className="w-full border rounded p-2">
-                  <option value="">اختر الموقع</option>
-                  {locations?.map((l) => (
-                    <option key={l.id} value={l.id}>{l.name}</option>
-                  ))}
-                </select>
+                <Combobox
+                  label="الموقع"
+                  options={locationOptions}
+                  value={String(watch('locationId') || '')}
+                  onChange={(val) => setValue('locationId', val ? Number(val) : null, { shouldValidate: true })}
+                  placeholder="اختر الموقع..."
+                  searchPlaceholder="بحث..."
+                />
               </div>
             </div>
 
@@ -113,32 +121,34 @@ export default function GRNCreatePage() {
             {fields.length > 0 && (
               <div>
                 <h3 className="font-medium mb-2">بنود الاستلام</h3>
-                <div className="overflow-x-auto border rounded">
+                <div className="overflow-x-auto border border-[var(--color-outline-variant)] rounded-xl">
                   <table className="w-full text-sm border-collapse">
                     <thead>
-                      <tr className="bg-muted">
-                        <th className="border p-2 text-start">الصنف</th>
-                        <th className="border p-2 text-start">الوحدة</th>
-                        <th className="border p-2 text-start">الكمية المطلوبة</th>
-                        <th className="border p-2 text-start">المتبقي</th>
-                        <th className="border p-2 text-start">الكمية المستلمة</th>
-                        <th className="border p-2 text-start">المقبولة</th>
-                        <th className="border p-2 text-start">المرفوضة</th>
-                        <th className="border p-2 text-start">الدفعة</th>
-                        <th className="border p-2 text-start">تاريخ الانتهاء</th>
-                        <th className="border p-2 text-start">ملاحظات</th>
+                      <tr className="border-b-2 border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">
+                        <th className="px-3 py-3 text-start font-semibold w-10">#</th>
+                        <th className="px-3 py-3 text-start font-semibold">الصنف</th>
+                        <th className="px-3 py-3 text-start font-semibold">الوحدة</th>
+                        <th className="px-3 py-3 text-start font-semibold">المطلوب</th>
+                        <th className="px-3 py-3 text-start font-semibold">المتبقي</th>
+                        <th className="px-3 py-3 text-start font-semibold">المستلمة</th>
+                        <th className="px-3 py-3 text-start font-semibold">المقبولة</th>
+                        <th className="px-3 py-3 text-start font-semibold">المرفوضة</th>
+                        <th className="px-3 py-3 text-start font-semibold">الدفعة</th>
+                        <th className="px-3 py-3 text-start font-semibold">تاريخ الانتهاء</th>
+                        <th className="px-3 py-3 text-start font-semibold">ملاحظات</th>
                       </tr>
                     </thead>
                     <tbody>
                       {fields.map((field, index) => {
                         const poLine = purchaseOrder?.lines?.find((l) => l.id === field.purchaseOrderDetailId);
                         return (
-                          <tr key={field.id} className="border-b">
-                            <td className="border p-2">{field.itemId}</td>
-                            <td className="border p-2">{field.unitId}</td>
-                            <td className="border p-2 tabular-nums">{poLine?.orderedQuantity ?? '-'}</td>
-                            <td className="border p-2 tabular-nums">{poLine?.remainingQuantity ?? '-'}</td>
-                            <td className="border p-2">
+                          <tr key={field.id} className="border-b border-[var(--color-outline-variant)] last:border-b-0 hover:bg-[color-mix(in_srgb,var(--color-primary-container)_3%,transparent)]">
+                            <td className="px-3 py-3 text-[var(--color-on-surface-variant)]">{index + 1}</td>
+                            <td className="px-3 py-3">{poLine?.itemId ?? field.itemId}</td>
+                            <td className="px-3 py-3">{poLine?.unitId ?? field.unitId}</td>
+                            <td className="px-3 py-3 tabular-nums">{poLine?.orderedQuantity ?? '-'}</td>
+                            <td className="px-3 py-3 tabular-nums">{poLine?.remainingQuantity ?? '-'}</td>
+                            <td className="px-3 py-3">
                               <Input
                                 type="number"
                                 step="0.01"
@@ -147,7 +157,7 @@ export default function GRNCreatePage() {
                                 className="w-20"
                               />
                             </td>
-                            <td className="border p-2">
+                            <td className="px-3 py-3">
                               <Input
                                 type="number"
                                 step="0.01"
@@ -156,7 +166,7 @@ export default function GRNCreatePage() {
                                 className="w-20"
                               />
                             </td>
-                            <td className="border p-2">
+                            <td className="px-3 py-3">
                               <Input
                                 type="number"
                                 step="0.01"
@@ -165,21 +175,21 @@ export default function GRNCreatePage() {
                                 className="w-20"
                               />
                             </td>
-                            <td className="border p-2">
+                            <td className="px-3 py-3">
                               <Input
                                 {...register(`lines.${index}.batchNumber`)}
                                 className="w-24"
                                 placeholder="الدفعة"
                               />
                             </td>
-                            <td className="border p-2">
+                            <td className="px-3 py-3">
                               <Input
                                 type="date"
                                 {...register(`lines.${index}.expiryDate`)}
                                 className="w-32"
                               />
                             </td>
-                            <td className="border p-2">
+                            <td className="px-3 py-3">
                               <Input
                                 {...register(`lines.${index}.notes`)}
                                 className="w-32"
@@ -200,8 +210,8 @@ export default function GRNCreatePage() {
               <Button type="button" variant="outline" onClick={() => navigate('/procurement/goods-receipt-notes')}>
                 إلغاء
               </Button>
-              <Button type="submit" disabled={createGRN.isPending}>
-                {createGRN.isPending ? 'جاري الإنشاء...' : 'إنشاء'}
+              <Button type="submit" disabled={createGRN.isPending} loading={createGRN.isPending}>
+                إنشاء
               </Button>
             </div>
           </form>

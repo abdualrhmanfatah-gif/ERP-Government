@@ -85,7 +85,7 @@ export default function BankAccountDetailPage() {
 
         <Card>
           <h2 className="text-sm font-semibold mb-4">إجراءات</h2>
-          <Button variant={isActive ? 'destructive' : 'default'} size="sm" onClick={() => setShowConfirm(true)} disabled={activateMutation.isPending || deactivateMutation.isPending}>
+          <Button variant={isActive ? 'destructive' : 'default'} size="sm" onClick={() => setShowConfirm(true)} disabled={activateMutation.isPending || deactivateMutation.isPending} loading={activateMutation.isPending || deactivateMutation.isPending}>
             {isActive ? 'تعطيل' : 'تنشيط'}
           </Button>
         </Card>

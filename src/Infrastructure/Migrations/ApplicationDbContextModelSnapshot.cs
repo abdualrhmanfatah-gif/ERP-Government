@@ -5012,6 +5012,9 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.Property<int?>("AccountId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("AccrualJournalEntryId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("AmountGross")
                         .HasColumnType("decimal(23,2)");
 
@@ -5126,6 +5129,10 @@ namespace ERP_Government.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AccountId");
+
+                    b.HasIndex("AccrualJournalEntryId")
+                        .IsUnique()
+                        .HasFilter("[AccrualJournalEntryId] IS NOT NULL");
 
                     b.HasIndex("BankAccountId");
 
@@ -8511,10 +8518,17 @@ namespace ERP_Government.Infrastructure.Migrations
 
             modelBuilder.Entity("ERP_Government.Domain.Payments.Entities.PaymentOrder", b =>
                 {
+                    b.HasOne("ERP_Government.Domain.Accounting.Entities.JournalEntry", "AccrualJournalEntry")
+                        .WithMany()
+                        .HasForeignKey("AccrualJournalEntryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("ERP_Government.Domain.Payments.Entities.DisbursementRequest", "DisbursementRequest")
                         .WithMany()
                         .HasForeignKey("DisbursementRequestId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("AccrualJournalEntry");
 
                     b.Navigation("DisbursementRequest");
                 });

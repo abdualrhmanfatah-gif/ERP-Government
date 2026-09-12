@@ -197,12 +197,12 @@ export default function ReceiptVoucherDetailPage() {
 
       <div className="flex justify-end gap-3">
         {canSubmit && (
-          <Button disabled={submitMutation.isPending} onClick={submit}>
+          <Button disabled={submitMutation.isPending} loading={submitMutation.isPending} onClick={submit}>
             إرسال للمراجعة
           </Button>
         )}
         {canApprove && (
-          <Button disabled={approveMutation.isPending} onClick={approve}>
+          <Button disabled={approveMutation.isPending} loading={approveMutation.isPending} onClick={approve}>
             اعتماد
           </Button>
         )}
@@ -224,7 +224,7 @@ export default function ReceiptVoucherDetailPage() {
           />
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => setCancelOpen(false)}>تراجع</Button>
-            <Button variant="outline" disabled={!cancelReason.trim() || cancelMutation.isPending} onClick={cancel}>
+            <Button variant="outline" disabled={!cancelReason.trim() || cancelMutation.isPending} loading={cancelMutation.isPending} onClick={cancel}>
               تأكيد الإلغاء
             </Button>
           </div>

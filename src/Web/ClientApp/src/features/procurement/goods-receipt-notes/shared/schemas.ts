@@ -10,7 +10,14 @@ export const grnLineSchema = z.object({
   batchNumber: z.string().optional().nullable(),
   expiryDate: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
-});
+}).refine(
+  (data) => {
+    const accepted = data.acceptedQuantity ?? 0;
+    const rejected = data.rejectedQuantity ?? 0;
+    return accepted + rejected <= data.receivedQuantity;
+  },
+  { message: 'المقبولة + المرفوضة لا تتجاوز المستلمة', path: ['acceptedQuantity'] },
+);
 
 export const createGRNSchema = z.object({
   purchaseOrderId: z.number().min(1, 'أمر الشراء مطلوب'),

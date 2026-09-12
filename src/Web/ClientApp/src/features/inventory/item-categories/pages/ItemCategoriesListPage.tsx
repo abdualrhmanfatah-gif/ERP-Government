@@ -171,7 +171,7 @@ export default function ItemCategoriesListPage() {
         onClose={() => setDialogOpen(false)}
         title={editItem ? 'تعديل التصنيف' : 'إضافة تصنيف جديد'}
         footer={
-          <Button type="submit" form="category-form" disabled={createMutation.isPending || updateMutation.isPending}>
+          <Button type="submit" form="category-form" disabled={createMutation.isPending || updateMutation.isPending} loading={createMutation.isPending || updateMutation.isPending}>
             {editItem ? 'حفظ التعديلات' : 'إنشاء'}
           </Button>
         }

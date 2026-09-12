@@ -1,4 +1,3 @@
-using ERP_Government.Application.Budgeting.Common;
 using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.Parties.Common;
 using ERP_Government.Domain.Budgeting.Entities;
@@ -15,8 +14,7 @@ public class ApprovePurchaseOrderCommandHandler(
     IApplicationDbContext context,
     IDocumentStatusLogger statusLogger,
     IUser user,
-    IPublisher publisher,
-    IBudgetAvailabilityService availabilityService) : IRequestHandler<ApprovePurchaseOrderCommand, Result>
+    IPublisher publisher) : IRequestHandler<ApprovePurchaseOrderCommand, Result>
 {
     public async Task<Result> Handle(
         ApprovePurchaseOrderCommand request,
@@ -37,37 +35,6 @@ public class ApprovePurchaseOrderCommandHandler(
         var details = await context.PurchaseOrderDetails
             .Where(d => d.PurchaseOrderId == request.Id)
             .ToListAsync(cancellationToken);
-
-        var budgetItemAllocationIds = new HashSet<int>();
-        foreach (var detail in details)
-        {
-            var prDetail = await context.PurchaseRequestDetails
-                .Include(prd => prd.PurchaseRequest)
-                .FirstOrDefaultAsync(prd => prd.Id == detail.PurchaseRequestDetailId, cancellationToken);
-            if (prDetail is null)
-                return Result.Failure(["Purchase request detail not found."]);
-
-            var item = await context.Items.FirstOrDefaultAsync(i => i.Id == prDetail.ItemId, cancellationToken);
-            if (item is null)
-                return Result.Failure(["Item not found."]);
-
-            var allocations = await context.BudgetItemAllocations
-                .Include(a => a.BudgetItem)
-                .Where(a => a.BudgetItem.ItemCode == item.Code)
-                .ToListAsync(cancellationToken);
-
-            foreach (var allocation in allocations)
-            {
-                budgetItemAllocationIds.Add(allocation.Id);
-                var available = await availabilityService.GetAvailableForAppropriationAsync(allocation.Id);
-                var lineAmount = detail.NetUnitPrice ?? detail.UnitPrice * detail.OrderedQuantity;
-                if (available < lineAmount)
-                    return Result.Failure(["Insufficient budget for item " + item.Code + ". Available: " + available + ", Required: " + lineAmount]);
-            }
-
-            if (budgetItemAllocationIds.Count == 0)
-                return Result.Failure(["No budget allocation found for item " + item.Code]);
-        }
 
         var encumbranceNumber = await context.Encumbrances
             .CountAsync() == 0

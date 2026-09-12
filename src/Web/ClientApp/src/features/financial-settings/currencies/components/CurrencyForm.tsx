@@ -88,7 +88,7 @@ export function CurrencyForm({
       </div>
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="ghost" onClick={onCancel}>إلغاء</Button>
-        <Button type="submit" disabled={isPending || !selectedCode}>{isPending ? 'جارٍ الحفظ...' : 'حفظ'}</Button>
+        <Button type="submit" disabled={isPending || !selectedCode} loading={isPending}>حفظ</Button>
       </div>
     </form>
   );

@@ -190,8 +190,8 @@ export default function PurchaseRequestDetailPage() {
         footer={
           <>
             <Button variant="outline" onClick={() => { setDialogState(null); setRejectReason(''); }}>إلغاء</Button>
-            <Button variant="destructive" onClick={handleReject} disabled={rejectMutation.isPending || !rejectReason.trim()}>
-              {rejectMutation.isPending ? 'جارٍ التنفيذ...' : 'تأكيد الرفض'}
+            <Button variant="destructive" onClick={handleReject} disabled={rejectMutation.isPending || !rejectReason.trim()} loading={rejectMutation.isPending}>
+              تأكيد الرفض
             </Button>
           </>
         }
@@ -213,8 +213,8 @@ export default function PurchaseRequestDetailPage() {
         footer={
           <>
             <Button variant="outline" onClick={() => { setDialogState(null); setCancelReason(''); }}>إلغاء</Button>
-            <Button variant="destructive" onClick={handleCancel} disabled={cancelMutation.isPending || !cancelReason.trim()}>
-              {cancelMutation.isPending ? 'جارٍ التنفيذ...' : 'تأكيد الإلغاء'}
+            <Button variant="destructive" onClick={handleCancel} disabled={cancelMutation.isPending || !cancelReason.trim()} loading={cancelMutation.isPending}>
+              تأكيد الإلغاء
             </Button>
           </>
         }

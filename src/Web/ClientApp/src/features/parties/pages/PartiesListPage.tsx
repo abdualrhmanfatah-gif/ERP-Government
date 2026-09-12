@@ -77,12 +77,12 @@ export default function PartiesListPage() {
 
   return (
     <Page
-      title="الأطراف"
+      title="الموردون"
       actions={
         canCreate ? (
           <Button variant="primary" size="sm" onClick={() => navigate('/parties/create')}>
             <Plus size={16} className="ms-1" />
-            طرف جديد
+            مورد جديد
           </Button>
         ) : undefined
       }

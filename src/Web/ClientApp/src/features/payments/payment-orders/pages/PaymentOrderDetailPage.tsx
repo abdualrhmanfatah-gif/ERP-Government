@@ -17,9 +17,11 @@ import { PaymentOrderForm } from '@/components/PaymentOrderForm';
 import { useFundsList } from '@/features/budgeting/funds/hooks/useFunds';
 import { useAccountsList } from '@/features/accounting/hooks/useAccountsList';
 import { Page, Button, Card, ConfirmDialog, Combobox, Input } from '@/components/ui';
-import { ArrowRight, ExternalLink } from 'lucide-react';
+import { ArrowRight, ExternalLink, Printer } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { usePermission } from '@/shared/hooks/usePermission';
+import { paymentOrdersClient } from '../shared/client';
+import { downloadBlobExport } from '@/shared/utils/download';
 
 const canSubmit = (s: PaymentOrderStatus) => s === 'Draft';
 const canApprove = (s: PaymentOrderStatus) => s === 'Submitted';
@@ -45,6 +47,7 @@ export default function PaymentOrderDetailPage() {
   const [reason, setReason] = useState('');
   const [submitFundId, setSubmitFundId] = useState<number>(0);
   const [submitAccountId, setSubmitAccountId] = useState<number>(0);
+  const [exporting, setExporting] = useState(false);
 
   const { data: order, isLoading, refetch } = usePaymentOrderDetail(orderId);
   const { data: totals } = usePaymentOrderTotals(orderId);
@@ -80,6 +83,7 @@ export default function PaymentOrderDetailPage() {
   const status = order.status as PaymentOrderStatus;
   const isFullyPaid = totals?.isFullyPaid ?? false;
   const netAmount = (order.amountGross ?? 0) - (order.deductionAmount ?? 0);
+  const hasAccrualLink = Boolean(order.accrualJournalEntryId);
 
   console.log('[PaymentOrderDetail] status:', status, '| typeof:', typeof status);
   console.log('[PaymentOrderDetail] canSendToTreasury:', status === 'Approved');
@@ -159,6 +163,18 @@ export default function PaymentOrderDetailPage() {
     }
   }
 
+  async function handleExportPdf() {
+    setExporting(true);
+    try {
+      const url = paymentOrdersClient.exportPaymentOrderPdf(orderId);
+      await downloadBlobExport(url, `PaymentOrder-${order?.paymentOrderNumber ?? orderId}.pdf`);
+    } catch {
+      notify({ type: 'error', title: 'فشل تنزيل ملف PDF' });
+    } finally {
+      setExporting(false);
+    }
+  }
+
   const headerActions = !editing ? (
     <div className="flex items-center gap-2 flex-wrap">
       {canEdit(status) && (
@@ -169,7 +185,7 @@ export default function PaymentOrderDetailPage() {
           setSubmitFundId(order!.fundId ?? 0);
           setSubmitAccountId(order!.accountId ?? 0);
           setShowSubmitDialog(true);
-        }} disabled={submitMutation.isPending}>تقديم</Button>
+        }} disabled={submitMutation.isPending || !hasAccrualLink} loading={submitMutation.isPending}>تقديم</Button>
       )}
       {canApprove(status) && canApproveOrder && (
         <Button variant="success" size="sm" onClick={() => setDialogState('approve')}>موافقة</Button>
@@ -189,6 +205,16 @@ export default function PaymentOrderDetailPage() {
       {canRecordPayment(status, totals?.paidAmount ?? 0) && canCreatePayment && (
         <Button variant="success" size="sm" onClick={() => setShowRecordPayment(true)}>تسجيل الدفع</Button>
       )}
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={handleExportPdf}
+        disabled={exporting}
+        loading={exporting}
+      >
+        <Printer size={14} className="ms-1" />
+        طباعة أمر الصرف
+      </Button>
     </div>
   ) : null;
 
@@ -219,6 +245,20 @@ export default function PaymentOrderDetailPage() {
           onSaved={() => { refetch(); setEditing(false); }}
           onCancel={() => setEditing(false)}
         />
+
+        <Card>
+          <h2 className="text-sm font-semibold mb-3">قيد الاستحقاق المرتبط</h2>
+          {hasAccrualLink ? (
+            <div className="text-sm">
+              <span className="text-[var(--color-on-surface-variant)]">رقم القيد: </span>
+              <span className="font-mono">{order.accrualEntryNumber ?? order.accrualJournalEntryId}</span>
+            </div>
+          ) : (
+            <p className="text-sm text-[var(--color-error)]">
+              لا يمكن تقديم أمر الدفع قبل ربطه بقيد استحقاق.
+            </p>
+          )}
+        </Card>
 
         {/* Financial summary */}
         {totals && (

@@ -1,10 +1,8 @@
-using ERP_Government.Application.Accounting.EventHandlers;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.FinancialSettings.Common.Services;
 using ERP_Government.Application.Parties.Common;
 using ERP_Government.Domain.Accounting.Entities;
 using ERP_Government.Domain.Accounting.Enums;
-using ERP_Government.Domain.Events.Payments;
 using ERP_Government.Domain.Payments.Entities;
 using ERP_Government.Domain.Payments.Enums;
 
@@ -23,8 +21,6 @@ public class RecordPaymentCommandHandler(
     IApplicationDbContext context,
     IDocumentStatusLogger statusLogger,
     IDocumentSequenceService sequenceService,
-    JournalEntryGenerator journalEntryGenerator,
-    PostingRuleMatcher postingRuleMatcher,
     IUser user) : IRequestHandler<RecordPaymentCommand, Result<Common.DTOs.PaymentDto>>
 {
     public async Task<Result<Common.DTOs.PaymentDto>> Handle(
@@ -61,69 +57,41 @@ public class RecordPaymentCommandHandler(
         var userEntity = await context.Users.FindAsync(userId, cancellationToken);
         string paidByName = userEntity?.Login ?? "Unknown";
 
-        // Check if linked disbursement request has an accrual entry
-        int? liabilityAccountId = null;
-        if (paymentOrder.DisbursementRequestId.HasValue)
-        {
-            var disbursementRequest = await context.DisbursementRequests
-                .FindAsync(paymentOrder.DisbursementRequestId.Value, cancellationToken);
+        if (!paymentOrder.AccrualJournalEntryId.HasValue)
+            return Result<Common.DTOs.PaymentDto>.Failure(["Payment order must be linked to an accrual journal entry before payment execution."]);
 
-            if (disbursementRequest?.AccrualJournalEntryId.HasValue == true)
-            {
-                // Find the liability account from the accrual entry's credit line
-                var accrualCreditLine = await context.JournalEntryLines
-                    .Where(l => l.JournalEntryId == disbursementRequest.AccrualJournalEntryId.Value && l.Credit > 0)
-                    .FirstOrDefaultAsync(cancellationToken);
+        var accrualEntry = await context.JournalEntries
+            .FirstOrDefaultAsync(j => j.Id == paymentOrder.AccrualJournalEntryId.Value, cancellationToken);
+        if (accrualEntry is null || accrualEntry.EntryType != MoveEntryType.Accrual)
+            return Result<Common.DTOs.PaymentDto>.Failure(["Payment order is not linked to a valid accrual journal entry."]);
 
-                if (accrualCreditLine is not null)
-                {
-                    liabilityAccountId = accrualCreditLine.AccountId;
-                }
-            }
-        }
+        var accrualCreditLines = await context.JournalEntryLines
+            .Where(l => l.JournalEntryId == accrualEntry.Id && l.Credit > 0)
+            .ToListAsync(cancellationToken);
+        if (accrualCreditLines.Count != 1)
+            return Result<Common.DTOs.PaymentDto>.Failure(["Accrual journal entry must contain exactly one liability credit line."]);
 
-        JournalEntry journalEntry;
-        if (liabilityAccountId.HasValue)
-        {
-            // Dynamic payment entry: debit liability account, credit bank account
-            journalEntry = await CreateDynamicPaymentEntry(
-                paymentOrder,
-                netTotal,
-                liabilityAccountId.Value,
-                userId,
-                cancellationToken);
-        }
-        else
-        {
-            // Standard posting rules
-            var eventTypeStr = EventType.PaymentOrderExecuted.ToString();
-            var rules = await postingRuleMatcher.MatchAsync(eventTypeStr, cancellationToken);
+        if (!paymentOrder.BankAccountId.HasValue)
+            return Result<Common.DTOs.PaymentDto>.Failure(["Bank account is required for payment."]);
 
-            if (rules.Count == 0)
-                return Result<Common.DTOs.PaymentDto>.Failure(["لا توجد قواعد ترحيل محاسبي معرّفة لأوامر الدفع."]);
+        var bankAccount = await context.BankAccounts
+            .FindAsync(paymentOrder.BankAccountId.Value, cancellationToken);
+        if (bankAccount is null || !bankAccount.IsActive)
+            return Result<Common.DTOs.PaymentDto>.Failure(["Invalid or inactive bank account."]);
 
-            var documentDate = DateOnly.FromDateTime(DateTime.Today);
-            journalEntry = null!;
-            foreach (var rule in rules)
-            {
-                journalEntry = await journalEntryGenerator.GenerateJournalEntryAsync(
-                    EventType.PaymentOrderExecuted,
-                    rule,
-                    new PaymentOrderExecuted
-                    {
-                        SourceEntityId = paymentOrder.Id,
-                        PaymentOrderId = paymentOrder.Id,
-                        Amount = netTotal,
-                        BankAccountId = paymentOrder.BankAccountId,
-                        AccountId = paymentOrder.AccountId,
-                        CostCenterId = paymentOrder.CostCenterId,
-                        CurrencyId = paymentOrder.CurrencyId,
-                        OccurredAt = DateTimeOffset.UtcNow
-                    },
-                    documentDate,
-                    cancellationToken);
-            }
-        }
+        if (!bankAccount.GlAccountId.HasValue)
+            return Result<Common.DTOs.PaymentDto>.Failure(["Bank account must be linked to a GL account before payment execution."]);
+
+        var linkedDisbursementRequest = await context.DisbursementRequests
+            .FirstOrDefaultAsync(d => d.AccrualJournalEntryId == accrualEntry.Id, cancellationToken);
+
+        var journalEntry = await CreateDynamicPaymentEntry(
+            paymentOrder,
+            netTotal,
+            accrualCreditLines[0].AccountId,
+            bankAccount.GlAccountId.Value,
+            userId,
+            cancellationToken);
 
         paymentOrder.JournalEntryId = journalEntry.Id;
 
@@ -134,7 +102,7 @@ public class RecordPaymentCommandHandler(
         {
             PaymentNumber = $"PAY-{sequence.CurrentNumber:D6}",
             PaymentOrderId = request.PaymentOrderId,
-            DisbursementRequestId = paymentOrder.DisbursementRequestId ?? 0,
+            DisbursementRequestId = linkedDisbursementRequest?.Id ?? paymentOrder.DisbursementRequestId ?? 0,
             PaymentMethod = request.PaymentMethod,
             Amount = netTotal,
             PaidById = userId,
@@ -165,17 +133,12 @@ public class RecordPaymentCommandHandler(
             null,
             cancellationToken);
 
-        // Update linked disbursement request if exists
-        if (paymentOrder.DisbursementRequestId.HasValue)
+        if (linkedDisbursementRequest is not null)
         {
-            var dr = await context.DisbursementRequests.FindAsync(paymentOrder.DisbursementRequestId.Value, cancellationToken);
-            if (dr is not null)
-            {
-                dr.Status = DisbursementRequestStatus.Disbursed;
-                dr.PaymentDate = DateTimeOffset.UtcNow;
-                dr.LastModified = DateTimeOffset.UtcNow;
-                dr.LastModifiedBy = userId.ToString();
-            }
+            linkedDisbursementRequest.Status = DisbursementRequestStatus.Disbursed;
+            linkedDisbursementRequest.PaymentDate = DateTimeOffset.UtcNow;
+            linkedDisbursementRequest.LastModified = DateTimeOffset.UtcNow;
+            linkedDisbursementRequest.LastModifiedBy = userId.ToString();
         }
 
         var strategy = context.Database.CreateExecutionStrategy();
@@ -223,6 +186,7 @@ public class RecordPaymentCommandHandler(
         PaymentOrder paymentOrder,
         decimal amount,
         int liabilityAccountId,
+        int bankGlAccountId,
         int userId,
         CancellationToken cancellationToken)
     {
@@ -249,6 +213,7 @@ public class RecordPaymentCommandHandler(
             EntryNumber = entryNumber,
             DocumentDate = today,
             EntryStatus = EntryStatus.Draft,
+            EntryType = MoveEntryType.SystemGenerated,
             JournalId = null,
             PeriodId = period.Id,
             FiscalYearId = period.FiscalYearId,
@@ -273,23 +238,21 @@ public class RecordPaymentCommandHandler(
             CurrencyId = paymentOrder.CurrencyId,
             ExchangeRate = 1,
             CostCenterId = paymentOrder.CostCenterId,
+            PaymentOrderId = paymentOrder.Id,
             RowVersion = []
         });
-
-        // Line 2: Credit bank account
-        if (!paymentOrder.BankAccountId.HasValue)
-            throw new InvalidOperationException("Bank account is required for payment.");
 
         journalEntry.Lines.Add(new JournalEntryLine
         {
             Sequence = 2,
-            AccountId = paymentOrder.BankAccountId.Value,
+            AccountId = bankGlAccountId,
             Description = $"دفعة — {paymentOrder.BeneficiaryName}",
             Debit = 0,
             Credit = amount,
             CurrencyId = paymentOrder.CurrencyId,
             ExchangeRate = 1,
             CostCenterId = paymentOrder.CostCenterId,
+            PaymentOrderId = paymentOrder.Id,
             RowVersion = []
         });
 

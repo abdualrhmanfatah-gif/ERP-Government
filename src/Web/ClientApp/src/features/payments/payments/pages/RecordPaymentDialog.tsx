@@ -68,8 +68,8 @@ export function RecordPaymentDialog({ open, onOpenChange, paymentOrderId, amount
       footer={
         <>
           <Button variant="outline" onClick={() => onOpenChange(false)}>إلغاء</Button>
-          <Button onClick={handleSubmit} disabled={recordPayment.isPending}>
-            {recordPayment.isPending ? 'جاري التسجيل...' : 'تأكيد الدفع'}
+          <Button onClick={handleSubmit} disabled={recordPayment.isPending} loading={recordPayment.isPending}>
+            تأكيد الدفع
           </Button>
         </>
       }

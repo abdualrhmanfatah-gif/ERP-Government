@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/shared/api';
+import { handleLifecycleError } from '@/shared/api/result-to-ui';
 import type { PurchaseOrder, PurchaseOrderDetail, PaginatedList } from '../shared/types';
 
 const queryKeys = {
@@ -38,6 +39,7 @@ export function useCreatePurchaseOrder() {
   return useMutation({
     mutationFn: (data: unknown) => api.post<number>('/api/PurchaseOrders', data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -47,6 +49,7 @@ export function useUpdatePurchaseOrder() {
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) =>
       api.put(`/api/PurchaseOrders/${id}`, { ...data, id }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -55,6 +58,7 @@ export function useSubmitPurchaseOrder() {
   return useMutation({
     mutationFn: (id: number) => api.patch(`/api/PurchaseOrders/${id}/submit`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -63,6 +67,7 @@ export function useApprovePurchaseOrder() {
   return useMutation({
     mutationFn: (id: number) => api.patch(`/api/PurchaseOrders/${id}/approve`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -71,6 +76,7 @@ export function useIssuePurchaseOrder() {
   return useMutation({
     mutationFn: (id: number) => api.patch(`/api/PurchaseOrders/${id}/issue`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -80,6 +86,7 @@ export function useCancelPurchaseOrder() {
     mutationFn: ({ id, reason }: { id: number; reason?: string }) =>
       api.patch(`/api/PurchaseOrders/${id}/cancel`, { reason }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -89,5 +96,6 @@ export function useClosePurchaseOrder() {
     mutationFn: ({ id, reason }: { id: number; reason?: string }) =>
       api.patch(`/api/PurchaseOrders/${id}/close`, { reason }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }

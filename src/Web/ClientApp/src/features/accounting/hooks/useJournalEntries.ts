@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { handleLifecycleError } from '@/shared/api/result-to-ui';
 import { journalEntriesClient as client } from '../shared/client';
 import {
   UpdateJournalEntryCommand,
@@ -57,10 +58,20 @@ export function useCreateJournalEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (command: CreateJournalEntryCommand) => client.journalEntriesPOST(command),
+    mutationFn: async (command: CreateJournalEntryCommand) => {
+      const res = await fetch('/api/JournalEntries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(command),
+      });
+      if (!res.ok) throw new Error('Failed to create journal entry');
+      const data: { id: number } = await res.json();
+      return data.id;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
     },
+    onError: handleLifecycleError,
   });
 }
 
@@ -79,6 +90,7 @@ export function useUpdateJournalEntry() {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
       queryClient.invalidateQueries({ queryKey: ['journalEntry', variables.id] });
     },
+    onError: handleLifecycleError,
   });
 }
 
@@ -92,6 +104,7 @@ export function useSubmitJournalEntry() {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
       queryClient.invalidateQueries({ queryKey: ['journalEntry', variables.id] });
     },
+    onError: handleLifecycleError,
   });
 }
 
@@ -105,6 +118,7 @@ export function useApproveJournalEntry() {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
       queryClient.invalidateQueries({ queryKey: ['journalEntry', variables.id] });
     },
+    onError: handleLifecycleError,
   });
 }
 
@@ -113,11 +127,12 @@ export function usePostJournalEntry() {
 
   return useMutation({
     mutationFn: ({ id, command }: { id: number; command?: PostJournalEntryCommandData }) =>
-      client.post(id, new PostJournalEntryCommand({ id, ...command })),
+      client.postPOST(id, new PostJournalEntryCommand({ id, ...command })),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
       queryClient.invalidateQueries({ queryKey: ['journalEntry', variables.id] });
     },
+    onError: handleLifecycleError,
   });
 }
 
@@ -131,6 +146,7 @@ export function useReverseJournalEntry() {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
       queryClient.invalidateQueries({ queryKey: ['journalEntry', variables.id] });
     },
+    onError: handleLifecycleError,
   });
 }
 
@@ -144,5 +160,6 @@ export function useCancelJournalEntry() {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
       queryClient.invalidateQueries({ queryKey: ['journalEntry', variables.id] });
     },
+    onError: handleLifecycleError,
   });
 }

@@ -6,6 +6,8 @@ public class ReportLine
 
     public string AccountName { get; init; } = string.Empty;
 
+    public string? Description { get; init; }
+
     public decimal Debit { get; init; }
 
     public decimal Credit { get; init; }

@@ -60,11 +60,11 @@ export const supplierInvoiceStatusLabels: Record<SupplierInvoiceStatus, string> 
   Cancelled: 'ملغاة',
 };
 
-export const supplierInvoiceStatusVariant: Record<SupplierInvoiceStatus, 'draft' | 'approved' | 'cancelled' | 'info'> = {
+export const supplierInvoiceStatusVariant: Record<SupplierInvoiceStatus, 'draft' | 'approved' | 'cancelled' | 'pending'> = {
   Draft: 'draft',
-  Submitted: 'info',
+  Submitted: 'pending',
   Matched: 'approved',
-  PartiallyPaid: 'info',
+  PartiallyPaid: 'pending',
   Paid: 'approved',
   Disputed: 'cancelled',
   Cancelled: 'cancelled',

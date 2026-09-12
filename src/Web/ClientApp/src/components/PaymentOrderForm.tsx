@@ -77,6 +77,8 @@ interface PaymentOrderFormProps {
     bankAccountId?: number;
     notes?: string;
     accountId?: number;
+    accrualJournalEntryId?: number;
+    accrualEntryNumber?: string | null;
     deductions?: unknown[];
     rowVersion?: string | number[];
     status?: string;
@@ -126,19 +128,22 @@ export function PaymentOrderForm({
         bankAccountId: initialData?.bankAccountId,
         notes: initialData?.notes ?? '',
         accountId: initialData?.accountId ?? undefined,
+        accrualJournalEntryId: initialData?.accrualJournalEntryId ?? undefined,
         deductions: [],
       }
     : {
         paymentOrderDate: new Date().toISOString().split('T')[0],
-        paymentOrderType: 'Standard',
+        paymentOrderType: initialData?.paymentOrderType ?? 'Standard',
         fundId: 0,
-        fiscalYearId: 0,
+        fiscalYearId: initialData?.fiscalYearId ?? 0,
         budgetItemAllocationId: 0,
-        currencyId: 0,
-        amountGross: 0,
+        currencyId: initialData?.currencyId ?? 0,
+        amountGross: initialData?.amountGross ?? 0,
         deductionAmount: 0,
-        beneficiaryName: '',
+        beneficiaryName: initialData?.beneficiaryName ?? '',
         paymentMethod: PaymentMethod.Cash,
+        notes: initialData?.notes ?? '',
+        accrualJournalEntryId: initialData?.accrualJournalEntryId ?? undefined,
         deductions: [],
       };
 
@@ -208,6 +213,7 @@ export function PaymentOrderForm({
         bankAccountId: initialData.bankAccountId,
         notes: initialData.notes ?? '',
         accountId: initialData.accountId ?? undefined,
+        accrualJournalEntryId: initialData.accrualJournalEntryId ?? undefined,
         deductions: [],
       });
       setDeductions(toDeductionList(initialData.deductions ?? []));
@@ -272,6 +278,7 @@ export function PaymentOrderForm({
             beneficiaryBankName: data.beneficiaryBankName,
             notes: data.notes,
             accountId: data.accountId,
+            accrualJournalEntryId: data.accrualJournalEntryId,
             deductions: deductions.map((d) => ({
               deductionType: d.deductionType,
               accountId: d.accountId,
@@ -308,6 +315,7 @@ export function PaymentOrderForm({
           beneficiaryBankName: data.beneficiaryBankName,
           notes: data.notes,
           accountId: data.accountId,
+          accrualJournalEntryId: data.accrualJournalEntryId,
           deductions: deductions.map((d) => ({
             deductionType: d.deductionType,
             accountId: d.accountId,
@@ -334,6 +342,12 @@ export function PaymentOrderForm({
       onSubmit={handleSubmit(onSubmit)}
       aria-label={isDetail ? 'تفاصيل أمر الدفع' : 'إنشاء أمر دفع'}
     >
+      <input
+        type="hidden"
+        {...register('accrualJournalEntryId', {
+          setValueAs: (value) => value === '' || value == null ? undefined : Number(value),
+        })}
+      />
       {/* ── Header ─────────────────────────────────────────────────── */}
       <Card variant="default" padding="none">
         <div className="px-4 py-2.5 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">

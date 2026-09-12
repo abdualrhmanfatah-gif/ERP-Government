@@ -10,7 +10,9 @@ using ERP_Government.Application.Payments.Commands.PaymentOrders.VoidPaymentOrde
 using ERP_Government.Application.Payments.Queries.GetPaymentOrderTotals;
 using ERP_Government.Application.Payments.Queries.PaymentOrders.GetPaymentOrderById;
 using ERP_Government.Application.Payments.Queries.PaymentOrders.GetPaymentOrders;
+using ERP_Government.Application.Payments.Queries.PaymentOrders.GetPaymentOrderPrint;
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Infrastructure.Services;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,6 +32,9 @@ public class PaymentOrders : IEndpointGroup
 
         groupBuilder.MapGet("/{id:int}/totals", GetPaymentOrderTotals)
             .Produces<PaymentOrderTotalsDto?>()
+            .RequireAuthorization(PermissionCodes.PaymentOrdersView);
+
+        groupBuilder.MapGet("/{id:int}/export-pdf", ExportPaymentOrderPdf)
             .RequireAuthorization(PermissionCodes.PaymentOrdersView);
 
         groupBuilder.MapPost("/", CreatePaymentOrder)
@@ -95,6 +100,23 @@ public class PaymentOrders : IEndpointGroup
         int id)
     {
         return await sender.Send(new GetPaymentOrderTotalsQuery { Id = id });
+    }
+
+    [EndpointSummary("Export payment order as PDF")]
+    public static async Task<IResult> ExportPaymentOrderPdf(
+        [FromServices] ISender sender,
+        [FromServices] PaymentOrderPdfExporter exporter,
+        int id)
+    {
+        var dto = await sender.Send(new GetPaymentOrderPrintQuery { Id = id });
+        if (dto is null) return Results.NotFound();
+
+        var stream = new MemoryStream();
+        await exporter.ExportAsync(dto, stream);
+        stream.Position = 0;
+
+        return Results.File(stream, "application/pdf",
+            $"PaymentOrder-{dto.OrderNumber}.pdf");
     }
 
     [EndpointSummary("Create a new payment order")]

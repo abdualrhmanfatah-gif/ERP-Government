@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/shared/api';
+import { handleLifecycleError } from '@/shared/api/result-to-ui';
 import type { GRN, GRNDetail, PaginatedList } from '../shared/types';
 import type { CreateGRNFormData } from '../shared/schemas';
 
@@ -35,6 +36,7 @@ export function useCreateGRN() {
   return useMutation({
     mutationFn: (data: CreateGRNFormData) => api.post<number>('/api/GoodsReceiptNotes', data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -43,6 +45,7 @@ export function useConfirmGRN() {
   return useMutation({
     mutationFn: (id: number) => api.patch(`/api/GoodsReceiptNotes/${id}/confirm`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -52,5 +55,6 @@ export function useRejectGRN() {
     mutationFn: ({ id, notes }: { id: number; notes: string }) =>
       api.patch(`/api/GoodsReceiptNotes/${id}/reject`, { notes }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
+    onError: handleLifecycleError,
   });
 }

@@ -188,7 +188,7 @@ export default function WarehousesListPage() {
         onClose={() => setDialogOpen(false)}
         title={editItem ? 'تعديل المستودع' : 'إضافة مستودع جديد'}
         footer={
-          <Button type="submit" form="warehouse-form" disabled={createMutation.isPending || updateMutation.isPending}>
+          <Button type="submit" form="warehouse-form" disabled={createMutation.isPending || updateMutation.isPending} loading={createMutation.isPending || updateMutation.isPending}>
             {editItem ? 'حفظ التعديلات' : 'إنشاء'}
           </Button>
         }

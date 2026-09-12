@@ -194,12 +194,12 @@ export default function PurchaseOrderDetailPage() {
         </Button>
       )}
       {canClose && (
-        <Button variant="secondary" size="sm" onClick={() => setCloseOpen(true)} disabled={closeMutation.isPending}>
+        <Button variant="secondary" size="sm" onClick={() => setCloseOpen(true)} disabled={closeMutation.isPending} loading={closeMutation.isPending}>
           إغلاق
         </Button>
       )}
       {canCancel && (
-        <Button variant="destructive" size="sm" onClick={() => setCancelOpen(true)} disabled={cancelMutation.isPending}>
+        <Button variant="destructive" size="sm" onClick={() => setCancelOpen(true)} disabled={cancelMutation.isPending} loading={cancelMutation.isPending}>
           إلغاء
         </Button>
       )}
@@ -381,8 +381,8 @@ export default function PurchaseOrderDetailPage() {
         footer={
           <>
             <Button variant="outline" onClick={() => setCancelOpen(false)}>تراجع</Button>
-            <Button variant="destructive" onClick={handleCancel} disabled={!cancelReason.trim() || cancelMutation.isPending}>
-              {cancelMutation.isPending ? 'جارٍ الإلغاء...' : 'تأكيد الإلغاء'}
+            <Button variant="destructive" onClick={handleCancel} disabled={!cancelReason.trim() || cancelMutation.isPending} loading={cancelMutation.isPending}>
+              تأكيد الإلغاء
             </Button>
           </>
         }
@@ -404,8 +404,8 @@ export default function PurchaseOrderDetailPage() {
         footer={
           <>
             <Button variant="outline" onClick={() => setCloseOpen(false)}>تراجع</Button>
-            <Button onClick={handleClose} disabled={closeMutation.isPending}>
-              {closeMutation.isPending ? 'جارٍ الإغلاق...' : 'تأكيد الإغلاق'}
+            <Button onClick={handleClose} disabled={closeMutation.isPending} loading={closeMutation.isPending}>
+              تأكيد الإغلاق
             </Button>
           </>
         }

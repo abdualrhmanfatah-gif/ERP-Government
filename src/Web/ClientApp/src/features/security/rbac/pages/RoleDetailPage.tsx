@@ -76,6 +76,7 @@ export function RoleDetailPage() {
           size="icon-xs"
           onClick={() => handleRemove(row.permissionId)}
           disabled={removeMutation.isPending}
+          loading={removeMutation.isPending}
           title="إزالة"
         >
           <Trash2 size={14} className="text-[var(--color-error)]" />
@@ -153,6 +154,7 @@ export function RoleDetailPage() {
                     size="sm"
                     onClick={() => handleAssign(p.id)}
                     disabled={assignMutation.isPending}
+                    loading={assignMutation.isPending}
                     className="w-full text-start justify-between"
                   >
                     <span className="text-[var(--color-on-surface)]">{p.name}</span>

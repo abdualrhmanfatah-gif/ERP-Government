@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { handleLifecycleError } from '@/shared/api/result-to-ui';
 import { financialSettingsKeys, fiscalYearsClient } from '../shared/client';
 import type { CreateFiscalYearCommand, UpdateFiscalYearCommand } from '../shared/types';
 
@@ -22,6 +23,7 @@ export function useCreateFiscalYear() {
   return useMutation({
     mutationFn: (data: CreateFiscalYearCommand) => fiscalYearsClient.create(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: financialSettingsKeys.fiscalYears.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -30,6 +32,7 @@ export function useUpdateFiscalYear() {
   return useMutation({
     mutationFn: ({ id, ...data }: UpdateFiscalYearCommand) => fiscalYearsClient.update(id, { id, ...data }),
     onSuccess: () => qc.invalidateQueries({ queryKey: financialSettingsKeys.fiscalYears.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -38,6 +41,7 @@ export function useOpenFiscalYear() {
   return useMutation({
     mutationFn: (id: number) => fiscalYearsClient.open(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: financialSettingsKeys.fiscalYears.all }),
+    onError: handleLifecycleError,
   });
 }
 
@@ -46,5 +50,6 @@ export function useCloseFiscalYear() {
   return useMutation({
     mutationFn: (id: number) => fiscalYearsClient.close(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: financialSettingsKeys.fiscalYears.all }),
+    onError: handleLifecycleError,
   });
 }

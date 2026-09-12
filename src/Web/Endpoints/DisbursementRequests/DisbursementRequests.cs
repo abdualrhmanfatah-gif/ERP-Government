@@ -166,6 +166,7 @@ public record UpdateDisbursementRequestRequest(
     string? Purpose,
     int? FinancialYearId,
     string? Notes,
+    int? AccrualJournalEntryId,
     byte[] RowVersion)
 {
     public UpdateDisbursementRequestCommand ToCommand(int id) => new()
@@ -177,6 +178,7 @@ public record UpdateDisbursementRequestRequest(
         Purpose = Purpose,
         FinancialYearId = FinancialYearId,
         Notes = Notes,
+        AccrualJournalEntryId = AccrualJournalEntryId,
         RowVersion = RowVersion
     };
 }
