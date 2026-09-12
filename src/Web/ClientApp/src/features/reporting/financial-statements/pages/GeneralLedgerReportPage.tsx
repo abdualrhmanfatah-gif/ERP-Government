@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Download, FileText } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
+import { downloadBlobExport, buildExportUrl } from '@/shared/utils/download';
 import {
   useGeneralLedger,
   useFinancialStatementFiscalYears,
@@ -12,13 +13,8 @@ import {
   type GeneralLedgerLine,
 } from '../shared/types';
 import { generalLedgerFilterSchema } from '../shared/schemas';
-import { Page } from '@/components/ui/Page';
-import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
-import { MoneyDisplay } from '@/components/ui/MoneyDisplay';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { ErrorState } from '@/components/ui/ErrorState';
-import { Button } from '@/components/ui/Button';
-import { FilterSelect } from '@/components/ui/FilterSelect';
+import { Page, DataGrid, MoneyDisplay, EmptyState, ErrorState, Button, Alert, Pagination, FilterSelect } from '@/components/ui';
+import type { DataGridColumn } from '@/components/ui/DataGrid';
 
 export default function GeneralLedgerReportPage() {
   const { data: fiscalYears, isLoading: yearsLoading } = useFinancialStatementFiscalYears();
@@ -58,21 +54,12 @@ export default function GeneralLedgerReportPage() {
   async function handleExport(format: 'xlsx' | 'pdf') {
     setExporting(true);
     try {
-      const qs = new URLSearchParams();
-      qs.set('format', format);
-      if (validFilters?.accountId) qs.set('AccountId', String(validFilters.accountId));
-      if (validFilters?.fiscalPeriodId) qs.set('FiscalPeriodId', String(validFilters.fiscalPeriodId));
-      const response = await fetch(`/api/Reports/general-ledger/export?${qs.toString()}`);
-      if (!response.ok) throw new Error('Export failed');
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `GeneralLedger-${new Date().toISOString().slice(0, 10)}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      const url = buildExportUrl('/api/Reports/general-ledger/export', {
+        format,
+        AccountId: validFilters?.accountId,
+        FiscalPeriodId: validFilters?.fiscalPeriodId,
+      });
+      await downloadBlobExport(url, `GeneralLedger-${new Date().toISOString().slice(0, 10)}.${format}`);
       notify({ type: 'success', title: 'تم تصدير دفتر الأستاذ العام بنجاح' });
     } catch {
       notify({ type: 'error', title: 'فشل تصدير دفتر الأستاذ العام' });
@@ -86,7 +73,7 @@ export default function GeneralLedgerReportPage() {
   }
 
   const columns: DataGridColumn<GeneralLedgerLine>[] = [
-    { header: 'التاريخ', cell: (row) => <span className="text-sm">{row.date ? new Date(row.date).toLocaleDateString('ar-EG') : '—'}</span> },
+    { header: 'التاريخ', cell: (row) => <span className="text-sm">{row.date ? new Date(row.date).toLocaleDateString('ar-YE') : '—'}</span> },
     { header: 'رقم القيد', cell: (row) => <span dir="ltr" className="font-mono text-sm">{row.journalEntryNumber ?? '—'}</span> },
     { header: 'الحساب', cell: (row) => <span className="text-sm">{row.accountName ?? '—'}</span> },
     { header: 'البيان', cell: (row) => <span className="text-sm">{row.narration ?? '—'}</span> },
@@ -136,9 +123,9 @@ export default function GeneralLedgerReportPage() {
       }
     >
       {isPartialData && (
-        <div role="status" className="mb-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
+        <Alert variant="warning">
           بيانات جزئية — الفترة الحالية جارية وقد تتغير الأرقام
-        </div>
+        </Alert>
       )}
       {isError ? (
         <ErrorState onRetry={() => refetch()} />
@@ -171,26 +158,13 @@ export default function GeneralLedgerReportPage() {
             </div>
           )}
           {totalPages > 1 && (
-            <div className="mt-4 flex items-center justify-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage <= 0}
-                onClick={() => goToPage(currentPage - 1)}
-              >
-                السابق
-              </Button>
-              <span className="text-muted-foreground text-sm">
-                صفحة {currentPage + 1} من {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage >= totalPages - 1}
-                onClick={() => goToPage(currentPage + 1)}
-              >
-                التالي
-              </Button>
+            <div className="mt-4 flex items-center justify-center">
+              <Pagination
+                page={currentPage + 1}
+                total={totalLines}
+                pageSize={pageSize}
+                onChange={(p) => goToPage(p - 1)}
+              />
             </div>
           )}
         </>

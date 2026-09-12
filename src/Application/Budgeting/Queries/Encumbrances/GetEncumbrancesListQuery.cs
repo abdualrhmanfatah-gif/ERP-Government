@@ -6,7 +6,6 @@ namespace ERP_Government.Application.Budgeting.Queries.Encumbrances;
 
 [Authorize(Policy = PermissionCodes.EncumbrancesView)]
 public record GetEncumbrancesListQuery(
-    int? AppropriationId = null,
     EncumbranceType? Type = null,
     EncumbranceStatus? Status = null,
     DateOnly? DateFrom = null,
@@ -22,9 +21,6 @@ public class GetEncumbrancesListQueryHandler(
         CancellationToken cancellationToken)
     {
         var query = context.Encumbrances.AsQueryable();
-
-        if (request.AppropriationId.HasValue)
-            query = query.Where(e => e.AppropriationId == request.AppropriationId.Value);
 
         if (request.Type.HasValue)
             query = query.Where(e => e.EncumbranceType == request.Type.Value);

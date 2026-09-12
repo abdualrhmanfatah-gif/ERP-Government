@@ -25,13 +25,12 @@ public class GetPaymentOrderByIdQueryHandler(
                 PaymentOrderDate = x.PaymentOrderDate.ToDateTime(TimeOnly.MinValue),
                 DueDate = x.DueDate.HasValue ? x.DueDate.Value.ToDateTime(TimeOnly.MinValue) : null,
                 PaymentOrderType = x.PaymentOrderType,
-                VendorId = x.VendorId,
                 FundId = x.FundId,
                 FiscalYearId = x.FiscalYearId,
-                AppropriationId = x.AppropriationId,
+                BudgetItemAllocationId = x.BudgetItemAllocationId,
                 BudgetClassificationId = x.BudgetClassificationId,
                 CostCenterId = x.CostCenterId,
-                ProjectId = x.ProjectId,
+                AccountId = x.AccountId,
                 PurchaseOrderId = x.PurchaseOrderId,
                 EncumbranceId = x.EncumbranceId,
                 CurrencyId = x.CurrencyId,
@@ -41,41 +40,20 @@ public class GetPaymentOrderByIdQueryHandler(
                 PaymentMethod = x.PaymentMethod,
                 BankAccountId = x.BankAccountId,
                 BeneficiaryName = x.BeneficiaryName,
-                BeneficiaryIban = x.BeneficiaryIban,
                 BeneficiaryAccountNumber = x.BeneficiaryAccountNumber,
                 BeneficiaryBankName = x.BeneficiaryBankName,
                 Status = x.Status,
-                BudgetCheckStatus = x.BudgetCheckStatus,
-                TreasuryStatus = x.TreasuryStatus,
-                TreasuryReference = x.TreasuryReference,
                 TreasurySentAt = x.TreasurySentAt,
                 PaidAt = x.PaidAt,
                 JournalEntryId = x.JournalEntryId,
-                Notes = x.Notes
+                Notes = x.Notes,
+                DisbursementRequestId = x.DisbursementRequestId,
+                DisbursementRequestNumber = x.DisbursementRequest != null ? x.DisbursementRequest.RequestNumber : null,
+                RowVersion = x.RowVersion
             })
             .FirstOrDefaultAsync(cancellationToken);
 
         if (order is null) return null;
-
-        // Load lines
-        order.Lines = await context.PaymentOrderLines
-            .Where(l => l.PaymentOrderId == request.Id)
-            .Select(l => new PaymentOrderLineDto
-            {
-                Id = l.Id,
-                LineNumber = l.LineNumber,
-                LineType = l.LineType,
-                Description = l.Description,
-                AccountId = l.AccountId,
-                Amount = l.Amount,
-                TaxAmount = l.TaxAmount,
-                FundId = l.FundId,
-                AppropriationId = l.AppropriationId,
-                OrganizationUnitId = l.OrganizationUnitId,
-                CostCenterId = l.CostCenterId,
-                ProjectId = l.ProjectId
-            })
-            .ToListAsync(cancellationToken);
 
         // Load deductions
         order.Deductions = await context.PaymentOrderDeductions

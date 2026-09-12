@@ -3,6 +3,7 @@ using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Domain.Budgeting.Enums;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP_Government.Application.Budgeting.Commands.FinancialControl.IssueFinalAccount;
 
@@ -17,12 +18,18 @@ public class IssueFinalAccountCommandHandler(
         IssueFinalAccountCommand request,
         CancellationToken cancellationToken)
     {
-        var finalAccount = await context.FinalAccounts.FindAsync(request.FinalAccountId, cancellationToken);
+        var finalAccount = await context.FinalAccounts
+            .Include(fa => fa.Lines)
+            .FirstOrDefaultAsync(fa => fa.Id == request.FinalAccountId, cancellationToken);
+
         if (finalAccount is null)
             return Result.Failure(new[] { "Final account not found." });
 
         if (finalAccount.Status == FinalAccountStatus.Issued)
             return Result.Failure(new[] { "Final account has already been issued." });
+
+        if (!finalAccount.Lines.Any())
+            return Result.Failure(new[] { "Cannot issue final account with no lines. Generate the final account first." });
 
         finalAccount.Status = FinalAccountStatus.Issued;
         finalAccount.IssuedAt = DateTimeOffset.UtcNow;

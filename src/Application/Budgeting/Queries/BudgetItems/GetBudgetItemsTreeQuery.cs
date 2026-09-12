@@ -16,6 +16,8 @@ public class GetBudgetItemsTreeQueryHandler(
         CancellationToken cancellationToken)
     {
         var allItems = await context.BudgetItems
+            .Include(x => x.Budget)
+            .ThenInclude(b => b.Fund)
             .Where(x => x.BudgetId == request.BudgetId)
             .OrderBy(x => x.ItemCode)
             .ToListAsync(cancellationToken);
@@ -24,8 +26,8 @@ public class GetBudgetItemsTreeQueryHandler(
             .Include(x => x.BudgetType)
             .FirstOrDefaultAsync(x => x.Id == request.BudgetId, cancellationToken);
 
-        // Collect IDs for lookup
-        var fundIds = allItems.Where(x => x.FundId.HasValue).Select(x => x.FundId!.Value).Distinct().ToList();
+        // Collect IDs for lookup — FundId comes from Budget, not BudgetItem
+        var fundIds = allItems.Where(x => x.Budget.FundId != 0).Select(x => x.Budget.FundId).Distinct().ToList();
         var accountIds = allItems.Where(x => x.AccountId.HasValue).Select(x => x.AccountId!.Value).Distinct().ToList();
         var costCenterIds = allItems.Where(x => x.CostCenterId.HasValue).Select(x => x.CostCenterId!.Value).Distinct().ToList();
         var classificationIds = allItems.Where(x => x.BudgetClassificationId.HasValue).Select(x => x.BudgetClassificationId!.Value).Distinct().ToList();
@@ -52,7 +54,7 @@ public class GetBudgetItemsTreeQueryHandler(
         {
             var entity = allItems.First(x => x.Id == dto.Id);
             dto.AllowOverrunEffective = ResolveAllowOverrun(entity, budget);
-            if (entity.FundId.HasValue && funds.TryGetValue(entity.FundId.Value, out var fundName))
+            if (funds.TryGetValue(entity.Budget.FundId, out var fundName))
                 dto.FundName = fundName;
             if (entity.AccountId.HasValue && accounts.TryGetValue(entity.AccountId.Value, out var accountName))
                 dto.AccountName = accountName;

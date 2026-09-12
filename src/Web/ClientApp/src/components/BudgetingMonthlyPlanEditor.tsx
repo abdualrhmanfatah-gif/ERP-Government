@@ -1,5 +1,5 @@
 import { useMonthlyPlan } from '@/features/budgeting/hooks/useMonthlyPlan';
-import { Button, Badge, Input } from '@/components/ui';
+import { Button, Badge, Input, Label } from '@/components/ui';
 import { Copy, Save } from 'lucide-react';
 
 const MONTH_NAMES = [
@@ -42,7 +42,7 @@ export function MonthlyPlanEditor({ budgetItemId, appropriatedTotal }: MonthlyPl
       <div className="grid grid-cols-6 md:grid-cols-12 gap-2">
         {MONTH_NAMES.map((name, i) => (
           <div key={i} className="space-y-1">
-            <label className="block text-[10px] text-[var(--color-on-surface-variant)] text-center">{name}</label>
+            <Label className="block text-[10px] text-[var(--color-on-surface-variant)] text-center">{name}</Label>
             <Input
               type="number"
               value={months[i] || ''}
@@ -58,17 +58,17 @@ export function MonthlyPlanEditor({ budgetItemId, appropriatedTotal }: MonthlyPl
       <div className="flex items-center justify-between mt-4 pt-3 border-t border-[var(--color-outline-variant)]">
         <div className="flex items-center gap-4 text-sm">
           <span className="text-[var(--color-on-surface-variant)]">المجموع</span>
-          <span className="font-mono font-semibold">{total.toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</span>
+          <span className="font-mono font-semibold">{total.toLocaleString('ar-YE', { minimumFractionDigits: 2 })}</span>
           {appropriatedTotal > 0 && (
             <>
               <span className="text-[var(--color-on-surface-variant)]">المخصص</span>
-              <span className="font-mono">{appropriatedTotal.toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</span>
+              <span className="font-mono">{appropriatedTotal.toLocaleString('ar-YE', { minimumFractionDigits: 2 })}</span>
             </>
           )}
         </div>
         {appropriatedTotal > 0 && (
           <Badge variant={variance === 0 ? 'success' : variance > 0 ? 'warning' : 'danger'}>
-            الفرق: {Math.abs(variance).toLocaleString('ar-EG', { minimumFractionDigits: 2 })}
+            الفرق: {Math.abs(variance).toLocaleString('ar-YE', { minimumFractionDigits: 2 })}
           </Badge>
         )}
       </div>

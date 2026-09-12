@@ -14,14 +14,12 @@ public record YearClosingRunResult(
     int Id,
     int FiscalYearId,
     string FiscalYearName,
-    DateTimeOffset RunAt,
+    DateTimeOffset StartedAt,
     int RunById,
     YearClosingRunType RunType,
     decimal LapsedAppropriationTotal,
     decimal LapsedEncumbranceTotal,
-    YearClosingRunStatus Status,
-    int? ReversedById,
-    DateTimeOffset? ReversedAt);
+    YearClosingRunStatus Status);
 
 public class GetYearClosingRunsQueryHandler(
     IApplicationDbContext context) : IRequestHandler<GetYearClosingRunsQuery, List<YearClosingRunResult>>
@@ -38,19 +36,17 @@ public class GetYearClosingRunsQueryHandler(
             query = query.Where(r => r.FiscalYearId == request.FiscalYearId.Value);
 
         return await query
-            .OrderByDescending(r => r.RunAt)
+            .OrderByDescending(r => r.StartedAt)
             .Select(r => new YearClosingRunResult(
                 r.Id,
                 r.FiscalYearId,
                 r.FiscalYear.Name,
-                r.RunAt,
+                r.StartedAt,
                 r.RunById,
                 r.RunType,
                 r.LapsedAppropriationTotal,
                 r.LapsedEncumbranceTotal,
-                r.Status,
-                r.ReversedById,
-                r.ReversedAt))
+                r.Status))
             .ToListAsync(cancellationToken);
     }
 }

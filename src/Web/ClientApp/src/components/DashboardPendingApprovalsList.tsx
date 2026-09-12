@@ -4,15 +4,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { Clock, ChevronLeft } from 'lucide-react';
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('ar-SA', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(date);
-}
+import { formatDateCompact } from '@/shared/utils/formatters';
 
 export function PendingApprovalsList() {
   const navigate = useNavigate();
@@ -60,7 +52,7 @@ export function PendingApprovalsList() {
             <div>
               <div className="text-body-sm font-medium text-[var(--color-on-surface)]">{item.title}</div>
               <div className="text-label-sm text-[var(--color-on-surface-variant)]">
-                {formatDate(item.createdAt)}
+                {formatDateCompact(item.createdAt)}
               </div>
             </div>
           </div>

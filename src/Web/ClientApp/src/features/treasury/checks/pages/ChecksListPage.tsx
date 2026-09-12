@@ -1,19 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Badge, Button, DataGrid, FilterSelect, FormField, Input, Page } from '@/components/ui';
+import { Badge, Button, DataGrid, FilterBar, FilterDate, FilterSelect, FormField, Input, Page } from '@/components/ui';
 import type { DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus } from 'lucide-react';
-import { TreasuryChecksClearDialog } from '@/components/TreasuryChecksClearDialog';
-import { TreasuryChecksBounceDialog } from '@/components/TreasuryChecksBounceDialog';
+import { TreasuryCheckActionDialog } from '@/components/TreasuryCheckActionDialog';
 import { TreasuryChecksReplaceDialog } from '@/components/TreasuryChecksReplaceDialog';
 import { useChecksList, useCheckDetail } from '../hooks/useChecks';
-
-const statusLabels: Record<string, string> = {
-  UnderCollection: 'تحت التحصيل',
-  Cleared: 'محصل',
-  Bounced: 'مرتجع',
-};
+import { checkStatusLabels } from '../../shared/types';
 
 const statusColors: Record<string, 'warning' | 'success' | 'error'> = {
   UnderCollection: 'warning',
@@ -33,7 +27,7 @@ export default function ChecksListPage() {
   const [replaceDialogOpen, setReplaceDialogOpen] = useState(false);
   const [selectedCheckId, setSelectedCheckId] = useState<number | null>(null);
 
-  const { data: checks, isLoading, error } = useChecksList({
+  const { data: checks, isLoading, error, refetch } = useChecksList({
     from: fromDate,
     to: toDate,
     status: statusFilter || undefined,
@@ -60,7 +54,7 @@ export default function ChecksListPage() {
       header: 'الحالة',
       render: (row) => (
         <Badge variant={statusColors[row.status] || 'default'}>
-          {statusLabels[row.status] || row.statusName || row.status}
+          {checkStatusLabels[row.status] || row.statusName || row.status}
         </Badge>
       ),
     },
@@ -122,38 +116,34 @@ export default function ChecksListPage() {
         </Button>
       }
       toolbar={
-        <div className="flex items-center gap-4">
-        <FormField label="من" htmlFor="checks-from-date" className="w-auto">
-          <Input
-            id="checks-from-date"
-            type="date"
+        <FilterBar>
+          <FilterDate
+            label="من تاريخ"
             value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
+            onChange={setFromDate}
           />
-        </FormField>
-        <FormField label="إلى" htmlFor="checks-to-date" className="w-auto">
-          <Input
-            id="checks-to-date"
-            type="date"
+          <FilterDate
+            label="إلى تاريخ"
             value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
+            onChange={setToDate}
           />
-        </FormField>
-        <FilterSelect
-          value={statusFilter}
-          onChange={setStatusFilter}
-          options={[
-            { value: '', label: 'جميع الحالات' },
-            { value: 'UnderCollection', label: 'تحت التحصيل' },
-            { value: 'Cleared', label: 'محصل' },
-            { value: 'Bounced', label: 'مرتجع' },
-          ]}
-        />
-        </div>
+          <FilterSelect
+            value={statusFilter}
+            onChange={setStatusFilter}
+            options={[
+              { value: '', label: 'جميع الحالات' },
+              { value: 'UnderCollection', label: 'تحت التحصيل' },
+              { value: 'Cleared', label: 'محصل' },
+              { value: 'Bounced', label: 'مرتجع' },
+            ]}
+            placeholder="الحالة"
+            label="الحالة"
+          />
+        </FilterBar>
       }
       loading={isLoading}
       error={error ? 'حدث خطأ في تحميل البيانات' : undefined}
-      onRetry={() => window.location.reload()}
+      onRetry={() => refetch()}
     >
       <DataGrid
         columns={columns}
@@ -164,17 +154,19 @@ export default function ChecksListPage() {
 
       {selectedCheckId && (
         <>
-          <TreasuryChecksClearDialog
+          <TreasuryCheckActionDialog
             open={clearDialogOpen}
             onClose={() => { setClearDialogOpen(false); setSelectedCheckId(null); }}
             checkId={selectedCheckId}
-            onCleared={() => { setClearDialogOpen(false); setSelectedCheckId(null); }}
+            action="clear"
+            onCompleted={() => { setClearDialogOpen(false); setSelectedCheckId(null); }}
           />
-          <TreasuryChecksBounceDialog
+          <TreasuryCheckActionDialog
             open={bounceDialogOpen}
             onClose={() => { setBounceDialogOpen(false); setSelectedCheckId(null); }}
             checkId={selectedCheckId}
-            onBounced={() => { setBounceDialogOpen(false); setSelectedCheckId(null); }}
+            action="bounce"
+            onCompleted={() => { setBounceDialogOpen(false); setSelectedCheckId(null); }}
           />
           <TreasuryChecksReplaceDialog
             open={replaceDialogOpen}

@@ -12,32 +12,27 @@ public class PurchaseRequestDetailConfiguration : IEntityTypeConfiguration<Purch
 
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.ConversionFactor)
-            .HasColumnType("decimal(18,6)");
-
         builder.Property(e => e.RequestedQuantity)
-            .HasColumnType("decimal(18,6)");
+            .HasColumnType("decimal(18,4)")
+            .IsRequired();
 
         builder.Property(e => e.ApprovedQuantity)
-            .HasColumnType("decimal(18,6)");
+            .HasColumnType("decimal(18,4)");
 
         builder.Property(e => e.UnitCostEstimate)
-            .HasColumnType("decimal(23,6)");
+            .HasColumnType("decimal(23,2)");
 
         builder.Property(e => e.TotalCostEstimate)
-            .HasColumnType("decimal(23,6)");
+            .HasColumnType("decimal(23,2)");
 
         builder.Property(e => e.Notes)
             .HasMaxLength(2000);
-
-        builder.Property(e => e.Status)
-            .HasMaxLength(50);
 
         builder.Property(e => e.RowVersion)
             .IsRowVersion();
 
         builder.HasOne(e => e.PurchaseRequest)
-            .WithMany()
+            .WithMany(p => p.Details)
             .HasForeignKey(e => e.PurchaseRequestId)
             .OnDelete(DeleteBehavior.Restrict);
 

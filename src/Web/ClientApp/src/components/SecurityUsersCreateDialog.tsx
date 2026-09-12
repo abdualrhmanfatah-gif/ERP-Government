@@ -74,7 +74,7 @@ export function CreateUserDialog({ open, onClose, onCreated }: CreateUserDialogP
         <Button variant="primary" loading={createUser.isPending} onClick={handleSubmit}>إنشاء</Button>
       </>}
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" aria-label="إنشاء مستخدم">
         <FormField label="اسم المستخدم" error={errors.login}>
           <Input value={login} onChange={(e) => setLogin(e.target.value)} placeholder="اسم المستخدم" />
         </FormField>

@@ -2,268 +2,254 @@
 
 **Input**: Design documents from `/specs/045-payments-group/`
 
-**Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/payments-api.md, quickstart.md
+**Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/, frontend-requirements.md, frontend-disbursement-requests.md
 
-**Tests**: No automated tests. Backend quality gate: `dotnet build src/Web/Web.csproj`. Frontend gate: `npm run lint` + `npm run build`. Validation via quickstart scenarios (S1–S6).
+**Tests**: NO automated tests (Constitution XI exception DEP-027). Backend gate: `dotnet build src/Web/Web.csproj`. Frontend gate: `npm run lint` + `npm run build`. Validation via quickstart.md scenarios (S1–S6).
 
-## Story Label Mapping
-
-Spec user stories are grouped by sub-module; task labels are sequential:
-
-| Label | Spec story | Title |
-|---|---|---|
-| US1 | PAY-01 US1 | Create a complete order (CRUD + lines + deductions) |
-| US2 | PAY-01 US2 | Budget check (Pending/Passed/Failed/Overridden) |
-| US3 | PAY-01 US3 | Lifecycle and treasury |
-| US4 | PAY-01 US4 | Totals and partial payment |
-| US5 | PAY-01 US5 | Voiding (+ order-side auto-invalidation, D4) |
-| US6 | PAY-02 US1 | Create request on approved order (1:1) |
-| US7 | PAY-02 US2 | Dual signature |
-| US8 | PAY-02 US3 | Rejection and cancellation (release) |
-| US9 | PAY-02 US4 | Availability gate |
-| US10 | PAY-03 US1 | Record payment (triad closure) |
-| US11 | PAY-03 US2 | Visible failure |
-| US12 | PAY-03 US3 | Payments list |
-| US13 | PAY-04 US1 | Accounts registry |
-| US14 | PAY-04 US2 | Create/edit with full details (+ default auto-switch) |
-| US15 | PAY-04 US3 | Activate/deactivate |
-
-**Chain note**: US6–US12 operate on PAY-01 output; their backend exists — story independence is preserved because each story ships its own UI increment against the shared built contract.
+**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
 ## Format: `[ID] [P?] [Story] Description`
 
-- **[P]**: different files, no dependencies on incomplete tasks
-- **[Story]**: label from the mapping above
+- **[P]**: Can run in parallel (different files, no dependencies)
+- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
+- Include exact file paths in descriptions
+
+## Phase 1: Setup — ADR-001 + ADR-002 Schema Migration
+
+**Purpose**: Apply ADR-001 breaking schema changes, ADR-002 BeneficiaryPartyId re-introduction, and register new permission code. All subsequent phases depend on this.
+
+- [ ] T001 Create EF Core migration for ADR-001 schema changes: DROP BeneficiaryPartyId from PaymentOrder, DROP BeneficiaryId/HasWarning/PaymentOrderId/PaymentOrderNumber/ApprovedAmount/IssuingAuthorityName/IssuingAuthorityCapacity/ApprovalDate from DisbursementRequest, DROP PaymentOrderLine table, ADD AccountId to PaymentOrder, ADD UNIQUE index on PaymentOrder.DisbursementRequestId, ADD UNIQUE index on Payment.PaymentOrderId in src/Infrastructure/Data/Migrations/
+- [ ] T002 Create EF Core migration for ADR-002: ADD BeneficiaryPartyId (int?) to PaymentOrder and DisbursementRequest with Restrict FK to Party, ADD index on BeneficiaryPartyId in src/Infrastructure/Data/Migrations/
+- [ ] T003 [P] Add PaymentOrders.OverrideBudgetCheck permission code to src/Application/Common/Security/PermissionCodes.cs
+- [ ] T004 [P] Register PaymentOrders.OverrideBudgetCheck policy in src/Web/DependencyInjection.cs
+- [ ] T005 [P] Add PaymentOrders.OverrideBudgetCheck to RolePermissionSeedData.GetAllPermissionCodes() for idempotent merge in src/Infrastructure/Data/
+
+**Checkpoint**: Schema migrations applied. Permission code registered. Backend builds: `dotnet build src/Web/Web.csproj`
 
 ---
 
-## Phase 1: Setup (Shared Infrastructure)
+## Phase 2: PAY-01 — Payment Order Lifecycle (P1) 🎯 MVP
 
-- [x] T001 Add `PaymentOrders.OverrideBudgetCheck` permission: constant in `src/Application/Common/Security/PermissionCodes.cs`, policy registration in `src/Web/DependencyInjection.cs`, entry in `RolePermissionSeedData.GetAllPermissionCodes()` (`src/Infrastructure/Data/Seeds/RolePermissionSeedData.cs`) — idempotent merge, no migration
-- [x] T002 Baseline gate: run `dotnet build src/Web/Web.csproj` and verify build succeeds before any change
+**Goal**: Complete payment order CRUD with 8-state lifecycle, budget check, treasury trace, and server-issued totals
 
-**Checkpoint**: permission ready; build green.
+**Independent Test**: Create order → submit (budget check) → approve → send to treasury. Verify totals from /{id}/totals. Verify budget check badges. Verify conditional action buttons per lifecycle.
 
----
+### Implementation for PAY-01
 
-## Phase 2: Foundational (Blocking Prerequisites)
+#### Entity & Enum Adjustments
 
-- [x] T003 Scaffold frontend domain: `src/Web/ClientApp/src/features/payments/` with `payment-orders/`, `disbursement-requests/`, `payments/`, `bank-accounts/` folders (+ cross-entity `hooks/`, `shared/`, `utils/` per plan structure decision) and register `/payments/*` routes in `src/Web/ClientApp/src/routes/` with navigation entries carrying their permission identifiers
-- [x] T004 Shared UI primitives in `src/Web/ClientApp/src/components/`: `PaymentsStatusBadge.tsx` (9 order states, 7 request states, 2 payment states, 4 budget-check states — token-driven colors), `PaymentsApprovalStepper.tsx` (renders approvals[] two-step history); RTL logical properties only; Arabic hardcoded strings
+- [ ] T006 [P] Remove PaymentOrderLine entity and its DbSet from src/Domain/Payments/Entities/PaymentOrder.cs and src/Infrastructure/Data/ApplicationDbContext.cs
+- [ ] T007 [P] Add AccountId (int?) property to PaymentOrder entity in src/Domain/Payments/Entities/PaymentOrder.cs
+- [ ] T008 [P] Add BeneficiaryPartyId (int?) to PaymentOrder entity with Restrict FK to Party in src/Domain/Payments/Entities/PaymentOrder.cs (ADR-002)
+- [ ] T009 [P] Verify PaymentOrderStatus enum has 8 states (Draft/Submitted/Approved/SentToTreasury/Paid/Cancelled/Rejected/Voided) — remove PartiallyPaid if present in src/Domain/Payments/Enums/PaymentOrderStatus.cs
+- [ ] T010 [P] Verify BudgetCheckStatus enum has 4 states (Pending/Passed/Failed/Overridden) in src/Domain/Payments/Enums/BudgetCheckStatus.cs
 
-**Checkpoint**: Frontend skeleton ready; backend stories (US1–US5) can proceed in parallel with frontend wiring.
+#### Commands
 
----
+- [ ] T011 [P] [US1] Create CreatePaymentOrderCommand + Handler + Validator in src/Application/Payments/Commands/PaymentOrders/CreatePaymentOrder/ — order-first path (beneficiaryName, appropriationId required, deductions, accountId optional, beneficiaryPartyId optional with server validation per ADR-002)
+- [ ] T012 [P] [US1] Create UpdatePaymentOrderCommand + Handler + Validator in src/Application/Payments/Commands/PaymentOrders/UpdatePaymentOrder/ — Draft-only editing
+- [ ] T013 [US2] Create SubmitPaymentOrderCommand + Handler + Validator in src/Application/Payments/Commands/PaymentOrders/SubmitPaymentOrder/ — fundId + appropriationId + accountId required at submit; budget check via BudgetAvailabilityService; sets BudgetCheckStatus
+- [ ] T014 [US2] Create ApprovePaymentOrderCommand + Handler + Validator in src/Application/Payments/Commands/PaymentOrders/ApprovePaymentOrder/ — budgetCheckStatus != Failed guard; optional overrideFailedBudgetCheck flag gated by PaymentOrders.OverrideBudgetCheck permission; sets Overridden when flag+permission
+- [ ] T015 [US3] Create RejectPaymentOrderCommand + Handler + Validator in src/Application/Payments/Commands/PaymentOrders/RejectPaymentOrder/ — reason required
+- [ ] T016 [US3] Create CancelPaymentOrderCommand + Handler + Validator in src/Application/Payments/Commands/PaymentOrders/CancelPaymentOrder/ — auto-invalidates linked Draft/PendingApproval requests
+- [ ] T017 [US3] Create SendToTreasuryPaymentOrderCommand + Handler + Validator in src/Application/Payments/Commands/PaymentOrders/SendToTreasuryPaymentOrder/ — treasuryReference required; sets treasury trace fields
+- [ ] T018 [US5] Create VoidPaymentOrderCommand + Handler + Validator in src/Application/Payments/Commands/PaymentOrders/VoidPaymentOrder/ — guard: Approved/SentToTreasury + unpaid only; auto-invalidates linked requests; partially paid refused
 
-## Phase 3: User Story US1 — Create a complete order (P1) — MVP
+#### Queries
 
-**Goal**: Accountant creates a full order (header + lines + deductions + beneficiary) with server-issued number and server-computed amounts.
+- [ ] T019 [P] [US1] Create GetPaymentOrdersQuery + Handler in src/Application/Payments/Queries/PaymentOrders/GetPaymentOrders/ — list with filters (status/budgetCheckStatus/period)
+- [ ] T020 [P] [US4] Create GetPaymentOrderByIdQuery + Handler in src/Application/Payments/Queries/PaymentOrders/GetPaymentOrderById/
+- [ ] T021 [P] [US4] Create GetPaymentOrderTotalsQuery + Handler in src/Application/Payments/Queries/PaymentOrders/GetPaymentOrderTotals/ — server-issued: amountGross, totalDeductions, netAmount, paidAmount, remainingAmount, isFullyPaid
 
-**Independent Test**: Create order with 5+ lines (all 5 line types) and 3+ deductions (all flags) → Draft + `PO-{D6}`; mandatory deduction deletion blocked; submit with 0 lines refused (quickstart S1.1, S1.6).
+#### Endpoints
 
-### Implementation for US1
+- [ ] T022 [US1] Create PaymentOrders endpoint group with CRUD + lifecycle routes in src/Web/Endpoints/Payments/PaymentOrders.cs — GET /, POST /, GET /{id}, GET /{id}/totals, POST /{id}/submit, POST /{id}/approve, POST /{id}/reject, POST /{id}/cancel, POST /{id}/send-to-treasury, POST /{id}/void, PUT /{id}; authorize each with PaymentOrders.* permission codes
 
-- [x] T005 [US1] Close any red gaps in `src/Application/Payments/Commands/PaymentOrders/CreatePaymentOrder/CreatePaymentOrderCommand.cs` + `UpdatePaymentOrder/UpdatePaymentOrderCommand.cs` (mandatory-deduction guard, zero-line submit guard lives in Submit — verify ordering)
-- [x] T006 [P] [US1] Frontend list page: `src/Web/ClientApp/src/features/payments/payment-orders/pages/PaymentOrdersListPage.tsx` + `hooks/usePaymentOrders.ts` + `shared/client.ts` (NSwag client only) + `shared/schemas.ts` — table (number/vendor/date/net/status/budget-check badge) + filters, CC-2 states
-- [x] T007 [US1] Frontend create page: `src/Web/ClientApp/src/features/payments/payment-orders/pages/PaymentOrderCreatePage.tsx` + `shared/schemas.ts` (Zod: lines net = gross − deductions ±0.01, deduction > gross blocked) — sections: header (vendor/fund/fiscal year/appropriation/dimensions/currency+exchangeRate/due date), lines typed grid, deductions typed grid (mandatory/tax/tax authority), beneficiary, server-fed totals preview
-- [x] T008 [US1] Frontend detail page base: `src/Web/ClientApp/src/features/payments/payment-orders/pages/PaymentOrderDetailPage.tsx` — header + lines + deductions + Totals card (6 server numbers) + badges
-
-**Checkpoint**: MVP — orders CRUD + UI complete; validate via quickstart S1.1/S1.6.
-
----
-
-## Phase 4: User Story US2 — Budget check (P1)
-
-**Goal**: Appropriation-level availability check at submit; Failed blocks approval; explicit permissioned override documented.
-
-**Independent Test**: Submit against drained appropriation → Failed persisted + verbatim refusal; approve Failed without flag → 400; with flag without permission → 403; with permission → Approved + Overridden + history rows (quickstart S1.2–S1.5).
-
-### Implementation for US2
-
-- [x] T009 [US2] Implement appropriation-level check in `src/Application/Payments/Commands/PaymentOrders/SubmitPaymentOrder/SubmitPaymentOrderCommand.cs` (research D1: `GetAvailableForAppropriationAsync(entity.AppropriationId)` vs net amount; Failed persists)
-- [x] T010 [US2] Implement override in `src/Application/Payments/Commands/PaymentOrders/ApprovePaymentOrder/ApprovePaymentOrderCommand.cs` (research D2: optional `overrideFailedBudgetCheck`, `PaymentOrders.OverrideBudgetCheck` permission, `BudgetCheckStatus=Overridden`, ApprovalHistory snapshot + `IDocumentStatusLogger`) + extend command shape per `contracts/payments-api.md`
-- [ ] T011 [US2] Frontend override affordance: budget-check badge wiring + permission-gated override confirm dialog in `src/Web/ClientApp/src/features/payments/payment-orders/pages/PaymentOrderDetailPage.tsx` + `src/Web/ClientApp/src/components/PaymentOrdersBudgetCheckOverrideDialog.tsx`
-
-**Checkpoint**: US1+US2 functional.
+**Checkpoint**: Payment order lifecycle complete. `dotnet build src/Web/Web.csproj` passes. Quickstart S1 and S2 scenarios manually verifiable.
 
 ---
 
-## Phase 5: User Story US3 — Lifecycle and treasury (P1)
+## Phase 3: PAY-02 — Disbursement Requests — Request-First Path (P1)
 
-**Goal**: Full 9-state lifecycle with conditional actions; treasury trace + journal link displayed.
+**Goal**: Independent request creation, dual-signature approval, atomic order generation, cancellation/invalidation, chain tracing
 
-**Independent Test**: Drive Draft→Submitted→Approved→SentToTreasury with guards (≥1 line, reason on reject, treasury reference required); Rejected reason visible in 022 panels (quickstart S1.7).
+**Independent Test**: Create request → submit → two qualified approvals → verify Draft order auto-generated → verify order follows full lifecycle. Verify rejection with reason. Verify cancellation releases order. Verify invalidation propagation.
 
-### Implementation for US3
+### Implementation for PAY-02
 
-- [x] T012 [US3] Close lifecycle gaps in `src/Application/Payments/Commands/PaymentOrders/` (guard messages verbatim; status logging on every transition via `IDocumentStatusLogger`)
-- [ ] T013 [US3] Frontend lifecycle actions: conditional submit/approve/reject/cancel/send-to-treasury/void buttons + reason/reference dialogs + treasury trace + `journalEntryId` link on `src/Web/ClientApp/src/features/payments/payment-orders/pages/PaymentOrderDetailPage.tsx` + dialog components in `src/Web/ClientApp/src/components/Payments*Dialog.tsx`
+#### Entity Adjustments
 
-**Checkpoint**: order lifecycle complete end-to-end.
+- [ ] T023 [P] Add BeneficiaryPartyId (int?) to DisbursementRequest entity with Restrict FK to Party in src/Domain/Payments/Entities/DisbursementRequest.cs (ADR-002)
+- [ ] T024 [P] Remove HasWarning from DisbursementRequest in src/Domain/Payments/Entities/DisbursementRequest.cs
+- [ ] T025 [P] Remove ApprovedAmount, IssuingAuthorityName, IssuingAuthorityCapacity, ApprovalDate from DisbursementRequest (approval data in ApprovalHistory only) in src/Domain/Payments/Entities/DisbursementRequest.cs
+- [ ] T026 [P] Verify DisbursementRequestStatus enum has 7 states (Draft/PendingApproval/Approved/Rejected/Cancelled/Disbursed/Invalidated) in src/Domain/Payments/Enums/DisbursementRequestStatus.cs
 
----
+#### Commands
 
-## Phase 6: User Story US4 — Totals (P1)
+- [ ] T027 [P] [US1] Create CreateDisbursementRequestCommand + Handler + Validator in src/Application/Payments/Commands/DisbursementRequests/CreateDisbursementRequest/ — independent creation (no order required); server-issues requestNumber DSB-{D6}; positive requestedAmount; BeneficiaryName required + BeneficiaryPartyId optional with server validation (ADR-002)
+- [ ] T028 [P] [US1] Create UpdateDisbursementRequestCommand + Handler + Validator in src/Application/Payments/Commands/DisbursementRequests/UpdateDisbursementRequest/ — Draft-only editing
+- [ ] T029 [P] [US4] Create SubmitDisbursementRequestCommand + Handler + Validator in src/Application/Payments/Commands/DisbursementRequests/SubmitDisbursementRequest/ — pure status transition (no availability check per ADR-001 D-3)
+- [ ] T030 [US2] Create ApproveDisbursementRequestCommand + Handler + Validator in src/Application/Payments/Commands/DisbursementRequests/ApproveDisbursementRequest/ — step 1 & 2: qualified role (AccountsManager/AuthorizingOfficer) + distinct users + same amount + approvedAmount ≤ requestedAmount; issuing authority recorded in ApprovalHistory; step 2 atomic: generates linked PaymentOrder (DisbursementRequestId UNIQUE) on final approval; copies beneficiaryName + beneficiaryPartyId from request to order (ADR-002)
+- [ ] T031 [US3] Create RejectDisbursementRequestCommand + Handler + Validator in src/Application/Payments/Commands/DisbursementRequests/RejectDisbursementRequest/ — nonblank reason required; no order generated
+- [ ] T032 [US5] Create CancelDisbursementRequestCommand + Handler + Validator in src/Application/Payments/Commands/DisbursementRequests/CancelDisbursementRequest/ — reason required; releases order for unpaid Approved requests
 
-**Goal**: Six server-issued totals + isFullyPaid; partial-payment-ready arithmetic (research D7).
+#### Queries
 
-**Independent Test**: For any order `net = gross − deductions`, `remaining = net − paid`, `isFullyPaid = remaining == 0` — all from `GET /{id}/totals` (quickstart S6).
+- [ ] T033 [P] [US6] Create GetDisbursementRequestsQuery + Handler in src/Application/Payments/Queries/DisbursementRequests/GetDisbursementRequests/ — list with filters (status/requester)
+- [ ] T034 [P] [US6] Create GetDisbursementRequestByIdQuery + Handler in src/Application/Payments/Queries/DisbursementRequests/GetDisbursementRequestById/ — includes approvals[] from ApprovalHistory (step/actor/role/decision/time/approvedAmount/issuingAuthority)
 
-### Implementation for US4
+#### Endpoints
 
-- [x] T014 [US4] Fix `src/Application/Payments/Queries/PaymentOrders/GetPaymentOrderTotals/` to compute `paidAmount` from completed payments (D7: Σ Completed amounts; remaining = net − paid)
-- [ ] T015 [P] [US4] Frontend Totals card server-fed audit: ensure `PaymentOrderDetailPage.tsx` renders totals exclusively from the totals endpoint (no client computation)
+- [ ] T035 [US1] Create DisbursementRequests endpoint group in src/Web/Endpoints/Payments/DisbursementRequests.cs — GET /, POST /, GET /{id}, PATCH /{id}/submit, PATCH /{id}/approve, PATCH /{id}/reject, PATCH /{id}/cancel; authorize each with DisbursementRequests.* permission codes
 
-**Checkpoint**: totals verifiable.
-
----
-
-## Phase 7: User Story US5 — Voiding + auto-invalidation (P2)
-
-**Goal**: Void unpaid Approved/SentToTreasury orders; partial refused; linked non-terminal requests auto-invalidated (D3/D4).
-
-**Independent Test**: Void unpaid → Voided final; void partially paid → refused verbatim; void/cancel order with Draft request → request Invalidated (quickstart S2.1–S2.3).
-
-### Implementation for US5
-
-- [x] T016 [US5] Implement D3+D4: `src/Application/Payments/Commands/PaymentOrders/VoidPaymentOrder/VoidPaymentOrderCommand.cs` (guard Approved/SentToTreasury + unpaid; partial refused; remove TODO reversing-entry comment) and `CancelPaymentOrder/CancelPaymentOrderCommand.cs` (auto-invalidate linked Draft/PendingApproval/Approved-unpaid requests + history rows)
-- [ ] T017 [P] [US5] Frontend void/cancel dialogs (confirm + reason) in `src/Web/ClientApp/src/components/PaymentsOrderVoidDialog.tsx` / `PaymentsOrderCancelDialog.tsx`, wired on detail page
+**Checkpoint**: Disbursement request workflow complete. `dotnet build src/Web/Web.csproj` passes. Quickstart S3 and S4 scenarios manually verifiable.
 
 ---
 
-## Phase 8: User Story US6 — Create request 1:1 (P1)
+## Phase 4: PAY-03 — Payment Execution (P1)
 
-**Goal**: Draft request on an Approved order without one; second request refused verbatim; warning badge.
+**Goal**: Single immutable payment recording, triad closure, concurrent-payment guard
 
-**Independent Test**: Create → Draft + `DSB-{D6}` + snapshot amount; duplicate → verbatim server message (quickstart S3.1–S3.2).
+**Independent Test**: Record payment on Approved order → Completed, request Disbursed, order Paid. Attempt double payment → refused. Attempt payment on non-approved order → refused.
 
-### Implementation for US6
+### Implementation for PAY-03
 
-- [x] T018 [US6] Close gaps in `src/Application/Payments/Commands/DisbursementRequests/CreateDisbursementRequest/CreateDisbursementRequestCommand.cs` (verify 1:1 message + warning flag)
-- [ ] T019 [US6] Frontend: `src/Web/ClientApp/src/features/payments/disbursement-requests/pages/DisbursementRequestCreatePage.tsx` (picker of Approved orders without request + notes) + list page `DisbursementRequestsListPage.tsx` (number/order/amount/status/warning badge + filters)
+#### Entity Adjustments
 
----
+- [ ] T036 [P] Verify Payment.PaymentOrderId has UNIQUE constraint in src/Domain/Payments/Entities/Payment.cs
+- [ ] T037 [P] Verify Payment entity fields: PaymentNumber, PaymentOrderId, DisbursementRequestId, PaymentMethod, Amount (snapshot), PaidById, PaidAt, ReferenceNumber, Notes, Status in src/Domain/Payments/Entities/Payment.cs
+- [ ] T038 [P] Verify PaymentMethod enum: Cash/Check only in src/Domain/Payments/Enums/PaymentMethod.cs
+- [ ] T039 [P] Verify PaymentStatus enum: Completed/Failed in src/Domain/Payments/Enums/PaymentStatus.cs
 
-## Phase 9: User Story US7 — Dual signature (P1)
+#### Commands
 
-**Goal**: Two qualified distinct signers; step 2 role-checked (D5); Stepper from approvals[].
+- [ ] T040 [US1] Create RecordPaymentCommand + Handler + Validator in src/Application/Payments/Commands/Payments/RecordPayment/ — precondition: order Approved; amount = server snapshot of order netAmount; PaymentOrderId UNIQUE guard; raises PaymentRecordedEvent for posting pipeline
+- [ ] T041 [US1] Add PaymentRecordedEvent domain event in src/Domain/Events/Payments/ — inherits BaseEvent, implements IHasSourceEntity; carries payment details for AccountingEvents/ACC-05 posting
 
-**Independent Test**: quickstart S3.4–S3.8 (unqualified step-1 refused; same-user step-2 refused; unqualified step-2 refused; two qualified → Approved + approvalDate).
+#### Queries
 
-### Implementation for US7
+- [ ] T042 [P] [US3] Create GetPaymentsQuery + Handler in src/Application/Payments/Queries/Payments/GetPayments/ — list with filters (period/method/status)
+- [ ] T043 [P] [US3] Create GetPaymentByIdQuery + Handler in src/Application/Payments/Queries/Payments/GetPaymentById/
 
-- [x] T020 [US7] Implement D5 in `src/Application/Payments/Commands/DisbursementRequests/ApproveDisbursementRequest/ApproveDisbursementRequestCommand.cs` (step-2 `RequiredRoles` membership + record role)
-- [ ] T021 [US7] Frontend Stepper wiring + approve dialog (reason) + conditional PATCH buttons on `src/Web/ClientApp/src/features/payments/disbursement-requests/pages/DisbursementRequestDetailPage.tsx` using `PaymentsApprovalStepper.tsx`
+#### Endpoints
 
----
+- [ ] T044 [US1] Create Payments endpoint group in src/Web/Endpoints/Payments/Payments.cs — GET /, POST /, GET /{id}; authorize with Payments.View and Payments.Create
 
-## Phase 10: User Story US8 — Reject and cancel (P1)
-
-**Goal**: Rejection with visible reason; cancellation releases the order for a new request.
-
-**Independent Test**: quickstart S4.2 + reject-reason visibility; Disbursed cancel refused.
-
-### Implementation for US8
-
-- [x] T022 [US8] Close gaps in `src/Application/Payments/Commands/DisbursementRequests/RejectDisbursementRequest/` and `CancelDisbursementRequest/`
-- [ ] T023 [P] [US8] Frontend reject/cancel dialogs (reason) on `DisbursementRequestDetailPage.tsx`; released-order visibility in create picker
+**Checkpoint**: Payment execution complete. `dotnet build src/Web/Web.csproj` passes. Quickstart S4 triad closure and double-payment guard manually verifiable.
 
 ---
 
-## Phase 11: User Story US9 — Availability gate (P1)
+## Phase 5: PAY-04 — Bank Accounts (P1)
 
-**Goal**: Submit blocked on Blocking availability with verbatim detail; Warning passes with badge.
+**Goal**: Bank account registry, CRUD with 17 fields, activate/deactivate, default auto-switch
 
-**Independent Test**: quickstart S3.3 — Blocking ⇒ refusal with detail; Warning ⇒ HasWarning badge on list/detail.
+**Independent Test**: Create account A default → create account B default → verify B is default and A demoted. Duplicate accountNumber → refused. Deactivate default → excluded from PAY-01 picker. Activate/deactivate round-trips with RowVersion.
 
-### Implementation for US9
+### Implementation for PAY-04
 
-- [x] T024 [US9] Close gaps in `src/Application/Payments/Commands/DisbursementRequests/SubmitDisbursementRequest/SubmitDisbursementRequestCommand.cs` (availability at transaction time; refusal detail verbatim)
-- [ ] T025 [P] [US9] Frontend availability-refusal panel (verbatim detail) + HasWarning badge on `DisbursementRequestsListPage.tsx` / `DisbursementRequestDetailPage.tsx`
+#### Entity Verification
 
----
+- [ ] T045 [P] Verify BankAccount entity has all 17 contract fields (Name, BankName, AccountNumber, Iban, SwiftCode, BranchName, BranchCode, CurrencyId, FundId, GlAccountId, IsDefault, MaxDailyLimit, MaxTransactionLimit, RequiresDualApproval, LastReconciliationDate, OpeningBalance, CurrentBalance, IsActive) in src/Domain/Payments/Entities/BankAccount.cs
 
-## Phase 12: User Story US10 — Record payment (P1)
+#### Commands
 
-**Goal**: Single immutable payment on Approved request; triad closes; amount is server snapshot.
+- [ ] T046 [P] [US2] Create CreateBankAccountCommand + Handler + Validator in src/Application/Payments/Commands/BankAccounts/CreateBankAccount/ — all 17 fields except id/lastReconciliationDate/currentBalance/isActive; accountNumber unique; IsDefault=true auto-demotes others in same transaction
+- [ ] T047 [P] [US2] Create UpdateBankAccountCommand + Handler + Validator in src/Application/Payments/Commands/BankAccounts/UpdateBankAccount/ — same auto-switch for IsDefault; accountNumber uniqueness check
+- [ ] T048 [P] [US3] Create ActivateBankAccountCommand + Handler in src/Application/Payments/Commands/BankAccounts/ActivateBankAccount/ — {id, rowVersion}
+- [ ] T049 [P] [US3] Create DeactivateBankAccountCommand + Handler in src/Application/Payments/Commands/BankAccounts/DeactivateBankAccount/ — {id, rowVersion}; deactivated excluded from PAY-01 bank picker
 
-**Independent Test**: quickstart S4.1, S4.4, S4.5 — Approved-only; Completed + `PAY-{D6}`; request Disbursed + order Paid; double record refused.
+#### Queries
 
-### Implementation for US10
+- [ ] T050 [P] [US1] Create GetBankAccountsQuery + Handler in src/Application/Payments/Queries/BankAccounts/GetBankAccounts/ — list with filters (active/currency/fund); excludes inactive from default picker
+- [ ] T051 [P] [US1] Create GetBankAccountByIdQuery + Handler in src/Application/Payments/Queries/BankAccounts/GetBankAccountById/
 
-- [x] T026 [US10] Close gaps in `src/Application/Payments/Commands/Payments/RecordPayment/RecordPaymentCommand.cs` (verify sequence allocation in same transaction + event raise)
-- [ ] T027 [US10] Frontend record dialog (readonly amount snapshot + method select + referenceNumber + notes + confirm) on `DisbursementRequestDetailPage.tsx` + success screen (triad numbers) in `src/Web/ClientApp/src/features/payments/payments/pages/PaymentSuccessPage.tsx` (or inline success state)
+#### Endpoints
 
----
+- [ ] T052 [US1] Create BankAccounts endpoint group in src/Web/Endpoints/Payments/BankAccounts.cs — GET /, POST /, GET /{id}, PUT /{id}, POST /{id}/activate, POST /{id}/deactivate; authorize with BankAccounts.* permission codes
 
-## Phase 13: User Story US11 — Visible failure (P1)
-
-**Goal**: No silent failure — verbatim reason + retry.
-
-**Independent Test**: Force a refusal (non-approved request) → verbatim server message rendered + retry affordance (quickstart S4.4 UI side).
-
-### Implementation for US11
-
-- [ ] T028 [US11] Frontend failure state on `PaymentSuccessPage.tsx`/record dialog: render `Result.Errors` verbatim via `shared/api/result-to-ui.ts`, retry re-opens the record dialog (research D10 — no synthetic Failed rows)
+**Checkpoint**: Bank accounts complete. `dotnet build src/Web/Web.csproj` passes. Quickstart S5 scenarios manually verifiable.
 
 ---
 
-## Phase 14: User Story US12 — Payments list (P2)
+## Phase 6: Frontend — features/payments/ — PAY-01, PAY-03, PAY-04
 
-**Goal**: Payments list with filters (period/method/status).
+**Goal**: Arabic RTL UI for payment orders, payments, and bank accounts (PAY-02 frontend in Phase 7)
 
-**Independent Test**: Filter by method/status/period returns matching rows; no edit/delete affordances (immutable).
+**Independent Test**: Navigate each entity's list, create, detail pages. Verify Arabic strings, RTL layout, color-coded badges, conditional action buttons, server-issued totals. Run `npm run lint && npm run build`.
 
-### Implementation for US12
+### Frontend Structure
 
-- [ ] T029 [US12] Frontend list page `src/Web/ClientApp/src/features/payments/payments/pages/PaymentsListPage.tsx` + `hooks/usePayments.ts` — verify list query filters; no PUT/DELETE affordances
+- [ ] T053 [P] Create frontend domain folder structure: src/Web/ClientApp/src/features/payments/ with subfolders: payment-orders/, disbursement-requests/, payments/, bank-accounts/, hooks/, shared/, utils/
+- [ ] T054 [P] Create route definitions for /payments/* routes in src/Web/ClientApp/src/routes/
 
----
+### Payment Orders Frontend
 
-## Phase 15: User Story US13 — Accounts registry (P1 for PAY-04)
+- [ ] T055 [P] Create PaymentOrdersListPage with table (number/beneficiary/date/net/status/check badge) + filters (status/budgetCheckStatus/period) in src/Web/ClientApp/src/features/payments/payment-orders/pages/PaymentOrdersListPage.tsx
+- [ ] T056 [P] Create PaymentOrderCreatePage with sections: header (fund/fiscal year/appropriation/currency/rate/dueDate), deductions (typed grid + mandatory/tax + taxAuthority), beneficiary (name/party/iban/account/bank), totals preview in src/Web/ClientApp/src/features/payments/payment-orders/pages/PaymentOrderCreatePage.tsx
+- [ ] T057 [P] Create PaymentOrderDetailPage with header + deductions + Totals card (4 numbers) + budgetCheckStatus badge + 022 panels + treasury trace + journal link + issuing authority badge + conditional lifecycle action dialogs in src/Web/ClientApp/src/features/payments/payment-orders/pages/PaymentOrderDetailPage.tsx
+- [ ] T058 [P] Create shared types/schemas/client for payment-orders in src/Web/ClientApp/src/features/payments/payment-orders/shared/
+- [ ] T059 [P] Create payment-order-scoped hooks in src/Web/ClientApp/src/features/payments/payment-orders/hooks/
 
-**Goal**: Registry columns + deactivated accounts absent from pickers.
+### Payments Frontend
 
-**Independent Test**: Registry shows all 17-field columns; deactivated account absent from PAY-01 picker (quickstart S5.3).
+- [ ] T060 [P] Create PaymentsListPage with table (number/request/order/method/amount/status/payer/date) + filters (period/method/status) in src/Web/ClientApp/src/features/payments/payments/pages/PaymentsListPage.tsx
+- [ ] T061 [P] Create RecordPaymentDialog with readonly amount snapshot + method select (Cash/Check) + referenceNumber + notes + confirmation in src/Web/ClientApp/src/features/payments/payments/pages/RecordPaymentDialog.tsx
+- [ ] T062 [P] Create shared types/schemas/client for payments in src/Web/ClientApp/src/features/payments/payments/shared/
+- [ ] T063 [P] Create payment-scoped hooks in src/Web/ClientApp/src/features/payments/payments/hooks/
 
-### Implementation for US13
+### Bank Accounts Frontend
 
-- [ ] T030 [US13] Frontend registry `src/Web/ClientApp/src/features/payments/bank-accounts/pages/BankAccountsListPage.tsx` (columns incl. isDefault/limits/lastReconciliationDate + filters) + detail `BankAccountDetailPage.tsx` (all fields display-only where contract says so)
+- [ ] T064 [P] Create BankAccountsListPage with table (name/bankName/accountNumber/currency/isDefault/isActive) + filters (active/currency/fund) in src/Web/ClientApp/src/features/payments/bank-accounts/pages/BankAccountsListPage.tsx
+- [ ] T065 [P] Create BankAccountCreatePage with sections: identity (name/bank/account), branch (iban/swift/branch), financial (currency/fund/GL/opening), controls (limits/dual/default) in src/Web/ClientApp/src/features/payments/bank-accounts/pages/BankAccountCreatePage.tsx
+- [ ] T066 [P] Create BankAccountDetailPage with all details + lastReconciliationDate + activate/deactivate buttons (confirmation) in src/Web/ClientApp/src/features/payments/bank-accounts/pages/BankAccountDetailPage.tsx
+- [ ] T067 [P] Create shared types/schemas/client for bank-accounts in src/Web/ClientApp/src/features/payments/bank-accounts/shared/
+- [ ] T068 [P] Create bank-account-scoped hooks in src/Web/ClientApp/src/features/payments/bank-accounts/hooks/
 
----
+### Cross-Entity Frontend
 
-## Phase 16: User Story US14 — Create/edit + default auto-switch (P1 for PAY-04)
+- [ ] T069 [P] Create cross-entity hooks in src/Web/ClientApp/src/features/payments/hooks/
+- [ ] T070 [P] Create cross-entity shared types in src/Web/ClientApp/src/features/payments/shared/
+- [ ] T071 [P] Create Payments-prefixed feature-scoped components (filters, badges, typed grids) in src/Web/ClientApp/src/components/
 
-**Goal**: Full 17-field CRUD; duplicate accountNumber refused; IsDefault auto-switch (D6).
-
-**Independent Test**: quickstart S5.1–S5.2 — B default demotes A; duplicate refused.
-
-### Implementation for US14
-
-- [x] T031 [US14] Implement D6 in `src/Application/Payments/Commands/BankAccounts/CreateBankAccount/CreateBankAccountCommand.cs` and `UpdateBankAccount/UpdateBankAccountCommand.cs` (demote others atomically when IsDefault=true)
-- [ ] T032 [US14] Frontend create/edit dialog `src/Web/ClientApp/src/components/PaymentsBankAccountEditDialog.tsx` — 4 sections (identity/branch/financial/controls) + Zod schema in `src/Web/ClientApp/src/features/payments/bank-accounts/shared/schemas.ts`
-
----
-
-## Phase 17: User Story US15 — Activate/deactivate (P2)
-
-**Goal**: isActive toggle with `{id, rowVersion}` + confirmation; history preserved.
-
-**Independent Test**: quickstart S5.3–S5.4 — deactivate (confirm) → excluded from pickers; stale RowVersion → conflict surfaced.
-
-### Implementation for US15
-
-- [x] T033 [US15] Close gaps in `src/Application/Payments/Commands/BankAccounts/DeactivateBankAccount/DeactivateBankAccountCommand.cs` and `ActivateBankAccount/ActivateBankAccountCommand.cs`
-- [ ] T034 [P] [US15] Frontend activate/deactivate buttons (confirmation) on `BankAccountDetailPage.tsx`
+**Checkpoint**: PAY-01/03/04 frontend complete. `cd src/Web/ClientApp && npm run lint && npm run build` passes. All Arabic RTL pages render correctly.
 
 ---
 
-## Phase 18: Polish & Cross-Cutting
+## Phase 7: Frontend — PAY-02 Disbursement Requests (Arabic spec)
 
-- [ ] T035 Regenerate NSwag client: `cd src/Web/ClientApp && npm run generate-api` (approve request body gained `overrideFailedBudgetCheck`), then `npm run lint` and `npm run build`
-- [ ] T036 Update `docs/database-schema.md` only if any migration landed (expected: none — permission seed only); verify AGENTS.md exemplar table still points at budgeting (no repoint needed unless payments folder supersedes — do NOT repoint speculatively)
-- [ ] T037 Full-suite gate: run `dotnet build src/Web/Web.csproj` — green required before converge
-- [ ] T038 Execute `specs/045-payments-group/quickstart.md` scenarios S1–S6 against a running AppHost; record evidence
+**Goal**: Arabic RTL UI for disbursement request lifecycle per frontend-disbursement-requests.md and frontend-requirements.md
+
+**Independent Test**: Create request → submit → approve (two signatures) → verify order generated → verify detail shows full chain. Verify rejection with reason. Verify cancellation. Run `npm run lint && npm run build`.
+
+**Reference documents**: `frontend-disbursement-requests.md` (Arabic), `frontend-requirements.md` (PAY-02 sections)
+
+### Disbursement Requests Frontend
+
+- [ ] T072 [P] Create DisbursementRequestsListPage with table (number/requester/beneficiary/amount/approvedAmount/status/signatureProgress/linkedOrder) + filters (status/requester) per frontend-disbursement-requests.md S1 in src/Web/ClientApp/src/features/payments/disbursement-requests/pages/DisbursementRequestsListPage.tsx
+- [ ] T073 [P] Create DisbursementRequestCreatePage with form: beneficiaryName (required), beneficiaryPartyId (optional Party picker per ADR-002), requestedAmount (positive), currency, purpose, financialYear, notes per S2 in src/Web/ClientApp/src/features/payments/disbursement-requests/pages/DisbursementRequestCreatePage.tsx
+- [ ] T074 [P] Create DisbursementRequestDetailPage with sections: document header, original request, approval (dual-signature Stepper), negative decision, linked order, execution follow-up, status log per S3 in src/Web/ClientApp/src/features/payments/disbursement-requests/pages/DisbursementRequestDetailPage.tsx
+- [ ] T075 [US3] Create ApprovalDialog (signature dialog) with: requestNumber/beneficiary/requestedAmount/currency for display, approvedAmount (required, positive, ≤ requestedAmount), issuingAuthorityName + issuingAuthorityCapacity (dropdown: General Manager / Finance Director), notes (optional) per S4 in src/Web/ClientApp/src/features/payments/disbursement-requests/pages/ApprovalDialog.tsx
+- [ ] T076 [US4] Create RejectDialog with: requestNumber/beneficiary, reason (required, nonblank) per S5 in src/Web/ClientApp/src/features/payments/disbursement-requests/pages/RejectDialog.tsx
+- [ ] T077 [US4] Create CancelDialog with: requestNumber/beneficiary, reason (required, nonblank) per S5 in src/Web/ClientApp/src/features/payments/disbursement-requests/pages/CancelDialog.tsx
+- [ ] T078 [P] Create shared types/schemas/client for disbursement-requests in src/Web/ClientApp/src/features/payments/disbursement-requests/shared/
+- [ ] T079 [P] Create disbursement-request-scoped hooks in src/Web/ClientApp/src/features/payments/disbursement-requests/hooks/
+
+**Checkpoint**: PAY-02 frontend complete. `cd src/Web/ClientApp && npm run lint && npm run build` passes. All Arabic RTL pages render correctly per frontend-disbursement-requests.md.
+
+---
+
+## Phase 8: Polish & Cross-Cutting Concerns
+
+**Purpose**: API client regeneration, documentation, final validation
+
+- [ ] T080 [P] Regenerate NSwag API client: `cd src/Web/ClientApp && npm run generate-api`
+- [ ] T081 [P] Update docs/database-schema.md with ADR-001 + ADR-002 schema changes (DROP/ADD columns, UNIQUE indexes, BeneficiaryPartyId re-introduction)
+- [ ] T082 Update docs/feature-architecture-map-v1.0.md with payments feature entry
+- [ ] T083 Run full backend build verification: `dotnet build src/Web/Web.csproj`
+- [ ] T084 Run full frontend verification: `cd src/Web/ClientApp && npm run lint && npm run build`
+- [ ] T085 Execute quickstart.md validation scenarios S1–S6 and record evidence
+- [ ] T086 Verify all permission codes are registered and policies wired (PaymentOrders.*, DisbursementRequests.*, BankAccounts.*, Payments.*, PaymentOrders.OverrideBudgetCheck)
+- [ ] T087 Verify all domain events (PaymentRecordedEvent) route through posting pipeline
 
 ---
 
@@ -271,44 +257,82 @@ Spec user stories are grouped by sub-module; task labels are sequential:
 
 ### Phase Dependencies
 
-- Phase 1 (Setup) → Phase 2 (Foundational) → backend stories in order US1→US2→US3→US4→US5 (same module, sequential recommended) while frontend stories can interleave after T003/T004
-- US6–US9 (PAY-02) depend on US1–US3 backend surface (orders exist) — can start after Phase 5
-- US10–US12 (PAY-03) depend on US6–US8 (request lifecycle) — after Phase 10
-- US13–US15 (PAY-04) independent of the chain — can start after Phase 2
-- Phase 18 depends on all
+- **Phase 1 (ADR-001 + ADR-002)**: No dependencies — start immediately. BLOCKS all subsequent phases.
+- **Phase 2 (PAY-01)**: Depends on Phase 1 completion
+- **Phase 3 (PAY-02)**: Depends on Phase 1 completion. T030 (order generation) depends on Phase 2 entity structure (T006–T010)
+- **Phase 4 (PAY-03)**: Depends on Phase 1 + Phase 2 entity structure (order Approved state exists)
+- **Phase 5 (PAY-04)**: Depends on Phase 1 completion only — independent of PAY-01/02/03
+- **Phase 6 (Frontend PAY-01/03/04)**: Depends on backend endpoints being available (Phases 2–5)
+- **Phase 7 (Frontend PAY-02)**: Depends on Phase 3 backend completion
+- **Phase 8 (Polish)**: Depends on all prior phases
 
-### Story Independence
+### User Story Dependencies
 
-- US13–US15 (bank accounts) have zero coupling to US1–US12 — safe parallel lane
-- US2 (budget check) and US5 (void) touch different commands — parallelizable after US1
+- **PAY-01 US1–US4 (P1)**: Can start after Phase 1 — no dependencies on other sub-modules
+- **PAY-01 US5 (P2)**: Depends on PAY-01 US1–US4 + PAY-02 entity structure (for request invalidation)
+- **PAY-02 US1–US6 (P1)**: Can start after Phase 1. US2 (order generation) depends on PAY-01 entity being available
+- **PAY-03 US1–US3 (P1)**: Can start after Phase 1 + Phase 2 entity (order Approved state)
+- **PAY-04 US1–US3 (P1)**: Can start after Phase 1 — fully independent
 
 ### Parallel Opportunities
 
-- Frontend tasks T006/T007/T008 run parallel to backend US2–US5 once T003/T004 land
-- Bank-accounts lane (US13–US15) fully parallel to the order→request→payment chain
+- Phase 1: T003, T004, T005 can run in parallel (different files)
+- Phase 2: T006–T010 (entity adjustments) all parallel; T011+T012 parallel; T019+T020+T021 parallel
+- Phase 3: T023–T026 parallel; T027+T028+T029 parallel; T033+T034 parallel
+- Phase 4: T036–T039 parallel; T042+T043 parallel
+- Phase 5: T045–T049 all parallel; T050+T051 parallel
+- Phase 6: All [P] frontend tasks parallel (different files)
+- Phase 7: T072+T073+T078+T079 parallel; T075+T076+T077 parallel
+- Phase 2–5 can partially overlap: PAY-04 (Phase 5) can run in parallel with Phase 2–4
 
 ---
 
 ## Implementation Strategy
 
-### MVP First (US1 only)
+### MVP First (PAY-01 Lifecycle Only)
 
-1. Phase 1 + Phase 2
-2. Phase 3 (US1) → STOP and validate (list/create/detail + build green)
-3. Demo-able increment
+1. Complete Phase 1: ADR-001 + ADR-002 schema migration
+2. Complete Phase 2: PAY-01 lifecycle (order create → submit → approve → treasury)
+3. **STOP and VALIDATE**: Quickstart S1 scenario manually
+4. Deploy/demo if ready
 
 ### Incremental Delivery
 
-US1 → US2 → US3 → US4 → US5 (order complete) → US6 → US7 → US8 → US9 (requests complete) → US10 → US11 → US12 (payments complete) → US13 → US14 → US15 (bank accounts) → Phase 18 gates.
+1. Phase 1 → Schema ready
+2. Phase 2 → Payment order lifecycle (MVP!)
+3. Phase 3 → Request-first workflow (PAY-02 → PAY-01 chain)
+4. Phase 4 → Payment execution (triad closure)
+5. Phase 5 → Bank accounts (independent, can parallel with 2–4)
+6. Phase 6 → Frontend for PAY-01/03/04
+7. Phase 7 → Frontend for PAY-02 (request-first UI)
+8. Phase 8 → Polish, validation, documentation
 
-### Quality Discipline (No TDD)
+### Parallel Team Strategy
 
-- Every task: implement → build green → validate via quickstart scenario
-- No assertion weakening/skipping; full build gate only at Phase 18 (T037) and converge
-- Frontend increments gate on lint + build
+With multiple developers:
+1. Team completes Phase 1 together
+2. Once Phase 1 done:
+   - Developer A: Phase 2 (PAY-01) + Phase 4 (PAY-03)
+   - Developer B: Phase 3 (PAY-02) — depends on PAY-01 entity
+   - Developer C: Phase 5 (PAY-04) — fully independent
+3. Phase 6 (Frontend PAY-01/03/04) can start as soon as endpoints are available
+4. Phase 7 (Frontend PAY-02) starts after Phase 3 backend
+5. Phase 8 (Polish) after all phases complete
+
+---
 
 ## Notes
 
+- [P] tasks = different files, no dependencies
+- [Story] label maps task to specific sub-module story for traceability
+- No automated tests (DEP-027 exception) — validation via quickstart scenarios
 - Commit after each task or logical group
-- All lifecycle refusals must surface verbatim server messages (CC-2)
-- Do not invent contract fields (D7 partial payments, D10 Failed rows, Transfer/InKind methods remain out of scope)
+- Stop at any checkpoint to validate story independently
+- ADR-001 breaking changes documented in contracts/payments-api.md — frontend must regenerate API client after backend changes
+- ADR-002 (BeneficiaryPartyId optional) supersedes ADR-001 D-1 — both migrations applied in Phase 1
+- Frontend follows features/budgeting/ exemplar — entity-based nesting, no components/ inside features/
+- All Arabic strings hardcoded in JSX — no t() calls, no locale files
+- RTL: logical CSS properties only (ms-/me-, ps-/pe-, start/end) — no physical properties
+- PAY-02 frontend spec: `frontend-disbursement-requests.md` (Arabic) + `frontend-requirements.md` (PAY-02 sections)
+- BeneficiaryPartyLink: server validates selected Party as active, stores ID + snapshots name; invalid ID refused; name-only accepted when no Party selected (ADR-002)
+- Unresolved decisions (OQ-N5..N9) do not block implementation but must be resolved before planning future features

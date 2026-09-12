@@ -4,15 +4,8 @@ import { Page, DataGrid, Button } from '@/components/ui';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useProjects, useDeleteProject } from '../hooks';
+import { projectStatusLabels } from '../types';
 import { useState } from 'react';
-
-const statusLabels: Record<string, string> = {
-  Draft: 'مسودة',
-  Active: 'نشط',
-  OnHold: 'معلق',
-  Completed: 'مكتمل',
-  Cancelled: 'ملغي',
-};
 
 export function ProjectsListPage() {
   const navigate = useNavigate();
@@ -55,7 +48,7 @@ export function ProjectsListPage() {
             };
             return (
               <StatusBadge variant={variantMap[r.status] ?? 'draft'}>
-                {statusLabels[r.status] ?? r.status}
+                {projectStatusLabels[r.status] ?? r.status}
               </StatusBadge>
             );
           }},

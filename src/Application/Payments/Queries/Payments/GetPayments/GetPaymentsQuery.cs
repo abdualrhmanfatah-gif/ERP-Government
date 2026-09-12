@@ -19,7 +19,6 @@ public class GetPaymentsQueryHandler(
         CancellationToken cancellationToken)
     {
         var query = context.Payments
-            .Include(p => p.DisbursementRequest)
             .Include(p => p.PaymentOrder)
             .AsQueryable();
 
@@ -42,13 +41,13 @@ public class GetPaymentsQueryHandler(
                 p.Id,
                 p.PaymentNumber,
                 p.DisbursementRequestId,
-                p.DisbursementRequest.RequestNumber,
+                "",
                 p.PaymentOrderId,
                 p.PaymentOrder.PaymentOrderNumber,
                 p.PaymentMethod,
                 p.Amount,
                 p.PaidById,
-                "",
+                p.PaidByName,
                 p.PaidAt,
                 p.ReferenceNumber,
                 p.Notes,

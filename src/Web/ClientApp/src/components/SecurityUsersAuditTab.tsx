@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { Button } from '@/components/ui/Button';
 import { usersAuditClient } from '@/features/security/users/client';
 
 interface AuditTabProps {
@@ -6,7 +7,7 @@ interface AuditTabProps {
 }
 
 export function AuditTab({ userId }: AuditTabProps) {
-  const { data: entries = [], isLoading } = useQuery({
+  const { data: entries = [], isLoading, isError: isEntriesError, refetch: refetchEntries } = useQuery({
     queryKey: ['users', userId, 'audit'],
     queryFn: () => usersAuditClient.list(userId),
     enabled: userId > 0,
@@ -16,6 +17,15 @@ export function AuditTab({ userId }: AuditTabProps) {
     return <div className="text-[var(--color-on-surface-variant)] p-4">جاري التحميل...</div>;
   }
 
+  if (isEntriesError) {
+    return (
+      <div className="p-4 text-center">
+        <p className="text-sm text-[var(--color-error)]">فشل تحميل البيانات</p>
+        <Button variant="outline" size="sm" className="mt-2" onClick={() => refetchEntries()}>إعادة المحاولة</Button>
+      </div>
+    );
+  }
+
   if (entries.length === 0) {
     return <div className="text-[var(--color-on-surface-variant)] text-sm p-4">لا يوجد سجل تغييرات</div>;
   }
@@ -23,7 +33,7 @@ export function AuditTab({ userId }: AuditTabProps) {
   return (
     <div className="space-y-3">
       {entries.map((entry) => (
-        <div key={entry.id} className="border rounded-lg p-3 text-sm">
+        <div key={entry.id} className="border border-[var(--color-outline)] rounded-lg p-3 text-sm">
           <div className="flex justify-between items-center mb-2">
             <span className="font-medium">{entry.action}</span>
             <span className="text-[var(--color-on-surface-variant)] text-xs">

@@ -13,7 +13,7 @@ function formatMoney(value: number | string): string {
     return '0.00';
   }
 
-  const formatted = new Intl.NumberFormat('ar-EG', {
+  const formatted = new Intl.NumberFormat('ar-YE', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(Math.abs(num));

@@ -6,7 +6,7 @@ namespace ERP_Government.Application.Budgeting.Queries.BudgetItems;
 [Authorize(Policy = PermissionCodes.BudgetItemsView)]
 public record GetBudgetItemMonthlyPlanQuery(int BudgetItemId) : IRequest<List<MonthlyPlanDto>>;
 
-public record MonthlyPlanDto(int Id, int Month, decimal PlannedAmount, byte[] RowVersion);
+public record MonthlyPlanDto(int Id, int FiscalPeriodId, decimal PlannedAmount, byte[] RowVersion);
 
 public class GetBudgetItemMonthlyPlanQueryHandler(
     IApplicationDbContext context) : IRequestHandler<GetBudgetItemMonthlyPlanQuery, List<MonthlyPlanDto>>
@@ -17,8 +17,8 @@ public class GetBudgetItemMonthlyPlanQueryHandler(
     {
         return await context.BudgetItemMonthlyPlans
             .Where(p => p.BudgetItemId == request.BudgetItemId)
-            .OrderBy(p => p.Month)
-            .Select(p => new MonthlyPlanDto(p.Id, p.Month, p.PlannedAmount, p.RowVersion))
+            .OrderBy(p => p.FiscalPeriodId)
+            .Select(p => new MonthlyPlanDto(p.Id, p.FiscalPeriodId, p.PlannedAmount, p.RowVersion))
             .ToListAsync(cancellationToken);
     }
 }

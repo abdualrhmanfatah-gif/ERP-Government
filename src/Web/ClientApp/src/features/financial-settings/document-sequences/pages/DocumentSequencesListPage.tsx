@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Page, Button, Switch, ConfirmDialog, Input } from '@/components/ui';
+import { Page, Button, Badge, Switch, ConfirmDialog, Input } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { notify } from '@/features/notifications/notify';
 import { useDocumentSequencesList, useUpdateDocumentSequence, useDeactivateDocumentSequence } from '../../hooks/useDocumentSequences';
 import { resetPolicyLabels, ResetPolicy } from '../../shared/types';
+import { getActiveStatusLabel } from '@/shared/constants/labels';
 
 export default function DocumentSequencesListPage() {
   const canUpdate = usePermission(PERMISSIONS.DocumentSequences.Update);
@@ -59,8 +60,8 @@ export default function DocumentSequencesListPage() {
     {
       header: 'الحالة',
       cell: (row) => canManage
-        ? <Switch checked={row.isActive} onChange={() => row.isActive ? setConfirmDeactivate({ id: row.id, rowVersion: row.rowVersion, name: row.name }) : undefined} label={row.isActive ? 'نشط' : 'معطل'} />
-        : <span className={row.isActive ? 'text-[var(--color-success)]' : 'text-[var(--color-error)]'}>{row.isActive ? 'نشط' : 'معطل'}</span>,
+        ? <Switch checked={row.isActive} onChange={() => row.isActive ? setConfirmDeactivate({ id: row.id, rowVersion: row.rowVersion, name: row.name }) : undefined} label={getActiveStatusLabel(row.isActive)} />
+        : <Badge variant={row.isActive ? 'success' : 'danger'}>{getActiveStatusLabel(row.isActive)}</Badge>,
     },
     ...(canManage ? [{
       header: 'إجراءات',

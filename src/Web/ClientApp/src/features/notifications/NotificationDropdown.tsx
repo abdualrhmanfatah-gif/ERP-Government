@@ -127,7 +127,7 @@ export function NotificationDropdown({ onClose: _onClose }: Props) {
 
   return (
     <div
-      role="dialog"
+      role="listbox"
       aria-label="الإشعارات"
       className="absolute start-0 top-full mt-2 w-80 bg-[var(--color-surface-container-low)] rounded-xl shadow-lg border border-[var(--color-border-container)] z-[300] overflow-hidden"
     >

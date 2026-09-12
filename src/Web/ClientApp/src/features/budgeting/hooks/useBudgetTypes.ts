@@ -8,10 +8,10 @@ import {
 
 const client = new BudgetTypesClient();
 
-export function useBudgetTypesList() {
+export function useBudgetTypesList(isActive?: boolean) {
   return useQuery({
-    queryKey: ['budget-types'],
-    queryFn: () => client.budgetTypesAll(),
+    queryKey: ['budget-types', { isActive }],
+    queryFn: () => client.budgetTypesAll(isActive),
   });
 }
 

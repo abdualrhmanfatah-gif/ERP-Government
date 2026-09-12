@@ -24,14 +24,14 @@ export function RoleCreatePage() {
     <Page
       title="دور جديد"
       description="إنشاء دور أمان جديد"
-      maxWidth="md"
+      maxWidth="sm"
       actions={
         <Button variant="ghost" onClick={() => navigate('/security/roles')}>
           إلغاء
         </Button>
       }
     >
-      <Card className="max-w-2xl">
+      <Card>
         <RoleForm
           onSubmit={handleSubmit}
           serverError={createMutation.error ? 'حدث خطأ أثناء إنشاء الدور' : undefined}

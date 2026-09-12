@@ -29,7 +29,7 @@ export function OrgUnitForm({ initialData, isEdit, onSubmit, serverError, loadin
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" aria-label="نموذج الوحدة التنظيمية">
       {serverError && (
         <div role="alert" className="p-3 bg-[var(--color-error-container)] text-[var(--color-on-error-container)] rounded-lg text-sm">{serverError}</div>
       )}

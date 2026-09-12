@@ -20,11 +20,18 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(e => e.Amount)
             .HasColumnType("decimal(23,2)");
 
+        builder.Property(e => e.PaidByName)
+            .HasMaxLength(200)
+            .IsRequired();
+
         builder.Property(e => e.ReferenceNumber)
             .HasMaxLength(100);
 
         builder.Property(e => e.Notes)
             .HasMaxLength(500);
+
+        builder.Property(e => e.PayeeName)
+            .HasMaxLength(200);
 
         builder.Property(e => e.Status)
             .HasMaxLength(20)
@@ -37,15 +44,11 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.HasIndex(e => e.PaymentNumber)
             .IsUnique();
 
-        builder.HasIndex(e => e.DisbursementRequestId)
+        // ADR-001 D-6: PaymentOrderId UNIQUE
+        builder.HasIndex(e => e.PaymentOrderId)
             .IsUnique();
 
-        builder.HasIndex(e => e.PaymentOrderId);
-
-        builder.HasOne(e => e.DisbursementRequest)
-            .WithMany()
-            .HasForeignKey(e => e.DisbursementRequestId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(e => e.DisbursementRequestId);
 
         builder.HasOne(e => e.PaymentOrder)
             .WithMany()

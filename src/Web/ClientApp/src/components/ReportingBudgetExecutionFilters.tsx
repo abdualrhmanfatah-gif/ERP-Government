@@ -1,5 +1,5 @@
+import { FilterBar } from '@/components/ui/FilterBar';
 import { FilterSelect } from '@/components/ui/FilterSelect';
-import { Button } from '@/components/ui/Button';
 import type { FundDto, BudgetClassificationDto, FiscalYearDto } from '@/web-api-client';
 import type { BudgetExecutionFilters } from '@/features/reporting/budget-execution-report/shared/types';
 
@@ -27,7 +27,6 @@ export function ReportingBudgetExecutionFilters({
     label: `${f.fundNumber} — ${f.fundName}`,
   }));
 
-  // Program options: classifications whose parent is a root node (level 2).
   const rootIds = new Set((classifications ?? []).filter((c) => !c.parentId).map((c) => c.id));
   const programOptions = (classifications ?? [])
     .filter((c) => c.parentId !== null && c.parentId !== undefined && rootIds.has(c.parentId))
@@ -39,7 +38,10 @@ export function ReportingBudgetExecutionFilters({
   const hasFilters = value.fundId || value.programId || value.projectId;
 
   return (
-    <div className="flex gap-2 items-center flex-wrap">
+    <FilterBar
+      hasFilters={hasFilters}
+      onClear={() => onChange({ fiscalYearId: value.fiscalYearId })}
+    >
       <FilterSelect
         value={value.fiscalYearId ? String(value.fiscalYearId) : ''}
         onChange={(v) => onChange({ ...value, fiscalYearId: v ? Number(v) : undefined })}
@@ -68,17 +70,6 @@ export function ReportingBudgetExecutionFilters({
         placeholder="المشروع"
         label="المشروع"
       />
-      {hasFilters && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() =>
-            onChange({ fiscalYearId: value.fiscalYearId })
-          }
-        >
-          مسح الفلاتر
-        </Button>
-      )}
-    </div>
+    </FilterBar>
   );
 }

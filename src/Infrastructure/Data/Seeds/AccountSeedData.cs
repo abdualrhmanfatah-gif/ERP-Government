@@ -1,269 +1,692 @@
 using ERP_Government.Domain.Accounting.Entities;
 using ERP_Government.Domain.Accounting.Enums;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace ERP_Government.Infrastructure.Data.Seeds;
 
+
+// طريقة الدمج:
+// 1) احذف/استبدل AccountGroupSeedData وAccountSeedData القديمين بهذا الملف.
+// 2) في مهيئ قاعدة البيانات استدعِ:
+//    await AccountingChartSeeder.SeedAsync(dbContext, cancellationToken);
+
+
 /// <summary>
-/// Egyptian Government Pension Fund — Chart of Accounts (دليل محاسبي)
-/// Account seed data — Levels 3-7 based on official chart.
-/// AccountGroupId references AccountGroupSeedData IDs.
+/// الدليل المحاسبي التشغيلي لصندوق التقاعد الأمني في الجمهورية اليمنية.
+///
+/// ملاحظات مهمة:
+/// - ParentId وAccountGroupId يحلهما AccountingChartSeeder من الأكواد الفعلية في قاعدة البيانات.
+/// - الحسابات غير الملائمة أو غير المطبقة حاليًا لا تُزرع في الدليل التشغيلي.
+/// - حسابات 122 تخص المشاريع قيد التنفيذ فقط، وليست أصولًا مكتملة جاهزة للاستخدام.
 /// </summary>
 public static class AccountSeedData
 {
-    public static List<Account> GetAccounts()
+    internal static List<Account> GetBlueprints()
     {
-        var accounts = new List<Account>();
+        ValidateDefinitions(Definitions);
 
-        // ═══ Asset Section (AccountGroupId=1: الموجودات) ═══
-        accounts.AddRange(GetAssetAccounts());
 
-        // ═══ Equity Section (AccountGroupId=2: الموارد الرأسمالية) ═══
-        accounts.AddRange(GetEquityAccounts());
-
-        // ═══ Expense Section (AccountGroupId=3: الاستخدامات الجارية) ═══
-        accounts.AddRange(GetExpenseAccounts());
-
-        // ═══ Revenue Section (AccountGroupId=4: الإيرادات) ═══
-        accounts.AddRange(GetRevenueAccounts());
-
-        return accounts;
+        return Definitions
+            .Select(definition => new Account
+            {
+                Code = definition.Code,
+                Name = definition.Name,
+                AccountGroupId = definition.AccountGroupId,
+                ParentId = null,
+                Level = (byte)definition.Code.Length,
+                NormalBalance = definition.NormalBalance,
+                IsPostable = definition.IsPostable
+            })
+            .ToList();
     }
 
-    // ─── ASSET (الموجودات — AccountGroupId=1) ───
-    private static List<Account> GetAssetAccounts() =>
+
+    private static readonly AccountDefinition[] Definitions =
     [
-        // ═══ 12: مشاريع قيد التنفيذ (AccountGroupId=18: المشاريع الاستثمارية) ═══
-        new() { Code="122",  Name="المشاريع الاستثمارية",                        AccountGroupId=18, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
+        // ═══════════════════════════════════════════════════════════════
+        // الموجودات
+        // ═══════════════════════════════════════════════════════════════
 
-        // 1222: مشاريع المباني والإنشاءات
-        new() { Code="1222", Name="مشاريع المباني والإنشاءات",                   AccountGroupId=18, ParentId=1,    Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="12221",Name="مباني الإدارة",                               AccountGroupId=18, ParentId=2,    Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="12222",Name="مباني استثمارية",                             AccountGroupId=18, ParentId=2,    Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
 
-        // 1223: مشاريع الآلات والتجهيزات والمعدات
-        new() { Code="1223", Name="مشاريع الآلات والتجهيزات والمعدات",          AccountGroupId=18, ParentId=1,    Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="12233",Name="آلات وتجهيزات أخرى ومختلفة",                 AccountGroupId=18, ParentId=5,    Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
+        // 11: أصول ثابتة مكتملة وجاهزة للاستخدام
+        // الأرقام التحليلية أدناه مقترحة للصندوق ويجب مطابقتها مع النسخة
+        // المعتمدة لدى وزارة المالية قبل الانتقال إلى الإنتاج.
+        D("111", "الأراضي", 111, null, NormalBalanceType.Debit, false),
+        D("1111", "أراضي الإدارة", 111, "111", NormalBalanceType.Debit),
+        D("1112", "أراضٍ استثمارية", 111, "111", NormalBalanceType.Debit),
+        D("112", "المباني والإنشاءات", 112, null, NormalBalanceType.Debit, false),
+        D("1121", "مباني الإدارة", 112, "112", NormalBalanceType.Debit),
+        D("1122", "مبانٍ استثمارية", 112, "112", NormalBalanceType.Debit),
+        D("113", "الآلات والتجهيزات والمعدات", 113, null, NormalBalanceType.Debit, false),
+        D("1131", "آلات وتجهيزات ومعدات", 113, "113", NormalBalanceType.Debit),
+        D("114", "السيارات ووسائل النقل", 114, null, NormalBalanceType.Debit, false),
+        D("1141", "سيارات ووسائل نقل", 114, "114", NormalBalanceType.Debit),
+        D("115", "الأثاث ومعدات المكاتب", 115, null, NormalBalanceType.Debit, false),
+        D("1151", "الأثاث والمفروشات", 115, "115", NormalBalanceType.Debit),
+        D("1158", "أجهزة الكمبيوتر وملحقاتها", 115, "115", NormalBalanceType.Debit),
+        D("1159", "معدات مكاتب أخرى", 115, "115", NormalBalanceType.Debit),
 
-        // 1225: مشاريع الأثاث ومعدات المكاتب
-        new() { Code="1225", Name="مشاريع الأثاث ومعدات المكاتب",               AccountGroupId=18, ParentId=1,    Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="12258",Name="أجهزة كمبيوتر",                              AccountGroupId=18, ParentId=7,    Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="12259",Name="أثاث ومعدات أخرى ومختلفة",                   AccountGroupId=18, ParentId=7,    Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
 
-        // ═══ 13: التوظيفات والاستثمارات ═══
-        // 133: حصص المشاركة (AccountGroupId=19)
-        new() { Code="133",  Name="حصص المشاركة",                               AccountGroupId=19, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="1331", Name="مؤسسات وشركات محلية",                        AccountGroupId=19, ParentId=10,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
+        // 122: مشاريع قيد التنفيذ فقط
+        D("122", "المشاريع الاستثمارية قيد التنفيذ", 18, null, NormalBalanceType.Debit, false),
+        D("1222", "مشاريع المباني والإنشاءات قيد التنفيذ", 18, "122", NormalBalanceType.Debit, false),
+        D("12221", "مشروع مبنى الإدارة قيد التنفيذ", 18, "1222", NormalBalanceType.Debit),
+        D("12222", "مشروع مبنى استثماري قيد التنفيذ", 18, "1222", NormalBalanceType.Debit),
+        D("1223", "مشاريع الآلات والتجهيزات والمعدات قيد التنفيذ", 18, "122", NormalBalanceType.Debit, false),
+        D("12233", "مشاريع آلات وتجهيزات أخرى قيد التنفيذ", 18, "1223", NormalBalanceType.Debit),
+        D("1225", "مشاريع الأثاث ومعدات المكاتب قيد التنفيذ", 18, "122", NormalBalanceType.Debit, false),
+        D("12258", "مشروع تجهيز أجهزة كمبيوتر قيد التنفيذ", 18, "1225", NormalBalanceType.Debit),
+        D("12259", "مشروع أثاث ومعدات مكاتب أخرى قيد التنفيذ", 18, "1225", NormalBalanceType.Debit),
 
-        // 135: استثمارات مالية بسندات (AccountGroupId=20)
-        new() { Code="135",  Name="استثمارات مالية بسندات",                      AccountGroupId=20, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="1351", Name="استثمارات مالية بسندات حكومية",               AccountGroupId=20, ParentId=12,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
 
-        // ═══ 18: الزيادة في الأموال الجاهزة ═══
-        // 182: نقد لدى البنوك (AccountGroupId=21)
-        new() { Code="182",  Name="نقد لدى البنوك",                            AccountGroupId=21, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="1821", Name="حسابات جارية محلية",                         AccountGroupId=21, ParentId=14,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
+        // 13: التوظيفات والاستثمارات
+        D("133", "حصص المشاركة", 19, null, NormalBalanceType.Debit, false),
+        D("1331", "مؤسسات وشركات محلية", 19, "133", NormalBalanceType.Debit),
+        D("135", "استثمارات مالية بسندات", 20, null, NormalBalanceType.Debit, false),
+        D("1351", "استثمارات مالية بسندات حكومية", 20, "135", NormalBalanceType.Debit),
+
+
+        // 18: الأموال الجاهزة
+        D("182", "نقد لدى البنوك", 21, null, NormalBalanceType.Debit, false),
+        D("1821", "حسابات جارية محلية", 21, "182", NormalBalanceType.Debit),
+
+
+        // ═══════════════════════════════════════════════════════════════
+        // الموارد الرأسمالية والالتزامات
+        // ═══════════════════════════════════════════════════════════════
+
+
+        D("222", "الفائض المرحل", 22, null, NormalBalanceType.Credit, false),
+        D("2221", "فائض الدورة الحالية", 22, "222", NormalBalanceType.Credit),
+
+
+        D("231", "مخصص الاهتلاكات", 23, null, NormalBalanceType.Credit, false),
+        D("2311", "مخصص اهتلاك المباني والإنشاءات", 23, "231", NormalBalanceType.Credit),
+        D("2312", "مخصص اهتلاك الآلات والتجهيزات والمعدات", 23, "231", NormalBalanceType.Credit),
+        D("2313", "مخصص اهتلاك السيارات ووسائل النقل", 23, "231", NormalBalanceType.Credit),
+        D("2314", "مخصص اهتلاك الأثاث والمفروشات", 23, "231", NormalBalanceType.Credit),
+        D("2315", "مخصص حقوق العاملين الأخرى", 23, "231", NormalBalanceType.Credit),
+
+
+        // العجز مدين، والفائض دائن
+        D("281", "حساب توزيع عجز النشاط الجاري", 24, null, NormalBalanceType.Debit, false),
+        D("2812", "عجز النشاط الجاري", 24, "281", NormalBalanceType.Debit),
+        D("282", "حساب توزيع فائض النشاط الجاري", 25, null, NormalBalanceType.Credit, false),
+        D("2822", "فائض النشاط الجاري", 25, "282", NormalBalanceType.Credit),
+
+
+        // 25: الدائنون
+        D("251", "الموردون", 44, null, NormalBalanceType.Credit, false),
+        D("2511", "موردون محليون - قطاع عام", 44, "251", NormalBalanceType.Credit),
+        D("2512", "موردون محليون - قطاع خاص", 44, "251", NormalBalanceType.Credit),
+        D("2513", "موردون خارجيون", 44, "251", NormalBalanceType.Credit),
+
+
+        D("253", "دائنون متنوعون", 46, null, NormalBalanceType.Credit, false),
+        D("2531", "دائنون متنوعون محليون", 46, "253", NormalBalanceType.Credit),
+        D("2533", "دائنون - ذمم موقوفة", 46, "253", NormalBalanceType.Credit),
+
+
+        D("254", "ذمم دائنة مختلفة", 47, null, NormalBalanceType.Credit, false),
+        D("2541", "مصلحة الضرائب - ضريبة غير مباشرة", 47, "254", NormalBalanceType.Credit),
+        D("2542", "مصلحة الضرائب - ضريبة كسب العمل", 47, "254", NormalBalanceType.Credit),
+        D("2543", "مصلحة الضرائب - ضريبة الدمغة", 47, "254", NormalBalanceType.Credit),
+        D("2544", "صندوق الغرامات والجزاءات", 47, "254", NormalBalanceType.Credit),
+        D("2545", "صندوق الضمان الاجتماعي", 47, "254", NormalBalanceType.Credit),
+        D("2547", "مبالغ محجوزة من المعاشات لنفقة شرعية", 47, "254", NormalBalanceType.Credit),
+        D("2548", "حجوزات رواتب موظفي الصندوق", 47, "254", NormalBalanceType.Credit),
+        D("2549", "ذمم دائنة أخرى", 47, "254", NormalBalanceType.Credit),
+
+
+        // التأمينات والتوقيفات اللازمة للعقود والمناقصات
+        D("262", "التأمينات الدائنة", 53, null, NormalBalanceType.Credit, false),
+        D("2621", "تأمينات للغير", 53, "262", NormalBalanceType.Credit),
+        D("2622", "تأمينات المقاولين", 53, "262", NormalBalanceType.Credit),
+        D("2623", "تأمينات المناقصات", 53, "262", NormalBalanceType.Credit),
+
+
+        D("263", "التوقيفات", 54, null, NormalBalanceType.Credit, false),
+        D("2631", "توقيفات للغير", 54, "263", NormalBalanceType.Credit),
+        D("2632", "توقيفات المقاولين", 54, "263", NormalBalanceType.Credit),
+
+
+        // 27: الحسابات الانتقالية الدائنة
+        D("271", "إيرادات محصلة مقدمًا", 56, null, NormalBalanceType.Credit, false),
+        D("2711", "إيرادات فوائد محصلة مقدمًا", 56, "271", NormalBalanceType.Credit),
+        D("2712", "إيرادات إيجارات محصلة مقدمًا", 56, "271", NormalBalanceType.Credit),
+        D("2713", "إيرادات أوراق مالية محصلة مقدمًا", 56, "271", NormalBalanceType.Credit),
+        D("2715", "إيرادات إعانات محصلة مقدمًا", 56, "271", NormalBalanceType.Credit),
+
+
+        D("272", "مصاريف جارية وتخصيصية مستحقة", 57, null, NormalBalanceType.Credit, false),
+        D("2721", "رواتب وأجور محلية مستحقة", 57, "272", NormalBalanceType.Credit),
+        D("2724", "صيانة وتصليحات مستحقة", 57, "272", NormalBalanceType.Credit),
+        D("2725", "دعاية وإعلان مستحق", 57, "272", NormalBalanceType.Credit),
+        D("2727", "إيجارات مستحقة", 57, "272", NormalBalanceType.Credit),
+        D("2728", "إعانات ومساعدات مستحقة", 57, "272", NormalBalanceType.Credit),
+        D("2729", "مصاريف أخرى مستحقة", 57, "272", NormalBalanceType.Credit),
+
+
+        // ═══════════════════════════════════════════════════════════════
+        // الاستخدامات الجارية
+        // ═══════════════════════════════════════════════════════════════
+
+
+        D("311", "المرتبات والأجور النقدية", 26, null, NormalBalanceType.Debit, false),
+        D("3111", "مرتبات الموظفين الدائمين", 26, "311", NormalBalanceType.Debit),
+
+
+        D("312", "البدلات والتعويضات", 27, null, NormalBalanceType.Debit, false),
+        D("3124", "بدل حضور جلسات", 27, "312", NormalBalanceType.Debit),
+        D("3125", "تعويض المسؤولية", 27, "312", NormalBalanceType.Debit),
+        D("3126", "تعويض العمل الإضافي", 27, "312", NormalBalanceType.Debit),
+        D("3129", "بدلات وتعويضات أخرى", 27, "312", NormalBalanceType.Debit),
+
+
+        D("313", "المزايا العينية", 28, null, NormalBalanceType.Debit, false),
+        D("3139", "مزايا عينية أخرى", 28, "313", NormalBalanceType.Debit),
+
+
+        D("314", "المكافآت", 29, null, NormalBalanceType.Debit, false),
+        D("3141", "المكافآت التشجيعية", 29, "314", NormalBalanceType.Debit),
+
+
+        D("316", "تأمينات وتقاعد العاملين", 30, null, NormalBalanceType.Debit, false),
+        D("3161", "تأمين الشيخوخة أو التقاعد", 30, "316", NormalBalanceType.Debit),
+
+
+        D("321", "المستلزمات السلعية", 31, null, NormalBalanceType.Debit, false),
+        D("3212", "الوقود والزيوت والقوى المحركة والمياه", 31, "321", NormalBalanceType.Debit, false),
+        D("32122", "المواد البترولية", 31, "3212", NormalBalanceType.Debit),
+        D("32123", "الكهرباء", 31, "3212", NormalBalanceType.Debit),
+        D("32128", "الزيوت والشحوم", 31, "3212", NormalBalanceType.Debit),
+        D("32129", "المياه", 31, "3212", NormalBalanceType.Debit),
+        D("3213", "قطع التبديل واللوازم", 31, "321", NormalBalanceType.Debit, false),
+        D("32131", "قطع التبديل للصيانة", 31, "3213", NormalBalanceType.Debit),
+        D("3215", "القرطاسية والمطبوعات", 31, "321", NormalBalanceType.Debit, false),
+        D("32151", "المنشورات والكتب الدورية", 31, "3215", NormalBalanceType.Debit),
+        D("32152", "لوازم الكتابة والقرطاسية", 31, "3215", NormalBalanceType.Debit),
+        D("32154", "لوازم التصوير", 31, "3215", NormalBalanceType.Debit),
+        D("32156", "السجلات والدفاتر", 31, "3215", NormalBalanceType.Debit),
+
+
+        D("322", "المستلزمات الخدمية", 32, null, NormalBalanceType.Debit, false),
+        D("3221", "الصيانة والتصليحات", 32, "322", NormalBalanceType.Debit, false),
+        D("32211", "صيانة المباني والطرق", 32, "3221", NormalBalanceType.Debit),
+        D("32212", "صيانة الآلات والتجهيزات", 32, "3221", NormalBalanceType.Debit),
+        D("32213", "صيانة السيارات ووسائل النقل", 32, "3221", NormalBalanceType.Debit),
+        D("32215", "صيانة الأثاث والمفروشات", 32, "3221", NormalBalanceType.Debit),
+        D("3223", "الأبحاث والتجارب", 32, "322", NormalBalanceType.Debit, false),
+        D("32235", "الخدمات الاستشارية الفنية", 32, "3223", NormalBalanceType.Debit),
+        D("3224", "النشر والإعلان والضيافة والاستقبال", 32, "322", NormalBalanceType.Debit, false),
+        D("32241", "إعلانات منشورة", 32, "3224", NormalBalanceType.Debit),
+        D("32242", "الدعاية الدورية أو الموسمية", 32, "3224", NormalBalanceType.Debit),
+        D("32246", "خدمات الاستقبال والضيافة", 32, "3224", NormalBalanceType.Debit),
+        D("3225", "التنقلات وبدلات السفر والمواصلات", 32, "322", NormalBalanceType.Debit, false),
+        D("32251", "نقل مهمات", 32, "3225", NormalBalanceType.Debit),
+        D("32252", "نقل وانتقالات عامة", 32, "3225", NormalBalanceType.Debit),
+        D("32253", "بدلات السفر الداخلية", 32, "3225", NormalBalanceType.Debit),
+        D("32255", "الاتصالات الهاتفية", 32, "3225", NormalBalanceType.Debit),
+        D("3227", "خدمات الإدارات الحكومية والمؤسسات", 32, "322", NormalBalanceType.Debit, false),
+        D("32271", "خدمات الحراسة والأمن", 32, "3227", NormalBalanceType.Debit),
+        D("32277", "خدمات التفتيش ومراجعة الحسابات", 32, "3227", NormalBalanceType.Debit),
+        D("3228", "الخدمات المتممة", 32, "322", NormalBalanceType.Debit, false),
+        D("32283", "خدمات المكاتب الاستشارية", 32, "3228", NormalBalanceType.Debit),
+        D("3229", "مستلزمات خدمية أخرى", 32, "322", NormalBalanceType.Debit, false),
+        D("32299", "مستلزمات خدمية أخرى ومختلفة", 32, "3229", NormalBalanceType.Debit),
+
+
+        D("351", "المصروفات الجارية التحويلية", 34, null, NormalBalanceType.Debit, false),
+        D("3511", "الاهتلاك", 34, "351", NormalBalanceType.Debit, false),
+        D("35111", "اهتلاك المباني والإنشاءات", 34, "3511", NormalBalanceType.Debit),
+        D("35112", "اهتلاك الآلات والتجهيزات والمعدات", 34, "3511", NormalBalanceType.Debit),
+        D("35113", "اهتلاك السيارات ووسائل النقل", 34, "3511", NormalBalanceType.Debit),
+        D("35114", "اهتلاك الأثاث والمفروشات", 34, "3511", NormalBalanceType.Debit),
+        D("3513", "الإيجارات", 34, "351", NormalBalanceType.Debit, false),
+        D("35136", "إيجارات مبانٍ في الداخل", 34, "3513", NormalBalanceType.Debit),
+        D("3514", "الفوائد والعمولات", 34, "351", NormalBalanceType.Debit, false),
+        D("35141", "الفوائد والعمولات المحلية", 34, "3514", NormalBalanceType.Debit),
+
+
+        D("352", "المصروفات المخصصة", 35, null, NormalBalanceType.Debit, false),
+        D("3522", "الإعانات والمساعدات والزكاة", 35, "352", NormalBalanceType.Debit, false),
+        D("35221", "الإعانات النقدية", 35, "3522", NormalBalanceType.Debit, false),
+        D("352211", "معاشات التقاعد - أساسي وبدلات", 35, "35221", NormalBalanceType.Debit),
+        D("352212", "غلاء المعيشة للمتقاعدين", 35, "35221", NormalBalanceType.Debit),
+        D("352213", "فروقات تسويات معاشات المتقاعدين", 35, "35221", NormalBalanceType.Debit),
+        D("352214", "مكافأة التقاعد", 35, "35221", NormalBalanceType.Debit),
+        D("352215", "تجهيز وتكفين", 35, "35221", NormalBalanceType.Debit),
+        D("352216", "مساعدات مرضية", 35, "35221", NormalBalanceType.Debit),
+        D("3526", "أعباء المخصصات", 35, "352", NormalBalanceType.Debit, false),
+        D("35263", "الديون المشكوك في تحصيلها", 35, "3526", NormalBalanceType.Debit),
+        D("35269", "التعويضات والغرامات المختلفة", 35, "3526", NormalBalanceType.Debit, false),
+        D("352692", "نفقات تأمينية", 35, "35269", NormalBalanceType.Debit),
+
+
+        // ═══════════════════════════════════════════════════════════════
+        // الإيرادات
+        // ═══════════════════════════════════════════════════════════════
+
+
+        D("414", "إيرادات قطاع الخدمات", 37, null, NormalBalanceType.Credit, false),
+        D("4142", "إيرادات الاشتراكات", 37, "414", NormalBalanceType.Credit, false),
+        D("41421", "إيرادات حصة الحكومة في التقاعد", 37, "4142", NormalBalanceType.Credit),
+        D("41422", "إيرادات حصة المنتفعين في التقاعد", 37, "4142", NormalBalanceType.Credit),
+        D("41423", "إيرادات دعم الحكومة لغلاء المعيشة", 37, "4142", NormalBalanceType.Credit),
+        D("41424", "إيرادات دعم الحكومة للمعاشات الاستثنائية", 37, "4142", NormalBalanceType.Credit),
+        D("41425", "إيرادات دعم الحكومة لتسويات معاشات المحالين", 37, "4142", NormalBalanceType.Credit),
+        D("41426", "إيرادات ضم الخدمات", 37, "4142", NormalBalanceType.Credit),
+
+
+        D("429", "إيرادات أخرى ومختلفة", 15, null, NormalBalanceType.Credit, false),
+        D("4291", "إيرادات أخرى ومختلفة", 15, "429", NormalBalanceType.Credit),
+
+
+        D("431", "إيرادات أوراق مالية محلية", 38, null, NormalBalanceType.Credit, false),
+        D("4311", "إيرادات أوراق مالية محلية", 38, "431", NormalBalanceType.Credit),
+        D("433", "إيرادات عوائد محلية", 39, null, NormalBalanceType.Credit, false),
+        D("4331", "إيرادات عوائد محلية", 39, "433", NormalBalanceType.Credit),
+        D("452", "الإيجارات الدائنة", 40, null, NormalBalanceType.Credit, false),
+        D("4521", "إيراد إيجار مبانٍ في الداخل", 40, "452", NormalBalanceType.Credit)
     ];
 
-    // ─── EQUITY (الموارد الرأسمالية — AccountGroupId=2) ───
-    private static List<Account> GetEquityAccounts() =>
-    [
-        // ═══ 22: الاحتياطيات والفائض ═══
-        // 222: الفائض المرحل (AccountGroupId=22)
-        new() { Code="222",  Name="الفائض المرحل",                            AccountGroupId=22, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Credit, IsPostable=false },
-        new() { Code="2221", Name="فائض الدورة الحالية",                       AccountGroupId=22, ParentId=16,   Level=4, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
 
-        // ═══ 23: المخصصات ═══
-        // 231: مخصص الاهتلاكات (AccountGroupId=23)
-        new() { Code="231",  Name="مخصص الاهتلاكات",                           AccountGroupId=23, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Credit, IsPostable=false },
-        new() { Code="2311", Name="مخصص اهتلاك المباني والإنشاءات",            AccountGroupId=23, ParentId=18,   Level=4, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
-        new() { Code="2312", Name="مخصص اهتلاك الآلات والتجهيزات والمعدات",    AccountGroupId=23, ParentId=18,   Level=4, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
-        new() { Code="2313", Name="مخصص اهتلاك السيارات ووسائل النقل",         AccountGroupId=23, ParentId=18,   Level=4, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
-        new() { Code="2314", Name="مخصص اهتلاك الأثاث والمفروشات",            AccountGroupId=23, ParentId=18,   Level=4, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
-        new() { Code="2315", Name="مخصص حقوق العاملين أخرى ومختلفة",           AccountGroupId=23, ParentId=18,   Level=4, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
+    private static AccountDefinition D(
+        string code,
+        string name,
+        int accountGroupId,
+        string? parentCode,
+        NormalBalanceType normalBalance,
+        bool isPostable = true) =>
+        new(code, name, accountGroupId, parentCode, normalBalance, isPostable);
 
-        // ═══ 28: حسابات النتائج ═══
-        // 281: حساب توزيع (عجز النشاط الجاري) (AccountGroupId=24)
-        new() { Code="281",  Name="حساب توزيع (عجز النشاط الجاري)",           AccountGroupId=24, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Credit, IsPostable=false },
-        new() { Code="2812", Name="حساب التوزيع (عجز النشاط الجاري)",         AccountGroupId=24, ParentId=25,   Level=4, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
 
-        // 282: حساب توزيع (فائض النشاط الجاري) (AccountGroupId=25)
-        new() { Code="282",  Name="حساب توزيع (فائض النشاط الجاري)",          AccountGroupId=25, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Credit, IsPostable=false },
-        new() { Code="2822", Name="حساب التوزيع (فائض النشاط الجاري)",        AccountGroupId=25, ParentId=27,   Level=4, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
-    ];
+    private static void ValidateDefinitions(IReadOnlyCollection<AccountDefinition> definitions)
+    {
+        var duplicateCodes = definitions
+            .GroupBy(definition => definition.Code, StringComparer.Ordinal)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToArray();
 
-    // ─── EXPENSE (الاستخدامات الجارية — AccountGroupId=3) ───
-    private static List<Account> GetExpenseAccounts() =>
-    [
-        // ═══ 31: المرتبات والأجور وما في حكمها ═══
-        // 311: المرتبات والأجور النقدية (AccountGroupId=26)
-        new() { Code="311",  Name="المرتبات والأجور النقدية",                  AccountGroupId=26, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="3111", Name="مرتبات الموظفين الدائمين",                   AccountGroupId=26, ParentId=29,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="3113", Name="مرتبات وأجور موسمية",                        AccountGroupId=26, ParentId=29,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
 
-        // 312: البدلات والتعويضات (AccountGroupId=27)
-        new() { Code="312",  Name="البدلات والتعويضات",                        AccountGroupId=27, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="3124", Name="بدل حضور جلسات",                            AccountGroupId=27, ParentId=32,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="3125", Name="تعويض المسؤولية",                           AccountGroupId=27, ParentId=32,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="3126", Name="تعويض العمل الإضافي",                       AccountGroupId=27, ParentId=32,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="3129", Name="بدلات وتعويضات أخرى",                      AccountGroupId=27, ParentId=32,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
+        if (duplicateCodes.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"Duplicate account codes: {string.Join(", ", duplicateCodes)}");
+        }
 
-        // 313: المزايا العينية (AccountGroupId=28)
-        new() { Code="313",  Name="المزايا العينية",                           AccountGroupId=28, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="3139", Name="مزايا عينية مختلفة أخرى",                   AccountGroupId=28, ParentId=37,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
 
-        // 314: المكافآت (AccountGroupId=29)
-        new() { Code="314",  Name="المكافآت",                                  AccountGroupId=29, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="3141", Name="المكافآت التشجيعية",                        AccountGroupId=29, ParentId=39,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
+        var definitionsByCode = definitions.ToDictionary(
+            definition => definition.Code,
+            StringComparer.Ordinal);
 
-        // 316: تأمينات وتقاعد العاملين (AccountGroupId=30)
-        new() { Code="316",  Name="تأمينات وتقاعد العاملين",                   AccountGroupId=30, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="3161", Name="تأمين الشيخوخة أو التقاعد",                AccountGroupId=30, ParentId=41,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
 
-        // ═══ 32: المستلزمات السلعية ومشتريات بغرض البيع ═══
-        // 321: المستلزمات السلعية (AccountGroupId=31)
-        new() { Code="321",  Name="المستلزمات السلعية",                        AccountGroupId=31, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
+        foreach (var definition in definitions)
+        {
+            if (definition.Code.Length is < 3 or > 7 ||
+                !definition.Code.All(char.IsAsciiDigit))
+            {
+                throw new InvalidOperationException(
+                    $"Invalid numeric account code: {definition.Code}");
+            }
 
-        // 3212: الوقود والزيوت والقوى المحركة والمياه
-        new() { Code="3212", Name="الوقود والزيوت والقوى المحركة والمياه",     AccountGroupId=31, ParentId=43,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="32122",Name="المواد البترولية",                           AccountGroupId=31, ParentId=44,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="32123",Name="الكهرباء",                                  AccountGroupId=31, ParentId=44,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="32128",Name="الزيوت والشحوم",                            AccountGroupId=31, ParentId=44,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="32129",Name="المياه",                                    AccountGroupId=31, ParentId=44,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
 
-        // 3213: قطع التبديل واللوازم
-        new() { Code="3213", Name="قطع التبديل واللوازم",                      AccountGroupId=31, ParentId=43,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="32131",Name="قطع التبديل للصيانة",                        AccountGroupId=31, ParentId=49,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
+            if (definition.ParentCode is null)
+            {
+                if (definition.Code.Length != 3)
+                {
+                    throw new InvalidOperationException(
+                        $"Account {definition.Code} must have a parent account.");
+                }
 
-        // 3215: القرطاسية والمطبوعات
-        new() { Code="3215", Name="القرطاسية والمطبوعات",                      AccountGroupId=31, ParentId=43,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="32151",Name="المنشورات والكتب الدورية",                  AccountGroupId=31, ParentId=51,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="32152",Name="القرطاسية - لوازم الكتابة",                 AccountGroupId=31, ParentId=51,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="32154",Name="قرطاسية - لوازم التصوير",                   AccountGroupId=31, ParentId=51,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="32156",Name="السجلات والدفاتر",                          AccountGroupId=31, ParentId=51,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
 
-        // 322: المستلزمات الخدمية (AccountGroupId=32)
-        new() { Code="322",  Name="المستلزمات الخدمية",                        AccountGroupId=32, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
+                continue;
+            }
 
-        // 3221: الصيانة والتصليحات
-        new() { Code="3221", Name="الصيانة والتصليحات",                        AccountGroupId=32, ParentId=56,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="32211",Name="صيانة المباني والطرق",                      AccountGroupId=32, ParentId=57,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="32212",Name="صيانة الآلات والتجهيزات",                   AccountGroupId=32, ParentId=57,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="32213",Name="صيانة السيارات ووسائل النقل",               AccountGroupId=32, ParentId=57,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="32215",Name="صيانة الأثاث والمفروشات",                   AccountGroupId=32, ParentId=57,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
 
-        // 3223: الأبحاث والتجارب
-        new() { Code="3223", Name="الأبحاث والتجارب",                          AccountGroupId=32, ParentId=56,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="32235",Name="الخدمات الاستشارية الفنية",                 AccountGroupId=32, ParentId=62,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
+            if (!definitionsByCode.TryGetValue(definition.ParentCode, out var parent))
+            {
+                throw new InvalidOperationException(
+                    $"Parent account {definition.ParentCode} was not found for {definition.Code}.");
+            }
 
-        // 3224: نشر وإعلان ومصروفات ضيافة واستقبال
-        new() { Code="3224", Name="نشر وإعلان ومصروفات ضيافة واستقبال",       AccountGroupId=32, ParentId=56,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="32241",Name="إعلانات منشورة",                            AccountGroupId=32, ParentId=64,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="32242",Name="الدعاية الدورية أو الموسمية",               AccountGroupId=32, ParentId=64,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="32246",Name="خدمات الاستقبال والضيافة",                  AccountGroupId=32, ParentId=64,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
 
-        // 3225: التنقلات وبدلات السفر والمواصلات
-        new() { Code="3225", Name="التنقلات وبدلات السفر والمواصلات",         AccountGroupId=32, ParentId=56,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="32251",Name="نقل مهمات",                                AccountGroupId=32, ParentId=68,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="32252",Name="نقل وانتقالات عامة",                        AccountGroupId=32, ParentId=68,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="32253",Name="بدلات السفر الداخلية",                      AccountGroupId=32, ParentId=68,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="32255",Name="الاتصالات الهاتفية",                        AccountGroupId=32, ParentId=68,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
+            if (!definition.Code.StartsWith(parent.Code, StringComparison.Ordinal) ||
+                definition.Code.Length != parent.Code.Length + 1)
+            {
+                throw new InvalidOperationException(
+                    $"Invalid hierarchy: {definition.Code} cannot be a direct child of {parent.Code}.");
+            }
 
-        // 3227: خدمات الإدارات الحكومية والمؤسسات
-        new() { Code="3227", Name="خدمات الإدارات الحكومية والمؤسسات",        AccountGroupId=32, ParentId=56,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="32271",Name="خدمات الحراسة والأمن",                      AccountGroupId=32, ParentId=73,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="32277",Name="خدمات التفتيش ومراجعة الحسابات",            AccountGroupId=32, ParentId=73,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
 
-        // 3228: الخدمات المتممة
-        new() { Code="3228", Name="الخدمات المتممة",                           AccountGroupId=32, ParentId=56,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="32283",Name="خدمات المكاتب الاستشارية",                  AccountGroupId=32, ParentId=75,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
+            if (definition.AccountGroupId != parent.AccountGroupId)
+            {
+                throw new InvalidOperationException(
+                    $"Account {definition.Code} and parent {parent.Code} must use the same AccountGroupId.");
+            }
 
-        // 3229: مستلزمات خدمية أخرى
-        new() { Code="3229", Name="مستلزمات خدمية أخرى",                      AccountGroupId=32, ParentId=56,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="32299",Name="مستلزمات خدمية أخرى ومختلفة",              AccountGroupId=32, ParentId=77,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
 
-        // 323: مشتريات بغرض البيع (AccountGroupId=33)
-        new() { Code="323",  Name="مشتريات بغرض البيع",                        AccountGroupId=33, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="3231", Name="مشتريات محلية",                             AccountGroupId=33, ParentId=79,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="32311",Name="مشتريات بثمن التكلفة",                      AccountGroupId=33, ParentId=80,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
+            if (parent.IsPostable)
+            {
+                throw new InvalidOperationException(
+                    $"Parent account {parent.Code} cannot be postable.");
+            }
+        }
+    }
 
-        // ═══ 35: المصروفات الجارية التحويلية والمخصصة ═══
-        // 351: المصروفات الجارية التحويلية (AccountGroupId=34)
-        new() { Code="351",  Name="المصروفات الجارية التحويلية",               AccountGroupId=34, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
 
-        // 3511: الاهتلاك
-        new() { Code="3511", Name="الاهتلاك",                                  AccountGroupId=34, ParentId=82,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="35111",Name="اهتلاك المباني والإنشاءات",                 AccountGroupId=34, ParentId=83,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="35112",Name="اهتلاك الآلات والتجهيزات والمعدات",        AccountGroupId=34, ParentId=83,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="35113",Name="اهتلاك السيارات ووسائل النقل",             AccountGroupId=34, ParentId=83,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="35114",Name="اهتلاك الأثاث والمفروشات",                AccountGroupId=34, ParentId=83,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
+    private sealed record AccountDefinition(
+        string Code,
+        string Name,
+        int AccountGroupId,
+        string? ParentCode,
+        NormalBalanceType NormalBalance,
+        bool IsPostable);
+}
 
-        // 3513: الإيجارات
-        new() { Code="3513", Name="الإيجارات",                                 AccountGroupId=34, ParentId=82,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="35136",Name="إيجارات مباني في الداخل",                  AccountGroupId=34, ParentId=88,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
 
-        // 3514: الفوائد والعمولات
-        new() { Code="3514", Name="الفوائد والعمولات",                         AccountGroupId=34, ParentId=82,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="35141",Name="الفوائد والعمولات المحلية",                AccountGroupId=34, ParentId=90,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
+/// <summary>
+/// يزرع مجموعات الحسابات والحسابات بالاعتماد على Code بدل الاعتماد على IDs ثابتة.
+/// استخدم هذه الدالة بدل منطق الإدخال القديم ذي المرحلتين والأرقام المتسلسلة المفترضة.
+/// </summary>
+public static class AccountingChartSeeder
+{
+    public static async Task SeedAsync(
+        DbContext dbContext,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(dbContext);
 
-        // 352: المصروفات المخصصة (AccountGroupId=35)
-        new() { Code="352",  Name="المصروفات المخصصة",                         AccountGroupId=35, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
 
-        // 3521: التبرعات
-        new() { Code="3521", Name="التبرعات",                                  AccountGroupId=35, ParentId=92,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="35211",Name="التبرعات النقدية",                          AccountGroupId=35, ParentId=93,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
+        var accountBlueprints = AccountSeedData.GetBlueprints();
+        var groupDefinitions = CreateGroupDefinitions(accountBlueprints);
 
-        // 3522: الإعانات والمساعدات والزكاة
-        new() { Code="3522", Name="الإعانات والمساعدات والزكاة",              AccountGroupId=35, ParentId=92,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="35221",Name="الإعانات النقدية",                          AccountGroupId=35, ParentId=95,   Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="352211",Name="معاشات التقاعد (أساسي + بدلات)",          AccountGroupId=35, ParentId=96,   Level=6, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="352212",Name="غلاء المعيشة للمتقاعدين",                 AccountGroupId=35, ParentId=96,   Level=6, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="352213",Name="فروقات تسويات المعاشات للمتقاعدين",       AccountGroupId=35, ParentId=96,   Level=6, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="352214",Name="مكافأة التقاعد",                           AccountGroupId=35, ParentId=96,   Level=6, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="352215",Name="تجهيز وتكفين",                            AccountGroupId=35, ParentId=96,   Level=6, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
 
-        // 3526: أعباء المخصصات
-        new() { Code="3526", Name="أعباء المخصصات",                            AccountGroupId=35, ParentId=92,   Level=4, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="35263",Name="الديون المشكوك في تحصيلها",                AccountGroupId=35, ParentId=102,  Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="35269",Name="التعويضات والغرامات المختلفة",             AccountGroupId=35, ParentId=102,  Level=5, NormalBalance=NormalBalanceType.Debit, IsPostable=false },
-        new() { Code="352691",Name="تبادل الاحتياطيات",                       AccountGroupId=35, ParentId=104,  Level=6, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-        new() { Code="352692",Name="نفقات تأمينية",                           AccountGroupId=35, ParentId=104,  Level=6, NormalBalance=NormalBalanceType.Debit, IsPostable=true },
-    ];
+        ValidateGroupDefinitions(groupDefinitions);
 
-    // ─── REVENUE (الإيرادات — AccountGroupId=4) ───
-    private static List<Account> GetRevenueAccounts() =>
-    [
-        // ═══ 41: إيرادات النشاط الجاري ═══
-        // 412: إيرادات العمليات التجارية (AccountGroupId=36)
-        new() { Code="412",  Name="إيرادات العمليات التجارية",                 AccountGroupId=36, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Credit, IsPostable=false },
-        new() { Code="4121", Name="مبيعات البضائع الجاهزة",                   AccountGroupId=36, ParentId=106,  Level=4, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
 
-        // 414: إيرادات قطاع الخدمات (AccountGroupId=37)
-        new() { Code="414",  Name="إيرادات قطاع الخدمات",                     AccountGroupId=37, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Credit, IsPostable=false },
-        new() { Code="4142", Name="إيرادات الاشتراكات",                        AccountGroupId=37, ParentId=108,  Level=4, NormalBalance=NormalBalanceType.Credit, IsPostable=false },
-        new() { Code="41421",Name="إيرادات حصة الحكومة في التقاعد",            AccountGroupId=37, ParentId=109,  Level=5, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
-        new() { Code="41422",Name="إيرادات حصة الموظفين في التقاعد",           AccountGroupId=37, ParentId=109,  Level=5, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
-        new() { Code="41423",Name="إيرادات دعم الحكومة لغلاء المعيشة",        AccountGroupId=37, ParentId=109,  Level=5, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
-        new() { Code="41424",Name="إيرادات دعم الحكومة للمعاشات الاستثنائية", AccountGroupId=37, ParentId=109,  Level=5, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
-        new() { Code="41425",Name="إيرادات دعم الحكومة لتسويات معاشات المحالين", AccountGroupId=37, ParentId=109, Level=5, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
-        new() { Code="41426",Name="إيرادات ضم الخدمات",                        AccountGroupId=37, ParentId=109,  Level=5, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
+        var groupsByCode = await UpsertAccountGroupsAsync(
+            dbContext,
+            groupDefinitions,
+            cancellationToken);
 
-        // ═══ 42: الإيرادات المتنوعة ═══
-        // 429: إيرادات أخرى ومختلفة (AccountGroupId=15)
-        new() { Code="429",  Name="إيرادات أخرى ومختلفة",                     AccountGroupId=15, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Credit, IsPostable=false },
-        new() { Code="4291", Name="أخرى ومختلفة",                             AccountGroupId=15, ParentId=117,  Level=4, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
 
-        // ═══ 43: إيرادات الأوراق المالية والعوائد ═══
-        // 431: إيرادات أوراق مالية محلية (AccountGroupId=38)
-        new() { Code="431",  Name="إيرادات أوراق مالية محلية",                 AccountGroupId=38, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Credit, IsPostable=false },
-        new() { Code="4311", Name="إيرادات أوراق مالية محلية",                 AccountGroupId=38, ParentId=119,  Level=4, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
+        await UpsertAccountsAsync(
+            dbContext,
+            accountBlueprints,
+            groupsByCode,
+            cancellationToken);
+    }
 
-        // 433: إيرادات عوائد محلية (AccountGroupId=39)
-        new() { Code="433",  Name="إيرادات عوائد محلية",                       AccountGroupId=39, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Credit, IsPostable=false },
-        new() { Code="4331", Name="إيرادات عوائد محلية",                       AccountGroupId=39, ParentId=121,  Level=4, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
 
-        // ═══ 45: الإيرادات الجارية التحويلية ═══
-        // 452: الإيجارات الدائنة (AccountGroupId=40)
-        new() { Code="452",  Name="الإيجارات الدائنة",                        AccountGroupId=40, ParentId=null, Level=3, NormalBalance=NormalBalanceType.Credit, IsPostable=false },
-        new() { Code="4521", Name="إيجار مباني في الداخل",                    AccountGroupId=40, ParentId=123,  Level=4, NormalBalance=NormalBalanceType.Credit, IsPostable=true },
-    ];
+    private static async Task<Dictionary<string, AccountGroup>> UpsertAccountGroupsAsync(
+        DbContext dbContext,
+        IReadOnlyCollection<AccountGroupDefinition> definitions,
+        CancellationToken cancellationToken)
+    {
+        var codes = definitions.Select(definition => definition.Code).ToArray();
+        var groupsByCode = await dbContext.Set<AccountGroup>()
+            .Where(group => codes.Contains(group.Code))
+            .ToDictionaryAsync(group => group.Code, StringComparer.Ordinal, cancellationToken);
+
+
+        foreach (var level in definitions.Select(definition => definition.Level).Distinct().Order())
+        {
+            foreach (var definition in definitions.Where(definition => definition.Level == level))
+            {
+                var parentId = definition.ParentCode is null
+                    ? (int?)null
+                    : groupsByCode[definition.ParentCode].Id;
+
+
+                if (!groupsByCode.TryGetValue(definition.Code, out var group))
+                {
+                    group = new AccountGroup
+                    {
+                        Code = definition.Code,
+                        Name = definition.Name,
+                        Type = definition.Type,
+                        NormalBalance = definition.NormalBalance,
+                        Level = (byte)definition.Level,
+                        ParentCode = definition.ParentCode,
+                        ParentId = parentId,
+                        Description = definition.Description
+                    };
+
+
+                    dbContext.Set<AccountGroup>().Add(group);
+                    groupsByCode.Add(group.Code, group);
+                }
+                else
+                {
+                    group.Name = definition.Name;
+                    group.Type = definition.Type;
+                    group.NormalBalance = definition.NormalBalance;
+                    group.Level = (byte)definition.Level;
+                    group.ParentCode = definition.ParentCode;
+                    group.ParentId = parentId;
+                    group.Description = definition.Description;
+                }
+            }
+
+
+            // الحفظ بعد كل مستوى يضمن توليد IDs قبل استخدامها في المستوى التالي.
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+
+        return groupsByCode;
+    }
+
+
+    private static async Task UpsertAccountsAsync(
+        DbContext dbContext,
+        IReadOnlyCollection<Account> blueprints,
+        IReadOnlyDictionary<string, AccountGroup> groupsByCode,
+        CancellationToken cancellationToken)
+    {
+        var codes = blueprints.Select(account => account.Code).ToArray();
+        var accountsByCode = await dbContext.Set<Account>()
+            .Where(account => codes.Contains(account.Code))
+            .ToDictionaryAsync(account => account.Code, StringComparer.Ordinal, cancellationToken);
+
+
+        foreach (var level in blueprints.Select(account => account.Level).Distinct().Order())
+        {
+            foreach (var blueprint in blueprints.Where(account => account.Level == level))
+            {
+                var groupCode = blueprint.Code[..3];
+                if (!groupsByCode.TryGetValue(groupCode, out var group))
+                {
+                    throw new InvalidOperationException(
+                        $"Account group {groupCode} was not found for account {blueprint.Code}.");
+                }
+
+
+                var parentCode = blueprint.Level == 3
+                    ? null
+                    : blueprint.Code[..^1];
+
+
+                var parentId = parentCode is null
+                    ? (int?)null
+                    : accountsByCode[parentCode].Id;
+
+
+                if (!accountsByCode.TryGetValue(blueprint.Code, out var account))
+                {
+                    account = new Account
+                    {
+                        Code = blueprint.Code,
+                        Name = blueprint.Name,
+                        AccountGroupId = group.Id,
+                        ParentId = parentId,
+                        Level = blueprint.Level,
+                        NormalBalance = blueprint.NormalBalance,
+                        IsPostable = blueprint.IsPostable
+                    };
+
+
+                    dbContext.Set<Account>().Add(account);
+                    accountsByCode.Add(account.Code, account);
+                }
+                else
+                {
+                    account.Name = blueprint.Name;
+                    account.AccountGroupId = group.Id;
+                    account.ParentId = parentId;
+                    account.Level = blueprint.Level;
+                    account.NormalBalance = blueprint.NormalBalance;
+                    account.IsPostable = blueprint.IsPostable;
+                }
+            }
+
+
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+    }
+
+
+    private static AccountGroupDefinition[] CreateGroupDefinitions(
+        IReadOnlyCollection<Account> accountBlueprints)
+    {
+        AccountGroupDefinition[] baseDefinitions =
+        [
+            G("1", "الموجودات", AccountGroupType.Asset, NormalBalanceType.Debit, null,
+                "إجمالي الموجودات الثابتة والاستثمارات والمشاريع والنقدية"),
+            G("2", "الموارد الرأسمالية والالتزامات", AccountGroupType.Equity, NormalBalanceType.Credit, null,
+                "الفائض والمخصصات والدائنون والحسابات الانتقالية"),
+            G("3", "الاستخدامات الجارية", AccountGroupType.Expense, NormalBalanceType.Debit, null,
+                "المصروفات التشغيلية والتقاعدية"),
+            G("4", "الإيرادات", AccountGroupType.Revenue, NormalBalanceType.Credit, null,
+                "الاشتراكات والدعم وعوائد الاستثمار والإيجارات"),
+
+
+            G("11", "الموجودات الثابتة", AccountGroupType.Asset, NormalBalanceType.Debit, "1",
+                "الأراضي والمباني والآلات والسيارات والأثاث ومعدات المكاتب"),
+            G("12", "مشاريع قيد التنفيذ", AccountGroupType.Asset, NormalBalanceType.Debit, "1",
+                "تكلفة المشاريع إلى حين اكتمالها ورسملتها"),
+            G("13", "التوظيفات والاستثمارات", AccountGroupType.Asset, NormalBalanceType.Debit, "1",
+                "حصص المشاركة والاستثمارات المالية"),
+            G("18", "الأموال الجاهزة", AccountGroupType.Asset, NormalBalanceType.Debit, "1",
+                "النقد لدى البنوك"),
+
+
+            G("22", "الاحتياطيات والفائض", AccountGroupType.Equity, NormalBalanceType.Credit, "2",
+                "الفائض المرحل وفائض الدورة"),
+            G("23", "المخصصات", AccountGroupType.Equity, NormalBalanceType.Credit, "2",
+                "مخصصات الاهتلاك والحقوق"),
+            G("25", "الدائنون", AccountGroupType.Equity, NormalBalanceType.Credit, "2",
+                "الموردون والذمم الدائنة"),
+            G("26", "التأمينات والتوقيفات الدائنة", AccountGroupType.Equity, NormalBalanceType.Credit, "2",
+                "تأمينات العقود والمناقصات والتوقيفات"),
+            G("27", "الحسابات الانتقالية الدائنة", AccountGroupType.Equity, NormalBalanceType.Credit, "2",
+                "إيرادات محصلة مقدمًا ومصاريف مستحقة"),
+            G("28", "حسابات النتائج", AccountGroupType.Equity, NormalBalanceType.Credit, "2",
+                "عجز أو فائض النشاط الجاري"),
+
+
+            G("31", "المرتبات والأجور وما في حكمها", AccountGroupType.Expense, NormalBalanceType.Debit, "3",
+                "مرتبات موظفي الصندوق وبدلاتهم ومكافآتهم"),
+            G("32", "المستلزمات السلعية والخدمية", AccountGroupType.Expense, NormalBalanceType.Debit, "3",
+                "المستلزمات التشغيلية والصيانة والخدمات"),
+            G("35", "المصروفات التحويلية والمخصصة", AccountGroupType.Expense, NormalBalanceType.Debit, "3",
+                "المعاشات والمساعدات والاهتلاك والإيجارات والعمولات"),
+
+
+            G("41", "إيرادات النشاط الجاري", AccountGroupType.Revenue, NormalBalanceType.Credit, "4",
+                "اشتراكات التقاعد والدعم الحكومي"),
+            G("42", "الإيرادات المتنوعة", AccountGroupType.Revenue, NormalBalanceType.Credit, "4",
+                "إيرادات أخرى ومختلفة"),
+            G("43", "إيرادات الأوراق المالية والعوائد", AccountGroupType.Revenue, NormalBalanceType.Credit, "4",
+                "عوائد الاستثمارات والأوراق المالية"),
+            G("45", "الإيرادات الجارية التحويلية", AccountGroupType.Revenue, NormalBalanceType.Credit, "4",
+                "إيرادات الإيجارات")
+        ];
+
+
+        var typeBySection = new Dictionary<char, AccountGroupType>
+        {
+            ['1'] = AccountGroupType.Asset,
+            ['2'] = AccountGroupType.Equity,
+            ['3'] = AccountGroupType.Expense,
+            ['4'] = AccountGroupType.Revenue
+        };
+
+
+        var levelThreeDefinitions = accountBlueprints
+            .Where(account => account.Level == 3)
+            .Select(account => G(
+                account.Code,
+                account.Name,
+                typeBySection[account.Code[0]],
+                account.NormalBalance,
+                account.Code[..2],
+                account.Name));
+
+
+        return baseDefinitions.Concat(levelThreeDefinitions).ToArray();
+    }
+
+
+    private static AccountGroupDefinition G(
+        string code,
+        string name,
+        AccountGroupType type,
+        NormalBalanceType normalBalance,
+        string? parentCode,
+        string description) =>
+        new(code, name, type, normalBalance, code.Length, parentCode, description);
+
+
+    private static void ValidateGroupDefinitions(
+        IReadOnlyCollection<AccountGroupDefinition> definitions)
+    {
+        var definitionsByCode = definitions.ToDictionary(
+            definition => definition.Code,
+            StringComparer.Ordinal);
+
+
+        if (definitionsByCode.Count != definitions.Count)
+        {
+            throw new InvalidOperationException("Duplicate account-group codes were found.");
+        }
+
+
+        foreach (var definition in definitions)
+        {
+            if (definition.ParentCode is null)
+            {
+                if (definition.Level != 1)
+                {
+                    throw new InvalidOperationException(
+                        $"Account group {definition.Code} must have a parent.");
+                }
+
+
+                continue;
+            }
+
+
+            if (!definitionsByCode.TryGetValue(definition.ParentCode, out var parent) ||
+                definition.Level != parent.Level + 1 ||
+                !definition.Code.StartsWith(parent.Code, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    $"Invalid account-group hierarchy: {definition.Code} -> {definition.ParentCode}.");
+            }
+        }
+    }
+
+
+    private sealed record AccountGroupDefinition(
+        string Code,
+        string Name,
+        AccountGroupType Type,
+        NormalBalanceType NormalBalance,
+        int Level,
+        string? ParentCode,
+        string Description);
 }

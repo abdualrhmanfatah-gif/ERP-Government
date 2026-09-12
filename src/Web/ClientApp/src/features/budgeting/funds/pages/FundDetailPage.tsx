@@ -3,6 +3,7 @@ import { useFundDetail } from '../hooks/useFunds';
 import { fundTypeLabels, fundCategoryLabels } from '../../shared/types';
 import { Page, Button, Badge, Card } from '@/components/ui';
 import { ArrowRight } from 'lucide-react';
+import { getActiveStatusLabel } from '@/shared/constants/labels';
 
 export default function FundDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -55,15 +56,9 @@ export default function FundDetailPage() {
           <div>
             <span className="block text-xs text-[var(--color-on-surface-variant)] mb-1">الحالة</span>
             <Badge variant={fund.isActive ? 'success' : 'danger'}>
-              {fund.isActive ? 'نشط' : 'معطل'}
+              {getActiveStatusLabel(fund.isActive)}
             </Badge>
           </div>
-          {fund.fiscalYearId && (
-            <div>
-              <span className="block text-xs text-[var(--color-on-surface-variant)] mb-1">السنة المالية</span>
-              <span className="block text-sm text-[var(--color-on-surface)]">{fund.fiscalYearId}</span>
-            </div>
-          )}
           {fund.description && (
             <div className="md:col-span-2">
               <span className="block text-xs text-[var(--color-on-surface-variant)] mb-1">الوصف</span>

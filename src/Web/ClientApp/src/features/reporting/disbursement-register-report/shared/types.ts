@@ -23,3 +23,11 @@ export interface DisbursementRegisterFilters {
   status?: string;
   approverId?: number;
 }
+
+export const statusLabels: Record<string, string> = {
+  Draft: 'مسودة',
+  Submitted: 'مُقدّم',
+  Approved: 'معتمد',
+  Paid: 'مدفوع',
+  Rejected: 'مرفوض',
+};

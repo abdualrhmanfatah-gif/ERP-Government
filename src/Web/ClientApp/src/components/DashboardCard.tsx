@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { Card } from '@/components/ui/Card';
 
 interface DashboardCardProps {
   title: string;
@@ -25,10 +26,11 @@ export function DashboardCard({
   const isInteractive = interactive || !!onClick;
 
   return (
-    <div
+    <Card
+      padding="none"
       className={cn(
-        // base
-        'rounded-xl border border-[var(--color-border-container)] bg-white overflow-hidden shadow-sm',
+        // base (preserve DashboardCard look on top of shared Card primitive)
+        'border-[var(--color-border-container)] bg-[var(--color-surface)] overflow-hidden shadow-sm',
         'transition-all duration-200 ease-in-out',
         // interactive states
         isInteractive && [
@@ -63,6 +65,6 @@ export function DashboardCard({
 
       {/* Content */}
       <div className={noPadding ? '' : 'p-6'}>{children}</div>
-    </div>
+    </Card>
   );
 }

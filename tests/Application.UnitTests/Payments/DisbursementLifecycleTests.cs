@@ -1,4 +1,6 @@
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.FinancialSettings.Common.Services;
+using ERP_Government.Application.Parties.Common;
 using ERP_Government.Application.Payments.Commands.DisbursementRequests.ApproveDisbursementRequest;
 using ERP_Government.Application.Payments.Commands.DisbursementRequests.CancelDisbursementRequest;
 using ERP_Government.Application.Payments.Commands.DisbursementRequests.RejectDisbursementRequest;
@@ -21,6 +23,8 @@ public class DisbursementLifecycleTests
 {
     private Mock<IApplicationDbContext> _contextMock = null!;
     private Mock<IIdentityService> _identityServiceMock = null!;
+    private Mock<IDocumentSequenceService> _sequenceServiceMock = null!;
+    private Mock<IDocumentStatusLogger> _statusLoggerMock = null!;
     private Mock<IUser> _validUserMock = null!;
     private Mock<IUser> _secondUserMock = null!;
     private const int UserId1 = 5;
@@ -31,6 +35,8 @@ public class DisbursementLifecycleTests
     {
         _contextMock = new Mock<IApplicationDbContext>();
         _identityServiceMock = new Mock<IIdentityService>();
+        _sequenceServiceMock = new Mock<IDocumentSequenceService>();
+        _statusLoggerMock = new Mock<IDocumentStatusLogger>();
         _validUserMock = new Mock<IUser>();
         _validUserMock.Setup(x => x.Id).Returns(UserId1);
         _secondUserMock = new Mock<IUser>();
@@ -63,11 +69,11 @@ public class DisbursementLifecycleTests
             .ReturnsAsync(1);
     }
 
-    private void SetupPayments(List<Domain.Payments.Entities.Payment>? payments = null)
+    private void SetupPaymentOrders(List<Domain.Payments.Entities.PaymentOrder>? orders = null)
     {
-        var paymentsList = payments ?? new List<Domain.Payments.Entities.Payment>();
-        _contextMock.Setup(x => x.Payments)
-            .Returns(paymentsList.AsQueryable().BuildMockForAsync().Object);
+        var ordersList = orders ?? new List<Domain.Payments.Entities.PaymentOrder>();
+        _contextMock.Setup(x => x.PaymentOrders)
+            .Returns(ordersList.AsQueryable().BuildMockForAsync().Object);
     }
 
     [Test]
@@ -76,7 +82,7 @@ public class DisbursementLifecycleTests
         SetupDisbursement(DisbursementRequestStatus.Draft);
 
         var handler = new SubmitDisbursementRequestCommandHandler(
-            _contextMock.Object, _validUserMock.Object);
+            _contextMock.Object);
 
         var result = await handler.Handle(
             new SubmitDisbursementRequestCommand { Id = 1, RowVersion = [1, 2, 3] },
@@ -96,7 +102,7 @@ public class DisbursementLifecycleTests
             .ReturnsAsync(true);
 
         var handler = new ApproveDisbursementRequestCommandHandler(
-            _contextMock.Object, _identityServiceMock.Object, _validUserMock.Object);
+            _contextMock.Object, _identityServiceMock.Object, _sequenceServiceMock.Object, _statusLoggerMock.Object, _validUserMock.Object);
 
         var result = await handler.Handle(
             new ApproveDisbursementRequestCommand { Id = 1, Reason = "OK", RowVersion = [1, 2, 3] },
@@ -126,8 +132,14 @@ public class DisbursementLifecycleTests
             DisbursementRequestStatus.PendingApproval,
             new List<ApprovalHistory> { existingApproval });
 
+        SetupPaymentOrders();
+
+        _identityServiceMock
+            .Setup(x => x.IsInRoleAsync(UserId2, "AccountsManager"))
+            .ReturnsAsync(true);
+
         var handler = new ApproveDisbursementRequestCommandHandler(
-            _contextMock.Object, _identityServiceMock.Object, _secondUserMock.Object);
+            _contextMock.Object, _identityServiceMock.Object, _sequenceServiceMock.Object, _statusLoggerMock.Object, _secondUserMock.Object);
 
         var result = await handler.Handle(
             new ApproveDisbursementRequestCommand { Id = 1, Reason = "Approved", RowVersion = [1, 2, 3] },
@@ -156,15 +168,19 @@ public class DisbursementLifecycleTests
             DisbursementRequestStatus.PendingApproval,
             new List<ApprovalHistory> { existingApproval });
 
+        _identityServiceMock
+            .Setup(x => x.IsInRoleAsync(UserId1, "AccountsManager"))
+            .ReturnsAsync(true);
+
         var handler = new ApproveDisbursementRequestCommandHandler(
-            _contextMock.Object, _identityServiceMock.Object, _validUserMock.Object);
+            _contextMock.Object, _identityServiceMock.Object, _sequenceServiceMock.Object, _statusLoggerMock.Object, _validUserMock.Object);
 
         var result = await handler.Handle(
             new ApproveDisbursementRequestCommand { Id = 1, Reason = "Again", RowVersion = [1, 2, 3] },
             CancellationToken.None);
 
         result.Succeeded.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Contains("A different approver is required"));
+        result.Errors.ShouldContain(e => e.Contains("Second signature must be by a different user."));
         _contextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -178,40 +194,15 @@ public class DisbursementLifecycleTests
             .ReturnsAsync(false);
 
         var handler = new ApproveDisbursementRequestCommandHandler(
-            _contextMock.Object, _identityServiceMock.Object, _validUserMock.Object);
+            _contextMock.Object, _identityServiceMock.Object, _sequenceServiceMock.Object, _statusLoggerMock.Object, _validUserMock.Object);
 
         var result = await handler.Handle(
             new ApproveDisbursementRequestCommand { Id = 1, Reason = "OK", RowVersion = [1, 2, 3] },
             CancellationToken.None);
 
         result.Succeeded.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Contains("First approver must hold"));
+        result.Errors.ShouldContain(e => e.Contains("Approver must hold AccountsManager or AuthorizingOfficer role"));
         _contextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
-    }
-
-    [Test]
-    public async Task T033_CancelDisbursementRequest_ApprovedNoPayment_ShouldTransitionToCancelled()
-    {
-        SetupDisbursement(DisbursementRequestStatus.Approved);
-        SetupPayments(new List<Domain.Payments.Entities.Payment>());
-
-        var handler = new CancelDisbursementRequestCommandHandler(
-            _contextMock.Object, _validUserMock.Object);
-
-        var result = await handler.Handle(
-            new CancelDisbursementRequestCommand
-            {
-                Id = 1,
-                Reason = "No longer needed",
-                RowVersion = [1, 2, 3]
-            },
-            CancellationToken.None);
-
-        result.Succeeded.ShouldBeTrue();
-        _contextMock.Verify(x => x.ApprovalHistory.Add(It.Is<ApprovalHistory>(
-            h => h.Action == ApprovalAction.Cancel
-                && h.ApproverUserId == UserId1)), Times.Once);
-        _contextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]

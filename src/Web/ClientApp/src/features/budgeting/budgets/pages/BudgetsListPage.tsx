@@ -20,7 +20,6 @@ const columns: DataGridColumn<any>[] = [
   { header: 'رقم الموازنة', cell: (row) => <span className="font-mono">{row.budgetNumber}</span> },
   { header: 'اسم الموازنة', cell: (row) => row.budgetName },
   { header: 'الصندوق', cell: (row) => row.fundName },
-  { header: 'المبلغ', cell: (row) => <span className="font-mono">{row.totalAmount.toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</span> },
   { header: 'الحالة', cell: (row) => <Badge variant={statusVariants[row.status] ?? 'default'}>{budgetStatusLabels[row.status] ?? String(row.status)}</Badge> },
 ];
 
@@ -38,7 +37,6 @@ export default function BudgetsListPage() {
           موازنة جديدة
         </Button>
       }
-      loading={isLoading}
     >
       <DataGrid
         columns={columns}

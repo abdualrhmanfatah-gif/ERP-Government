@@ -358,8 +358,8 @@ components:
             type: https://tools.ietf.org/html/rfc9110#section-15.5.1
             title: Validation Failed
             status: 400
-            detail: "الرصيد الطبيعي غير متوافق مع النوع"
-            errors: { NormalBalance: ["الرصيد الطبيعي غير متوافق مع النوع"] }
+            detail: "نوع الحساب  غير متوافق مع النوع"
+            errors: { NormalBalance: ["نوع الحساب  غير متوافق مع النوع"] }
     Unauthorized:
       description: 401
       content:

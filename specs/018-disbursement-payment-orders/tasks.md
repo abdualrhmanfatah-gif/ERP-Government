@@ -2,182 +2,251 @@
 
 **Input**: Design documents from `/specs/018-disbursement-payment-orders/`
 
-**Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
+**Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/
 
-**Tests**: TDD mandatory per Constitution Principle XI. Test tasks are included and must be executed first (red → green → refactor).
+**Tests**: TDD is mandatory per Constitution Principle XI. Test tasks are included for every behavioral change.
 
-**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
+**Organization**: Tasks grouped by user story. Most code already exists — tasks focus on gaps and corrections.
 
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
-- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
+- **[Story]**: Which user story this task belongs to (US1–US9)
 - Include exact file paths in descriptions
-
----
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Entity definitions, enums, DbContext registration, document sequences
+**Purpose**: Verify existing code builds and tests pass before any changes
 
-- [x] T001 [P] Create DisbursementRequestStatus enum in src/Domain/Payments/Enums/DisbursementRequestStatus.cs
-- [x] T002 [P] Create PaymentStatus enum in src/Domain/Payments/Enums/PaymentStatus.cs
-- [x] T003 [P] Create DisbursementRequest entity in src/Domain/Payments/Entities/DisbursementRequest.cs
-- [x] T004 [P] Create Payment entity in src/Domain/Payments/Entities/Payment.cs
-- [x] T005 Register DbSets in src/Application/Common/Interfaces/IApplicationDbContext.cs (DisbursementRequests, Payments)
-- [x] T006 Register DbSets in src/Infrastructure/Data/ApplicationDbContext.cs
-- [x] T007 [P] Create DisbursementRequest EF configuration in src/Infrastructure/Data/Configurations/Payments/DisbursementRequestConfiguration.cs (unique indexes on PaymentOrderId, RequestNumber)
-- [x] T008 [P] Create Payment EF configuration in src/Infrastructure/Data/Configurations/Payments/PaymentConfiguration.cs (unique indexes on DisbursementRequestId, PaymentNumber)
-- [x] T009 Add EF migration for DisbursementRequest and Payment entities
-- [x] T010 Register DSB and PAY document sequences in DocumentSequenceService seed data
-- [x] T011 Add PermissionCodes for Disbursements and Payments in src/Application/Common/Security/PermissionCodes.cs
-- [x] T012 Register authorization policies in src/Web/DependencyInjection.cs for new permission codes
+- [ ] T001 Verify backend builds: `dotnet build src/Web/Web.csproj`
+- [ ] T002 [P] Verify unit tests pass: `dotnet test tests/Application.UnitTests`
+- [ ] T003 [P] Verify functional tests pass: `dotnet test tests/Application.FunctionalTests`
+- [ ] T004 [P] Verify frontend builds: `cd src/Web/ClientApp && npm run build`
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Shared DTOs and query infrastructure that all user stories depend on
+**Purpose**: Core gaps that block multiple user stories
 
-**⚠️ CRITICAL**: No user story work can begin until this phase is complete
+**⚠ CRITICAL**: US2 and US3 cannot be fully tested until this phase completes
 
-- [x] T013 [P] Create DisbursementRequestDto in src/Application/Payments/Common/DTOs/DisbursementRequestDto.cs
-- [x] T014 [P] Create PaymentDto in src/Application/Payments/Common/DTOs/PaymentDto.cs
-- [x] T015 [P] Create AvailabilityBreakdownDto in src/Application/Payments/Common/DTOs/AvailabilityBreakdownDto.cs
-- [x] T016 [P] Create GetDisbursementRequestsQuery in src/Application/Payments/Queries/DisbursementRequests/GetDisbursementRequests/GetDisbursementRequestsQuery.cs
-- [x] T017 [P] Create GetDisbursementRequestByIdQuery in src/Application/Payments/Queries/DisbursementRequests/GetDisbursementRequestById/GetDisbursementRequestByIdQuery.cs
-- [x] T018 [P] Create GetPaymentsQuery in src/Application/Payments/Queries/Payments/GetPayments/GetPaymentsQuery.cs
+- [ ] T005 [P] Create UpdateDisbursementRequestCommand in `src/Application/Payments/Commands/DisbursementRequests/UpdateDisbursementRequest/UpdateDisbursementRequestCommand.cs` — command, handler, validator. Validates: status must be Draft for full edit; if PendingApproval with ≥1 approval, only Notes and Purpose may be updated (amount freeze). Uses RowVersion concurrency check.
+- [ ] T006 [P] Create UpdateDisbursementRequestCommandValidator in same file — FluentValidation: RequestedAmount > 0 (when allowed), BeneficiaryName not blank, Purpose not blank, valid CurrencyId, valid FinancialYearId
+- [ ] T007 [US3] Add role check to step 2 in `src/Application/Payments/Commands/DisbursementRequests/ApproveDisbursementRequest/ApproveDisbursementRequestCommand.cs` — currently step 1 checks role; step 2 must also check AccountsManager/AuthorizingOfficer role before finalizing
 
-**Checkpoint**: Foundation ready — user story implementation can now begin
+**Checkpoint**: Foundation ready — US2 and US3 can now be fully tested
 
 ---
 
-## Phase 3: User Story 1 — Create Disbursement Request (Priority: P1) 🎯 MVP
+## Phase 3: User Story 1 - Create Disbursement Request (Priority: P1) 🎯 MVP
 
-**Goal**: Accountant creates a disbursement request against an approved payment order; budget availability is checked; creation rejected with breakdown when Blocking + insufficient funds.
+**Goal**: Accountant creates a disbursement request with beneficiary, amount, currency, purpose, fiscal year. System assigns number, creates Draft, records requester.
 
-**Independent Test**: Create request against approved PO with sufficient funds (Draft status). Attempt creation against PO with insufficient funds on Blocking item (rejection with breakdown). Attempt duplicate request (rejected).
+**Independent Test**: Create request with valid data → 201, Draft, number assigned. Create with invalid data → 400 with validation errors.
 
-### Tests for User Story 1 (TDD) ⚠️
+### Tests for User Story 1
 
-> **Write these tests FIRST, ensure they FAIL before implementation**
-
-- [x] T019 [P] [US1] Unit test: CreateDisbursementRequest succeeds with sufficient budget — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
-- [x] T020 [P] [US1] Unit test: CreateDisbursementRequest rejected when Blocking + insufficient funds — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
-- [x] T021 [P] [US1] Unit test: CreateDisbursementRequest allowed when Warning + insufficient funds (hasWarning=true) — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
-- [x] T022 [P] [US1] Unit test: CreateDisbursementRequest allowed when control=None (no check) — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
-- [x] T023 [P] [US1] Unit test: CreateDisbursementRequest rejected when PO not Approved — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
-- [x] T024 [P] [US1] Unit test: CreateDisbursementRequest rejected when PO net total is zero — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
-- [x] T025 [P] [US1] Unit test: CreateDisbursementRequest rejected when PO already has a request (1:1 enforced) — in tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs
+- [ ] T008 [P] [US1] Unit test for CreateDisbursementRequest success path in `tests/Application.UnitTests/Payments/CreateDisbursementRequestTests.cs` — verify Draft status, RequestNumber assigned, RequestedById/RequestedByName recorded
+- [ ] T009 [P] [US1] Unit test for CreateDisbursementRequest validation failures — zero amount, blank beneficiary, blank purpose, invalid currency, invalid fiscal year
 
 ### Implementation for User Story 1
 
-- [x] T026 [US1] Implement CreateDisbursementRequestCommand + Handler + Validator in src/Application/Payments/Commands/DisbursementRequests/CreateDisbursementRequest/CreateDisbursementRequestCommand.cs (depends on T001-T012, T013-T015)
-- [x] T027 [US1] Implement DisbursementRequests endpoint group (create, list, get by id) in src/Web/Endpoints/DisbursementRequests/DisbursementRequests.cs (depends on T026, T016-T017)
+> **Note**: CreateDisbursementRequestCommand and handler already exist. Verify they match spec.
 
-**Checkpoint**: Create disbursement request fully functional — budget gate working, 1:1 enforced
+- [ ] T010 [US1] Verify `src/Application/Payments/Commands/DisbursementRequests/CreateDisbursementRequest/CreateDisbursementRequestCommand.cs` matches spec: validates amount > 0, beneficiary not blank, purpose not blank, valid currency, valid fiscal year, assigns DSB-{D6} number, creates Draft, records requester
+- [ ] T011 [US1] Verify `src/Web/Endpoints/DisbursementRequests/DisbursementRequests.cs` POST / endpoint matches spec: PermissionCodes.DisbursementRequestsCreate, returns 201 with DTO
+
+**Checkpoint**: US1 fully functional and tested
 
 ---
 
-## Phase 4: User Story 2 — Dual-Signature Approval (Priority: P1)
+## Phase 4: User Story 2 - Edit Draft Disbursement Request (Priority: P2)
 
-**Goal**: Disbursement request requires dual signature: ≥2 distinct approvers, ≥1 AccountsManager or AuthorizingOfficer. All decisions recorded in ApprovalHistory.
+**Goal**: Any user with DisbursementRequestsUpdate permission can edit Draft requests. After first approval, amount is frozen — only notes/purpose editable.
 
-**Independent Test**: Submit Draft → PendingApproval. First approval (AccountsManager) → still PendingApproval. Second approval (distinct user, AuthorizingOfficer) → Approved. Same user re-approval → rejected. Wrong role on first approval → rejected.
+**Independent Test**: Edit Draft → changes persist. Edit after first approval → amount rejected, notes/purpose accepted. Edit non-Draft → rejected. RowVersion mismatch → 409.
 
-### Tests for User Story 2 (TDD) ⚠️
+### Tests for User Story 2
 
-> **Write these tests FIRST, ensure they FAIL before implementation**
-
-- [x] T028 [P] [US2] Unit test: Approve with first approver (AccountsManager) records step 1, stays PendingApproval — in tests/Application.UnitTests/Payments/DisbursementLifecycleTests.cs
-- [x] T029 [P] [US2] Unit test: Approve with second distinct approver transitions to Approved — in tests/Application.UnitTests/Payments/DisbursementLifecycleTests.cs
-- [x] T030 [P] [US2] Unit test: Same user double-approval rejected — in tests/Application.UnitTests/Payments/DisbursementLifecycleTests.cs
-- [x] T031 [P] [US2] Unit test: First approver without AccountsManager/AuthorizingOfficer role rejected — in tests/Application.UnitTests/Payments/DisbursementLifecycleTests.cs
-- [x] T032 [P] [US2] Unit test: Reject records in ApprovalHistory, status → Rejected — in tests/Application.UnitTests/Payments/DisbursementLifecycleTests.cs
-- [x] T033 [P] [US2] Unit test: Cancel (approved, unpaid) → Cancelled, clears PO link — in tests/Application.UnitTests/Payments/DisbursementLifecycleTests.cs
-- [x] T034 [P] [US2] Unit test: Submit Draft → PendingApproval — in tests/Application.UnitTests/Payments/DisbursementLifecycleTests.cs
+- [ ] T012 [P] [US2] Unit test for UpdateDisbursementRequest success — Draft status, all fields updated, RowVersion checked
+- [ ] T013 [P] [US2] Unit test for amount freeze — PendingApproval with 1 approval, amount edit rejected, notes/purpose edit accepted
+- [ ] T014 [P] [US2] Unit test for non-Draft rejection — status != Draft → full edit rejected
+- [ ] T015 [P] [US2] Unit test for RowVersion conflict — mismatched RowVersion → concurrency error
 
 ### Implementation for User Story 2
 
-- [x] T035 [US2] Implement SubmitDisbursementRequestCommand in src/Application/Payments/Commands/DisbursementRequests/SubmitDisbursementRequest/SubmitDisbursementRequestCommand.cs (depends on T026)
-- [x] T036 [US2] Implement ApproveDisbursementRequestCommand + Handler + Validator in src/Application/Payments/Commands/DisbursementRequests/ApproveDisbursementRequest/ApproveDisbursementRequestCommand.cs (depends on T026)
-- [x] T037 [US2] Implement RejectDisbursementRequestCommand in src/Application/Payments/Commands/DisbursementRequests/RejectDisbursementRequest/RejectDisbursementRequestCommand.cs (depends on T026)
-- [x] T038 [US2] Implement CancelDisbursementRequestCommand + Handler + Validator in src/Application/Payments/Commands/DisbursementRequests/CancelDisbursementRequest/CancelDisbursementRequestCommand.cs (depends on T026)
-- [x] T039 [US2] Add submit/approve/reject/cancel routes to DisbursementRequests endpoint group in src/Web/Endpoints/DisbursementRequests/DisbursementRequests.cs (depends on T035-T038)
+- [ ] T016 [US2] Verify UpdateDisbursementRequestCommand handler implements amount-freeze logic: query ApprovalHistory for count; if ≥1 approval and field is RequestedAmount/CurrencyId/BeneficiaryName/FinancialYearId → reject
+- [ ] T017 [US2] Add PUT /api/DisbursementRequests/{id} endpoint in `src/Web/Endpoints/DisbursementRequests/DisbursementRequests.cs` — PermissionCodes.DisbursementRequestsUpdate, accepts UpdateDisbursementRequestCommand, returns updated DTO or 409 on concurrency
+- [ ] T018 [US2] Update frontend `src/Web/ClientApp/src/features/payments/disbursement-requests/pages/DisbursementRequestDetailPage.tsx` — add edit button for Draft status, inline form for beneficiary/amount/currency/purpose/notes, submit calls PUT endpoint with rowVersion
 
-**Checkpoint**: Dual-signature approval fully functional — approval history enforced
+**Checkpoint**: US2 fully functional — draft editing with amount-freeze protection
 
 ---
 
-## Phase 5: User Story 3 — Execute Payment and Post to Ledger (Priority: P2)
+## Phase 5: User Story 3 - Dual-Signature Approval (Priority: P1)
 
-**Goal**: On approval, payment is executed (method, reference, amount = PO net total). Payment posts to ledger via domain event pipeline.
+**Goal**: Two distinct qualified approvers must approve. Both record approved amount, authority name, capacity. Amount frozen after first. Second approval auto-generates PaymentOrder.
 
-**Independent Test**: Approve request (dual sig) → execute payment → Payment record created, amount matches PO net total, disbursement request → Disbursed, payment order → Paid. Ledger entry posted with balanced debits/credits.
+**Independent Test**: Submit → PendingApproval. First approve (qualified) → step 1 recorded. Second approve (distinct, same amount) → Approved + order generated. Same user → rejected. Wrong role → rejected. Amount mismatch → rejected.
 
-### Tests for User Story 3 (TDD) ⚠️
+### Tests for User Story 3
 
-> **Write these tests FIRST, ensure they FAIL before implementation**
-
-- [x] T040 [P] [US3] Unit test: RecordPayment creates Payment with correct amount snapshot — in tests/Application.UnitTests/Payments/RecordPaymentTests.cs
-- [x] T041 [P] [US3] Unit test: RecordPayment rejected when request not Approved — in tests/Application.UnitTests/Payments/RecordPaymentTests.cs
-- [x] T042 [P] [US3] Unit test: RecordPayment transitions request to Disbursed, PO to Paid — in tests/Application.UnitTests/Payments/RecordPaymentTests.cs
-- [x] T043 [P] [US3] Unit test: RecordPayment raises AccountingEvent domain event — in tests/Application.UnitTests/Payments/RecordPaymentTests.cs
+- [ ] T019 [P] [US3] Unit test for dual-signature happy path — two distinct qualified approvers, same amount, order generated
+- [ ] T020 [P] [US3] Unit test for same-user rejection — same approver tries twice → rejected
+- [ ] T021 [P] [US3] Unit test for role check on both steps — step 1 without role → rejected; step 2 without role → rejected
+- [ ] T022 [P] [US3] Unit test for amount mismatch — step 2 amount ≠ step 1 → rejected
+- [ ] T023 [P] [US3] Unit test for amount exceeds requested — approved amount > requested → rejected
 
 ### Implementation for User Story 3
 
-- [x] T044 [US3] Implement RecordPaymentCommand + Handler + Validator in src/Application/Payments/Commands/Payments/RecordPayment/RecordPaymentCommand.cs (depends on T026, T036)
-- [x] T045 [US3] Add AccountingEvent domain event handler for Payment in src/Application/Payments/Commands/Payments/RecordPayment/ (depends on T044)
-- [x] T046 [US3] Add record/list routes to Payments endpoint group in src/Web/Endpoints/Payments/Payments.cs (depends on T044, T018)
+- [ ] T024 [US3] Verify ApproveDisbursementRequestCommand step 2 role check (from T007) works correctly
+- [ ] T025 [US3] Verify order auto-generation in ApproveDisbursementRequestCommand: FundId=0, AppropriationId=null, AmountGross=approvedAmount, BeneficiaryName copied, IssuingAuthorityName/Capacity copied, DisbursementRequestId linked
+- [ ] T026 [US3] Verify frontend `src/Web/ClientApp/src/features/payments/disbursement-requests/pages/DisbursementRequestDetailPage.tsx` approval dialog captures: approvedAmount, issuingAuthorityName, issuingAuthorityCapacity, rowVersion
 
-**Checkpoint**: Payment execution fully functional — ledger posting working
+**Checkpoint**: US3 fully functional — dual-signature with authority tracking and order generation
 
 ---
 
-## Phase 6: User Story 4 — Disbursement Register Report (Priority: P3)
+## Phase 6: User Story 5 - Order Lifecycle and Budget Check (Priority: P1)
 
-**Goal**: Report lists requests and payments by period, fund, status with totals.
+**Goal**: Auto-generated order follows Draft → Submitted → Approved → SentToTreasury → Paid. User prepares order (Fund, Appropriation, deductions) before submit. Budget check at submission.
 
-**Independent Test**: Generate report filtered by period/fund/status. Verify totals and correct row details.
+**Independent Test**: Prepare order → set Fund/Appropriation. Submit → budget check runs. Approve → status change. Send to treasury → treasury details recorded. Failed budget → blocks approval.
 
-### Tests for User Story 4 (TDD) ⚠️
+### Tests for User Story 5
 
-> **Write these tests FIRST, ensure they FAIL before implementation**
+- [ ] T027 [P] [US5] Unit test for order preparation — UpdatePaymentOrder on Draft order with FundId/AppropriationId/deductions
+- [ ] T028 [P] [US5] Unit test for submit with budget check — FundId/AppropriationId required, BudgetCheckStatus set
+- [ ] T029 [P] [US5] Unit test for failed budget blocks approval — BudgetCheckStatus=Failed → approve rejected
+- [ ] T030 [P] [US5] Unit test for budget override — OverrideFailedBudgetCheck=true with permission → approve succeeds
 
-- [x] T047 [P] [US4] Unit test: GetDisbursementRequests filters by status, fund, period — in tests/Application.UnitTests/Payments/GetDisbursementRequestsTests.cs
-- [x] T048 [P] [US4] Unit test: GetDisbursementRequests includes payment details when linked — in tests/Application.UnitTests/Payments/GetDisbursementRequestsTests.cs
-- [x] T049 [P] [US4] Unit test: GetDisbursementRequests computes totals correctly — in tests/Application.UnitTests/Payments/GetDisbursementRequestsTests.cs
+### Implementation for User Story 5
+
+- [ ] T031 [US5] Verify SubmitPaymentOrderCommand validates FundId > 0 and AppropriationId has value before running budget check
+- [ ] T032 [US5] Verify ApprovePaymentOrderCommand checks BudgetCheckStatus before allowing approval; supports OverrideFailedBudgetCheck with PaymentOrdersOverrideBudgetCheck permission
+- [ ] T033 [US5] Verify SendToTreasuryCommand records TreasuryReference and TreasurySentAt
+- [ ] T034 [US5] Update frontend `src/Web/ClientApp/src/features/payments/payment-orders/pages/PaymentOrderDetailPage.tsx` — show "Prepare" action for Draft orders auto-generated from requests (FundId=0), display budget check status badge
+
+**Checkpoint**: US5 fully functional — order lifecycle with budget control
+
+---
+
+## Phase 7: User Story 6 - Deductions on Payment Orders (Priority: P1)
+
+**Goal**: Line-item deductions on Draft orders. Mandatory protection. Sum validation. Tax authority required for tax deductions.
+
+**Independent Test**: Create order with deductions → sum matches. Update → mandatory ones protected. Tax deduction without authority → rejected.
+
+### Tests for User Story 6
+
+- [ ] T035 [P] [US6] Unit test for deduction sum validation — sum(deductions.amount) must equal DeductionAmount within 0.01
+- [ ] T036 [P] [US6] Unit test for mandatory deduction protection — IsMandatory=true deduction removed → rejected
+- [ ] T037 [P] [US6] Unit test for tax deduction validation — IsTaxDeduction=true without TaxAuthorityId → rejected
+
+### Implementation for User Story 6
+
+- [ ] T038 [US6] Verify CreatePaymentOrderCommand and UpdatePaymentOrderCommand enforce: sum match, mandatory protection (BR-4), tax authority check, DeductionAmount ≤ AmountGross
+- [ ] T039 [US6] Verify GetPaymentOrderTotalsQuery computes: TotalDeductions, NetAmount, PaidAmount, RemainingAmount, IsFullyPaid
+
+**Checkpoint**: US6 fully functional — deduction lifecycle with protections
+
+---
+
+## Phase 8: User Story 7 - Record Payment (Priority: P1)
+
+**Goal**: Record payment against Approved/SentToTreasury order. One payment per order. Triggers ledger posting. Updates order to Paid, request to Disbursed.
+
+**Independent Test**: Record payment → Payment created, order Paid, request Disbursed. Second payment → rejected. Non-approved order → rejected.
+
+### Tests for User Story 7
+
+- [ ] T040 [P] [US7] Unit test for payment recording — Amount = AmountGross - DeductionAmount, order → Paid, request → Disbursed
+- [ ] T041 [P] [US7] Unit test for duplicate payment prevention — second payment on same order → rejected
+- [ ] T042 [P] [US7] Unit test for payment status guard — only Approved/SentToTreasury orders accepted
+
+### Implementation for User Story 7
+
+- [ ] T043 [US7] Verify RecordPaymentCommand: checks order status, checks for existing payment, computes netTotal, creates Payment, updates order status, updates request status, emits PaymentRecordedEvent
+- [ ] T044 [US7] Verify PaymentRecordedEvent handler creates balanced JournalEntry via posting pipeline
+
+**Checkpoint**: US7 fully functional — payment execution with ledger posting
+
+---
+
+## Phase 9: User Story 4 - Cancel Disbursement Request (Priority: P2)
+
+**Goal**: Cancel at Draft/PendingApproval/Approved(unpaid). DisbursementRequestsCancel permission required. Invalidates linked order.
+
+**Independent Test**: Cancel Draft → Cancelled. Cancel PendingApproval → Cancelled + approval history. Cancel Approved with Draft order → both invalidated. Cancel with Paid order → rejected.
+
+### Tests for User Story 9
+
+- [ ] T045 [P] [US4] Unit test for cancel at each status — Draft, PendingApproval, Approved(unpaid)
+- [ ] T046 [P] [US4] Unit test for cancel blocked when order paid — Approved request with Paid order → rejected
+- [ ] T047 [P] [US4] Unit test for order invalidation — cancel Approved request → linked order → Cancelled
 
 ### Implementation for User Story 4
 
-- [x] T050 [US4] Update GetDisbursementRequestsQuery with full filter/total logic in src/Application/Payments/Queries/DisbursementRequests/GetDisbursementRequests/GetDisbursementRequestsQuery.cs (depends on T016)
-- [x] T051 [US4] Update GetPaymentsQuery with filter logic in src/Application/Payments/Queries/Payments/GetPayments/GetPaymentsQuery.cs (depends on T018)
+- [ ] T048 [US4] Verify CancelDisbursementRequestCommand: checks DisbursementRequestsCancel permission, validates status, checks if linked order is paid, invalidates order if exists, records in ApprovalHistory
 
-**Checkpoint**: Register report fully functional — all filters and totals working
-
----
-
-## Phase 7: Functional Tests & Integration
-
-**Purpose**: End-to-end functional tests covering the full disbursement lifecycle
-
-- [x] T052 Functional test: Full lifecycle — create request → dual approval → execute payment → verify PO Paid — in tests/Application.FunctionalTests/Payments/DisbursementLifecycleTests.cs
-- [x] T053 Functional test: Budget Blocking rejection with breakdown — in tests/Application.FunctionalTests/Payments/DisbursementLifecycleTests.cs
-- [x] T054 Functional test: Dual-signature combinations (role, distinct user, same-user rejection) — in tests/Application.FunctionalTests/Payments/DisbursementLifecycleTests.cs
-- [x] T055 Functional test: Cancellation clears PO link, allows new request — in tests/Application.FunctionalTests/Payments/DisbursementLifecycleTests.cs
-- [x] T056 Functional test: Payment posting produces balanced journal entry — in tests/Application.FunctionalTests/Payments/DisbursementLifecycleTests.cs
+**Checkpoint**: US4 fully functional — cancellation with cascading invalidation
 
 ---
 
-## Phase 8: Polish & Cross-Cutting Concerns
+## Phase 10: User Story 9 - Void Payment Order (Priority: P2)
 
-**Purpose**: Validation, cleanup, and documentation
+**Goal**: Void Approved/SentToTreasury orders with no payment. Terminal state. Invalidates linked request.
 
-- [x] T057 Run quickstart.md validation scenarios end-to-end
-- [x] T058 Run full test suite: `dotnet test tests/Application.UnitTests` + `dotnet test tests/Application.FunctionalTests`
-- [x] T059 Run backend build: `dotnet build src/Web/Web.csproj` — zero warnings
-- [x] T060 Update docs/database-schema.md with new tables
-- [x] T061 Run NSwag regeneration: `npm run generate-api` in src/Web/ClientApp
+**Independent Test**: Void Approved order → Voided, request Invalidated. Void Paid order → rejected.
+
+### Tests for User Story 9
+
+- [ ] T049 [P] [US9] Unit test for void happy path — Approved order, no payment → Voided, request Invalidated
+- [ ] T050 [P] [US9] Unit test for void blocked when paid → rejected
+
+### Implementation for User Story 9
+
+- [ ] T051 [US9] Verify VoidPaymentOrderCommand: checks no completed payment, transitions to Voided, invalidates linked DisbursementRequest
+
+**Checkpoint**: US9 fully functional — void with cascading invalidation
+
+---
+
+## Phase 11: User Story 8 - List and Detail Views (Priority: P1)
+
+**Goal**: List and detail views for requests and orders with filtering and complete information display.
+
+**Independent Test**: List with filters → correct results. Detail → all required fields shown.
+
+### Tests for User Story 8
+
+- [ ] T052 [P] [US8] Unit test for GetDisbursementRequestsQuery — filter by status, requestedById
+- [ ] T053 [P] [US8] Unit test for GetDisbursementRequestByIdQuery — returns full detail with approvals, order link, payment info
+
+### Implementation for User Story 8
+
+- [ ] T054 [US8] Verify GetDisbursementRequestsQuery returns correct DTOs with filtering
+- [ ] T055 [US8] Verify GetDisbursementRequestByIdQuery loads: header, ApprovalHistory steps (with amounts, authority details), linked PaymentOrderNumber, Payment info
+- [ ] T056 [US8] Verify GetPaymentOrdersQuery and GetPaymentOrderByIdQuery load: header, deductions, linked DisbursementRequestNumber
+- [ ] T057 [US8] Verify frontend list pages: `DisbursementRequestsListPage.tsx` shows number, beneficiary, amount, status, date with status/requester filters
+- [ ] T058 [US8] Verify frontend detail pages: `DisbursementRequestDetailPage.tsx` shows all fields, approval history with amounts/authority, order link, payment info
+- [ ] T059 [US8] Verify frontend `PaymentOrderDetailPage.tsx` shows: beneficiary details, gross/deductions/net, deduction line items, budget check status, treasury details, request link, approval history, payment info
+
+**Checkpoint**: US8 fully functional — complete visibility into disbursement pipeline
+
+---
+
+## Phase 12: Polish & Cross-Cutting Concerns
+
+**Purpose**: Final validation and edge cases
+
+- [ ] T060 [P] Run quickstart.md validation scenarios V1–V18 end-to-end
+- [ ] T061 [P] Verify all permission codes are bound to endpoints (DisbursementRequests: View/Create/Update/Submit/Approve/Reject/Cancel; PaymentOrders: View/Create/Update/Submit/Approve/Reject/Cancel/SendToTreasury/Void/OverrideBudgetCheck; Payments: View/Create)
+- [ ] T062 [P] Verify RowVersion concurrency on all mutating endpoints — every PATCH/PUT accepts and validates rowVersion
+- [ ] T063 [P] Verify append-only audit: ApprovalHistory and DocumentStatusLog records are INSERT-ONLY
+- [ ] T064 Run full test suite: `dotnet test tests/Application.UnitTests && dotnet test tests/Application.FunctionalTests`
+- [ ] T065 Run frontend lint and build: `cd src/Web/ClientApp && npm run lint && npm run build`
 
 ---
 
@@ -185,74 +254,74 @@
 
 ### Phase Dependencies
 
-- **Setup (Phase 1)**: No dependencies — can start immediately
-- **Foundational (Phase 2)**: Depends on Phase 1 completion — BLOCKS all user stories
-- **US1 (Phase 3)**: Depends on Phase 2
-- **US2 (Phase 4)**: Depends on Phase 2 + T026 (US1 CreateDisbursementRequestCommand — needed for approval to reference)
-- **US3 (Phase 5)**: Depends on Phase 2 + T026 + T036 (US1 + US2 approval — payment requires approved request)
-- **US4 (Phase 6)**: Depends on Phase 2 + T016/T018 (queries exist)
-- **Functional Tests (Phase 7)**: Depends on Phases 3-6
-- **Polish (Phase 8)**: Depends on all phases
+- **Phase 1 (Setup)**: No dependencies — start immediately
+- **Phase 2 (Foundational)**: Depends on Phase 1 — BLOCKS US2, US3
+- **Phases 3–11 (User Stories)**: Depend on Phase 2; can proceed in parallel after Phase 2
+- **Phase 12 (Polish)**: Depends on all desired stories complete
 
 ### User Story Dependencies
 
-- **US1 (Create Request)**: Independent after Foundational. Foundation for all other stories.
-- **US2 (Dual Approval)**: Depends on US1 command (T026) existing — but can be developed in parallel once T026 is done.
-- **US3 (Payment Execution)**: Depends on US1 + US2 — cannot execute payment without an approved request.
-- **US4 (Register Report)**: Depends on queries (Phase 2) — can start once queries are built.
+```
+Phase 1: Setup
+    ↓
+Phase 2: Foundational (T005-T007)
+    ↓
+    ├── Phase 3:  US1  Create Request (P1) ─────── independent
+    ├── Phase 4:  US2  Edit Draft (P2) ──────────── depends on T005 (UpdateCommand)
+    ├── Phase 5:  US3  Dual-Signature (P1) ─────── depends on T007 (step 2 role check)
+    ├── Phase 6:  US5  Order Lifecycle (P1) ─────── depends on US3 (order generated on approval)
+    ├── Phase 7:  US6  Deductions (P1) ──────────── depends on US5 (order preparation)
+    ├── Phase 8:  US7  Record Payment (P1) ──────── depends on US5 (order in Approved status)
+    ├── Phase 9:  US4  Cancel (P2) ──────────────── depends on US3 (order exists to invalidate)
+    ├── Phase 10: US9  Void (P2) ────────────────── depends on US5 (order lifecycle)
+    └── Phase 11: US8  Views (P1) ───────────────── depends on all above (queries read all entities)
+    ↓
+Phase 12: Polish
+```
+
+### Within Each User Story
+
+1. Tests FIRST (red)
+2. Implementation (green)
+3. Verify tests pass
+4. Commit
 
 ### Parallel Opportunities
 
-- T001-T004: All enum/entity creation in parallel
-- T007-T008: EF configurations in parallel
-- T013-T015: All DTOs in parallel
-- T016-T018: All queries in parallel
-- T019-T025: All US1 tests in parallel
-- T028-T034: All US2 tests in parallel
-- T040-T043: All US3 tests in parallel
-- T047-T049: All US4 tests in parallel
-- US1 and US2 can overlap after T026 is complete
-
----
-
-## Parallel Example: User Story 1
-
-```
-# Write all US1 tests first (parallel):
-Task T019: Unit test — sufficient budget success
-Task T020: Unit test — Blocking + insufficient rejection
-Task T021: Unit test — Warning + insufficient allowed
-Task T022: Unit test — None control no check
-Task T023: Unit test — PO not Approved rejection
-Task T024: Unit test — PO zero amount rejection
-Task T025: Unit test — duplicate request rejection
-
-# Then implement (sequential — single file):
-Task T026: CreateDisbursementRequestCommand + Handler + Validator
-Task T027: DisbursementRequests endpoint group
-```
+- **Phase 1**: T002, T003, T004 can run in parallel
+- **Phase 2**: T005, T006 can run in parallel; T007 independent
+- **Phases 3–10**: Once Phase 2 completes, all user story phases can start in parallel (different files, different entities)
+- **Within each story**: Test tasks marked [P] can run in parallel
+- **Phase 12**: T060–T063 can run in parallel
 
 ---
 
 ## Implementation Strategy
 
-### MVP First (US1 + US2 — both P1)
+### MVP First (US1 + US3 + US5 + US7)
 
-1. Complete Phase 1: Setup (entities, enums, DbContext, sequences)
-2. Complete Phase 2: Foundational (DTOs, queries)
-3. Complete Phase 3: US1 — Create Disbursement Request
-4. Complete Phase 4: US2 — Dual-Signature Approval
-5. **STOP and VALIDATE**: Full request-approval cycle working
-6. Deploy/demo if ready
+1. Complete Phase 1: Setup — verify build and tests
+2. Complete Phase 2: Foundational — UpdateCommand + step 2 role check
+3. Complete Phase 3: US1 — Create request
+4. Complete Phase 5: US3 — Dual-signature approval + order generation
+5. Complete Phase 6: US5 — Order lifecycle + budget check
+6. Complete Phase 8: US7 — Record payment + ledger posting
+7. **STOP and VALIDATE**: Run quickstart V1, V5, V9, V12
+8. Deploy/demo if ready
 
 ### Incremental Delivery
 
 1. Setup + Foundational → Foundation ready
-2. Add US1 → Test independently → Deploy/Demo
-3. Add US2 → Test independently → Deploy/Demo (MVP!)
-4. Add US3 → Test independently → Deploy/Demo
-5. Add US4 → Test independently → Deploy/Demo
-6. Each story adds value without breaking previous stories
+2. US1 (Create) → Test → MVP entry point
+3. US3 (Approve) → Test → Requests can be approved
+4. US5 (Order Lifecycle) → Test → Orders can be prepared and submitted
+5. US7 (Payment) → Test → Full disbursement cycle works
+6. US2 (Edit) → Test → Draft corrections supported
+7. US4 (Cancel) → Test → Cancellation supported
+8. US9 (Void) → Test → Void supported
+8. US6 (Deductions) → Test → Financial controls complete
+9. US8 (Views) → Test → Full visibility
+10. Polish → All validation scenarios pass
 
 ---
 
@@ -260,20 +329,7 @@ Task T027: DisbursementRequests endpoint group
 
 - [P] tasks = different files, no dependencies
 - [Story] label maps task to specific user story for traceability
-- TDD mandatory: tests must be written and observed failing before implementation (Constitution Principle XI)
+- Most code already exists — tasks focus on gaps (T005–T007) and verification
+- TDD mandatory: write tests first, observe red, implement, green
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
-- Entity status values: DisbursementRequest uses Draft/PendingApproval/Approved/Rejected/Cancelled/Disbursed/Invalidated; Payment uses Completed/Failed
-
----
-
-## Phase 9: Follow-ups from Contract Alignment Check (2026-09-08)
-
-Discovered by verifying as-built code against the PAY contract (PAY-01/PAY-02). See spec.md Clarifications, Session 2026-09-08. New unchecked tasks; TDD rules apply.
-
-- [x] T060 [US1] Bind permission codes to DisbursementRequests endpoints: RequireAuthorization(DisbursementRequests.View/Create/Submit/Approve/Reject/Cancel) on routes in src/Web/Endpoints/DisbursementRequests/DisbursementRequests.cs (codes already exist — PermissionCodes.cs:186-191). Verify policies registered in src/Web/DependencyInjection.cs. Test: endpoint without permission claim → 403 (open placeholder assertion stays consistent with dev-state note in AGENTS.md). DONE 2026-09-08 — structural test tests/Application.FunctionalTests/WebApiTests/EndpointAuthorizationTests.cs (red→green).
-- [x] T061 [US1] Add PaymentOrders.Update permission code (PermissionCodes.cs) + register policy + UpdatePaymentOrder command (handler enforces: edit Draft only, BR-2; amountGross/deductionAmount recomputed server-side) + PUT endpoint with RequireAuthorization. Tests: update Draft succeeds, update non-Draft blocked. DONE 2026-09-08 — code: UpdatePaymentOrderCommand.cs (BR-2 Draft-only, RowVersion guard, BR-4 mandatory-deduction guard, lines/deductions replacement), PermissionCodes.PaymentOrdersUpdate + policy, PUT /api/PaymentOrders/{id}. Unit tests written red-first (tests/Application.UnitTests/Payments/UpdatePaymentOrderTests.cs); test EXECUTION deferred per user instruction — run before merge gate.
-- [x] T062 [Engineering-decision] Resolve PAY-02 contract deviation on qualified-role position (contract: SECOND approver must hold AccountsManager/AuthorizingOfficer; as-built: FIRST). Decide and either amend contract or move role check to step 2 in ApproveDisbursementRequestCommand (with test change — no weakening). DECIDED 2026-09-08: keep as-built (FIRST approver holds role); recorded as documented deviation in spec.md Clarifications — contract source to be amended by contract owner (see T065).
-- [x] T063 [Engineering-decision] Resolve PAY-02 contract deviation on availability-gate timing (contract: Blocking reject at submit; as-built: at creation). Decide and align one side; keep BudgetAvailabilityService as the sole gate either way. DECIDED 2026-09-08: keep as-built (gate at creation); recorded as documented deviation in spec.md Clarifications — contract source to be amended by contract owner (see T065).
-- [ ] T064 [PAY-01 owner] Void semantics conflict: as-built VoidPaymentOrderCommand allows voiding only Paid orders (reversal); PAY-01 contract expects void of unpaid Approved/SentToTreasury, blocked for PartiallyPaid (OQ-N1). Track under PAY-01 (payment-orders), not 018. — DEFERRED to PAY-01 owner; not executable in this spec.
-- [ ] T065 [Docs] PAY contract route table marks `/api/Payments/PaymentOrders` + `/api/Payments/DisbursementRequests`; as-built uses `/api/{ClassName}` per AGENTS.md convention. Mark as documented deviation in the contract source; do not change routes. — DEFERRED: contract source lives outside this repo; contract owner to amend.

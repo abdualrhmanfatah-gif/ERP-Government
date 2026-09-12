@@ -6,7 +6,7 @@ interface ConfirmDialogProps {
   open?: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  message: string;
+  message: ReactNode;
   title?: string;
   confirmLabel?: string;
   destructive?: boolean;
@@ -51,10 +51,10 @@ export function ConfirmDialog({
           <span className={destructive ? 'text-[var(--color-error)]' : 'text-[var(--color-primary)]'} aria-hidden="true">
             {icon}
           </span>
-          <p className="m-0 text-sm leading-relaxed text-[var(--color-on-surface-variant)]">{message}</p>
+          <div className="text-sm leading-relaxed text-[var(--color-on-surface-variant)]">{message}</div>
         </div>
       ) : (
-        <p className="m-0 text-sm leading-relaxed text-[var(--color-on-surface-variant)]">{message}</p>
+        <div className="text-sm leading-relaxed text-[var(--color-on-surface-variant)]">{message}</div>
       )}
     </Dialog>
   );

@@ -12,7 +12,7 @@ public class YearClosingRunConfiguration : IEntityTypeConfiguration<YearClosingR
 
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.RunAt)
+        builder.Property(e => e.StartedAt)
             .IsRequired();
 
         builder.Property(e => e.LapsedAppropriationTotal)

@@ -100,6 +100,11 @@ public static class PermissionCodes
     public const string BudgetItemsDelete = "BudgetItems.Delete";
     public const string BudgetItemsMove = "BudgetItems.Move";
 
+    public const string BudgetItemAllocationsView = "BudgetItemAllocations.View";
+    public const string BudgetItemAllocationsCreate = "BudgetItemAllocations.Create";
+    public const string BudgetItemAllocationsUpdate = "BudgetItemAllocations.Update";
+    public const string BudgetItemAllocationsDelete = "BudgetItemAllocations.Delete";
+
     public const string BudgetClassificationsView = "BudgetClassifications.View";
     public const string BudgetClassificationsCreate = "BudgetClassifications.Create";
     public const string BudgetClassificationsUpdate = "BudgetClassifications.Update";
@@ -110,17 +115,15 @@ public static class PermissionCodes
     public const string BudgetTypesUpdate = "BudgetTypes.Update";
     public const string BudgetTypesToggleActive = "BudgetTypes.ToggleActive";
 
-    public const string AppropriationsView = "Appropriations.View";
-    public const string AppropriationsCreate = "Appropriations.Create";
-    public const string AppropriationsUpdate = "Appropriations.Update";
-    public const string AppropriationsDelete = "Appropriations.Delete";
-    public const string AppropriationsSubmit = "Appropriations.Submit";
-    public const string AppropriationsApprove = "Appropriations.Approve";
-    public const string AppropriationsActivate = "Appropriations.Activate";
-    public const string AppropriationsSuspend = "Appropriations.Suspend";
-    public const string AppropriationsClose = "Appropriations.Close";
-    public const string AppropriationsCancel = "Appropriations.Cancel";
-    public const string AppropriationsReverse = "Appropriations.Reverse";
+    public const string BudgetTransactionsView = "BudgetTransactions.View";
+    public const string BudgetTransactionsCreate = "BudgetTransactions.Create";
+    public const string BudgetTransactionsUpdate = "BudgetTransactions.Update";
+    public const string BudgetTransactionsDelete = "BudgetTransactions.Delete";
+    public const string BudgetTransactionsSubmit = "BudgetTransactions.Submit";
+    public const string BudgetTransactionsApprove = "BudgetTransactions.Approve";
+    public const string BudgetTransactionsPost = "BudgetTransactions.Post";
+    public const string BudgetTransactionsCancel = "BudgetTransactions.Cancel";
+    public const string BudgetTransactionsReverse = "BudgetTransactions.Reverse";
 
     public const string EncumbrancesView = "Encumbrances.View";
     public const string EncumbrancesCreate = "Encumbrances.Create";
@@ -145,21 +148,34 @@ public static class PermissionCodes
     public const string PurchaseRequestsSubmit = "PurchaseRequests.Submit";
     public const string PurchaseRequestsApprove = "PurchaseRequests.Approve";
     public const string PurchaseRequestsReject = "PurchaseRequests.Reject";
-
-    public const string RFQView = "RFQ.View";
-    public const string RFQCreate = "RFQ.Create";
-    public const string RFQPublish = "RFQ.Publish";
-    public const string RFQComplete = "RFQ.Complete";
-    public const string RFQCancel = "RFQ.Cancel";
+    public const string PurchaseRequestsCancel = "PurchaseRequests.Cancel";
 
     public const string QuotationsView = "Quotations.View";
     public const string QuotationsCreate = "Quotations.Create";
+    public const string QuotationsEvaluate = "Quotations.Evaluate";
+    public const string QuotationsSelect = "Quotations.Select";
+    public const string QuotationsAward = "Quotations.Award";
+    public const string QuotationsReject = "Quotations.Reject";
 
     public const string PurchaseOrdersView = "PurchaseOrders.View";
     public const string PurchaseOrdersCreate = "PurchaseOrders.Create";
     public const string PurchaseOrdersSubmit = "PurchaseOrders.Submit";
     public const string PurchaseOrdersApprove = "PurchaseOrders.Approve";
+    public const string PurchaseOrdersIssue = "PurchaseOrders.Issue";
     public const string PurchaseOrdersCancel = "PurchaseOrders.Cancel";
+    public const string PurchaseOrdersClose = "PurchaseOrders.Close";
+
+    public const string GoodsReceiptsView = "GoodsReceipts.View";
+    public const string GoodsReceiptsCreate = "GoodsReceipts.Create";
+    public const string GoodsReceiptsConfirm = "GoodsReceipts.Confirm";
+    public const string GoodsReceiptsReject = "GoodsReceipts.Reject";
+
+    public const string SupplierInvoicesView = "SupplierInvoices.View";
+    public const string SupplierInvoicesCreate = "SupplierInvoices.Create";
+    public const string SupplierInvoicesSubmit = "SupplierInvoices.Submit";
+    public const string SupplierInvoicesMatch = "SupplierInvoices.Match";
+    public const string SupplierInvoicesAcceptWithNotes = "SupplierInvoices.AcceptWithNotes";
+    public const string SupplierInvoicesCancel = "SupplierInvoices.Cancel";
 
     // ─── Payments ─────────────────────────────────────────────────────
     public const string BankAccountsView = "BankAccounts.View";
@@ -177,7 +193,10 @@ public static class PermissionCodes
     public const string PaymentOrdersCancel = "PaymentOrders.Cancel";
     public const string PaymentOrdersSendToTreasury = "PaymentOrders.SendToTreasury";
     public const string PaymentOrdersVoid = "PaymentOrders.Void";
-    public const string PaymentOrdersOverrideBudgetCheck = "PaymentOrders.OverrideBudgetCheck";
+
+    public const string PaymentsView = "Payments.View";
+    public const string PaymentsCreate = "Payments.Create";
+    public const string PaymentsApprove = "Payments.Approve";
 
     // ─── Disbursements ────────────────────────────────────────────────
     public const string DisbursementRequestsView = "DisbursementRequests.View";
@@ -186,10 +205,8 @@ public static class PermissionCodes
     public const string DisbursementRequestsApprove = "DisbursementRequests.Approve";
     public const string DisbursementRequestsReject = "DisbursementRequests.Reject";
     public const string DisbursementRequestsCancel = "DisbursementRequests.Cancel";
-
-    // ─── Payments ─────────────────────────────────────────────────────
-    public const string PaymentsView = "Payments.View";
-    public const string PaymentsCreate = "Payments.Create";
+    public const string DisbursementRequestsUpdate = "DisbursementRequests.Update";
+    public const string DisbursementRequestsCreateAccrual = "DisbursementRequests.CreateAccrual";
 
     // ─── Committees ───────────────────────────────────────────────────
     public const string CommitteesView = "Committees.View";

@@ -16,49 +16,49 @@ internal class GetAvailabilitySnapshotDetailQueryHandler(IApplicationDbContext d
             .Include(bi => bi.Budget)
             .FirstAsync(bi => bi.Id == request.BudgetItemId, cancellationToken);
 
-        var appropriationQuery = dbContext.Appropriations
+        // Budget transactions for this item
+        var transactionDtos = await dbContext.BudgetTransactions
             .AsNoTracking()
-            .Where(a => a.BudgetItemId == request.BudgetItemId
-                     && a.Status != Domain.Budgeting.Enums.AppropriationStatus.Cancelled);
-
-        var appropriationDtos = await appropriationQuery
-            .Select(a => new AppropriationDetailDto
+            .Where(t => t.BudgetItemAllocation.BudgetItemId == request.BudgetItemId)
+            .Select(t => new BudgetTransactionDetailDto
             {
-                AppropriationId = a.Id,
-                AppropriationNumber = a.AppropriationNumber,
-                Type = a.AppropriationType.ToString(),
-                Amount = a.Amount,
-                Status = a.Status.ToString()
+                TransactionId = t.Id,
+                TransactionNumber = t.TransactionNumber,
+                Type = t.TransactionType.ToString(),
+                Amount = t.Direction == Domain.Budgeting.Enums.TransactionDirection.Increase ? t.Amount : -t.Amount,
+                Status = t.Status.ToString()
             })
             .ToListAsync(cancellationToken);
 
-        var appropriationIds = await appropriationQuery
-            .Select(a => a.Id)
-            .ToListAsync(cancellationToken);
-
-        var encumbranceDtos = await dbContext.Encumbrances
+        // Encumbrances for this item
+        var encumbranceDtos = await dbContext.EncumbranceLines
             .AsNoTracking()
-            .Where(e => appropriationIds.Contains(e.AppropriationId)
-                     && e.Status != Domain.Budgeting.Enums.EncumbranceStatus.Cancelled)
-            .Select(e => new EncumbranceDetailDto
+            .Where(l => l.BudgetItemId == request.BudgetItemId
+                && l.Encumbrance.Status != Domain.Budgeting.Enums.EncumbranceStatus.Cancelled)
+            .Select(l => new EncumbranceDetailDto
             {
-                EncumbranceId = e.Id,
-                EncumbranceNumber = e.EncumbranceNumber,
-                Amount = e.Amount,
-                Status = e.Status.ToString()
+                EncumbranceId = l.Encumbrance.Id,
+                EncumbranceNumber = l.Encumbrance.EncumbranceNumber,
+                Amount = l.Amount,
+                Status = l.Encumbrance.Status.ToString()
             })
             .ToListAsync(cancellationToken);
 
+        // Payments for this item (via BudgetItemAllocation)
         var paymentDtos = await dbContext.PaymentOrders
             .AsNoTracking()
-            .Where(po => appropriationIds.Contains(po.AppropriationId)
-                      && po.Status != Domain.Payments.Enums.PaymentOrderStatus.Cancelled)
-            .Select(po => new PaymentDetailDto
+            .Join(dbContext.BudgetItemAllocations,
+                po => po.BudgetItemAllocationId,
+                alloc => alloc.Id,
+                (po, alloc) => new { po, alloc.BudgetItemId })
+            .Where(x => x.BudgetItemId == request.BudgetItemId
+                && x.po.Status != Domain.Payments.Enums.PaymentOrderStatus.Cancelled)
+            .Select(x => new PaymentDetailDto
             {
-                PaymentOrderId = po.Id,
-                OrderNumber = po.PaymentOrderNumber,
-                Amount = po.AmountGross,
-                Status = po.Status.ToString()
+                PaymentOrderId = x.po.Id,
+                OrderNumber = x.po.PaymentOrderNumber,
+                Amount = x.po.AmountGross,
+                Status = x.po.Status.ToString()
             })
             .ToListAsync(cancellationToken);
 
@@ -67,7 +67,7 @@ internal class GetAvailabilitySnapshotDetailQueryHandler(IApplicationDbContext d
             BudgetItemId = request.BudgetItemId,
             ItemCode = budgetItem.ItemCode,
             ItemName = budgetItem.ItemName,
-            Appropriations = appropriationDtos,
+            Transactions = transactionDtos,
             Encumbrances = encumbranceDtos,
             Payments = paymentDtos
         };

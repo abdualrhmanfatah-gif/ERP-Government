@@ -10,29 +10,14 @@ import { downloadRevenueCollectionsExport } from '../shared/client';
 import {
   type RevenueCollectionsFilters,
   type RevenueCollectionsLineDto,
+  paymentMethodLabels,
+  depositStatusLabels,
 } from '../shared/types';
 import { revenueCollectionsFilterSchema } from '../shared/schemas';
 import { ReportingRevenueCollectionsFilters } from '@/components/ReportingRevenueCollectionsFilters';
 import { ReportingRevenueCollectionsDetail } from '@/components/ReportingRevenueCollectionsDetail';
-import { Page } from '@/components/ui/Page';
-import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
-import { MoneyDisplay } from '@/components/ui/MoneyDisplay';
-import { Badge } from '@/components/ui/Badge';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { ErrorState } from '@/components/ui/ErrorState';
-import { Button } from '@/components/ui/Button';
-
-const paymentMethodLabels: Record<string, string> = {
-  Cash: 'نقدي',
-  Check: 'شيك',
-  Transfer: 'تحويل',
-};
-
-const depositStatusLabels: Record<string, string> = {
-  Pending: 'قيد الانتظار',
-  Deposited: 'تم الإيداع',
-  Rejected: 'مرفوض',
-};
+import { Page, DataGrid, MoneyDisplay, Badge, EmptyState, ErrorState, Button, Alert } from '@/components/ui';
+import type { DataGridColumn } from '@/components/ui/DataGrid';
 
 export default function RevenueCollectionsReportPage() {
   const { data: fiscalYears, isLoading: yearsLoading } = useRevenueCollectionsFiscalYears();
@@ -60,7 +45,7 @@ export default function RevenueCollectionsReportPage() {
 
   const columns: DataGridColumn<RevenueCollectionsLineDto>[] = [
     { header: 'رقم السند', cell: (row) => <span dir="ltr" className="font-mono text-sm">{row.voucherNumber}</span> },
-    { header: 'التاريخ', cell: (row) => <span className="text-sm">{row.voucherDate ? new Date(row.voucherDate).toLocaleDateString('ar-EG') : '—'}</span> },
+    { header: 'التاريخ', cell: (row) => <span className="text-sm">{row.voucherDate ? new Date(row.voucherDate).toLocaleDateString('ar-YE') : '—'}</span> },
     { header: 'الطرف', cell: (row) => <span className="text-sm">{row.partyName ?? '—'}</span> },
     { header: 'المبلغ', align: 'right', cell: (row) => <MoneyDisplay value={row.amount ?? 0} /> },
     { header: 'طريقة الدفع', cell: (row) => <span className="text-sm">{paymentMethodLabels[row.paymentMethod ?? ''] ?? row.paymentMethod ?? '—'}</span> },
@@ -124,12 +109,9 @@ export default function RevenueCollectionsReportPage() {
       }
     >
       {isPartialData && (
-        <div
-          role="status"
-          className="mb-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200"
-        >
+        <Alert variant="warning">
           بيانات جزئية — الفترة الحالية جارية وقد تتغير الأرقام
-        </div>
+        </Alert>
       )}
       {isError ? (
         <ErrorState onRetry={() => refetch()} />

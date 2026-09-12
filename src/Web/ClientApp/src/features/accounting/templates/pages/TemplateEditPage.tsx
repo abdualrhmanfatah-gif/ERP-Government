@@ -5,7 +5,7 @@ import { TemplateLinesSection } from '@/components/AccountingTemplateLinesSectio
 import { useTemplateById } from '../../hooks/useTemplateById';
 import { useUpdateTemplate } from '../../hooks/useUpdateTemplate';
 import { useJournalsList } from '../../hooks/useJournalsList';
-import { showToast } from '@/components/ui/Toast';
+import { notify } from '@/features/notifications/notify';
 
 export function TemplateEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -41,10 +41,10 @@ export function TemplateEditPage() {
           rowVersion: template.rowVersion,
         },
       });
-      showToast('success', 'تم تعديل القالب بنجاح');
+      notify({ type: 'success', title: 'تم تعديل القالب بنجاح' });
       navigate('/accounting/templates');
     } catch {
-      showToast('error', 'فشل تعديل القالب');
+      notify({ type: 'error', title: 'فشل تعديل القالب' });
     }
   };
 

@@ -124,3 +124,19 @@ export interface UpdateProjectCommand {
   status: string;
   isActive: boolean;
 }
+
+// ─── Status Labels ──────────────────────────────────────────────────────────
+
+export const projectStatusLabels: Record<string, string> = {
+  Draft: 'مسودة',
+  Active: 'نشط',
+  OnHold: 'معلق',
+  Completed: 'مكتمل',
+  Cancelled: 'ملغي',
+};
+
+export const employeeStatusLabels: Record<string, string> = {
+  Active: 'نشط',
+  Suspended: 'موقوف',
+  Terminated: 'منتهي',
+};

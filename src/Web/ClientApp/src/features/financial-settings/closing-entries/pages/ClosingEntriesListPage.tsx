@@ -8,13 +8,7 @@ import { Plus, Eye } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { useClosingEntriesByFiscalYear, useGenerateClosingEntry } from '../../hooks/useClosingEntries';
 import { useFiscalYearsList } from '../../hooks/useFiscalYears';
-
-const statusLabels: Record<string, string> = {
-  Draft: 'مسودة',
-  Approved: 'معتمد',
-  Posted: 'مقيّد',
-  Cancelled: 'ملغي',
-};
+import { closingEntryStatusLabels } from '../../shared/types';
 
 const statusVariants: Record<string, 'default' | 'success' | 'warning' | 'danger'> = {
   Draft: 'default',
@@ -49,8 +43,8 @@ export default function ClosingEntriesListPage() {
 
   const columns: DataGridColumn<typeof entries[0]>[] = [
     { header: 'رقم القيد', cell: (row) => <span className="font-mono font-medium">{row.closingEntryNumber}</span> },
-    { header: 'التاريخ', cell: (row) => <span className="whitespace-nowrap">{new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium' }).format(new Date(row.closingDate))}</span> },
-    { header: 'الحالة', cell: (row) => <Badge variant={statusVariants[row.status] ?? 'default'}>{statusLabels[row.status] ?? row.status}</Badge> },
+    { header: 'التاريخ', cell: (row) => <span className="whitespace-nowrap">{new Intl.DateTimeFormat('ar-YE', { dateStyle: 'medium' }).format(new Date(row.closingDate))}</span> },
+    { header: 'الحالة', cell: (row) => <Badge variant={statusVariants[row.status] ?? 'default'}>{closingEntryStatusLabels[row.status as keyof typeof closingEntryStatusLabels] ?? row.status}</Badge> },
     { header: '逆转', cell: (row) => row.isReversal && <span className="text-xs">逆转: {row.reversalOfNumber}</span> },
     {
       header: 'إجراءات',

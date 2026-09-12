@@ -82,10 +82,6 @@ public class Parties : IEndpointGroup
             .Where(r => r.PartyId == id)
             .ToListAsync();
 
-        var payments = await dbContext.PaymentOrders
-            .Where(p => p.VendorPartyId == id)
-            .ToListAsync();
-
         var encumbrances = await dbContext.Encumbrances
             .Where(e => e.VendorPartyId == id)
             .ToListAsync();
@@ -95,11 +91,8 @@ public class Parties : IEndpointGroup
         all.AddRange(receipts.Select(r => new PartyDocumentResponse(
             "ReceiptVoucher", r.Id, r.VoucherNumber, r.Status.ToString(), r.VoucherDate, 0m)));
 
-        all.AddRange(payments.Select(p => new PartyDocumentResponse(
-            "PaymentOrder", p.Id, p.PaymentOrderNumber, p.Status.ToString(), p.PaymentOrderDate, p.AmountGross)));
-
         all.AddRange(encumbrances.Select(e => new PartyDocumentResponse(
-            "Encumbrance", e.Id, e.EncumbranceNumber, e.Status.ToString(), e.EncumbranceDate, e.Amount)));
+            "Encumbrance", e.Id, e.EncumbranceNumber, e.Status.ToString(), e.EncumbranceDate, e.TotalAmount)));
 
         return Results.Ok(all.OrderByDescending(d => d.Date).ToList());
     }

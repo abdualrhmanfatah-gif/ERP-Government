@@ -6,12 +6,14 @@ public class FinalAccountLine : BaseEntity
 {
     public int FinalAccountId { get; set; }
     public Enums.FinalAccountLineDimension Dimension { get; set; }
-    public int DimensionId { get; set; }
+    public int? DimensionId { get; set; }
     public string DimensionCode { get; set; } = string.Empty;
     public string DimensionName { get; set; } = string.Empty;
-    public decimal BudgetedAmount { get; set; }
+    public decimal OriginalBudgetAmount { get; set; }
+    public decimal RevisedBudgetAmount { get; set; }
+    public decimal EncumberedAmount { get; set; }
     public decimal ActualAmount { get; set; }
-    public decimal Variance { get; set; }
+    public decimal VarianceAmount { get; set; }
     public byte[] RowVersion { get; set; } = [];
 
     public FinalAccount FinalAccount { get; set; } = null!;

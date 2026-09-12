@@ -5,6 +5,7 @@ import { Page, Button, FilterBar, FilterSearch, FilterSelect } from '@/component
 import { AccountGrid } from '@/components/AccountingAccountGrid';
 import { useAccountsList } from '../hooks/useAccountsList';
 import { useAccountGroups } from '../hooks/useAccountGroups';
+import { activeStatusLabels } from '@/shared/constants/labels';
 
 export function AccountsListPage() {
   const navigate = useNavigate();
@@ -68,8 +69,8 @@ export function AccountsListPage() {
             value={isActive === undefined ? '' : String(isActive)}
             onChange={(v) => setIsActive(v === '' ? undefined : v === 'true')}
             options={[
-              { value: 'true', label: 'نشط' },
-              { value: 'false', label: 'غير نشط' },
+              { value: 'true', label: activeStatusLabels.active },
+              { value: 'false', label: activeStatusLabels.inactive },
             ]}
           />
           <FilterSelect

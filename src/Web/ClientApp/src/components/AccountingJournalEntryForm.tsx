@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,9 +11,9 @@ import { useAccountsList } from '@/features/accounting/hooks/useAccountsList';
 import { useCostCenters } from '@/features/organization/hooks/useCostCenters';
 import { FiscalYearIndicator } from '@/components/AccountingFiscalYearIndicator';
 import { BalanceIndicator } from '@/components/AccountingBalanceIndicator';
-import { MoveEntryType } from '../web-api-client';
 import { notify } from '@/features/notifications/notify';
 import { Button, Card, Combobox, Input, Select, Textarea, Badge } from '@/components/ui';
+import { entryTypeLabels, manualEntryTypes } from '@/features/accounting/shared/types';
 
 const headerSchema = z.object({
   documentDate: z.string().min(1, 'التاريخ مطلوب'),
@@ -25,22 +25,6 @@ const headerSchema = z.object({
 });
 
 type HeaderFormData = z.infer<typeof headerSchema>;
-
-const entryTypeLabels: Record<MoveEntryType, string> = {
-  [MoveEntryType.Standard]: 'قيود عامة',
-  [MoveEntryType.Reversing]: 'قيود عكسية',
-  [MoveEntryType.Adjusting]: 'قيود تسوية',
-  [MoveEntryType.Opening]: 'قيد افتتاحي',
-  [MoveEntryType.Closing]: 'قيد إغلاق',
-  [MoveEntryType.SystemGenerated]: 'مولد آلياً',
-};
-
-const manualEntryTypes: MoveEntryType[] = [
-  MoveEntryType.Standard,
-  MoveEntryType.Reversing,
-  MoveEntryType.Adjusting,
-  MoveEntryType.Opening,
-];
 
 interface EntryLine {
   id: number;
@@ -74,8 +58,8 @@ export function AccountingJournalEntryForm({ onSuccess, onStateChange }: Account
   const { data: accounts = [] } = useAccountsList({ isActive: true, isPostable: true });
   const { data: costCenters = [] } = useCostCenters();
 
-  const accountMap = new Map(accounts.map((a) => [a.id, `${a.code} - ${a.name}`]));
-  const costCenterMap = new Map(costCenters.map((c) => [c.id, `${c.code} - ${c.name}`]));
+  const accountMap = useMemo(() => new Map(accounts.map((a) => [a.id, `${a.code} - ${a.name}`])), [accounts]);
+  const costCenterMap = useMemo(() => new Map(costCenters.map((c) => [c.id, `${c.code} - ${c.name}`])), [costCenters]);
 
   const {
     register,
@@ -156,7 +140,7 @@ export function AccountingJournalEntryForm({ onSuccess, onStateChange }: Account
   };
 
   return (
-    <form id="journal-entry-form" onSubmit={handleSubmit(onSubmit)}>
+    <form id="journal-entry-form" onSubmit={handleSubmit(onSubmit)} aria-label="إنشاء قيد يومية">
       <Card variant="default">
         <div className="px-4 py-2.5 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)] flex items-center justify-between">
           <h2 className="text-sm font-bold text-[var(--color-on-surface)]">بيانات القيد</h2>

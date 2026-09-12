@@ -7,6 +7,7 @@ import { Plus, Pencil } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { budgetControlMethodLabels, BudgetControlMethod } from '../../shared/types';
 import type { BudgetTypeDto } from '../../shared/types';
+import { activeStatusLabels, getActiveStatusLabel } from '@/shared/constants/labels';
 import { useBudgetTypesList, useCreateBudgetType, useUpdateBudgetType, useToggleBudgetTypeActive } from '../hooks/useBudgetTypes';
 
 const controlMethodBadgeVariant: Record<BudgetControlMethod, 'success' | 'warning' | 'danger'> = {
@@ -21,8 +22,8 @@ const controlMethodOptions = Object.entries(budgetControlMethodLabels).map(([val
 }));
 
 const isActiveOptions = [
-  { value: 'true', label: 'نشط' },
-  { value: 'false', label: 'معطل' },
+  { value: 'true', label: activeStatusLabels.active },
+  { value: 'false', label: activeStatusLabels.disabled },
 ];
 
 const columns: DataGridColumn<BudgetTypeDto>[] = [
@@ -39,6 +40,7 @@ export default function BudgetTypesListPage() {
   const [isActiveFilter, setIsActiveFilter] = useState<string>('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editItem, setEditItem] = useState<BudgetTypeDto | null>(null);
+  const [allowOverrun, setAllowOverrun] = useState(false);
   const [confirmToggle, setConfirmToggle] = useState<BudgetTypeDto | null>(null);
 
   const { data: items = [], isLoading } = useBudgetTypesList();
@@ -68,11 +70,13 @@ export default function BudgetTypesListPage() {
 
   function handleCreate() {
     setEditItem(null);
+    setAllowOverrun(false);
     setDialogOpen(true);
   }
 
   function handleEdit(item: BudgetTypeDto) {
     setEditItem(item);
+    setAllowOverrun(item.allowOverrun);
     setDialogOpen(true);
   }
 
@@ -102,7 +106,7 @@ export default function BudgetTypesListPage() {
       name: form.get('name') as string,
       description: (form.get('description') as string) || undefined,
       controlMethod: Number(form.get('controlMethod')) as BudgetControlMethod,
-      allowOverrun: form.get('allowOverrun') === 'on',
+      allowOverrun,
     };
 
     if (editItem) {
@@ -132,8 +136,8 @@ export default function BudgetTypesListPage() {
     {
       header: 'الحالة',
       cell: (row) => canManage
-        ? <Switch checked={row.isActive} onChange={() => handleToggle(row)} label={row.isActive ? 'نشط' : 'معطل'} />
-        : <Badge variant={row.isActive ? 'success' : 'danger'}>{row.isActive ? 'نشط' : 'معطل'}</Badge>,
+        ? <Switch checked={row.isActive} onChange={() => handleToggle(row)} label={getActiveStatusLabel(row.isActive)} />
+        : <Badge variant={row.isActive ? 'success' : 'danger'}>{getActiveStatusLabel(row.isActive)}</Badge>,
     },
     ...(canManage ? [{
       header: 'إجراءات',
@@ -144,7 +148,6 @@ export default function BudgetTypesListPage() {
   return (
     <Page
       title="أنواع الميزانيات"
-      loading={isLoading}
       actions={
         canManage ? (
           <Button onClick={handleCreate} icon={<Plus size={16} />}>
@@ -195,7 +198,7 @@ export default function BudgetTypesListPage() {
           </Button>
         }
       >
-        <form id="budget-type-form" onSubmit={handleSubmit} className="space-y-4">
+        <form id="budget-type-form" onSubmit={handleSubmit} className="space-y-4" aria-label="نموذج نوع الموازنة">
           <Input
             label="الكود *"
             id="code"
@@ -228,14 +231,12 @@ export default function BudgetTypesListPage() {
             options={Object.entries(budgetControlMethodLabels).map(([value, label]) => ({ value, label }))}
           />
           <div className="flex items-center gap-2">
-            <input
+            <Switch
               id="allowOverrun"
-              name="allowOverrun"
-              type="checkbox"
-              defaultChecked={editItem?.allowOverrun}
-              className="w-4 h-4"
+              checked={allowOverrun}
+              onChange={setAllowOverrun}
+              label="السماح بالتجاوز"
             />
-            <label htmlFor="allowOverrun" className="text-sm text-[var(--color-on-surface)]">السماح بالتجاوز</label>
           </div>
         </form>
       </Dialog>

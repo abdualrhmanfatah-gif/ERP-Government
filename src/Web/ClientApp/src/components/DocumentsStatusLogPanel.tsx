@@ -58,7 +58,7 @@ export function StatusLogPanel({ documentType, documentId }: StatusLogPanelProps
                       <td className="px-3 py-3">{record.fromStatus}</td>
                       <td className="px-3 py-3">{record.toStatus}</td>
                       <td className="px-3 py-3">المستخدم #{record.changedById}</td>
-                      <td className="px-3 py-3">{new Date(record.changedAt).toLocaleDateString('ar-EG')}</td>
+                      <td className="px-3 py-3">{new Date(record.changedAt).toLocaleDateString('ar-YE')}</td>
                       <td className="px-3 py-3">{record.reason ?? '—'}</td>
                     </tr>
                   ))}

@@ -1,12 +1,12 @@
 # Implementation Plan: Payments Group (PAY-01..04)
 
-**Branch**: `045-payments-group` | **Date**: 2026-09-08 | **Spec**: [spec.md](./spec.md)
+**Branch**: `045-payments-group` | **Date**: 2026-09-09 (amended per ADR-001 + request-first frontend requirements) | **Spec**: [spec.md](./spec.md)
 
-**Input**: Feature specification from `/specs/045-payments-group/spec.md`
+**Input**: Feature specification from `/specs/045-payments-group/spec.md` + [frontend-requirements.md](./frontend-requirements.md)
 
 ## Summary
 
-Four payment sub-modules — payment orders (lifecycle + budget check + treasury trace + totals), disbursement requests (1:1 with order, dual signature, availability gate), payment execution (single immutable record closing the order-request-payment triad), and bank accounts (registry + activate/deactivate + default auto-switch). The backend contract is largely built (`src/Application/Payments`, `src/Web/Endpoints/Payments|DisbursementRequests`); this plan aligns the built surface with the clarified spec: void guard (unpaid-only), dual-signature step-2 role check, Failed-check override via a new `PaymentOrders.OverrideBudgetCheck` permission, automatic request invalidation on order cancel/void, appropriation-level budget check via `BudgetAvailabilityService`, and bank-account default auto-switch. Frontend adds `features/payments/` (4 entity folders, Arabic RTL).
+Four payment sub-modules — payment orders (lifecycle + budget check + treasury trace + totals, two creation paths: order-first and request-first), disbursement requests (request-first initiator with independent creation, amount approval, issuing authority, atomic order generation), payment execution (single immutable record per order closing the triad), and bank accounts (registry + activate/deactivate + default auto-switch). **Schema simplified per ADR-001**: BeneficiaryName only (no Party ID), DisbursementRequestId UNIQUE on PaymentOrder (one-directional link), budget check at order submit only, PaymentOrderLine removed (AccountId added), approval data in ApprovalHistory only, PaymentOrderId UNIQUE on Payment. Frontend adds `features/payments/` (4 entity folders, Arabic RTL).
 
 ## Technical Context
 
@@ -22,7 +22,7 @@ Four payment sub-modules — payment orders (lifecycle + budget check + treasury
 
 **Project Type**: layered web application (Domain → Application → Infrastructure → Web + ClientApp)
 
-**Performance Goals**: order create <5 min task time; totals endpoint fresh per request (no caching, Constitution-consistent)
+**Performance Goals**: order create <5 min task time; totals endpoint fresh per request
 
 **Constraints**: Financial Law 8/1990 (dual signature, budget-before-expenditure); server-side rule enforcement (Constitution III); all numbers server-issued (CC-1)
 
@@ -30,24 +30,24 @@ Four payment sub-modules — payment orders (lifecycle + budget check + treasury
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+*GATE: Must pass before Phase 0 research. Re-checked after Phase 1 design.*
 
 | Principle | Status | Notes |
 |---|---|---|
-| I. Layered integrity | PASS | Work confined to existing Payments module folders (Domain/Application/Web) + ClientApp; no new cross-references. |
-| II. Bounded contexts / events | PASS | Payment→ledger posting already via `PaymentRecordedEvent` domain event + outbox; no direct cross-module writes. |
-| III. Server-side rules | PASS | All clarified rules (void guard, step-2 role, auto-invalidate, default auto-switch) enforced in handlers/validators. |
-| IV. Financial integrity | PASS | No journal mutation; void of unpaid order needs no reversing entry (nothing posted); posting remains event-driven. |
-| V. Budget control | PASS→ALIGN | Budget check upgraded from fund-level heuristic to `BudgetAvailabilityService` appropriation-level check; Failed blocks approval; Overridden explicit + permissioned + recorded (spec clarification Q3). |
-| VI. Data integrity | PASS | No schema deletion; `Restrict` FKs unchanged; RowVersion round-trips on all mutations; new permission seed idempotent. |
-| VII. Authorization | PASS | New permission code `PaymentOrders.OverrideBudgetCheck` added to registry + policy; existing GAP-ADD codes already present in `PermissionCodes` (spec note stale — verified). Endpoint policies remain open placeholders per registered exception #1. |
-| VIII. Approval audit immutability | PASS | Dual-signature steps + override decision recorded in ApprovalHistory (with evaluation snapshot); no inline columns. |
-| IX. API contract integrity | PASS | No endpoint renames/removals; behavior fixes only; OpenAPI regenerated after changes (`npm run generate-api`). |
-| X. UI/design consistency | PASS | Frontend reuses tokens.ts SSOT, shared primitives, RTL logical properties, Arabic-only strings. |
-| XI. Testing/TDD | EXCEPTION | No automated tests for this feature. Backend gate: build success. Frontend gate: lint + build. Validation via quickstart scenarios. |
-| XII. Controlled change | PASS | No module boundary/layer changes; no decision record required. Partial-payment semantics deferred (see research.md D7) — no contract invented. |
+| I. Layered integrity | PASS | Work confined to existing Payments module folders + ClientApp; no new cross-references. |
+| II. Bounded contexts / events | PASS | Payment→ledger posting via `PaymentRecordedEvent` + outbox; no direct cross-module writes. |
+| III. Server-side rules | PASS | All rules (void guard, step-2 role, auto-invalidate, default auto-switch) enforced in handlers/validators. |
+| IV. Financial integrity | PASS | No journal mutation; void of unpaid order needs no reversing entry; posting event-driven. |
+| V. Budget control | PASS | Budget check at order submit via `BudgetAvailabilityService` (appropriation-level); Failed blocks approval; Overridden explicit + permissioned + recorded. Request submit is pure status transition (ADR-001 D-3). FundId/AppropriationId required at submit. |
+| VI. Data integrity | PASS | ADR-001 migration: column drops/adds, unique indexes; Restrict FKs; RowVersion; idempotent permission seed. |
+| VII. Authorization | PASS | `PaymentOrders.OverrideBudgetCheck` permission added; existing GAP-ADD codes verified. Endpoint policies remain open placeholders. |
+| VIII. Approval audit immutability | PASS | Approval data (amount, issuing authority) in ApprovalHistory only — no duplicate columns on DisbursementRequest (ADR-001 D-5). |
+| IX. API contract integrity | PASS | Breaking changes per ADR-001 (BeneficiaryPartyId removed, BeneficiaryId removed, PaymentOrderId removed from DisbursementRequest, PaymentOrderLine removed, AccountId added, approval columns removed from DisbursementRequest, PaymentOrderId UNIQUE on Payment). ADR-001 documents rationale. OpenAPI regenerated after changes. |
+| X. UI/design consistency | PASS | Frontend reuses tokens.ts, shared primitives, RTL logical properties, Arabic-only strings. |
+| XI. Testing/TDD | EXCEPTION | No automated tests. Backend gate: build success. Frontend gate: lint + build. Validation via quickstart scenarios. |
+| XII. Controlled change | PASS | ADR-001 documents all breaking schema changes (rationale, scope, migration). No module boundary changes. |
 
-**Post-Phase-1 re-check**: PASS — no violations introduced; see Complexity Tracking (empty).
+**Post-Phase-1 re-check**: PASS — no violations introduced; ADR-001 covers all breaking changes.
 
 ## Project Structure
 
@@ -59,9 +59,12 @@ specs/045-payments-group/
 ├── research.md
 ├── data-model.md
 ├── quickstart.md
+├── adr-001-schema-simplification.md   # NEW — breaking changes per ADR-001
+├── frontend-requirements.md           # NEW — detailed screen/field specs for all UI screens
+├── feature-context-request-first-disbursement.md  # Discovery input for request-first amendment
 ├── contracts/
 │   └── payments-api.md
-└── tasks.md             # Phase 2 output (/speckit.tasks)
+└── tasks.md
 ```
 
 ### Source Code (repository root)
@@ -69,37 +72,47 @@ specs/045-payments-group/
 ```text
 src/
 ├── Domain/Payments/
-│   ├── Entities/            # PaymentOrder, PaymentOrderLine, PaymentOrderDeduction,
-│   │                        # DisbursementRequest, Payment, BankAccount (exist)
-│   ├── Enums/               # 9 payment enums (exist; no changes)
-│   └── Events/              # PaymentRecordedEvent lives in Application (as-built)
+│   ├── Entities/            # PaymentOrder (no PaymentOrderLine), DisbursementRequest, Payment, BankAccount
+│   ├── Enums/               # payment enums
+│   └── Events/
 ├── Application/Payments/
 │   ├── Commands/
-│   │   ├── PaymentOrders/   # Create/Update/Submit/Approve/Reject/Cancel/
-│   │   │                    # SendToTreasury/Void (exist; Submit/Approve/Void/Cancel modified)
-│   │   ├── DisbursementRequests/  # Create/Submit/Approve/Reject/Cancel (Approve modified)
-│   │   ├── Payments/        # RecordPayment (unchanged behavior; optional referenceNumber)
-│   │   └── BankAccounts/    # Create/Update/Activate/Deactivate (default auto-switch added)
-│   ├── Queries/Payments/    # list/by-id/totals (exist)
+│   │   ├── PaymentOrders/   # Create/Update/Submit/Approve/Reject/Cancel/SendToTreasury/Void
+│   │   ├── DisbursementRequests/  # Create/Submit/Approve/Reject/Cancel
+│   │   ├── Payments/        # RecordPayment
+│   │   └── BankAccounts/    # Create/Update/Activate/Deactivate
+│   ├── Queries/Payments/
 │   └── Common/DTOs/
-├── Infrastructure/Data/Migrations/   # NEW migration only if seed/precision requires
+├── Infrastructure/Data/Migrations/   # ADR-001 migration
 └── Web/
-    ├── Endpoints/Payments/           # PaymentOrders.cs, Payments.cs, BankAccounts.cs (exist)
-    ├── Endpoints/DisbursementRequests/DisbursementRequests.cs (exist)
-    └── DependencyInjection.cs        # register OverrideBudgetCheck policy
+    ├── Endpoints/Payments/
+    ├── Endpoints/DisbursementRequests/
+    └── DependencyInjection.cs
 src/Web/ClientApp/src/
 ├── features/payments/
 │   ├── payment-orders/     # pages/ hooks/ shared/
 │   ├── disbursement-requests/
 │   ├── payments/
 │   ├── bank-accounts/
-│   └── hooks/ shared/      # cross-entity
-├── components/             # Payments*-prefixed feature components
-└── routes/                 # /payments/* route additions
+│   └── hooks/ shared/
+├── components/             # Payments*-prefixed
+└── routes/                 # /payments/*
 ```
 
-**Structure Decision**: Reuse the existing Payments module layout (verified as-built). No new projects, no new endpoints groups — endpoint deltas are behavior changes inside existing handlers. Frontend follows the `features/budgeting/` exemplar with a new `features/payments/` domain folder.
+**Structure Decision**: Reuse existing Payments module layout. ADR-001 schema migration is the primary infrastructure change. Frontend follows `features/budgeting/` exemplar. Frontend screen-level specs are in `frontend-requirements.md` (linked from spec.md UI/UX sections).
 
 ## Complexity Tracking
 
-> Empty — no Constitution violations to justify.
+> ADR-001 documents all breaking changes. No unresolved Constitution violations.
+
+### Unresolved Decisions (from spec.md OQ-N5..N9)
+
+These decisions are **not blocking** current implementation tasks but **block planning of future features** (e.g., payment gateway, Party linkage). They are tracked here for visibility.
+
+| ID | Question | Impact on current scope |
+|---|---|---|
+| OQ-N5 | Beneficiary Party linkage: reintroduce in future version? | None — current model uses BeneficiaryName string only |
+| OQ-N6 | Which signer's identity/capacity becomes the order's issuing authority? | None — both signatures recorded in ApprovalHistory; order authority is a display concern |
+| OQ-N7 | Cancellation/re-authorization process after order generation? | None — current model: cancel + create new request |
+| OQ-N8 | Zero-net balance scenario (deductions ≥ gross)? | None — server rejects deductionTotal > gross |
+| OQ-N9 | Payment gateway integration or current Cash/Check model sufficient? | None — current enum is Cash/Check only |

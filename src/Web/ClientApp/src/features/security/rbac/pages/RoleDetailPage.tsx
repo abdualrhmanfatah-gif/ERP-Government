@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Plus, Trash2 } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
-import { Page, Button, StatusBadge, DataGrid, Loading, Card, Input, EmptyState } from '@/components/ui';
+import { Page, Button, StatusBadge, DataGrid, Loading, Card, FilterSearch, EmptyState } from '@/components/ui';
 import type { DataGridColumn } from '@/components/ui/DataGrid';
 import { useRoles, useRolePermissions, useAssignRolePermission, useRemoveRolePermission, usePermissions } from '../hooks';
+import { getActiveStatusLabel } from '@/shared/constants/labels';
 
 interface AssignedPermission {
   permissionId: number;
@@ -113,7 +114,7 @@ export function RoleDetailPage() {
               <span className="text-[var(--color-on-surface-variant)]">الحالة:</span>
               <span className="me-2">
                 <StatusBadge variant={role.isActive ? 'active' : 'draft'}>
-                  {role.isActive ? 'نشط' : 'غير نشط'}
+                  {getActiveStatusLabel(role.isActive)}
                 </StatusBadge>
               </span>
             </div>
@@ -134,12 +135,11 @@ export function RoleDetailPage() {
 
           {showAdd && (
             <Card className="p-3">
-              <label htmlFor="permission-search" className="sr-only">بحث في الصلاحيات</label>
-              <Input
-                id="permission-search"
-                placeholder="بحث في الصلاحيات..."
+              <FilterSearch
                 value={filter}
-                onChange={(e) => setFilter(e.target.value)}
+                onChange={setFilter}
+                placeholder="بحث في الصلاحيات..."
+                label="بحث في الصلاحيات"
                 className="mb-2"
               />
               <div className="max-h-48 overflow-y-auto space-y-1">

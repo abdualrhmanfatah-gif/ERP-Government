@@ -301,7 +301,7 @@ public class JournalEntries : IEndpointGroup
             GeneratedAt = DateTimeOffset.UtcNow,
             Sections = sections,
             PaperSize = pageSize ?? "A5",
-            IsLandscape = isLandscape ?? false,
+            IsLandscape = isLandscape ?? true,
         };
 
         var stream = new MemoryStream();

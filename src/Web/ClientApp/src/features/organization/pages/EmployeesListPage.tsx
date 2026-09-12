@@ -4,13 +4,8 @@ import { Page, DataGrid, Button } from '@/components/ui';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useEmployees, useDeleteEmployee } from '../hooks';
+import { employeeStatusLabels } from '../types';
 import { useState } from 'react';
-
-const statusLabels: Record<string, string> = {
-  Active: 'نشط',
-  Suspended: 'موقوف',
-  Terminated: 'منتهي',
-};
 
 export function EmployeesListPage() {
   const navigate = useNavigate();
@@ -46,7 +41,7 @@ export function EmployeesListPage() {
           { key: 'jobTitle', header: 'المسمى الوظيفي', width: 150 },
           { key: 'employmentStatus', header: 'الحالة', width: 100, render: (r) => (
             <StatusBadge variant={r.isActive ? 'active' : 'draft'}>
-              {statusLabels[r.employmentStatus] ?? r.employmentStatus}
+              {employeeStatusLabels[r.employmentStatus] ?? r.employmentStatus}
             </StatusBadge>
           )},
           { key: 'actions', header: 'الإجراءات', width: 100, render: (r) => (

@@ -19,7 +19,7 @@ const schema = z.object({
 }).refine((d) => {
   const map: Record<string,string> = { Asset:'Debit', Expense:'Debit', Liability:'Credit', Equity:'Credit', Revenue:'Credit' };
   return map[d.type] === d.normalBalance;
-}, { message: 'الرصيد الطبيعي غير متوافق مع النوع', path: ['normalBalance'] });
+}, { message: 'نوع الحساب  غير متوافق مع النوع', path: ['normalBalance'] });
 
 type Props = { open: boolean; onOpenChange:(v:boolean)=>void; initial?: AccountGroupDto | null; onSubmit:(data:CreateAccountGroupRequest & {rowVersion?:string})=>Promise<void>; isPending?: boolean };
 
@@ -54,7 +54,7 @@ export function AccountGroupForm({ open, onOpenChange, initial, onSubmit, isPend
 
   return (
     <Dialog open={open} onClose={()=>onOpenChange(false)} title={initial ? 'تعديل المجموعة' : 'إنشاء مجموعة'}>
-      <form onSubmit={form.handleSubmit(async (v) => { await onSubmit(v as never); onOpenChange(false); })} className="space-y-4 p-4">
+      <form onSubmit={form.handleSubmit(async (v) => { await onSubmit(v as never); onOpenChange(false); })} className="space-y-4 p-4" aria-label="نموذج مجموعة الحسابات">
         <div className="grid gap-4">
           <Input label="الكود (20)" {...form.register('code')} disabled={!!initial} error={form.formState.errors.code?.message} />
           <Input label="الاسم (200)" {...form.register('name')} error={form.formState.errors.name?.message} />
@@ -73,7 +73,7 @@ export function AccountGroupForm({ open, onOpenChange, initial, onSubmit, isPend
               error={form.formState.errors.type?.message}
             />
             <Select
-              label="الرصيد الطبيعي"
+              label="نوع الحساب "
               value={form.watch('normalBalance')}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => form.setValue('normalBalance', e.target.value as 'Debit'|'Credit', { shouldValidate: true })}
               options={[

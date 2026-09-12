@@ -233,6 +233,10 @@ export const semanticColorsDark = {
   outline: primitives.slate[700],
   outlineVariant: primitives.slate[950],
 
+  // ── Border (functional) ───────────────────────────────────────────────────
+  inputBorder: '#43474e',
+  containerBorder: '#233144',
+
   // ── Surface Tint — Protocol Section 3 ────────────────────────────────────
   surfaceTint: '#adc7f7',
 

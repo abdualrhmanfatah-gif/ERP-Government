@@ -39,4 +39,6 @@ public class JournalEntry : BaseAuditableEntity
     // User navigation for audit metadata
     public User? PostedBy { get; set; }
     public User? CancelledBy { get; set; }
+
+    public ICollection<JournalEntryLine> Lines { get; set; } = new List<JournalEntryLine>();
 }

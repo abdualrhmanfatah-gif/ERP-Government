@@ -6,7 +6,6 @@ const orderStatusVariantMap: Record<string, BadgeVariant> = {
   Approved: 'approved',
   SentToTreasury: 'sentToTreasury',
   Paid: 'paid',
-  PartiallyPaid: 'partiallyPaid',
   Cancelled: 'cancelled',
   Rejected: 'rejected',
   Voided: 'voided',
@@ -18,7 +17,6 @@ const orderStatusLabels: Record<string, string> = {
   Approved: 'موافق عليها',
   SentToTreasury: 'مرسلة للخزينة',
   Paid: 'مدفوعة',
-  PartiallyPaid: 'مدفوعة جزئياً',
   Cancelled: 'ملغاة',
   Rejected: 'مرفوضة',
   Voided: 'ملغاة نهائياً',
@@ -54,24 +52,10 @@ const paymentStatusLabels: Record<string, string> = {
   Failed: 'فشل',
 };
 
-const budgetCheckVariantMap: Record<string, BadgeVariant> = {
-  Pending: 'pending',
-  Passed: 'passed',
-  Failed: 'failed',
-  Overridden: 'overridden',
-};
-
-const budgetCheckLabels: Record<string, string> = {
-  Pending: 'قيد الفحص',
-  Passed: 'ناجح',
-  Failed: 'فاشل',
-  Overridden: 'تم التجاوز',
-};
-
 interface PaymentsStatusBadgeProps {
   status: string;
   className?: string;
-  variant?: 'order' | 'request' | 'payment' | 'budgetCheck';
+  variant?: 'order' | 'request' | 'payment';
 }
 
 function getVariant(status: string, type: string): BadgeVariant {
@@ -79,7 +63,6 @@ function getVariant(status: string, type: string): BadgeVariant {
     case 'order': return orderStatusVariantMap[status] ?? 'draft';
     case 'request': return requestStatusVariantMap[status] ?? 'draft';
     case 'payment': return paymentStatusVariantMap[status] ?? 'pending';
-    case 'budgetCheck': return budgetCheckVariantMap[status] ?? 'pending';
     default: return 'draft';
   }
 }
@@ -89,7 +72,6 @@ function getLabel(status: string, type: string): string {
     case 'order': return orderStatusLabels[status] ?? status;
     case 'request': return requestStatusLabels[status] ?? status;
     case 'payment': return paymentStatusLabels[status] ?? status;
-    case 'budgetCheck': return budgetCheckLabels[status] ?? status;
     default: return status;
   }
 }

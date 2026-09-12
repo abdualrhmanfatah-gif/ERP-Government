@@ -48,4 +48,29 @@ export function Card({
   );
 }
 
+function CardHeader({ className, children, ...rest }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={cn('flex flex-col space-y-1.5 p-6', className)} {...rest}>
+      {children}
+    </div>
+  );
+}
+
+function CardTitle({ className, children, ...rest }: HTMLAttributes<HTMLHeadingElement>) {
+  return (
+    <h3 className={cn('text-2xl font-semibold leading-none tracking-tight', className)} {...rest}>
+      {children}
+    </h3>
+  );
+}
+
+function CardContent({ className, children, ...rest }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={cn('p-6 pt-0', className)} {...rest}>
+      {children}
+    </div>
+  );
+}
+
+export { CardHeader, CardTitle, CardContent };
 export type { CardProps, CardVariant, CardPadding };

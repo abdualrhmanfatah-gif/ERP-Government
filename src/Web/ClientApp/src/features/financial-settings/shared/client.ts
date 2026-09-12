@@ -154,6 +154,14 @@ export const fiscalYearsClient = {
       }),
     );
   },
+
+  async byDate(date: string): Promise<{ fiscalYearId: number; fiscalYearCode?: string; fiscalYearName?: string; fiscalPeriodId: number; fiscalPeriodName?: string }> {
+    return handleResponse(
+      await fetch(`/api/FiscalYears/by-date?date=${encodeURIComponent(date)}`, {
+        headers: { Accept: 'application/json' },
+      }),
+    );
+  },
 };
 
 // ─── Fiscal Periods Client ───────────────────────────────────────────────────

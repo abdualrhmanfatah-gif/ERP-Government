@@ -1,4 +1,6 @@
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.FinancialSettings.Common.Services;
+using ERP_Government.Application.Parties.Common;
 using ERP_Government.Application.Payments.Commands.DisbursementRequests.ApproveDisbursementRequest;
 using ERP_Government.Application.Payments.Commands.DisbursementRequests.RejectDisbursementRequest;
 using ERP_Government.Domain.Payments.Entities;
@@ -17,6 +19,8 @@ public class DisbursementAuditGuardTests
 {
     private Mock<IApplicationDbContext> _contextMock = null!;
     private Mock<IIdentityService> _identityServiceMock = null!;
+    private Mock<IDocumentSequenceService> _sequenceServiceMock = null!;
+    private Mock<IDocumentStatusLogger> _statusLoggerMock = null!;
     private Mock<IUser> _nullUserMock = null!;
     private Mock<IUser> _validUserMock = null!;
     private const int ValidUserId = 5;
@@ -26,6 +30,8 @@ public class DisbursementAuditGuardTests
     {
         _contextMock = new Mock<IApplicationDbContext>();
         _identityServiceMock = new Mock<IIdentityService>();
+        _sequenceServiceMock = new Mock<IDocumentSequenceService>();
+        _statusLoggerMock = new Mock<IDocumentStatusLogger>();
         _nullUserMock = new Mock<IUser>();
         _nullUserMock.Setup(x => x.Id).Returns((int?)null);
         _validUserMock = new Mock<IUser>();
@@ -95,7 +101,7 @@ public class DisbursementAuditGuardTests
         SetupDisbursement(DisbursementRequestStatus.PendingApproval);
 
         var handler = new ApproveDisbursementRequestCommandHandler(
-            _contextMock.Object, _identityServiceMock.Object, _nullUserMock.Object);
+            _contextMock.Object, _identityServiceMock.Object, _sequenceServiceMock.Object, _statusLoggerMock.Object, _nullUserMock.Object);
 
         var result = await handler.Handle(
             new ApproveDisbursementRequestCommand { Id = 1, Reason = "OK", RowVersion = [1, 2, 3] },
@@ -116,7 +122,7 @@ public class DisbursementAuditGuardTests
             .ReturnsAsync(true);
 
         var handler = new ApproveDisbursementRequestCommandHandler(
-            _contextMock.Object, _identityServiceMock.Object, _validUserMock.Object);
+            _contextMock.Object, _identityServiceMock.Object, _sequenceServiceMock.Object, _statusLoggerMock.Object, _validUserMock.Object);
 
         var result = await handler.Handle(
             new ApproveDisbursementRequestCommand { Id = 1, Reason = "OK", RowVersion = [1, 2, 3] },

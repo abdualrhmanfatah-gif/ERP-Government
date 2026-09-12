@@ -13,7 +13,7 @@ const schema = z.object({
   description: z.string().optional(),
   accountGroupId: z.coerce.number().min(1, 'المجموعة مطلوبة'),
   parentId: z.coerce.number().optional().nullable(),
-  normalBalance: z.coerce.number().min(0, 'الرصيد الطبيعي مطلوب'),
+  normalBalance: z.coerce.number().min(0, 'نوع الحساب  مطلوب'),
   isPostable: z.boolean(),
   isReconcilable: z.boolean(),
   currencyId: z.coerce.number().optional().nullable(),
@@ -60,7 +60,7 @@ export function AccountForm({ initialData, accountGroups, parentAccounts, onSubm
   const isReconcilable = watch('isReconcilable');
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl">
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl" aria-label="نموذج الحساب">
       <Input label="الرمز" {...register('code')} error={errors.code?.message} required disabled={!!initialData} />
       <Input label="الاسم" {...register('name')} error={errors.name?.message} required />
       <Input label="الوصف" {...register('description')} />
@@ -79,7 +79,7 @@ export function AccountForm({ initialData, accountGroups, parentAccounts, onSubm
         ]}
       />
       <Select
-        label="الرصيد الطبيعي"
+        label="نوع الحساب "
         {...register('normalBalance')}
         options={[
           { value: '0', label: 'مدين' },

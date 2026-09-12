@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ERP_Government.Application.Budgeting.Commands.BudgetItems;
 
-public record MonthlyPlanEntry(int Month, decimal PlannedAmount);
+public record MonthlyPlanEntry(int FiscalPeriodId, decimal PlannedAmount);
 
 [Authorize(Policy = PermissionCodes.BudgetItemsUpdate)]
 public record SaveBudgetItemMonthlyPlanCommand(
@@ -28,7 +28,7 @@ public class SaveBudgetItemMonthlyPlanCommandHandler(
             context.BudgetItemMonthlyPlans.Add(new BudgetItemMonthlyPlan
             {
                 BudgetItemId = request.BudgetItemId,
-                Month = entry.Month,
+                FiscalPeriodId = entry.FiscalPeriodId,
                 PlannedAmount = entry.PlannedAmount
             });
         }
@@ -52,14 +52,14 @@ public class SaveBudgetItemMonthlyPlanCommandValidator : AbstractValidator<SaveB
 
         RuleForEach(x => x.Entries).ChildRules(entry =>
         {
-            entry.RuleFor(e => e.Month)
-                .InclusiveBetween(1, 12).WithMessage("Month must be between 1 and 12.");
+            entry.RuleFor(e => e.FiscalPeriodId)
+                .GreaterThan(0).WithMessage("Fiscal period ID must be greater than 0.");
             entry.RuleFor(e => e.PlannedAmount)
                 .GreaterThanOrEqualTo(0).WithMessage("Planned amount must be >= 0.");
         });
 
         RuleFor(x => x.Entries)
-            .Must(e => e.Select(x => x.Month).Distinct().Count() == e.Count)
-            .WithMessage("Duplicate months are not allowed.");
+            .Must(e => e.Select(x => x.FiscalPeriodId).Distinct().Count() == e.Count)
+            .WithMessage("Duplicate fiscal periods are not allowed.");
     }
 }

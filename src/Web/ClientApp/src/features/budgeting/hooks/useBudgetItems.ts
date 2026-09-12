@@ -3,7 +3,6 @@ import {
   BudgetsClient,
   CreateBudgetItemRequest,
   UpdateBudgetItemRequest,
-  MoveBudgetItemRequest,
 } from '../../../web-api-client';
 
 const client = new BudgetsClient();
@@ -13,14 +12,6 @@ export function useBudgetItemsTree(budgetId: number) {
     queryKey: ['budget-items-tree', budgetId],
     queryFn: () => client.tree2(budgetId),
     enabled: Number.isFinite(budgetId),
-  });
-}
-
-export function useBudgetItemDetail(itemId: number) {
-  return useQuery({
-    queryKey: ['budget-items', itemId],
-    queryFn: () => client.itemsGET(itemId),
-    enabled: Number.isFinite(itemId),
   });
 }
 
@@ -44,24 +35,6 @@ export function useUpdateBudgetItem() {
   return useMutation({
     mutationFn: ({ budgetId, itemId, ...data }: Record<string, unknown> & { budgetId: number; itemId: number }) =>
       client.itemsPUT(budgetId, itemId, new UpdateBudgetItemRequest({ ...data } as any)),
-    onSuccess: () => invalidateItems(qc),
-  });
-}
-
-export function useDeleteBudgetItem() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ budgetId, itemId }: { budgetId: number; itemId: number }) =>
-      client.itemsDELETE(budgetId, itemId),
-    onSuccess: () => invalidateItems(qc),
-  });
-}
-
-export function useMoveBudgetItem() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ budgetId, itemId, ...data }: Record<string, unknown> & { budgetId: number; itemId: number }) =>
-      client.move(budgetId, itemId, new MoveBudgetItemRequest(data as any)),
     onSuccess: () => invalidateItems(qc),
   });
 }

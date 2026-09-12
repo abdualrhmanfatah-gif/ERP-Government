@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Power, PowerOff, Eye, Pencil } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
-import { Page, DataGrid, Button, ConfirmDialog, Input, FilterBar, FilterSelect, StatusBadge } from '@/components/ui';
+import { Page, DataGrid, Button, ConfirmDialog, Input, FilterBar, FilterSelect, StatusBadge, Pagination } from '@/components/ui';
 import { GroupTree } from '@/components/AccountingGroupTree';
 import { AccountGroupForm } from '@/components/AccountingAccountGroupForm';
 import { useAccountGroupsList } from '../hooks/useAccountGroupsList';
@@ -12,6 +12,7 @@ import { useToggleAccountGroupActive } from '../hooks/useToggleAccountGroupActiv
 import type { AccountGroupDto } from '../types';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
+import { activeStatusLabels, getActiveStatusLabel } from '@/shared/constants/labels';
 
 export function AccountGroupsListPage() {
   const navigate = useNavigate();
@@ -85,7 +86,7 @@ export function AccountGroupsListPage() {
         <FilterBar>
           <Input placeholder="بحث بالكود أو الاسم..." value={search} onChange={(e)=>{setSearch(e.target.value); setPage(1);}} className="max-w-sm" />
           <FilterSelect label="النوع" value={filterType} onChange={(v: string)=>{setFilterType(v); setPage(1);}} options={[{value:'All',label:'الكل'},{value:'Asset',label:'أصل'},{value:'Liability',label:'التزام'},{value:'Equity',label:'حقوق ملكية'},{value:'Revenue',label:'إيراد'},{value:'Expense',label:'مصروف'}]} />
-          <FilterSelect label="الحالة" value={filterActive} onChange={(v: string)=>{setFilterActive(v); setPage(1);}} options={[{value:'All',label:'الكل'},{value:'active',label:'نشط'},{value:'inactive',label:'معطل'}]} />
+          <FilterSelect label="الحالة" value={filterActive} onChange={(v: string)=>{setFilterActive(v); setPage(1);}} options={[{value:'All',label:'الكل'},{value:'active',label:activeStatusLabels.active},{value:'inactive',label:activeStatusLabels.disabled}]} />
         </FilterBar>
       }
       loading={isLoading}
@@ -110,7 +111,7 @@ export function AccountGroupsListPage() {
             { id:'type', accessorKey:'type', header:'النوع' },
             { id:'normalBalance', accessorKey:'normalBalance', header:'الرصيد' },
             { id:'level', accessorKey:'level', header:'المستوى' },
-            { id:'isActive', accessorKey:'isActive', header:'الحالة', cell: (row)=> <StatusBadge variant={row.isActive?'active':'closed'}>{row.isActive?'نشط':'معطل'}</StatusBadge> },
+            { id:'isActive', accessorKey:'isActive', header:'الحالة', cell: (row)=> <StatusBadge variant={row.isActive?'active':'closed'}>{getActiveStatusLabel(row.isActive ?? false)}</StatusBadge> },
             { id:'ancestorPath', accessorKey:'ancestorPath', header:'المسار', cell: (row)=> <span className="text-xs">{(row.ancestorPath ?? []).map((a)=>a.code).join(' / ')}</span> },
             { id:'actions', header:'إجراءات', cell: (row)=> {
               return <div className="flex gap-1">
@@ -123,9 +124,9 @@ export function AccountGroupsListPage() {
         />
       )}
 
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-[var(--color-on-surface-variant)]">الصفحة {data?.page ?? 1} من {data?.totalPages ?? 1} — الإجمالي {data?.totalCount ?? 0}</span>
-        <div className="flex gap-2"><Button variant="outline" disabled={page<=1} onClick={()=>setPage(p=>p-1)}>السابق</Button><Button variant="outline" disabled={page>= (data?.totalPages ?? 1)} onClick={()=>setPage(p=>p+1)}>التالي</Button></div>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <span className="text-sm text-[var(--color-on-surface-variant)]">الإجمالي {data?.totalCount ?? 0}</span>
+        <Pagination page={page} total={data?.totalCount ?? 0} pageSize={20} onChange={setPage} />
       </div>
 
       <AccountGroupForm open={showCreate} onOpenChange={setShowCreate} onSubmit={handleCreate} isPending={createMut.isPending} />

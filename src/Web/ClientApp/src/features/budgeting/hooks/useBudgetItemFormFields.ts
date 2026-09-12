@@ -1,7 +1,7 @@
-import { useFundsList } from './useFunds';
+import { useFundsList } from '../funds/hooks/useFunds';
 import { useCostCenters } from '../../organization/hooks/useCostCenters';
 import { useAccountsList } from '../../accounting/hooks/useAccountsList';
-import { useClassificationsTree } from './useClassifications';
+import { useClassificationsTree } from '../classifications/hooks/useClassifications';
 
 interface ClassificationNode {
   id: number;

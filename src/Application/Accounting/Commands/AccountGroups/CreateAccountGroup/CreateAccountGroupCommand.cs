@@ -33,7 +33,7 @@ public class CreateAccountGroupCommandHandler(
 
         // Matrix
         if (!AccountGroupHierarchyHelper.IsNormalBalanceCompatible(request.Type, request.NormalBalance))
-            return Result<int>.Failure(["الرصيد الطبيعي غير متوافق مع النوع."]);
+            return Result<int>.Failure(["نوع الحساب  غير متوافق مع النوع."]);
 
         AccountGroup? parent = null;
         byte level = 1;
@@ -94,7 +94,7 @@ public class CreateAccountGroupCommandValidator : AbstractValidator<CreateAccoun
             .IsInEnum().WithMessage("نوع المجموعة غير صالح.");
 
         RuleFor(x => x.NormalBalance)
-            .IsInEnum().WithMessage("الرصيد الطبيعي غير صالح.");
+            .IsInEnum().WithMessage("نوع الحساب  غير صالح.");
 
         RuleFor(x => x.Description)
             .MaximumLength(500).WithMessage("الوصف يجب ألا يتجاوز 500 حرفاً.");

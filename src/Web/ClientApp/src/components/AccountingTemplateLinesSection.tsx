@@ -3,7 +3,7 @@ import { BalanceIndicator } from '@/components/AccountingBalanceIndicator';
 import { useAccountsList } from '@/features/accounting/hooks/useAccountsList';
 import { useCurrenciesList } from '@/features/accounting/hooks/useCurrenciesList';
 import { useCreateTemplateLine, useUpdateTemplateLine, useRemoveTemplateLine } from '@/features/accounting/hooks/useTemplateLines';
-import { showToast } from '@/components/ui/Toast';
+import { notify } from '@/features/notifications/notify';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
@@ -81,9 +81,9 @@ export function TemplateLinesSection({ templateId, lines }: Props) {
 
   const save = async () => {
     if (!editing) return;
-    if (editing.debit > 0 && editing.credit > 0) { showToast('error', 'يجب أن يكون السطر مدين أو دائن فقط'); return; }
-    if (!editing.debit && !editing.credit) { showToast('error', 'يجب إدخال مبلغ مدين أو دائن'); return; }
-    if (!editing.accountId) { showToast('error', 'يجب اختيار الحساب'); return; }
+    if (editing.debit > 0 && editing.credit > 0) { notify({ type: 'error', title: 'يجب أن يكون السطر مدين أو دائن فقط' }); return; }
+    if (!editing.debit && !editing.credit) { notify({ type: 'error', title: 'يجب إدخال مبلغ مدين أو دائن' }); return; }
+    if (!editing.accountId) { notify({ type: 'error', title: 'يجب اختيار الحساب' }); return; }
     try {
       if (editing.id) {
         await updateLine.mutateAsync({
@@ -95,7 +95,7 @@ export function TemplateLinesSection({ templateId, lines }: Props) {
             rowVersion: editing.rowVersion ?? '',
           },
         });
-        showToast('success', 'تم تعديل السطر');
+        notify({ type: 'success', title: 'تم تعديل السطر' });
       } else {
         await createLine.mutateAsync({
           templateId,
@@ -105,20 +105,20 @@ export function TemplateLinesSection({ templateId, lines }: Props) {
             debit: editing.debit, credit: editing.credit,
           },
         });
-        showToast('success', 'تمت إضافة السطر');
+        notify({ type: 'success', title: 'تمت إضافة السطر' });
       }
       setEditing(null);
     } catch {
-      showToast('error', 'فشلت العملية');
+      notify({ type: 'error', title: 'فشلت العملية' });
     }
   };
 
   const remove = async (row: TemplateLineRow) => {
     try {
       await removeLine.mutateAsync({ templateId, lineId: row.id });
-      showToast('success', 'تم حذف السطر');
+      notify({ type: 'success', title: 'تم حذف السطر' });
     } catch {
-      showToast('error', 'فشل الحذف');
+      notify({ type: 'error', title: 'فشل الحذف' });
     }
   };
 

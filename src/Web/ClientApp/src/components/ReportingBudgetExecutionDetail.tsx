@@ -74,7 +74,7 @@ export function ReportingBudgetExecutionDetail({
                             <span dir="ltr" className="font-mono">{e.encumbranceNumber}</span>
                           </td>
                           <td className="py-2 text-sm">
-                            {e.encumbranceDate ? new Date(e.encumbranceDate).toLocaleDateString('ar-EG') : '—'}
+                            {e.encumbranceDate ? new Date(e.encumbranceDate).toLocaleDateString('ar-YE') : '—'}
                           </td>
                           <td className="py-2"><MoneyDisplay value={e.amount} /></td>
                           <td className="py-2">
@@ -109,7 +109,7 @@ export function ReportingBudgetExecutionDetail({
                             <span dir="ltr" className="font-mono">{p.orderNumber}</span>
                           </td>
                           <td className="py-2 text-sm">
-                            {p.orderDate ? new Date(p.orderDate).toLocaleDateString('ar-EG') : '—'}
+                            {p.orderDate ? new Date(p.orderDate).toLocaleDateString('ar-YE') : '—'}
                           </td>
                           <td className="py-2"><MoneyDisplay value={p.amount} /></td>
                           <td className="py-2">

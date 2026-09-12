@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Page, Button, FilterBar, FilterSearch } from '@/components/ui';
+import { Page, Button, FilterBar, FilterSearch, Badge } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Eye } from 'lucide-react';
 import { FiscalYearStatusBadge } from '@/components/FinancialSettingsFiscalYearStatusBadge';
@@ -28,8 +28,8 @@ export default function FiscalYearsListPage() {
   const columns: DataGridColumn<typeof items[0]>[] = [
     { header: 'الاسم', cell: (row) => <span className="font-medium">{row.name}</span> },
     { header: 'رقم السنة', cell: (row) => <span className="font-mono">{row.yearNumber}</span> },
-    { header: 'تاريخ البداية', cell: (row) => <span className="whitespace-nowrap">{new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium' }).format(new Date(row.startDate))}</span> },
-    { header: 'تاريخ النهاية', cell: (row) => <span className="whitespace-nowrap">{new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium' }).format(new Date(row.endDate))}</span> },
+    { header: 'تاريخ البداية', cell: (row) => <span className="whitespace-nowrap">{new Intl.DateTimeFormat('ar-YE', { dateStyle: 'medium' }).format(new Date(row.startDate))}</span> },
+    { header: 'تاريخ النهاية', cell: (row) => <span className="whitespace-nowrap">{new Intl.DateTimeFormat('ar-YE', { dateStyle: 'medium' }).format(new Date(row.endDate))}</span> },
     { header: 'الحالة', cell: (row) => <FiscalYearStatusBadge status={row.status} /> },
     {
       header: 'إجراءات',
@@ -55,7 +55,7 @@ export default function FiscalYearsListPage() {
       }
     >
       <div className="flex items-center gap-2 text-sm">
-        <span className="inline-flex items-center rounded-full bg-[var(--color-surface-container)] px-3 py-1 font-medium text-[var(--color-on-surface)] border border-[var(--color-border-container)]">{filtered.length} نتيجة</span>
+        <Badge variant="default">{filtered.length} نتيجة</Badge>
         {items.length > 0 && <span className="text-[var(--color-on-surface-variant)]">من أصل {items.length} إجمالي</span>}
       </div>
 

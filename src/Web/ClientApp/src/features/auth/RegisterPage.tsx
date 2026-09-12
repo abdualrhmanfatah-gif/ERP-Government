@@ -4,7 +4,7 @@ import { useAuth } from '../../shared/hooks/useAuth';
 import { Page } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { showToast } from '@/components/ui/Toast';
+import { notify } from '@/features/notifications/notify';
 
 const MIN_PASSWORD_LENGTH = 6;
 
@@ -34,7 +34,7 @@ export function RegisterPage() {
     setLoading(true);
     try {
       await register(email, password);
-      showToast('success', 'تم إنشاء الحساب بنجاح');
+      notify({ type: 'success', title: 'تم إنشاء الحساب بنجاح' });
       navigate('/login');
     } catch {
       setError('فشل إنشاء الحساب. يرجى المحاولة مرة أخرى.');
@@ -50,7 +50,7 @@ export function RegisterPage() {
           {error}
         </div>
       ) : null}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} aria-label="إنشاء حساب">
         <Input
           label="البريد الإلكتروني"
           type="email"

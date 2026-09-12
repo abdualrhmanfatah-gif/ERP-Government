@@ -9,6 +9,7 @@ interface StatusBadgeProps {
   size?: BadgeSize;
   icon?: ReactNode;
   children: ReactNode;
+  className?: string;
 }
 
 const variantClasses: Record<BadgeVariant, string> = {
@@ -53,6 +54,17 @@ const statusLabels: Record<BadgeVariant, string> = {
   locked: 'مقفل',
   overBudget: 'يتجاوز الميزانية',
   unbalanced: 'غير متوازن',
+  submitted: 'مرسلة',
+  sentToTreasury: 'مرسلة للخزينة',
+  paid: 'مدفوعة',
+  partiallyPaid: 'مدفوعة جزئياً',
+  rejected: 'مرفوضة',
+  voided: 'ملغاة نهائياً',
+  disbursed: 'صرفت',
+  failed: 'فاشلة',
+  warning: 'تحذير',
+  overridden: 'تم التجاوز',
+  passed: 'ناجح',
 };
 
 export function StatusBadge({
@@ -60,6 +72,7 @@ export function StatusBadge({
   size = 'md',
   icon,
   children,
+  className,
 }: StatusBadgeProps) {
   return (
     <span
@@ -68,7 +81,8 @@ export function StatusBadge({
       className={cn(
         'inline-flex items-center gap-1 rounded-full font-medium leading-normal whitespace-nowrap',
         variantClasses[variant],
-        sizeClasses[size]
+        sizeClasses[size],
+        className
       )}
     >
       {icon ? <span aria-hidden="true">{icon}</span> : null}

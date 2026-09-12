@@ -31,7 +31,7 @@ public class PostingRuleLineConfiguration : IEntityTypeConfiguration<PostingRule
         builder.HasIndex(e => e.FixedAccountId);
 
         builder.HasOne(e => e.PostingRule)
-            .WithMany()
+            .WithMany(r => r.Lines)
             .HasForeignKey(e => e.PostingRuleId)
             .OnDelete(DeleteBehavior.Restrict);
 

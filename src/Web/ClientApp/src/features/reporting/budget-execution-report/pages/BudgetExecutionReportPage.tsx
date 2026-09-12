@@ -17,13 +17,8 @@ import {
 import { budgetExecutionFilterSchema } from '../shared/schemas';
 import { ReportingBudgetExecutionFilters } from '@/components/ReportingBudgetExecutionFilters';
 import { ReportingBudgetExecutionDetail } from '@/components/ReportingBudgetExecutionDetail';
-import { Page } from '@/components/ui/Page';
-import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
-import { MoneyDisplay } from '@/components/ui/MoneyDisplay';
-import { Pagination } from '@/components/ui/Pagination';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { ErrorState } from '@/components/ui/ErrorState';
-import { Button } from '@/components/ui/Button';
+import { Page, DataGrid, MoneyDisplay, Pagination, EmptyState, ErrorState, Button, Alert } from '@/components/ui';
+import type { DataGridColumn } from '@/components/ui/DataGrid';
 
 const PAGE_SIZE = 25;
 
@@ -131,12 +126,9 @@ export default function BudgetExecutionReportPage() {
       }
     >
       {isPartialData && (
-        <div
-          role="status"
-          className="mb-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200"
-        >
+        <Alert variant="warning">
           بيانات جزئية — الفترة الحالية جارية وقد تتغير الأرقام
-        </div>
+        </Alert>
       )}
       {isError ? (
         <ErrorState onRetry={() => refetch()} />

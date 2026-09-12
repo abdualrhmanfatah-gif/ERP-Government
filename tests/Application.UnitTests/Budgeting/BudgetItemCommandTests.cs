@@ -25,11 +25,11 @@ public class BudgetItemCommandTests
     private void WireContext(
         Mock<DbSet<BudgetItem>> budgetItems = null!,
         Mock<DbSet<Budget>> budgets = null!,
-        Mock<DbSet<Appropriation>> appropriations = null!)
+        Mock<DbSet<BudgetTransaction>> budgetTransactions = null!)
     {
         if (budgetItems != null) _contextMock.Setup(x => x.BudgetItems).Returns(budgetItems.Object);
         if (budgets != null) _contextMock.Setup(x => x.Budgets).Returns(budgets.Object);
-        if (appropriations != null) _contextMock.Setup(x => x.Appropriations).Returns(appropriations.Object);
+        if (budgetTransactions != null) _contextMock.Setup(x => x.BudgetTransactions).Returns(budgetTransactions.Object);
     }
 
     private static void SetupBudgetItemFindAsync(Mock<DbSet<BudgetItem>> mockSet, List<BudgetItem> data)
@@ -138,8 +138,8 @@ public class BudgetItemCommandTests
         var budget = new Budget { Id = 1, Status = BudgetStatus.Draft };
         var budgets = new List<Budget> { budget }.AsQueryable().BuildMockForAsync();
         SetupBudgetFindAsync(budgets, new List<Budget> { budget });
-        var appropriations = new List<Appropriation>().AsQueryable().BuildMockForAsync();
-        WireContext(budgetItems: budgetItems, budgets: budgets, appropriations: appropriations);
+        var budgetTransactions = new List<BudgetTransaction>().AsQueryable().BuildMockForAsync();
+        WireContext(budgetItems: budgetItems, budgets: budgets, budgetTransactions: budgetTransactions);
         _contextMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         var result = await new DeleteBudgetItemCommandHandler(_contextMock.Object)
@@ -187,7 +187,7 @@ public class BudgetItemCommandTests
     }
 
     [Test]
-    public async Task DeleteBudgetItem_WithAppropriations_ShouldReturnFailure()
+    public async Task DeleteBudgetItem_WithTransactions_ShouldReturnFailure()
     {
         var item = new BudgetItem { Id = 1, BudgetId = 1 };
         var budgetItems = new List<BudgetItem> { item }.AsQueryable().BuildMockForAsync();
@@ -195,14 +195,14 @@ public class BudgetItemCommandTests
         var budget = new Budget { Id = 1, Status = BudgetStatus.Draft };
         var budgets = new List<Budget> { budget }.AsQueryable().BuildMockForAsync();
         SetupBudgetFindAsync(budgets, new List<Budget> { budget });
-        var appropriations = new List<Appropriation> { new() { Id = 1, BudgetItemId = 1 } }.AsQueryable().BuildMockForAsync();
-        WireContext(budgetItems: budgetItems, budgets: budgets, appropriations: appropriations);
+        var budgetTransactions = new List<BudgetTransaction> { new() { Id = 1, BudgetId = 1 } }.AsQueryable().BuildMockForAsync();
+        WireContext(budgetItems: budgetItems, budgets: budgets, budgetTransactions: budgetTransactions);
 
         var result = await new DeleteBudgetItemCommandHandler(_contextMock.Object)
             .Handle(new DeleteBudgetItemCommand(1), CancellationToken.None);
 
         result.Succeeded.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Contains("has appropriations"));
+        result.Errors.ShouldContain(e => e.Contains("has budget transactions"));
     }
 
     // ─── MoveBudgetItem ────────────────────────────────────────────

@@ -69,7 +69,7 @@ export function JournalForm({ initialData, onSubmit, loading, lockedFields = [] 
   const requireApprovalBeforePosting = watch('requireApprovalBeforePosting');
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl">
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl" aria-label="نموذج اليومية">
       <Input
         label="الرمز"
         {...register('code')}

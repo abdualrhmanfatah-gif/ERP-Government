@@ -1,8 +1,8 @@
 # Research: Payments Group (PAY-01..04)
 
-**Branch**: `045-payments-group` | **Date**: 2026-09-08
+**Branch**: `045-payments-group` | **Date**: 2026-09-09 (amended per ADR-001)
 
-All unknowns resolved by direct code inspection of the as-built Payments module (AGENTS.md: "the code is the truth"). No external research required.
+All unknowns resolved by direct code inspection of the as-built Payments module (AGENTS.md: "the code is the truth") and stakeholder clarifications Q4–Q6 and ADR-001 schema simplification. No external research required.
 
 ## D1 — Where does the budget check live, and how is it upgraded to spec?
 
@@ -52,13 +52,13 @@ All unknowns resolved by direct code inspection of the as-built Payments module 
 
 **Alternatives considered**: refuse second default (rejected by clarification); per-currency default (rejected — contract has one boolean, inventing scoping would diverge from the OpenAPI shape).
 
-## D7 — Partial payments: ContractSnapshot conflict (DEFERRED — flag for converge)
+## D7 — Partial payments: REMOVED (single payment per order)
 
-**Decision**: Implement `PartiallyPaid`/`remainingAmount` in Totals as `netAmount − Σ completed payment amounts`, but RecordPayment v1 keeps paying the full snapshot (`Amount = netTotal`, no API amount field exists — spec FR-003/contract L35672 has **no amount field**). Consequence: with the current contract, every payment is full and `PartiallyPaid` is unreachable in practice; the Totals arithmetic ships ready for it.
+**Decision**: `PartiallyPaid` status removed from PaymentOrderStatus. Each order is paid once. The Totals DTO retains `paidAmount`/`remainingAmount`/`isFullyPaid` fields but they reflect a single-payment state: `paidAmount` = 0 or netAmount; `remainingAmount` = netAmount or 0; `isFullyPaid` = false or true. `RecordPaymentRequest` has no amount field (snapshot is server-side net amount).
 
-**Rationale**: The HTTP contract is SSOT (Constitution IX); adding an amount field is a breaking contract change requiring a decision record — out of scope here. PAY-01 US4 partial scenario is satisfied structurally (Totals math) without inventing a payload field.
+**Rationale**: Clarified 2026-09-09 — partial payment is not a target capability. The HTTP contract (L35672) has no amount field, and adding one is a breaking change requiring a decision record — out of scope. Single-payment model simplifies the lifecycle and eliminates `PartiallyPaid` state complexity.
 
-**Alternatives considered**: adding `amount?` to `RecordPaymentRequest` (rejected — contract change, needs DEP decision); calculating partials client-side (forbidden — CC-1).
+**Alternatives considered**: keeping PartiallyPaid for future extensibility (rejected — YAGNI; reintroduce when needed with a decision record); adding `amount?` to RecordPaymentRequest (rejected — contract change, needs DEP decision).
 
 ## D8 — exchangeRate conditionality (spec OQ-N3, deferred)
 
@@ -107,3 +107,63 @@ All unknowns resolved by direct code inspection of the as-built Payments module 
 **Rationale**: single consistent rule; no request can survive its order's death except as Invalidated.
 
 **Alternatives considered**: refusing void whenever a request exists (rejected — traps money behind a dead order; D4 auto-invalidation is the clarified behavior).
+
+## D13 — Beneficiary model simplification (ADR-001 D-1)
+
+**Decision**: Remove `BeneficiaryPartyId` from PaymentOrder and `BeneficiaryId` from DisbursementRequest. Both entities use `BeneficiaryName` (string, required) only. Beneficiary is a display name — Party linkage is a separate concern deferred to a future ADR if needed.
+
+**Rationale**: ADR-001. BeneficiaryPartyId adds complexity without value in v1. The beneficiary is always a name string; Party linkage is optional and independent. YAGNI — add when needed with a separate ADR.
+
+**Alternatives considered**: keeping BeneficiaryPartyId for future Party linkage (rejected — YAGNI); mapping beneficiaryId → vendorId (rejected — semantically different).
+
+**Schema impact**: PaymentOrder: DROP BeneficiaryPartyId. DisbursementRequest: DROP BeneficiaryId.
+
+## D14 — DisbursementRequestId UNIQUE on PaymentOrder (ADR-001 D-2)
+
+**Decision**: `PaymentOrder.DisbursementRequestId` is `int?` with a UNIQUE constraint. Set on request-first orders; null on order-first orders. `DisbursementRequest.PaymentOrderId` is removed — link is one-directional (order → request).
+
+**Rationale**: ADR-001. The natural link direction is PaymentOrder → DisbursementRequest. Storing PaymentOrderId on DisbursementRequest creates a bidirectional dependency. UNIQUE constraint enforces one request → at most one order.
+
+**Alternatives considered**: keeping PaymentOrderId on DisbursementRequest (rejected — bidirectional dependency); adding a junction table (rejected — over-engineering for 1:1).
+
+**Schema impact**: PaymentOrder: add UNIQUE index on DisbursementRequestId. DisbursementRequest: DROP PaymentOrderId, DROP PaymentOrderNumber.
+
+## D15 — Budget check at order submit only (ADR-001 D-3)
+
+**Decision**: Remove `HasWarning` from DisbursementRequest. Remove availability check from request submit lifecycle. Budget check runs only at `SubmitPaymentOrderCommand` (order submit), after FundId and AppropriationId are filled. Request submit becomes a pure status transition (Draft → PendingApproval).
+
+**Rationale**: ADR-001. The request captures expenditure intent; budget controls belong at order level per Constitution V. Availability checking at request time is premature — FundId/AppropriationId are not yet set.
+
+**Alternatives considered**: keeping availability check at request submit (rejected — premature; FundId/AppropriationId not available); moving check to both request and order submit (rejected — double-checking adds complexity without value).
+
+**Schema impact**: DisbursementRequest: DROP HasWarning.
+
+## D16 — Remove PaymentOrderLine, add AccountId (ADR-001 D-4)
+
+**Decision**: Remove `PaymentOrderLine` collection from the target model. Add `AccountId` (int?, GL account link) to PaymentOrder. `AccountId` is optional in Draft, mandatory at Submit. Orders from request-first path are header-only. `PaymentOrderDeduction` collection is retained.
+
+**Rationale**: ADR-001. PaymentOrderLine contradicts the header-only request-first model and the single-account design. AccountId is the minimal GL link needed for posting. Deductions are header-level, not line-level, so they stay.
+
+**Alternatives considered**: keeping PaymentOrderLine for order-first path (rejected — over-engineering; header-only model sufficient); removing deductions too (rejected — deductions are header-level and needed for withholding-tax logic).
+
+**Schema impact**: PaymentOrder: DROP PaymentOrderLine collection (entity + table), ADD AccountId int?.
+
+## D17 — Approval data in ApprovalHistory only (ADR-001 D-5)
+
+**Decision**: Remove `ApprovedAmount`, `IssuingAuthorityName`, `IssuingAuthorityCapacity`, `ApprovalDate` from DisbursementRequest. All approval decisions, amounts, and issuing authority are stored in `ApprovalHistory` rows (DocumentType = "DisbursementRequest"). `PaymentDate` remains on DisbursementRequest (set by PAY-03).
+
+**Rationale**: ADR-001. CC-3 (Approvals via 022 panels) requires all approval data in ApprovalHistory. Duplicating on entity columns violates this invariant. The Stepper reads from approvals[] which comes from ApprovalHistory.
+
+**Alternatives considered**: keeping ApprovedAmount on DisbursementRequest for query performance (rejected — CC-3 violation; add a materialized view if needed later); removing PaymentDate too (rejected — PaymentDate is not an approval decision; it's a payment-completion stamp).
+
+**Schema impact**: DisbursementRequest: DROP ApprovedAmount, DROP IssuingAuthorityName, DROP IssuingAuthorityCapacity, DROP ApprovalDate.
+
+## D18 — Payment links via PaymentOrderId UNIQUE (ADR-001 D-6)
+
+**Decision**: `Payment.PaymentOrderId` is the primary link to the order. Add UNIQUE constraint on PaymentOrderId (one payment per order). `Payment.DisbursementRequestId` is derived from `PaymentOrder.DisbursementRequestId` (denormalized for query convenience).
+
+**Rationale**: ADR-001. The triad closure is: Payment records against PaymentOrder; PaymentOrder traces back to DisbursementRequest. PaymentOrderId UNIQUE enforces one-payment-per-order invariant at the database level.
+
+**Alternatives considered**: keeping both DisbursementRequestId and PaymentOrderId as independent FKs (rejected — redundant; derive from order); using only DisbursementRequestId on Payment (rejected — breaks the order-centric payment model).
+
+**Schema impact**: Payment: add UNIQUE index on PaymentOrderId. DisbursementRequestId remains as a denormalized read field.

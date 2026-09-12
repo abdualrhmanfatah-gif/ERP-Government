@@ -48,7 +48,7 @@ public class JournalEntryLineConfiguration : IEntityTypeConfiguration<JournalEnt
 
         // Same-module FK
         builder.HasOne(e => e.JournalEntry)
-            .WithMany()
+            .WithMany(e => e.Lines)
             .HasForeignKey(e => e.JournalEntryId)
             .OnDelete(DeleteBehavior.Restrict);
 

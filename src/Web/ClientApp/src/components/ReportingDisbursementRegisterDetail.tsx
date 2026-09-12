@@ -44,12 +44,12 @@ export function ReportingDisbursementRegisterDetail({
         <>
           <div className="mb-4 space-y-1 text-sm">
             <div><span className="text-muted-foreground">رقم الأمر:</span> <span dir="ltr" className="font-mono">{detail.orderNumber}</span></div>
-            <div><span className="text-muted-foreground">التاريخ:</span> {detail.orderDate ? new Date(detail.orderDate).toLocaleDateString('ar-EG') : '—'}</div>
+            <div><span className="text-muted-foreground">التاريخ:</span> {detail.orderDate ? new Date(detail.orderDate).toLocaleDateString('ar-YE') : '—'}</div>
             <div><span className="text-muted-foreground">المبلغ:</span> <MoneyDisplay value={detail.amount ?? 0} /></div>
             <div><span className="text-muted-foreground">الحالة:</span> <Badge variant="outline">{paymentStatusLabels[detail.status ?? ''] ?? detail.status}</Badge></div>
             <div><span className="text-muted-foreground">الصندوق:</span> {detail.fundCode ?? '—'}</div>
             {detail.approverName && <div><span className="text-muted-foreground">المعتمد:</span> {detail.approverName}</div>}
-            {detail.paidAt && <div><span className="text-muted-foreground">تاريخ الدفع:</span> {new Date(detail.paidAt).toLocaleDateString('ar-EG')}</div>}
+            {detail.paidAt && <div><span className="text-muted-foreground">تاريخ الدفع:</span> {new Date(detail.paidAt).toLocaleDateString('ar-YE')}</div>}
           </div>
           <h4 className="mb-2 text-sm font-medium">المدفوعات</h4>
           {!detail.payments || detail.payments.length === 0 ? (
@@ -68,7 +68,7 @@ export function ReportingDisbursementRegisterDetail({
                 {detail.payments.map((p, i) => (
                   <tr key={i} className="border-b">
                     <td className="py-2"><span dir="ltr" className="font-mono">{p.paymentNumber ?? '—'}</span></td>
-                    <td className="py-2 text-sm">{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString('ar-EG') : '—'}</td>
+                    <td className="py-2 text-sm">{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString('ar-YE') : '—'}</td>
                     <td className="py-2"><MoneyDisplay value={p.amount ?? 0} /></td>
                     <td className="py-2"><Badge variant="outline">{p.status ?? '—'}</Badge></td>
                   </tr>

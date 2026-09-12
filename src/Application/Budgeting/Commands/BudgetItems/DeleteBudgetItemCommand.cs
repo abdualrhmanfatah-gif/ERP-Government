@@ -32,11 +32,11 @@ public class DeleteBudgetItemCommandHandler(
         if (hasChildren)
             return Result.Failure(["Cannot delete a budget item that has children. Delete children first."]);
 
-        var hasAppropriations = await context.Appropriations
-            .AnyAsync(x => x.BudgetItemId == request.Id, cancellationToken);
+        var hasTransactions = await context.BudgetTransactions
+            .AnyAsync(t => t.BudgetItemAllocation.BudgetItemId == request.Id, cancellationToken);
 
-        if (hasAppropriations)
-            return Result.Failure(["Cannot delete a budget item that has appropriations."]);
+        if (hasTransactions)
+            return Result.Failure(["Cannot delete a budget item that has budget transactions."]);
 
         context.BudgetItems.Remove(entity);
         await context.SaveChangesAsync(cancellationToken);

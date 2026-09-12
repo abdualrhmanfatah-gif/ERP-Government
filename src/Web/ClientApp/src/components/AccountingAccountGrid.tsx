@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import type { AccountDto } from '@/features/accounting/types';
 import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Loading } from '@/components/ui/Loading';
+import { normalBalanceLabel } from '@/shared/utils/formatters';
 
 interface TreeNode {
   data: AccountDto;
@@ -28,19 +30,11 @@ const columns: Column[] = [
   { key: 'code', header: 'الرمز', width: 120 },
   { key: 'name', header: 'الاسم', width: 250 },
   { key: 'accountGroupName', header: 'المجموعة', width: 150 },
-  { key: 'normalBalance', header: 'الرصيد الطبيعي', width: 120 },
+  { key: 'normalBalance', header: 'نوع الحساب ', width: 120 },
   { key: 'level', header: 'المستوى', width: 80 },
   { key: 'isPostable', header: 'قابل للترحيل', width: 100 },
   { key: 'isActive', header: 'نشط', width: 80 },
 ];
-
-function normalBalanceLabel(val?: string): string {
-  if (!val) return '—';
-  const v = val.toLowerCase();
-  if (v === 'debit' || v === 'дебет') return 'مدين';
-  if (v === 'credit' || v === 'кредит') return 'دائن';
-  return val;
-}
 
 /** Flatten visible tree into ordered list for keyboard navigation. */
 function flattenVisible(nodes: TreeNode[], expanded: Set<number>, depth = 0): { id: number; depth: number; hasChildren: boolean; node: TreeNode }[] {
@@ -125,11 +119,9 @@ function TreeRow({
             ) : col.key === 'isPostable' ? (
               node.data.isPostable ? 'نعم' : 'لا'
             ) : col.key === 'isActive' ? (
-              node.data.isActive ? (
-                <span className="text-[var(--color-success)]">نشط</span>
-              ) : (
-                <span className="text-[var(--color-on-surface-variant)]">غير نشط</span>
-              )
+              <Badge variant={node.data.isActive ? 'success' : 'default'}>
+                {node.data.isActive ? 'نشط' : 'غير نشط'}
+              </Badge>
             ) : (
               String((node.data as Record<string, unknown>)[col.key] ?? '—')
             )}

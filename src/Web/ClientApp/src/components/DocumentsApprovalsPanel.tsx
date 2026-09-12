@@ -61,7 +61,7 @@ export function ApprovalsPanel({ documentType, documentId }: ApprovalsPanelProps
                       </span>
                     </div>
                     <p className="text-xs text-[var(--color-on-surface-variant)]">
-                      {new Date(record.decisionAt).toLocaleDateString('ar-EG')}
+                      {new Date(record.decisionAt).toLocaleDateString('ar-YE')}
                     </p>
                     {record.reason && (
                       <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">{record.reason}</p>

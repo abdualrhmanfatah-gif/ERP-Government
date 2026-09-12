@@ -1,3 +1,4 @@
+using ERP_Government.Application.Budgeting.Common;
 using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Budgeting.Queries.Encumbrances;
@@ -14,7 +15,6 @@ public class GetEncumbranceByIdQueryHandler(
         CancellationToken cancellationToken)
     {
         var entity = await context.Encumbrances
-            .Include(e => e.Appropriation)
             .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
 
         if (entity is null)
@@ -24,6 +24,14 @@ public class GetEncumbranceByIdQueryHandler(
 
         dto.IsReversed = await context.Encumbrances
             .AnyAsync(r => r.ReversalOfId == entity.Id, cancellationToken);
+
+        var lines = await context.EncumbranceLines
+            .Where(l => l.EncumbranceId == entity.Id)
+            .Select(l => new EncumbranceLineDto(
+                l.Id, l.BudgetItemId, l.Amount, l.LiquidatedAmount, l.CancelledAmount, l.Description))
+            .ToListAsync(cancellationToken);
+
+        dto.Lines = lines;
 
         return dto;
     }

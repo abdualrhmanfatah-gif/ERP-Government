@@ -3,7 +3,7 @@ import { Page } from '@/components/ui';
 import { TemplateForm } from '@/components/AccountingTemplateForm';
 import { useCreateTemplate } from '../../hooks/useCreateTemplate';
 import { useJournalsList } from '../../hooks/useJournalsList';
-import { showToast } from '@/components/ui/Toast';
+import { notify } from '@/features/notifications/notify';
 
 export function TemplateCreatePage() {
   const navigate = useNavigate();
@@ -16,10 +16,10 @@ export function TemplateCreatePage() {
         ...data,
         isSystemTemplate: false,
       });
-      showToast('success', 'تم إنشاء القالب بنجاح');
+      notify({ type: 'success', title: 'تم إنشاء القالب بنجاح' });
       navigate('/accounting/templates');
     } catch {
-      showToast('error', 'فشل إنشاء القالب');
+      notify({ type: 'error', title: 'فشل إنشاء القالب' });
     }
   };
 

@@ -10,26 +10,11 @@ import { useCurrenciesList } from '@/features/accounting/hooks/useCurrenciesList
 import { useAccountsList } from '@/features/accounting/hooks/useAccountsList';
 import { useCostCenters } from '@/features/organization/hooks/useCostCenters';
 import { BalanceIndicator } from '@/components/AccountingBalanceIndicator';
-import { MoveEntryType } from '../web-api-client';
 import type { JournalEntryDto } from '../web-api-client';
 import { notify } from '@/features/notifications/notify';
 import { Button, Card, Combobox, Input, Select, Textarea, Badge } from '@/components/ui';
-
-const entryTypeLabels: Record<string, string> = {
-  Standard: 'قيود عامة',
-  Reversing: 'قيود عكسية',
-  Adjusting: 'قيود تسوية',
-  Opening: 'قيد افتتاحي',
-  Closing: 'قيد إغلاق',
-  SystemGenerated: 'مولد آلياً',
-};
-
-const manualEntryTypes: MoveEntryType[] = [
-  MoveEntryType.Standard,
-  MoveEntryType.Reversing,
-  MoveEntryType.Adjusting,
-  MoveEntryType.Opening,
-];
+import { entryTypeLabels, manualEntryTypes } from '@/features/accounting/shared/types';
+import { toDateInput } from '@/shared/utils/formatters';
 
 interface EditLine {
   key: string;
@@ -45,12 +30,6 @@ interface EditLine {
   credit: number;
   costCenterId: number | null;
   rowVersion?: string;
-}
-
-function toDateInput(value?: Date | string | null): string {
-  if (!value) return '';
-  const d = value instanceof Date ? value : new Date(value);
-  return isNaN(d.getTime()) ? '' : d.toISOString().split('T')[0];
 }
 
 interface AccountingJournalEntryDetailProps {
@@ -207,7 +186,7 @@ export function AccountingJournalEntryDetail({ entry, editing = false, onToggleE
   const dateInput = toDateInput(entry.documentDate);
 
   return (
-    <form id="journal-entry-detail-form" onSubmit={(e) => { e.preventDefault(); void handleSave(); }}>
+    <form id="journal-entry-detail-form" onSubmit={(e) => { e.preventDefault(); void handleSave(); }} aria-label="تفاصيل قيد اليومية">
       <Card variant="default">
         <div className="px-4 py-2.5 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-low)]">
           <h2 className="text-sm font-bold text-[var(--color-on-surface)]">بيانات القيد</h2>

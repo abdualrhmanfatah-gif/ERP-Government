@@ -32,8 +32,6 @@ public class BudgetItemConfiguration : IEntityTypeConfiguration<BudgetItem>
 
         builder.HasIndex(e => e.AccountId);
 
-        builder.HasIndex(e => e.FundId);
-
         builder.HasIndex(e => e.CostCenterId);
 
         builder.HasIndex(e => e.BudgetClassificationId);

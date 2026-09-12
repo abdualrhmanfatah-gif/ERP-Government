@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Download, FileText, AlertTriangle } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
+import { downloadBlobExport, buildExportUrl } from '@/shared/utils/download';
 import {
   useCashFlowStatement,
   useFinancialStatementFiscalYears,
@@ -10,13 +11,7 @@ import {
   type FinancialStatementFilters,
 } from '../shared/types';
 import { cashFlowStatementFilterSchema } from '../shared/schemas';
-import { FilterSelect } from '@/components/ui/FilterSelect';
-import { FilterDate } from '@/components/ui/FilterDate';
-import { Page } from '@/components/ui/Page';
-import { MoneyDisplay } from '@/components/ui/MoneyDisplay';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { ErrorState } from '@/components/ui/ErrorState';
-import { Button } from '@/components/ui/Button';
+import { FilterSelect, FilterDate, Page, MoneyDisplay, EmptyState, ErrorState, Button, Alert } from '@/components/ui';
 
 export default function CashFlowStatementReportPage() {
   const { data: fiscalYears, isLoading: yearsLoading } = useFinancialStatementFiscalYears();
@@ -51,21 +46,12 @@ export default function CashFlowStatementReportPage() {
   async function handleExport(format: 'xlsx' | 'pdf') {
     setExporting(true);
     try {
-      const qs = new URLSearchParams();
-      qs.set('format', format);
-      if (report?.startDate) qs.set('startDate', new Date(report.startDate).toISOString().slice(0, 10));
-      if (report?.endDate) qs.set('endDate', new Date(report.endDate).toISOString().slice(0, 10));
-      const response = await fetch(`/api/Reports/cash-flow/export?${qs.toString()}`);
-      if (!response.ok) throw new Error('Export failed');
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `CashFlowStatement-${new Date().toISOString().slice(0, 10)}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      const url = buildExportUrl('/api/Reports/cash-flow/export', {
+        format,
+        startDate: report?.startDate ? new Date(report.startDate).toISOString().slice(0, 10) : undefined,
+        endDate: report?.endDate ? new Date(report.endDate).toISOString().slice(0, 10) : undefined,
+      });
+      await downloadBlobExport(url, `CashFlowStatement-${new Date().toISOString().slice(0, 10)}.${format}`);
       notify({ type: 'success', title: 'تم تصدير قائمة التدفقات النقدية بنجاح' });
     } catch {
       notify({ type: 'error', title: 'فشل تصدير قائمة التدفقات النقدية' });
@@ -135,9 +121,9 @@ export default function CashFlowStatementReportPage() {
       }
     >
       {isPartialData && (
-        <div role="status" className="mb-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
+        <Alert variant="warning">
           بيانات جزئية — الفترة الحالية جارية وقد تتغير الأرقام
-        </div>
+        </Alert>
       )}
       {isError ? (
         <ErrorState onRetry={() => refetch()} />
@@ -146,10 +132,10 @@ export default function CashFlowStatementReportPage() {
       ) : (
         <>
           {report.reconciled === false && (
-            <div className="mb-3 flex items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
-              <AlertTriangle size={14} />
+            <Alert variant="warning">
+              <AlertTriangle size={14} className="me-1 inline" />
               تنبيه: عدم تطابق في التدفقات النقدية
-            </div>
+            </Alert>
           )}
           {renderSection('التدفقات التشغيلية', report.operating)}
           {renderSection('التدفقات الاستثمارية', report.investing)}
@@ -160,9 +146,9 @@ export default function CashFlowStatementReportPage() {
             <div>التدفقات النقدية النهائية: <MoneyDisplay value={report.closingCash ?? 0} /></div>
           </div>
           {report.warning && (
-            <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
+            <Alert variant="warning" className="mt-3">
               {report.warning}
-            </div>
+            </Alert>
           )}
         </>
       )}

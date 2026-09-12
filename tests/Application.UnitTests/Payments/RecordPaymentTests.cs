@@ -1,4 +1,5 @@
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.Parties.Common;
 using ERP_Government.Application.Payments.Commands.Payments.RecordPayment;
 using ERP_Government.Domain.FinancialSettings.Entities;
 using ERP_Government.Domain.Payments.Entities;
@@ -16,6 +17,7 @@ public class RecordPaymentTests
 {
     private ApplicationDbContext _dbContext = null!;
     private Mock<IUser> _userMock = null!;
+    private Mock<IDocumentStatusLogger> _statusLoggerMock = null!;
 
     [SetUp]
     public void Setup()
@@ -26,6 +28,7 @@ public class RecordPaymentTests
         _dbContext = new ApplicationDbContext(options);
         _userMock = new Mock<IUser>();
         _userMock.Setup(x => x.Id).Returns(1);
+        _statusLoggerMock = new Mock<IDocumentStatusLogger>();
     }
 
     [TearDown]
@@ -34,7 +37,7 @@ public class RecordPaymentTests
         _dbContext?.Dispose();
     }
 
-    private async Task<(DisbursementRequest request, PaymentOrder order)> SeedApprovedRequestAsync(
+    private async Task<PaymentOrder> SeedApprovedOrderAsync(
         decimal amountGross = 5000m, decimal deduction = 750m)
     {
         var order = new PaymentOrder
@@ -44,22 +47,12 @@ public class RecordPaymentTests
             DeductionAmount = deduction,
             PaymentOrderNumber = "PO-000001",
             BeneficiaryName = "Acme Corp",
-            Status = PaymentOrderStatus.Approved
+            Status = PaymentOrderStatus.Approved,
+            FundId = 1,
+            FiscalYearId = 1,
+            CurrencyId = 1
         };
         _dbContext.PaymentOrders.Add(order);
-        await _dbContext.SaveChangesAsync();
-
-        var request = new DisbursementRequest
-        {
-            Id = 1,
-            PaymentOrderId = 10,
-            Status = DisbursementRequestStatus.Approved,
-            RequestNumber = "DR-000001",
-            RequestedById = 1,
-            RequestDate = DateOnly.FromDateTime(DateTime.UtcNow),
-            RowVersion = [1, 2, 3]
-        };
-        _dbContext.DisbursementRequests.Add(request);
         await _dbContext.SaveChangesAsync();
 
         _dbContext.DocumentSequences.Add(new DocumentSequence
@@ -70,23 +63,21 @@ public class RecordPaymentTests
         });
         await _dbContext.SaveChangesAsync();
 
-        return (request, order);
+        return order;
     }
 
-    // ─── T040: Approved request → payment with correct amount ──────
-
     [Test]
-    public async Task RecordPayment_ApprovedRequest_ShouldCreatePaymentWithCorrectAmount()
+    public async Task RecordPayment_ApprovedOrder_ShouldCreatePaymentWithCorrectAmount()
     {
-        var (request, order) = await SeedApprovedRequestAsync(5000m, 750m);
+        var order = await SeedApprovedOrderAsync(5000m, 750m);
 
-        var handler = new RecordPaymentCommandHandler(_dbContext, _userMock.Object);
+        var handler = new RecordPaymentCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object);
 
         var result = await handler.Handle(
             new RecordPaymentCommand
             {
-                DisbursementRequestId = 1,
-                PaymentMethod = PaymentMethod.BankTransfer,
+                PaymentOrderId = 10,
+                PaymentMethod = PaymentMethod.Cash,
                 ReferenceNumber = "REF-001"
             },
             CancellationToken.None);
@@ -95,11 +86,8 @@ public class RecordPaymentTests
         result.Value!.Amount.ShouldBe(4250m); // 5000 - 750
         result.Value!.Status.ShouldBe(PaymentStatus.Completed);
         result.Value!.PaymentNumber.ShouldBe("PAY-000042");
-        result.Value!.DisbursementRequestId.ShouldBe(1);
         result.Value!.PaymentOrderId.ShouldBe(10);
     }
-
-    // ─── T041: Not approved → reject ───────────────────────────────
 
     [Test]
     public async Task RecordPayment_NotApproved_ShouldReject()
@@ -111,85 +99,68 @@ public class RecordPaymentTests
             DeductionAmount = 750m,
             PaymentOrderNumber = "PO-000001",
             BeneficiaryName = "Acme Corp",
-            Status = PaymentOrderStatus.Approved
+            Status = PaymentOrderStatus.Draft,
+            FundId = 1,
+            FiscalYearId = 1,
+            CurrencyId = 1
         };
         _dbContext.PaymentOrders.Add(order);
         await _dbContext.SaveChangesAsync();
 
-        var request = new DisbursementRequest
-        {
-            Id = 1,
-            PaymentOrderId = 10,
-            Status = DisbursementRequestStatus.Draft,
-            RequestNumber = "DR-000001",
-            RequestedById = 1,
-            RequestDate = DateOnly.FromDateTime(DateTime.UtcNow),
-            RowVersion = [1, 2, 3]
-        };
-        _dbContext.DisbursementRequests.Add(request);
-        await _dbContext.SaveChangesAsync();
-
-        var handler = new RecordPaymentCommandHandler(_dbContext, _userMock.Object);
+        var handler = new RecordPaymentCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object);
 
         var result = await handler.Handle(
             new RecordPaymentCommand
             {
-                DisbursementRequestId = 1,
-                PaymentMethod = PaymentMethod.BankTransfer
+                PaymentOrderId = 10,
+                PaymentMethod = PaymentMethod.Cash
             },
             CancellationToken.None);
 
         result.Succeeded.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Contains("Disbursement request must be approved before payment execution"));
+        result.Errors.ShouldContain(e => e.Contains("Payment order must be approved before payment execution"));
     }
 
-    // ─── T042: Status transitions ──────────────────────────────────
-
     [Test]
-    public async Task RecordPayment_ShouldTransitionRequestToDisbursedAndPOToPaid()
+    public async Task RecordPayment_ShouldTransitionOrderToPaid()
     {
-        var (request, order) = await SeedApprovedRequestAsync(3000m, 500m);
+        var order = await SeedApprovedOrderAsync(3000m, 500m);
 
-        var handler = new RecordPaymentCommandHandler(_dbContext, _userMock.Object);
+        var handler = new RecordPaymentCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object);
 
         var result = await handler.Handle(
             new RecordPaymentCommand
             {
-                DisbursementRequestId = 1,
+                PaymentOrderId = 10,
                 PaymentMethod = PaymentMethod.Cash
             },
             CancellationToken.None);
 
         result.Succeeded.ShouldBeTrue();
 
-        var updatedRequest = await _dbContext.DisbursementRequests.FindAsync(1);
-        updatedRequest!.Status.ShouldBe(DisbursementRequestStatus.Disbursed);
-
         var updatedOrder = await _dbContext.PaymentOrders.FindAsync(10);
         updatedOrder!.Status.ShouldBe(PaymentOrderStatus.Paid);
         updatedOrder.PaidAt.ShouldNotBeNull();
     }
 
-    // ─── T043: Domain event raised ─────────────────────────────────
-
     [Test]
     public async Task RecordPayment_ShouldRaisePaymentRecordedEvent()
     {
-        var (request, order) = await SeedApprovedRequestAsync(1000m, 100m);
+        var order = await SeedApprovedOrderAsync(1000m, 100m);
 
-        var handler = new RecordPaymentCommandHandler(_dbContext, _userMock.Object);
+        var handler = new RecordPaymentCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object);
 
         var result = await handler.Handle(
             new RecordPaymentCommand
             {
-                DisbursementRequestId = 1,
+                PaymentOrderId = 10,
                 PaymentMethod = PaymentMethod.Check
             },
             CancellationToken.None);
 
         result.Succeeded.ShouldBeTrue();
 
-        var payment = await _dbContext.Payments.FirstOrDefaultAsync(p => p.DisbursementRequestId == 1);
+        var payment = await _dbContext.Payments.FirstOrDefaultAsync(p => p.PaymentOrderId == 10);
         payment.ShouldNotBeNull();
         payment.DomainEvents.ShouldContain(e => e is PaymentRecordedEvent);
     }

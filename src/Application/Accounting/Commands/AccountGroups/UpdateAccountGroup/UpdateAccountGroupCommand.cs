@@ -41,7 +41,7 @@ public class UpdateAccountGroupCommandHandler(
 
         // Matrix
         if (!AccountGroupHierarchyHelper.IsNormalBalanceCompatible(request.Type, request.NormalBalance))
-            return Result.Failure(["الرصيد الطبيعي غير متوافق مع النوع."]);
+            return Result.Failure(["نوع الحساب  غير متوافق مع النوع."]);
 
         // Parent handling — only validate if parent changed
         byte newLevel = entity.Level;
@@ -138,7 +138,7 @@ public class UpdateAccountGroupCommandValidator : AbstractValidator<UpdateAccoun
             .IsInEnum().WithMessage("نوع المجموعة غير صالح.");
 
         RuleFor(x => x.NormalBalance)
-            .IsInEnum().WithMessage("الرصيد الطبيعي غير صالح.");
+            .IsInEnum().WithMessage("نوع الحساب  غير صالح.");
 
         RuleFor(x => x.Description)
             .MaximumLength(500).WithMessage("الوصف يجب ألا يتجاوز 500 حرفاً.");

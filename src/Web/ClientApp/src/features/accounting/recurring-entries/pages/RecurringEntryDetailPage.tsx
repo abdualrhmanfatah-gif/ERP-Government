@@ -7,7 +7,7 @@ import {
   useCancelRecurringEntry,
 } from '../hooks/useRecurringEntries';
 import { FREQUENCY_LABELS, STATUS_LABELS } from '../shared/types';
-import { Page, Button, Textarea, Badge, Dialog, EmptyState } from '@/components/ui';
+import { Page, Button, Textarea, Badge, Dialog, EmptyState, Label, Card } from '@/components/ui';
 
 export default function RecurringEntryDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -79,97 +79,101 @@ export default function RecurringEntryDetailPage() {
       }
     >
 
-      <div className="grid grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">التفاصيل</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm text-muted-foreground">الدفتر</label>
-              <p>{entry.journalName}</p>
-            </div>
-            <div>
-              <label className="text-sm text-muted-foreground">القالب</label>
-              <p>{entry.templateName ?? 'بدون قالب'}</p>
-            </div>
-            <div>
-              <label className="text-sm text-muted-foreground">الدورية</label>
-              <p>{FREQUENCY_LABELS[entry.frequency ?? '']}</p>
-            </div>
-            <div>
-              <label className="text-sm text-muted-foreground">المبلغ</label>
-              <p>{entry.amount?.toLocaleString('ar-YE') ?? '-'}</p>
-            </div>
-            <div>
-              <label className="text-sm text-muted-foreground">تاريخ البداية</label>
-              <p>{new Date(entry.startDate!).toLocaleDateString('ar-YE')}</p>
-            </div>
-            <div>
-              <label className="text-sm text-muted-foreground">تاريخ النهاية</label>
-              <p>
-                {entry.endDate
-                  ? new Date(entry.endDate).toLocaleDateString('ar-YE')
-                  : 'غير محدد'}
-              </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold">التفاصيل</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm text-muted-foreground">الدفتر</Label>
+                <p>{entry.journalName}</p>
+              </div>
+              <div>
+                <Label className="text-sm text-muted-foreground">القالب</Label>
+                <p>{entry.templateName ?? 'بدون قالب'}</p>
+              </div>
+              <div>
+                <Label className="text-sm text-muted-foreground">الدورية</Label>
+                <p>{FREQUENCY_LABELS[entry.frequency ?? '']}</p>
+              </div>
+              <div>
+                <Label className="text-sm text-muted-foreground">المبلغ</Label>
+                <p>{entry.amount?.toLocaleString('ar-YE') ?? '-'}</p>
+              </div>
+              <div>
+                <Label className="text-sm text-muted-foreground">تاريخ البداية</Label>
+                <p>{new Date(entry.startDate!).toLocaleDateString('ar-YE')}</p>
+              </div>
+              <div>
+                <Label className="text-sm text-muted-foreground">تاريخ النهاية</Label>
+                <p>
+                  {entry.endDate
+                    ? new Date(entry.endDate).toLocaleDateString('ar-YE')
+                    : 'غير محدد'}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        </Card>
 
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">التوليد</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm text-muted-foreground">التاريخ القادم</label>
-              <p>
-                {entry.nextExecutionDate
-                  ? new Date(entry.nextExecutionDate).toLocaleDateString('ar-YE')
-                  : '-'}
-              </p>
-            </div>
-            <div>
-              <label className="text-sm text-muted-foreground">آخر تنفيذ</label>
-              <p>
-                {entry.lastExecutedAt
-                  ? new Date(entry.lastExecutedAt).toLocaleString('ar-YE')
-                  : 'لم يتم التوليد بعد'}
-              </p>
-            </div>
-            <div>
-              <label className="text-sm text-muted-foreground">الحالة</label>
-              <p>
-                <Badge
-                  variant={
-                    entry.status === 'Active'
-                      ? 'success'
-                      : entry.status === 'Paused'
-                      ? 'warning'
-                      : entry.status === 'Cancelled'
-                      ? 'danger'
-                      : 'default'
-                  }
-                >
-                  {STATUS_LABELS[entry.status ?? '']}
-                </Badge>
-              </p>
-            </div>
-            <div>
-              <label className="text-sm text-muted-foreground">القيد المولد</label>
-              <p>
-                {entry.generatedJournalEntryId ? (
-                  <Button
-                    variant="link"
-                    onClick={() =>
-                      navigate(`/accounting/journal-entries/${entry.generatedJournalEntryId}`)
+        <Card>
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold">التوليد</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm text-muted-foreground">التاريخ القادم</Label>
+                <p>
+                  {entry.nextExecutionDate
+                    ? new Date(entry.nextExecutionDate).toLocaleDateString('ar-YE')
+                    : '-'}
+                </p>
+              </div>
+              <div>
+                <Label className="text-sm text-muted-foreground">آخر تنفيذ</Label>
+                <p>
+                  {entry.lastExecutedAt
+                    ? new Date(entry.lastExecutedAt).toLocaleString('ar-YE')
+                    : 'لم يتم التوليد بعد'}
+                </p>
+              </div>
+              <div>
+                <Label className="text-sm text-muted-foreground">الحالة</Label>
+                <p>
+                  <Badge
+                    variant={
+                      entry.status === 'Active'
+                        ? 'success'
+                        : entry.status === 'Paused'
+                        ? 'warning'
+                        : entry.status === 'Cancelled'
+                        ? 'danger'
+                        : 'default'
                     }
                   >
-                    عرض القيد
-                  </Button>
-                ) : (
-                  <span className="text-muted-foreground">لم يتم التوليد بعد</span>
-                )}
-              </p>
+                    {STATUS_LABELS[entry.status ?? '']}
+                  </Badge>
+                </p>
+              </div>
+              <div>
+                <Label className="text-sm text-muted-foreground">القيد المولد</Label>
+                <p>
+                  {entry.generatedJournalEntryId ? (
+                    <Button
+                      variant="link"
+                      onClick={() =>
+                        navigate(`/accounting/journal-entries/${entry.generatedJournalEntryId}`)
+                      }
+                    >
+                      عرض القيد
+                    </Button>
+                  ) : (
+                    <span className="text-muted-foreground">لم يتم التوليد بعد</span>
+                  )}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
 
       <Dialog
@@ -191,6 +195,7 @@ export default function RecurringEntryDetailPage() {
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           placeholder="سبب الإيقاف (اختياري)"
+          label="سبب الإيقاف"
           rows={3}
         />
       </Dialog>
@@ -215,6 +220,7 @@ export default function RecurringEntryDetailPage() {
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           placeholder="سبب الإلغاء (اختياري)"
+          label="سبب الإلغاء"
           rows={3}
         />
       </Dialog>

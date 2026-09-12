@@ -8,7 +8,7 @@ import {
   useReverseJournalEntry,
   useCancelJournalEntry,
 } from '../hooks/useJournalEntries';
-import { usePermission, hasPermission as checkPermission } from '../../../shared/hooks/usePermission';
+import { usePermission } from '../../../shared/hooks/usePermission';
 import { useFiscalYearByDate } from '../hooks/useFiscalYearByDate';
 import { ReverseDialog } from '@/components/AccountingReverseDialog';
 import { ApprovalsPanel } from '@/components/DocumentsApprovalsPanel';
@@ -16,27 +16,8 @@ import { StatusLogPanel } from '@/components/DocumentsStatusLogPanel';
 import { AccountingJournalEntryDetail } from '@/components/AccountingJournalEntryDetail';
 import { StatusBadge } from '@/components/AccountingStatusBadge';
 import { Page, Button, Card, Badge } from '@/components/ui';
-
-function formatDate(value: unknown): string {
-  if (!value) return '';
-  if (typeof value === 'string') return value;
-  if (value instanceof Date) return value.toLocaleDateString('ar-YE');
-  return String(value);
-}
-
-function toDateInput(value: unknown): string {
-  if (!value) return '';
-  const d = value instanceof Date ? value : new Date(String(value));
-  return isNaN(d.getTime()) ? '' : d.toISOString().split('T')[0];
-}
-
-function MetaItem({ label, value }: { label: string; value?: string }) {
-  return (
-    <span className="flex items-center gap-1.5 text-sm text-[var(--color-on-surface)]">
-      {label}: <strong className="text-sm font-bold text-[var(--color-on-surface)]">{value || '-'}</strong>
-    </span>
-  );
-}
+import { MetaItem } from '@/components/MetaItem';
+import { formatDate, toDateInput } from '@/shared/utils/formatters';
 
 function getActionsForStatus(status: string) {
   switch (status) {
@@ -65,6 +46,11 @@ export function JournalEntryDetailPage() {
   const reverseMutation = useReverseJournalEntry();
   const cancelMutation = useCancelJournalEntry();
   const { hasPermission } = usePermission();
+  const { hasPermission: canSubmit } = usePermission('Accounting.JournalEntries.Submit');
+  const { hasPermission: canApprove } = usePermission('Accounting.JournalEntries.Approve');
+  const { hasPermission: canPost } = usePermission('Accounting.JournalEntries.Post');
+  const { hasPermission: canReverse } = usePermission('Accounting.JournalEntries.Reverse');
+  const { hasPermission: canCancel } = usePermission('Accounting.JournalEntries.Cancel');
   const fiscal = useFiscalYearByDate(toDateInput(entry?.documentDate));
 
   const [showReverseDialog, setShowReverseDialog] = useState(false);
@@ -133,7 +119,10 @@ export function JournalEntryDetailPage() {
       {!entry.isSystemGenerated && actions.map((action) => {
         const isLoading = loadingMap[action];
         const handler = handlerMap[action];
-        const allowed = hasPermission || checkPermission(permissionMap[action]);
+        const actionPermissions: Record<string, boolean> = {
+          submit: canSubmit, approve: canApprove, post: canPost, reverse: canReverse, cancel: canCancel,
+        };
+        const allowed = hasPermission || actionPermissions[action];
         return (
           <Button key={action} type="button" onClick={handler} disabled={isLoading || !allowed}
             variant={action === 'cancel' || action === 'reverse' ? 'destructive' : 'primary'}

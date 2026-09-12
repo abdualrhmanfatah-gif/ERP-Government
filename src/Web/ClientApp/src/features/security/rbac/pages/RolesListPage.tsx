@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Page, DataGrid, Button } from '@/components/ui';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useRoles } from '../hooks';
+import { getActiveStatusLabel } from '@/shared/constants/labels';
 
 export function RolesListPage() {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export function RolesListPage() {
           { key: 'roleLevel', header: 'المستوى', width: 120 },
           { key: 'isActive', header: 'الحالة', width: 100, render: (r) => (
             <StatusBadge variant={r.isActive ? 'active' : 'draft'}>
-              {r.isActive ? 'نشط' : 'غير نشط'}
+              {getActiveStatusLabel(r.isActive)}
             </StatusBadge>
           )},
           { key: 'actions', header: 'الإجراءات', width: 120, render: (r) => (

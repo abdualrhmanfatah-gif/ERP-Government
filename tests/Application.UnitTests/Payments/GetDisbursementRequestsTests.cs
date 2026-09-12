@@ -31,84 +31,60 @@ public class GetDisbursementRequestsTests
 
     private async Task SeedDataAsync()
     {
-        var po1 = new PaymentOrder
-        {
-            Id = 1,
-            PaymentOrderNumber = "PO-001",
-            Status = PaymentOrderStatus.Approved,
-            AmountGross = 10000m,
-            DeductionAmount = 2000m,
-            FundId = 1,
-            BeneficiaryName = "Vendor A",
-            RowVersion = [1, 2, 3]
-        };
-        var po2 = new PaymentOrder
-        {
-            Id = 2,
-            PaymentOrderNumber = "PO-002",
-            Status = PaymentOrderStatus.Approved,
-            AmountGross = 5000m,
-            DeductionAmount = 500m,
-            FundId = 2,
-            BeneficiaryName = "Vendor B",
-            RowVersion = [1, 2, 3]
-        };
-        var po3 = new PaymentOrder
-        {
-            Id = 3,
-            PaymentOrderNumber = "PO-003",
-            Status = PaymentOrderStatus.Draft,
-            AmountGross = 8000m,
-            DeductionAmount = 0m,
-            FundId = 1,
-            BeneficiaryName = "Vendor C",
-            RowVersion = [1, 2, 3]
-        };
-
-        _dbContext.PaymentOrders.AddRange(po1, po2, po3);
-
         _dbContext.DisbursementRequests.AddRange(
             new DisbursementRequest
             {
                 Id = 1,
                 RequestNumber = "DR-000001",
-                PaymentOrderId = 1,
                 RequestedById = 1,
+                RequestedByName = "User A",
+                BeneficiaryName = "Vendor A",
+                RequestedAmount = 8000m,
+                CurrencyId = 1,
+                Purpose = "Procurement",
+                FinancialYearId = 1,
                 RequestDate = new DateOnly(2025, 1, 15),
                 Status = DisbursementRequestStatus.Approved,
-                HasWarning = false,
                 RowVersion = [1, 2, 3]
             },
             new DisbursementRequest
             {
                 Id = 2,
                 RequestNumber = "DR-000002",
-                PaymentOrderId = 2,
                 RequestedById = 2,
+                RequestedByName = "User B",
+                BeneficiaryName = "Vendor B",
+                RequestedAmount = 4500m,
+                CurrencyId = 1,
+                Purpose = "Services",
+                FinancialYearId = 1,
                 RequestDate = new DateOnly(2025, 2, 20),
                 Status = DisbursementRequestStatus.Draft,
-                HasWarning = false,
                 RowVersion = [1, 2, 3]
             },
             new DisbursementRequest
             {
                 Id = 3,
                 RequestNumber = "DR-000003",
-                PaymentOrderId = 3,
                 RequestedById = 1,
+                RequestedByName = "User A",
+                BeneficiaryName = "Vendor C",
+                RequestedAmount = 8000m,
+                CurrencyId = 2,
+                Purpose = "Travel",
+                FinancialYearId = 2,
                 RequestDate = new DateOnly(2025, 3, 10),
                 Status = DisbursementRequestStatus.Cancelled,
-                HasWarning = true,
                 RowVersion = [1, 2, 3]
             });
 
         await _dbContext.SaveChangesAsync();
     }
 
-    // ─── T047: Filter by status, fund, period ─────────────────────
+    // ─── T047: Filter by status ───────────────────────────────────
 
     [Test]
-    public async Task Handle_FilterByStatus_Fund_Period_ShouldReturnCorrectSubset()
+    public async Task Handle_FilterByStatus_ShouldReturnCorrectSubset()
     {
         await SeedDataAsync();
 
@@ -116,10 +92,7 @@ public class GetDisbursementRequestsTests
 
         var result = await handler.Handle(
             new GetDisbursementRequestsQuery(
-                Status: DisbursementRequestStatus.Approved,
-                FundId: 1,
-                FromDate: new DateOnly(2025, 1, 1),
-                ToDate: new DateOnly(2025, 12, 31)),
+                Status: DisbursementRequestStatus.Approved),
             CancellationToken.None);
 
         result.Count.ShouldBe(1);
@@ -129,19 +102,18 @@ public class GetDisbursementRequestsTests
     }
 
     [Test]
-    public async Task Handle_FilterByPaymentOrderId_ShouldReturnMatchingRequest()
+    public async Task Handle_FilterByRequestedById_ShouldReturnMatchingRequests()
     {
         await SeedDataAsync();
 
         var handler = new GetDisbursementRequestsQueryHandler(_dbContext);
 
         var result = await handler.Handle(
-            new GetDisbursementRequestsQuery(PaymentOrderId: 2),
+            new GetDisbursementRequestsQuery(RequestedById: 1),
             CancellationToken.None);
 
-        result.Count.ShouldBe(1);
-        result[0].Id.ShouldBe(2);
-        result[0].PaymentOrderId.ShouldBe(2);
+        result.Count.ShouldBe(2);
+        result.ShouldAllBe(r => r.RequestedById == 1);
     }
 
     [Test]
@@ -161,35 +133,41 @@ public class GetDisbursementRequestsTests
         result[2].RequestDate.ShouldBe(new DateOnly(2025, 1, 15));
     }
 
-    // ─── T048: Include payment details when linked ────────────────
+    // ─── T048: DTO shape validation ───────────────────────────────
 
     [Test]
-    public async Task Handle_WithLinkedPaymentOrder_ShouldIncludePaymentOrderData()
+    public async Task Handle_ShouldReturnCorrectDtoFields()
     {
         await SeedDataAsync();
 
         var handler = new GetDisbursementRequestsQueryHandler(_dbContext);
 
         var result = await handler.Handle(
-            new GetDisbursementRequestsQuery(PaymentOrderId: 1),
+            new GetDisbursementRequestsQuery(),
             CancellationToken.None);
 
-        result.Count.ShouldBe(1);
-        result[0].PaymentOrderNumber.ShouldBe("PO-001");
-        result[0].PayeeName.ShouldBe("Vendor A");
+        var dto = result.First(r => r.Id == 1);
+        dto.RequestNumber.ShouldBe("DR-000001");
+        dto.RequestedByName.ShouldBe("User A");
+        dto.BeneficiaryName.ShouldBe("Vendor A");
+        dto.RequestedAmount.ShouldBe(8000m);
+        dto.CurrencyId.ShouldBe(1);
+        dto.Purpose.ShouldBe("Procurement");
+        dto.FinancialYearId.ShouldBe(1);
     }
 
     // ─── T049: Compute totals correctly ───────────────────────────
 
     [Test]
-    public async Task Handle_ShouldComputeRequestedAmountAsGrossMinusDeduction()
+    public async Task Handle_ShouldReturnRequestedAmountFromEntity()
     {
         await SeedDataAsync();
 
         var handler = new GetDisbursementRequestsQueryHandler(_dbContext);
 
         var result = await handler.Handle(
-            new GetDisbursementRequestsQuery(PaymentOrderId: 1),
+            new GetDisbursementRequestsQuery(
+                Status: DisbursementRequestStatus.Approved),
             CancellationToken.None);
 
         result.Count.ShouldBe(1);

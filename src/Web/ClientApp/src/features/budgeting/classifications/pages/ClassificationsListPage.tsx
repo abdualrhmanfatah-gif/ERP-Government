@@ -6,6 +6,7 @@ import { usePermission } from '../../../../shared/hooks/usePermission';
 import { BUDGET_PERMISSIONS } from '../../../../shared/constants/permissions';
 import { ChevronRight, ChevronLeft, Plus, Pencil } from 'lucide-react';
 import { Page, FilterBar, FilterSearch, FilterSelect, Dialog, Switch, ConfirmDialog, Button, Input, Select, Badge } from '../../../../components/ui';
+import { getDisabledStatusLabel, activeStatusLabels } from '../../../../shared/constants/labels';
 import { notify } from '@/features/notifications/notify';
 
 export function normalizeTree(
@@ -148,7 +149,7 @@ function TreeItem({
           <Switch
             checked={node.isActive}
             onChange={() => onToggleActive(node)}
-            label={node.isActive ? 'نشط' : 'معطل'}
+            label={getDisabledStatusLabel(node.isActive)}
           />
         )}
         {canEdit && (
@@ -185,7 +186,7 @@ function TreeItem({
 }
 
 export default function ClassificationsListPage() {
-  const { data: rawTree, isLoading, error } = useClassificationsTree();
+  const { data: rawTree, isLoading, error, refetch } = useClassificationsTree();
   const createMutation = useCreateClassification();
   const updateMutation = useUpdateClassification();
   const toggleMutation = useToggleClassificationActive();
@@ -397,7 +398,7 @@ export default function ClassificationsListPage() {
       title="التصنيفات المالية"
       loading={isLoading}
       error={error ? 'خطأ في تحميل التصنيفات' : undefined}
-      onRetry={error ? () => window.location.reload() : undefined}
+      onRetry={error ? () => refetch() : undefined}
       actions={
         canCreate ? (
           <Button variant="primary" onClick={handleOpenCreate} icon={<Plus size={16} />}>
@@ -413,8 +414,8 @@ export default function ClassificationsListPage() {
             onChange={setIsActiveFilter}
             options={[
               { value: 'All', label: 'الكل' },
-              { value: 'active', label: 'نشط' },
-              { value: 'inactive', label: 'معطل' },
+              { value: 'active', label: activeStatusLabels.active },
+              { value: 'inactive', label: activeStatusLabels.disabled },
             ]}
             placeholder="الحالة"
             label="الحالة"
@@ -457,7 +458,7 @@ export default function ClassificationsListPage() {
           </Button>
         }
       >
-        <form id="classification-form" onSubmit={handleSubmit} className="space-y-4">
+        <form id="classification-form" onSubmit={handleSubmit} className="space-y-4" aria-label="نموذج التصنيف">
           <Input
             id="code"
             name="code"
@@ -489,7 +490,7 @@ export default function ClassificationsListPage() {
           <Switch
             checked={formIsActive}
             onChange={setFormIsActive}
-            label="نشط"
+            label={activeStatusLabels.active}
           />
         </form>
       </Dialog>

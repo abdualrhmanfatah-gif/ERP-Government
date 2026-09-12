@@ -43,7 +43,7 @@ export function ReportingRevenueCollectionsDetail({
       ) : (
         <>
           <div className="mb-4 space-y-1 text-sm">
-            <div><span className="text-muted-foreground">التاريخ:</span> {detail.voucherDate ? new Date(detail.voucherDate).toLocaleDateString('ar-EG') : '—'}</div>
+            <div><span className="text-muted-foreground">التاريخ:</span> {detail.voucherDate ? new Date(detail.voucherDate).toLocaleDateString('ar-YE') : '—'}</div>
             <div><span className="text-muted-foreground">المبلغ:</span> <MoneyDisplay value={detail.totalAmount ?? 0} /></div>
             <div><span className="text-muted-foreground">طريقة الدفع:</span> {detail.paymentMethod ?? '—'}</div>
             {detail.depositSlipNumber && (
@@ -105,7 +105,7 @@ export function ReportingRevenueCollectionsDetail({
                         {detail.checks.map((c, i) => (
                           <tr key={i} className="border-b">
                             <td className="py-2"><span dir="ltr" className="font-mono">{c.checkNumber}</span></td>
-                            <td className="py-2 text-sm">{c.checkDate ? new Date(c.checkDate).toLocaleDateString('ar-EG') : '—'}</td>
+                            <td className="py-2 text-sm">{c.checkDate ? new Date(c.checkDate).toLocaleDateString('ar-YE') : '—'}</td>
                             <td className="py-2"><MoneyDisplay value={c.amount ?? 0} /></td>
                             <td className="py-2 text-sm">{c.bankName ?? '—'}</td>
                           </tr>

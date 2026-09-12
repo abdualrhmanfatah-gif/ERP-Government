@@ -63,6 +63,7 @@ public class ApplicationDbContextInitialiser
     {
         // Default security roles
         await SeedSecurityDataAsync();
+        await MergeDocumentAttachmentRequirementsAsync();
         await SeedFinancialSettingsDataAsync();
         await SeedOrganizationDataAsync();
         await SeedAccountingDataAsync();
@@ -74,51 +75,12 @@ public class ApplicationDbContextInitialiser
         await SeedProcurementDataAsync();
         await SeedCommitteesDataAsync();
         await SeedAssetsDataAsync();
-
-        // Seed default admin user directly (no Identity)
-        if (!_context.Users.Any())
-        {
-            var adminRoleId = _context.SecurityRoles.First(r => r.Code == "ADMIN").Id;
-            var hasher = new PasswordHasher<ERP_Government.Domain.Security.Entities.User>();
-            var adminUser = new ERP_Government.Domain.Security.Entities.User
-            {
-                Login = "administrator@localhost",
-                IsActive = true,
-                AccountType = ERP_Government.Domain.Security.Enums.AccountType.Internal,
-                RoleId = adminRoleId
-            };
-            adminUser.PasswordHash = hasher.HashPassword(adminUser, "Administrator1!");
-            _context.Users.Add(adminUser);
-            await _context.SaveChangesAsync();
-        }
+        await SeedUsersDataAsync();
     }
 
     private async Task SeedAccountingDataAsync()
     {
-        if (!_context.AccountGroups.Any())
-        {
-            var roots = AccountGroupSeedData.GetRootAccountGroups();
-            _context.AccountGroups.AddRange(roots);
-            await _context.SaveChangesAsync();
-
-            var codeToId = _context.AccountGroups.ToDictionary(g => g.Code, g => g.Id);
-
-            var childGroups = AccountGroupSeedData.GetChildAccountGroups();
-            foreach (var child in childGroups)
-            {
-                if (child.ParentCode != null && codeToId.TryGetValue(child.ParentCode, out var parentId))
-                    child.ParentId = parentId;
-            }
-            _context.AccountGroups.AddRange(childGroups);
-            await _context.SaveChangesAsync();
-        }
-
-        if (!_context.Accounts.Any())
-        {
-            var accounts = AccountSeedData.GetAccounts();
-            _context.Accounts.AddRange(accounts);
-            await _context.SaveChangesAsync();
-        }
+        await AccountingChartSeeder.SeedAsync(_context, CancellationToken.None);
     }
 
     private async Task SeedSecurityDataAsync()
@@ -128,6 +90,10 @@ public class ApplicationDbContextInitialiser
             var roles = SecurityRoleSeedData.GetRoles();
             _context.SecurityRoles.AddRange(roles);
             await _context.SaveChangesAsync();
+        }
+        else
+        {
+            await MergeSecurityRolesAsync();
         }
 
         // Merge PermissionCodes-based permissions without deleting existing custom data.
@@ -179,6 +145,39 @@ public class ApplicationDbContextInitialiser
         if (missingRolePermissions.Count > 0)
         {
             _context.RolePermissions.AddRange(missingRolePermissions);
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    private async Task MergeSecurityRolesAsync()
+    {
+        var desiredRoles = SecurityRoleSeedData.GetRoles();
+        var existingRoleCodes = (await _context.SecurityRoles.Select(r => r.Code).ToListAsync()).ToHashSet();
+
+        var missingRoles = desiredRoles
+            .Where(r => !existingRoleCodes.Contains(r.Code))
+            .ToList();
+
+        if (missingRoles.Count > 0)
+        {
+            _context.SecurityRoles.AddRange(missingRoles);
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    private async Task MergeDocumentAttachmentRequirementsAsync()
+    {
+        var desired = DisbursementRequestAttachmentSeedData.GetRequirements();
+        var existing = await _context.DocumentAttachmentRequirements
+            .ToDictionaryAsync(r => $"{r.DocumentType}:{r.AttachmentTypeCode}");
+
+        var missing = desired
+            .Where(d => !existing.ContainsKey($"{d.DocumentType}:{d.AttachmentTypeCode}"))
+            .ToList();
+
+        if (missing.Count > 0)
+        {
+            _context.DocumentAttachmentRequirements.AddRange(missing);
             await _context.SaveChangesAsync();
         }
     }
@@ -254,8 +253,90 @@ public class ApplicationDbContextInitialiser
 
     private async Task SeedBudgetingDataAsync()
     {
-        // TODO: Recreate seed data in Phase 2 (T016-T017)
-        await Task.CompletedTask;
+        if (!_context.Funds.Any())
+        {
+            var funds = FundSeedData.GetFunds();
+            _context.Funds.AddRange(funds);
+            await _context.SaveChangesAsync();
+        }
+
+        if (!_context.BudgetTypes.Any())
+        {
+            var budgetTypes = BudgetTypeSeedData.GetBudgetTypes();
+            _context.BudgetTypes.AddRange(budgetTypes);
+            await _context.SaveChangesAsync();
+        }
+
+        if (!_context.Budgets.Any())
+        {
+            var budgets = BudgetSeedData.GetBudgets();
+
+            var fundId = _context.Funds.OrderBy(f => f.Id).First().Id;
+            var budgetTypeId = _context.BudgetTypes.OrderBy(bt => bt.Id).First().Id;
+            var fiscalYearId = _context.FiscalYears.OrderBy(f => f.Id).First(f => f.YearNumber == 2026).Id;
+
+            foreach (var budget in budgets)
+            {
+                budget.FundId = fundId;
+                budget.BudgetTypeId = budgetTypeId;
+                budget.FiscalYearId = fiscalYearId;
+            }
+
+            _context.Budgets.AddRange(budgets);
+            await _context.SaveChangesAsync();
+
+            // Seed BudgetItems with hierarchy
+            var items = BudgetSeedData.GetBudgetItems();
+            var savedBudgetIds = _context.Budgets.OrderBy(b => b.Id).Select(b => b.Id).ToList();
+            var budgetId = savedBudgetIds[0];
+            var secondBudgetId = savedBudgetIds[1];
+
+            // Budget 1 items (1000-3xxx)
+            var budget1Items = items.Where(i => !i.ItemCode.StartsWith("INV-")).ToList();
+            foreach (var item in budget1Items)
+            {
+                item.BudgetId = budgetId;
+            }
+
+            // Budget 2 items (INV-xxx)
+            var budget2Items = items.Where(i => i.ItemCode.StartsWith("INV-")).ToList();
+            foreach (var item in budget2Items)
+            {
+                item.BudgetId = secondBudgetId;
+            }
+
+            _context.BudgetItems.AddRange(budget1Items);
+            _context.BudgetItems.AddRange(budget2Items);
+            await _context.SaveChangesAsync();
+
+            // Set ParentId hierarchy by ItemCode lookup
+            var codeToId = _context.BudgetItems.ToDictionary(i => i.ItemCode, i => i.Id);
+
+            var parentMap = new Dictionary<string, string>
+            {
+                // Budget 1 level 2 → level 1
+                ["1100"] = "1000", ["1200"] = "1000",
+                ["2100"] = "2000", ["2200"] = "2000", ["2300"] = "2000",
+                ["3100"] = "3000", ["3200"] = "3000", ["3300"] = "3000",
+                // Budget 1 level 3 → level 2
+                ["1110"] = "1100", ["1120"] = "1100",
+                ["3110"] = "3100", ["3120"] = "3100",
+                // Budget 2 level 2 → level 1
+                ["INV-1100"] = "INV-1000", ["INV-1200"] = "INV-1000",
+                ["INV-2100"] = "INV-2000",
+                ["INV-3100"] = "INV-3000", ["INV-3200"] = "INV-3000",
+            };
+
+            foreach (var item in _context.BudgetItems)
+            {
+                if (parentMap.TryGetValue(item.ItemCode, out var parentCode) && codeToId.TryGetValue(parentCode, out var parentId))
+                {
+                    item.ParentId = parentId;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+        }
     }
 
     private async Task SeedPaymentsDataAsync()
@@ -330,6 +411,52 @@ public class ApplicationDbContextInitialiser
         }
     }
 
+    private async Task SeedUsersDataAsync()
+    {
+        // Seed admin user
+        if (!_context.Users.Any())
+        {
+            var adminRoleId = _context.SecurityRoles.First(r => r.Code == "ADMIN").Id;
+            var hasher = new PasswordHasher<ERP_Government.Domain.Security.Entities.User>();
+            var adminUser = new ERP_Government.Domain.Security.Entities.User
+            {
+                Login = "administrator@localhost",
+                IsActive = true,
+                AccountType = ERP_Government.Domain.Security.Enums.AccountType.Internal,
+                RoleId = adminRoleId
+            };
+            adminUser.PasswordHash = hasher.HashPassword(adminUser, "Administrator1!");
+            _context.Users.Add(adminUser);
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            // Ensure admin user has ADMIN role
+            var adminRoleId = _context.SecurityRoles.First(r => r.Code == "ADMIN").Id;
+            var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.Login == "administrator@localhost");
+            if (adminUser is not null && adminUser.RoleId != adminRoleId)
+            {
+                adminUser.RoleId = adminRoleId;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        // Seed example users
+        var existingLogins = await _context.Users.Select(u => u.Login).ToListAsync();
+        var roleCodeToId = await _context.SecurityRoles.ToDictionaryAsync(r => r.Code, r => r.Id);
+
+        var seedUsers = UserSeedData.GetUsers();
+        foreach (var (user, roleCode) in seedUsers)
+        {
+            if (!existingLogins.Contains(user.Login) && roleCodeToId.TryGetValue(roleCode, out var roleId))
+            {
+                user.RoleId = roleId;
+                _context.Users.Add(user);
+            }
+        }
+        await _context.SaveChangesAsync();
+    }
+
     private async Task SeedJournalsDataAsync()
     {
         if (!_context.Journals.Any())
@@ -346,6 +473,18 @@ public class ApplicationDbContextInitialiser
             await _context.SaveChangesAsync();
         }
 
+        if (!_context.PostingRuleLines.Any())
+        {
+            var paymentOrderRule = await _context.PostingRules
+                .FirstOrDefaultAsync(r => r.EventType == "PaymentOrderExecuted");
+            if (paymentOrderRule is not null)
+            {
+                var lines = PostingRuleLineSeedData.GetLinesForPaymentOrderExecuted(paymentOrderRule.Id);
+                _context.PostingRuleLines.AddRange(lines);
+                await _context.SaveChangesAsync();
+            }
+        }
+
         if (!_context.JournalEntryTemplates.Any())
         {
             var templates = JournalEntryTemplateSeedData.GetTemplates();
@@ -356,7 +495,30 @@ public class ApplicationDbContextInitialiser
 
     private async Task SeedBudgetClassificationsDataAsync()
     {
-        // TODO: Recreate seed data in Phase 2 (T017)
-        await Task.CompletedTask;
+        if (!_context.BudgetClassifications.Any())
+        {
+            var classifications = BudgetClassificationSeedData.GetClassifications();
+            _context.BudgetClassifications.AddRange(classifications);
+            await _context.SaveChangesAsync();
+
+            // Set ParentId hierarchy by Code lookup
+            var codeToId = _context.BudgetClassifications.ToDictionary(c => c.Code, c => c.Id);
+            var parentMap = new Dictionary<string, string>
+            {
+                ["2100"] = "2000",
+                ["2200"] = "2000",
+                ["2110"] = "2100",
+            };
+
+            foreach (var c in _context.BudgetClassifications)
+            {
+                if (parentMap.TryGetValue(c.Code, out var parentCode) && codeToId.TryGetValue(parentCode, out var parentId))
+                {
+                    c.ParentId = parentId;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+        }
     }
 }

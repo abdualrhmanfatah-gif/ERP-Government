@@ -6,6 +6,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { FilterBar, FilterSearch, FilterSelect } from '@/components/ui';
 import { useUsers } from '../hooks';
 import { CreateUserDialog } from '@/components/SecurityUsersCreateDialog';
+import { activeStatusLabels, getActiveStatusLabel } from '@/shared/constants/labels';
 
 export function UserListPage() {
   const navigate = useNavigate();
@@ -45,8 +46,8 @@ export function UserListPage() {
             onChange={(v) => { setStatus(v); setPage(1); }}
             options={[
               { value: '', label: 'الكل' },
-              { value: 'active', label: 'نشط' },
-              { value: 'inactive', label: 'غير نشط' },
+              { value: 'active', label: activeStatusLabels.active },
+              { value: 'inactive', label: activeStatusLabels.inactive },
             ]}
           />
         </FilterBar>
@@ -58,7 +59,7 @@ export function UserListPage() {
           { key: 'departmentName', header: 'القسم', width: 150, render: (r) => r.departmentName ?? '—' },
           { key: 'isActive', header: 'الحالة', width: 100, render: (r) => (
             <StatusBadge variant={r.isActive ? 'active' : 'draft'}>
-              {r.isActive ? 'نشط' : 'غير نشط'}
+              {getActiveStatusLabel(r.isActive)}
             </StatusBadge>
           )},
           { key: 'mfaEnabled', header: 'المصادقة الثنائية', width: 120, render: (r) => (

@@ -5,14 +5,20 @@ namespace ERP_Government.Domain.Budgeting.Entities;
 public class FinalAccount : BaseAuditableEntity
 {
     public int FiscalYearId { get; set; }
+    public int FundId { get; set; }
+    public int YearClosingRunId { get; set; }
+    public Enums.FinalAccountStatus Status { get; set; } = Enums.FinalAccountStatus.Draft;
     public DateTimeOffset GeneratedAt { get; set; }
     public int GeneratedById { get; set; }
-    public Enums.FinalAccountStatus Status { get; set; } = Enums.FinalAccountStatus.Draft;
+    public DateTimeOffset? ReviewedAt { get; set; }
+    public int? ReviewedById { get; set; }
     public DateTimeOffset? IssuedAt { get; set; }
     public int? IssuedById { get; set; }
     public byte[] RowVersion { get; set; } = [];
 
     public FinancialSettings.Entities.FiscalYear FiscalYear { get; set; } = null!;
+    public Fund Fund { get; set; } = null!;
+    public YearClosingRun YearClosingRun { get; set; } = null!;
 
     private readonly List<FinalAccountLine> _lines = [];
     public IReadOnlyCollection<FinalAccountLine> Lines => _lines.AsReadOnly();

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
 import { Page, Button, Card, ConfirmDialog } from '@/components/ui';
+import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { ArrowRight, Unlock, Lock, CalendarPlus, FolderOpen, X } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { FiscalYearStatusBadge } from '@/components/FinancialSettingsFiscalYearStatusBadge';
@@ -100,13 +101,13 @@ export default function FiscalYearDetailPage() {
               <div>
                 <div className="text-xs text-[var(--color-on-surface-variant)] mb-1">تاريخ البداية</div>
                 <div className="text-sm font-medium text-[var(--color-on-surface)]">
-                  {new Intl.DateTimeFormat('ar-EG', { dateStyle: 'long' }).format(new Date(fy.startDate))}
+                  {new Intl.DateTimeFormat('ar-YE', { dateStyle: 'long' }).format(new Date(fy.startDate))}
                 </div>
               </div>
               <div>
                 <div className="text-xs text-[var(--color-on-surface-variant)] mb-1">تاريخ النهاية</div>
                 <div className="text-sm font-medium text-[var(--color-on-surface)]">
-                  {new Intl.DateTimeFormat('ar-EG', { dateStyle: 'long' }).format(new Date(fy.endDate))}
+                  {new Intl.DateTimeFormat('ar-YE', { dateStyle: 'long' }).format(new Date(fy.endDate))}
                 </div>
               </div>
               <div>
@@ -116,7 +117,7 @@ export default function FiscalYearDetailPage() {
             </div>
             {fy.createdBy && (
               <div className="mt-4 pt-4 border-t border-[var(--color-border-container)] text-xs text-[var(--color-on-surface-variant)]">
-                أنشأ: {fy.createdBy} — {fy.createdAt ? new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(fy.createdAt)) : ''}
+                أنشأ: {fy.createdBy} — {fy.createdAt ? new Intl.DateTimeFormat('ar-YE', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(fy.createdAt)) : ''}
               </div>
             )}
           </Card>
@@ -137,54 +138,32 @@ export default function FiscalYearDetailPage() {
                 <p className="text-[var(--color-on-surface-variant)]">لا توجد فترات بعد</p>
               </div>
             ) : (
-              <div className="w-full overflow-x-auto rounded-xl border border-[var(--color-border-container)] bg-[var(--color-surface-container-lowest)] shadow-sm">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-[var(--color-border-container)] bg-[var(--color-surface-container)]">
-                      <th className="px-4 py-3 text-start font-semibold text-[var(--color-on-surface)]">رقم الفترة</th>
-                      <th className="px-4 py-3 text-start font-semibold text-[var(--color-on-surface)]">الاسم</th>
-                      <th className="px-4 py-3 text-start font-semibold text-[var(--color-on-surface)]">تاريخ البداية</th>
-                      <th className="px-4 py-3 text-start font-semibold text-[var(--color-on-surface)]">تاريخ النهاية</th>
-                      <th className="px-4 py-3 text-start font-semibold text-[var(--color-on-surface)]">الحالة</th>
-                      {fy.status !== 'HardClosed' && (
-                        <th className="px-4 py-3 text-start font-semibold text-[var(--color-on-surface)] w-[100px]">إجراءات</th>
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {periods.map((p) => (
-                      <tr key={p.id} className="border-b border-[var(--color-border-container)] last:border-0 hover:bg-[var(--color-surface-container)] transition-colors duration-150">
-                        <td className="px-4 py-3 font-mono text-[var(--color-on-surface)]">{p.periodNumber}</td>
-                        <td className="px-4 py-3 text-[var(--color-on-surface)]">{p.name}</td>
-                        <td className="px-4 py-3 text-[var(--color-on-surface)] whitespace-nowrap">
-                          {new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium' }).format(new Date(p.startDate))}
-                        </td>
-                        <td className="px-4 py-3 text-[var(--color-on-surface)] whitespace-nowrap">
-                          {new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium' }).format(new Date(p.endDate))}
-                        </td>
-                        <td className="px-4 py-3">
-                          <PeriodLockIndicator isLocked={p.isLockedForPosting} />
-                        </td>
-                        {fy.status !== 'HardClosed' && (
-                          <td className="px-4 py-3">
-                            {canLock && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => p.isLockedForPosting ? handleUnlockPeriod(p.id) : handleLockPeriod(p.id)}
-                                disabled={lockMutation.isPending || unlockMutation.isPending}
-                                className="cursor-pointer"
-                              >
-                                {p.isLockedForPosting ? <Unlock size={16} /> : <Lock size={16} />}
-                              </Button>
-                            )}
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataGrid
+                columns={[
+                  { header: 'رقم الفترة', cell: (row) => <span className="font-mono">{row.periodNumber}</span> },
+                  { header: 'الاسم', cell: (row) => row.name },
+                  { header: 'تاريخ البداية', cell: (row) => <span className="whitespace-nowrap">{new Intl.DateTimeFormat('ar-YE', { dateStyle: 'medium' }).format(new Date(row.startDate))}</span> },
+                  { header: 'تاريخ النهاية', cell: (row) => <span className="whitespace-nowrap">{new Intl.DateTimeFormat('ar-YE', { dateStyle: 'medium' }).format(new Date(row.endDate))}</span> },
+                  { header: 'الحالة', cell: (row) => <PeriodLockIndicator isLocked={row.isLockedForPosting} /> },
+                  ...(fy.status !== 'HardClosed' ? [{
+                    header: 'إجراءات',
+                    cell: (row: typeof periods[number]) => canLock ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => row.isLockedForPosting ? handleUnlockPeriod(row.id) : handleLockPeriod(row.id)}
+                        disabled={lockMutation.isPending || unlockMutation.isPending}
+                        className="cursor-pointer"
+                      >
+                        {row.isLockedForPosting ? <Unlock size={16} /> : <Lock size={16} />}
+                      </Button>
+                    ) : null,
+                  }] : []),
+                ]}
+                data={periods}
+                rowKey={(row) => row.id}
+                emptyMessage="لا توجد فترات بعد"
+              />
             )}
           </div>
 

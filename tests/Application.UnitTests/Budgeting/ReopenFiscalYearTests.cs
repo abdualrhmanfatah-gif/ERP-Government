@@ -44,36 +44,53 @@ public class ReopenFiscalYearTests
         });
         _dbContext.YearClosingRuns.Add(new YearClosingRun
         {
-            FiscalYearId = fyId, RunAt = DateTimeOffset.UtcNow, RunById = 1,
+            FiscalYearId = fyId, StartedAt = DateTimeOffset.UtcNow, RunById = 1,
             RunType = YearClosingRunType.Lapse, Status = YearClosingRunStatus.Completed,
             LapsedAppropriationTotal = 50000m, LapsedEncumbranceTotal = 20000m
         });
         await _dbContext.SaveChangesAsync();
     }
 
-    private async Task SeedCancelledAppropriation(int id, int budgetItemId, decimal amount, AppropriationType type, int fyId)
+    private async Task SeedLapseTransaction(int budgetItemId, decimal amount, int fyId)
     {
-        var budget = new Budget { Id = id, FiscalYearId = fyId, BudgetNumber = $"B-{id}", BudgetName = "Test", BudgetTypeId = 1, FundId = 1, TotalAmount = 100000m, Status = Domain.Budgeting.Enums.BudgetStatus.Active, EffectiveFrom = new DateOnly(2026, 1, 1) };
-        var budgetItem = new BudgetItem { Id = budgetItemId, BudgetId = id, ItemCode = $"ITEM-{budgetItemId}", ItemName = "Test" };
+        var budget = new Budget { Id = budgetItemId / 100, FiscalYearId = fyId, BudgetNumber = $"B-{budgetItemId}", BudgetName = "Test", BudgetTypeId = 1, FundId = 1, Status = BudgetStatus.Active, EffectiveFrom = new DateOnly(2026, 1, 1) };
+        var budgetItem = new BudgetItem { Id = budgetItemId, BudgetId = budgetItemId / 100, ItemCode = $"ITEM-{budgetItemId}", ItemName = "Test" };
         _dbContext.Budgets.Add(budget);
         _dbContext.BudgetItems.Add(budgetItem);
-        _dbContext.Appropriations.Add(new Appropriation
+
+        var transaction = new BudgetTransaction
         {
-            Id = id, BudgetItemId = budgetItemId, Amount = amount,
-            AppropriationType = type, Status = AppropriationStatus.Cancelled,
-            BudgetId = id, AppropriationNumber = $"APP-{id}", DocumentType = "Test", DocumentId = 1
+            TransactionNumber = $"BTR-{budgetItemId}",
+            BudgetId = budgetItemId / 100,
+            TransactionType = BudgetTransactionType.Lapse,
+            TransactionDate = DateOnly.FromDateTime(DateTime.UtcNow),
+            Description = "Lapse transaction",
+            Status = BudgetTransactionStatus.Posted,
+            PostedAt = DateTimeOffset.UtcNow,
+            PostedBy = "1"
+        };
+        _dbContext.BudgetTransactions.Add(transaction);
+        await _dbContext.SaveChangesAsync();
+
+        _dbContext.BudgetTransactionLines.Add(new BudgetTransactionLine
+        {
+            BudgetTransactionId = transaction.Id,
+            BudgetItemId = budgetItemId,
+            Direction = TransactionDirection.Decrease,
+            Amount = amount,
+            Remarks = "Lapse"
         });
         await _dbContext.SaveChangesAsync();
     }
 
-    private async Task SeedCancelledEncumbrance(int id, int appropriationId, decimal amount)
+    private async Task SeedCancelledEncumbrance(int id, int budgetItemId, decimal amount)
     {
         _dbContext.Encumbrances.Add(new Encumbrance
         {
-            Id = id, AppropriationId = appropriationId, Amount = amount,
+            Id = id, TotalAmount = amount,
             Status = EncumbranceStatus.Cancelled, EncumbranceNumber = $"ENC-{id}",
             EncumbranceType = EncumbranceType.Commitment, EncumbranceDate = new DateOnly(2026, 6, 1),
-            DocumentType = "Test", DocumentId = 1
+            DocumentType = "BudgetTransaction", DocumentId = 1
         });
         await _dbContext.SaveChangesAsync();
     }
@@ -84,14 +101,14 @@ public class ReopenFiscalYearTests
     public async Task ReopenFiscalYear_NoPaymentsAgainstLapsed_ShouldRestoreAmounts()
     {
         await SeedLapsedFiscalYear(1, "FY2026");
-        await SeedCancelledAppropriation(1, 100, 50000m, AppropriationType.Original, 1);
-        await SeedCancelledEncumbrance(10, 1, 20000m);
+        await SeedLapseTransaction(100, 50000m, 1);
+        await SeedCancelledEncumbrance(10, 100, 20000m);
 
         var handler = new ReopenFiscalYearCommandHandler(_dbContext, _userMock.Object);
         var result = await handler.Handle(new ReopenFiscalYearCommand(1), CancellationToken.None);
 
         result.Succeeded.ShouldBeTrue();
-        result.Value!.RestoredAppropriationTotal.ShouldBe(50000m);
+        result.Value!.RestoredBudgetTotal.ShouldBe(50000m);
         result.Value!.RestoredEncumbranceTotal.ShouldBe(20000m);
         (await _dbContext.FiscalYears.FindAsync(1))!.IsClosed.ShouldBeFalse();
     }
@@ -151,7 +168,7 @@ public class ReopenFiscalYearTests
     public async Task ReopenFiscalYear_ShouldMarkLapsedRunAsReversed()
     {
         await SeedLapsedFiscalYear(1, "FY2026");
-        await SeedCancelledAppropriation(1, 100, 30000m, AppropriationType.Original, 1);
+        await SeedLapseTransaction(100, 30000m, 1);
 
         var handler = new ReopenFiscalYearCommandHandler(_dbContext, _userMock.Object);
         var result = await handler.Handle(new ReopenFiscalYearCommand(1), CancellationToken.None);
@@ -159,15 +176,13 @@ public class ReopenFiscalYearTests
         result.Succeeded.ShouldBeTrue();
         var lapsedRun = await _dbContext.YearClosingRuns.FirstAsync(r => r.RunType == YearClosingRunType.Lapse);
         lapsedRun.Status.ShouldBe(YearClosingRunStatus.Reversed);
-        lapsedRun.ReversedById.ShouldBe(1);
-        lapsedRun.ReversedAt.ShouldNotBeNull();
     }
 
     [Test]
     public async Task ReopenFiscalYear_ShouldCreateReopenRun()
     {
         await SeedLapsedFiscalYear(1, "FY2026");
-        await SeedCancelledAppropriation(1, 100, 40000m, AppropriationType.Original, 1);
+        await SeedLapseTransaction(100, 40000m, 1);
 
         var handler = new ReopenFiscalYearCommandHandler(_dbContext, _userMock.Object);
         var result = await handler.Handle(new ReopenFiscalYearCommand(1), CancellationToken.None);
@@ -176,35 +191,5 @@ public class ReopenFiscalYearTests
         var runs = await _dbContext.YearClosingRuns.Where(r => r.RunType == YearClosingRunType.Reopen).ToListAsync();
         runs.Count.ShouldBe(1);
         runs[0].Status.ShouldBe(YearClosingRunStatus.Completed);
-    }
-
-    [Test]
-    public async Task ReopenFiscalYear_WithMixedAppropriationTypes_ShouldComputeCorrectTotals()
-    {
-        await SeedLapsedFiscalYear(1, "FY2026");
-        var budget = new Budget { Id = 1, FiscalYearId = 1, BudgetNumber = "B-1", BudgetName = "Test", BudgetTypeId = 1, FundId = 1, TotalAmount = 200000m, Status = Domain.Budgeting.Enums.BudgetStatus.Active, EffectiveFrom = new DateOnly(2026, 1, 1) };
-        var budgetItem = new BudgetItem { Id = 100, BudgetId = 1, ItemCode = "ITEM-100", ItemName = "Test" };
-        _dbContext.Budgets.Add(budget);
-        _dbContext.BudgetItems.Add(budgetItem);
-        _dbContext.Appropriations.AddRange(
-            new Appropriation { Id = 1, BudgetItemId = 100, Amount = 100000m, AppropriationType = AppropriationType.Original, Status = AppropriationStatus.Cancelled, BudgetId = 1, AppropriationNumber = "APP-1", DocumentType = "Test", DocumentId = 1 },
-            new Appropriation { Id = 2, BudgetItemId = 100, Amount = 15000m, AppropriationType = AppropriationType.Supplement, Status = AppropriationStatus.Cancelled, BudgetId = 1, AppropriationNumber = "APP-2", DocumentType = "Test", DocumentId = 1 },
-            new Appropriation { Id = 3, BudgetItemId = 100, Amount = 5000m, AppropriationType = AppropriationType.Reduction, Status = AppropriationStatus.Cancelled, BudgetId = 1, AppropriationNumber = "APP-3", DocumentType = "Test", DocumentId = 1 }
-        );
-        _dbContext.Encumbrances.Add(new Encumbrance
-        {
-            Id = 10, AppropriationId = 1, Amount = 25000m, Status = EncumbranceStatus.Cancelled,
-            EncumbranceNumber = "ENC-10", EncumbranceType = EncumbranceType.Commitment,
-            EncumbranceDate = new DateOnly(2026, 6, 1), DocumentType = "Test", DocumentId = 1
-        });
-        await _dbContext.SaveChangesAsync();
-
-        var handler = new ReopenFiscalYearCommandHandler(_dbContext, _userMock.Object);
-        var result = await handler.Handle(new ReopenFiscalYearCommand(1), CancellationToken.None);
-
-        result.Succeeded.ShouldBeTrue();
-        // Original 100000 + Supplement 15000 - Reduction 5000 = 110000
-        result.Value!.RestoredAppropriationTotal.ShouldBe(110000m);
-        result.Value!.RestoredEncumbranceTotal.ShouldBe(25000m);
     }
 }

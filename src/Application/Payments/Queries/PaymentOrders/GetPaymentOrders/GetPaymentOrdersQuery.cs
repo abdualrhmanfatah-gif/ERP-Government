@@ -8,8 +8,8 @@ namespace ERP_Government.Application.Payments.Queries.PaymentOrders.GetPaymentOr
 public class GetPaymentOrdersQuery : IRequest<List<PaymentOrderDto>>
 {
     public PaymentOrderStatus? Status { get; init; }
-    public int? VendorId { get; init; }
     public int? FundId { get; init; }
+    public int? FiscalYearId { get; init; }
 }
 
 public class GetPaymentOrdersQueryHandler(
@@ -24,11 +24,11 @@ public class GetPaymentOrdersQueryHandler(
         if (request.Status.HasValue)
             query = query.Where(x => x.Status == request.Status.Value);
 
-        if (request.VendorId.HasValue)
-            query = query.Where(x => x.VendorId == request.VendorId.Value);
-
         if (request.FundId.HasValue)
             query = query.Where(x => x.FundId == request.FundId.Value);
+
+        if (request.FiscalYearId.HasValue)
+            query = query.Where(x => x.FiscalYearId == request.FiscalYearId.Value);
 
         return await query
             .OrderByDescending(x => x.PaymentOrderDate)
@@ -39,18 +39,18 @@ public class GetPaymentOrdersQueryHandler(
                 PaymentOrderDate = x.PaymentOrderDate.ToDateTime(TimeOnly.MinValue),
                 DueDate = x.DueDate.HasValue ? x.DueDate.Value.ToDateTime(TimeOnly.MinValue) : null,
                 PaymentOrderType = x.PaymentOrderType,
-                VendorId = x.VendorId,
                 FundId = x.FundId,
                 FiscalYearId = x.FiscalYearId,
-                AppropriationId = x.AppropriationId,
+                BudgetItemAllocationId = x.BudgetItemAllocationId,
                 CurrencyId = x.CurrencyId,
                 AmountGross = x.AmountGross,
                 DeductionAmount = x.DeductionAmount,
                 PaymentMethod = x.PaymentMethod,
                 BeneficiaryName = x.BeneficiaryName,
                 Status = x.Status,
-                BudgetCheckStatus = x.BudgetCheckStatus,
-                Notes = x.Notes
+                Notes = x.Notes,
+                DisbursementRequestId = x.DisbursementRequestId,
+                RowVersion = x.RowVersion
             })
             .ToListAsync(cancellationToken);
     }

@@ -17,7 +17,7 @@ export function GroupTree({ groups, onSelect, onToggle, onEdit, canEdit }: Props
       {groups.map((g, idx) => (
         <div
           key={g.id}
-          className={`group flex items-center gap-3 border-e border-b border-[color-mix(in_srgb,var(--color-primary-container)_20%,transparent)] px-3 py-1.5 transition-all duration-150 hover:bg-[color-mix(in_srgb,var(--color-primary-container)_5%,transparent)] cursor-pointer ${idx % 2 === 1 ? 'bg-[rgba(0,32,69,0.06)]' : 'bg-[var(--color-surface-container-lowest)]'}`}
+          className={`group flex items-center gap-3 border-e border-b border-[color-mix(in_srgb,var(--color-primary-container)_20%,transparent)] px-3 py-1.5 transition-all duration-150 hover:bg-[color-mix(in_srgb,var(--color-primary-container)_5%,transparent)] cursor-pointer ${idx % 2 === 1 ? 'bg-[var(--color-surface-container-low)]' : 'bg-[var(--color-surface-container-lowest)]'}`}
           style={{ marginInlineStart: `${(g.level - 1) * 24}px` }}
           onClick={() => onSelect?.(g)}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect?.(g); } }}

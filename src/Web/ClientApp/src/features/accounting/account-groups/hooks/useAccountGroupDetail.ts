@@ -1,14 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import type { AccountGroupDetailResponse } from '../types';
+import { accountGroupsClient } from '../../shared/client';
 
 export function useAccountGroupDetail(id: number) {
   return useQuery({
     queryKey: ['account-group-detail', id],
-    queryFn: async (): Promise<AccountGroupDetailResponse> => {
-      const res = await fetch(`/api/AccountGroups/${id}/detail`, { credentials: 'include' });
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
-    },
+    queryFn: () => accountGroupsClient.detail5(id),
     enabled: !!id,
   });
 }

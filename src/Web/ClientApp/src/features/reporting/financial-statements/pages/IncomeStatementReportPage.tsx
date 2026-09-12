@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Download, FileText } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
+import { downloadBlobExport, buildExportUrl } from '@/shared/utils/download';
 import {
   useIncomeStatement,
   useFinancialStatementFiscalYears,
@@ -10,13 +11,7 @@ import {
   type FinancialStatementFilters,
 } from '../shared/types';
 import { incomeStatementFilterSchema } from '../shared/schemas';
-import { FilterSelect } from '@/components/ui/FilterSelect';
-import { FilterDate } from '@/components/ui/FilterDate';
-import { Page } from '@/components/ui/Page';
-import { MoneyDisplay } from '@/components/ui/MoneyDisplay';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { ErrorState } from '@/components/ui/ErrorState';
-import { Button } from '@/components/ui/Button';
+import { FilterSelect, FilterDate, Page, MoneyDisplay, EmptyState, ErrorState, Button, Alert } from '@/components/ui';
 
 export default function IncomeStatementReportPage() {
   const { data: fiscalYears, isLoading: yearsLoading } = useFinancialStatementFiscalYears();
@@ -51,21 +46,12 @@ export default function IncomeStatementReportPage() {
   async function handleExport(format: 'xlsx' | 'pdf') {
     setExporting(true);
     try {
-      const qs = new URLSearchParams();
-      qs.set('format', format);
-      if (report?.startDate) qs.set('startDate', new Date(report.startDate).toISOString().slice(0, 10));
-      if (report?.endDate) qs.set('endDate', new Date(report.endDate).toISOString().slice(0, 10));
-      const response = await fetch(`/api/Reports/income-statement/export?${qs.toString()}`);
-      if (!response.ok) throw new Error('Export failed');
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `IncomeStatement-${new Date().toISOString().slice(0, 10)}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      const url = buildExportUrl('/api/Reports/income-statement/export', {
+        format,
+        startDate: report?.startDate ? new Date(report.startDate).toISOString().slice(0, 10) : undefined,
+        endDate: report?.endDate ? new Date(report.endDate).toISOString().slice(0, 10) : undefined,
+      });
+      await downloadBlobExport(url, `IncomeStatement-${new Date().toISOString().slice(0, 10)}.${format}`);
       notify({ type: 'success', title: 'تم تصدير قائمة الدخل بنجاح' });
     } catch {
       notify({ type: 'error', title: 'فشل تصدير قائمة الدخل' });
@@ -143,9 +129,9 @@ export default function IncomeStatementReportPage() {
       }
     >
       {isPartialData && (
-        <div role="status" className="mb-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
+        <Alert variant="warning">
           بيانات جزئية — الفترة الحالية جارية وقد تتغير الأرقام
-        </div>
+        </Alert>
       )}
       {isError ? (
         <ErrorState onRetry={() => refetch()} />

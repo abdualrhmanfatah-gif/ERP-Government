@@ -47,6 +47,26 @@ export const voucherStatusBadgeVariant: Record<string, 'secondary' | 'warning' |
   Cancelled: 'danger',
 };
 
+// ─── Deposit Slip Labels ────────────────────────────────────────────────────
+
+export const depositSlipStatusLabels: Record<string, string> = {
+  Draft: 'مسودة',
+  Approved: 'معتمدة',
+};
+
+export const depositSlipFormTypeLabels: Record<string, string> = {
+  Form47: 'نقدية (47)',
+  Form48: 'شيكات (48)',
+};
+
+// ─── Check Labels ───────────────────────────────────────────────────────────
+
+export const checkStatusLabels: Record<string, string> = {
+  UnderCollection: 'تحت التحصيل',
+  Cleared: 'محصل',
+  Bounced: 'مرتجع',
+};
+
 export interface AccountLookupDto {
   id: number;
   name: string;

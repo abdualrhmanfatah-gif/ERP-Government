@@ -38,7 +38,8 @@ public static class DependencyInjection
         builder.Services.AddScoped<ApplicationDbContextInitialiser>();
 
         // JWT Authentication
-        var jwtKey = builder.Configuration["Jwt:Key"] ?? "ERP_Government_DefaultKey_2026!ChangeInProduction";
+        var jwtKey = builder.Configuration["Jwt:Key"]
+            ?? throw new InvalidOperationException("Jwt:Key is not configured. Set Jwt:Key in configuration.");
         var key = Encoding.ASCII.GetBytes(jwtKey);
 
         builder.Services.AddAuthentication(options =>
@@ -65,6 +66,8 @@ public static class DependencyInjection
 
         builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddTransient<IIdentityService, IdentityService>();
+        builder.Services.AddSingleton<Microsoft.AspNetCore.Identity.IPasswordHasher<ERP_Government.Domain.Security.Entities.User>,
+            Microsoft.AspNetCore.Identity.PasswordHasher<ERP_Government.Domain.Security.Entities.User>>();
 
         // Approval Rules Engine
         builder.Services.AddScoped<ERP_Government.Application.Security.Common.IApprovalRuleEvaluationService,
@@ -88,7 +91,8 @@ public static class DependencyInjection
         builder.Services.AddScoped<ERP_Government.Application.Accounting.Reports.Common.ReportAuditService>();
 
         // Report Exporters
-        builder.Services.AddScoped<ERP_Government.Application.Accounting.Reports.Common.IReportExporter, ERP_Government.Infrastructure.Services.ExcelReportExporter>();
+        builder.Services.AddScoped<ERP_Government.Infrastructure.Services.PdfReportExporter>();
+        builder.Services.AddScoped<ERP_Government.Infrastructure.Services.ExcelReportExporter>();
 
         // Document Services
         builder.Services.AddScoped<ERP_Government.Application.Parties.Common.IDocumentStatusLogger,

@@ -34,6 +34,10 @@ public class RejectPaymentOrderCommandHandler(
         if (entity.Status != PaymentOrderStatus.Submitted)
             return Result.Failure(["Only submitted payment orders can be rejected."]);
 
+        if (entity.RowVersion.Length > 0 && request.RowVersion.Length > 0
+            && !entity.RowVersion.SequenceEqual(request.RowVersion))
+            return Result.Failure(["RowVersion conflict — record modified by another user. Reload."]);
+
         if (string.IsNullOrWhiteSpace(request.RejectionReason))
             return Result.Failure(["Rejection reason is required."]);
 

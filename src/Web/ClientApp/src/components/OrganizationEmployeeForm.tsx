@@ -43,7 +43,7 @@ export function EmployeeForm({ initialData, isEdit, onSubmit, serverError, loadi
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" aria-label="نموذج الموظف">
       {serverError && (
         <div role="alert" className="p-3 bg-[var(--color-error-container)] text-[var(--color-on-error-container)] rounded-lg text-sm">{serverError}</div>
       )}

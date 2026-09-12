@@ -83,7 +83,7 @@ export default function ClosingEntryDetailPage() {
               <div>
                 <div className="text-xs text-[var(--color-on-surface-variant)] mb-1">التاريخ</div>
                 <div className="text-sm font-medium text-[var(--color-on-surface)]">
-                  {new Intl.DateTimeFormat('ar-EG', { dateStyle: 'long' }).format(new Date(entry.closingDate))}
+                  {new Intl.DateTimeFormat('ar-YE', { dateStyle: 'long' }).format(new Date(entry.closingDate))}
                 </div>
               </div>
               <div>

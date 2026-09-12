@@ -13,6 +13,7 @@ public class BudgetItemDto
     public string? AccountName { get; set; }
     public int? FundId { get; init; }
     public string? FundName { get; set; }
+    public string? BudgetName { get; set; }
     public int? CostCenterId { get; init; }
     public string? CostCenterName { get; set; }
     public int? BudgetClassificationId { get; init; }

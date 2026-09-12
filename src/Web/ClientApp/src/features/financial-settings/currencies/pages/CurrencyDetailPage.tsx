@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Page, Button, Badge, Card, StatusBadge, FormField, Input, ConfirmDialog } from '@/components/ui';
+import { Page, Button, Badge, Card, StatusBadge, FormField, Input, ConfirmDialog, Switch } from '@/components/ui';
 import { Pencil, X, Check } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { useCurrencyDetail, useUpdateCurrency, useActivateCurrency, useDeactivateCurrency } from '../../hooks/useCurrencies';
 import type { CurrencyDto } from '../../shared/types';
+import { getActiveStatusLabel } from '@/shared/constants/labels';
 
 export default function CurrencyDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -109,7 +110,7 @@ export default function CurrencyDetailPage() {
             <div className="flex items-center gap-2">
               {currency.isBase && <Badge variant="primary">أساسية</Badge>}
               <StatusBadge variant={currency.isActive ? 'active' : 'closed'}>
-                {currency.isActive ? 'نشط' : 'معطل'}
+                {getActiveStatusLabel(currency.isActive)}
               </StatusBadge>
             </div>
             {!isEditing && canUpdate && currency.isActive && (
@@ -170,18 +171,12 @@ export default function CurrencyDetailPage() {
                     onChange={(e) => setEditForm({ ...editForm, roundingPrecision: Number(e.target.value) })}
                   />
                 </FormField>
-                <FormField label="العملة الأساسية" htmlFor="editIsBase">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      id="editIsBase"
-                      type="checkbox"
-                      checked={editForm.isBase ?? currency.isBase}
-                      onChange={(e) => setEditForm({ ...editForm, isBase: e.target.checked })}
-                      className="w-4 h-4 rounded border-[var(--color-border-container)] text-[var(--color-primary)] focus:ring-[var(--color-focus-ring)]"
-                    />
-                    <span className="text-sm text-[var(--color-on-surface)]">عملة أساسية</span>
-                  </label>
-                </FormField>
+                <Switch
+                  id="editIsBase"
+                  label="عملة أساسية"
+                  checked={editForm.isBase ?? currency.isBase}
+                  onChange={(v) => setEditForm({ ...editForm, isBase: v })}
+                />
                 <div className="flex justify-end gap-2 pt-4">
                   <Button variant="ghost" onClick={cancelEdit} className="cursor-pointer" icon={<X size={16} />}>
                     إلغاء

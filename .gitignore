@@ -491,3 +491,19 @@ $RECYCLE.BIN/
 *.db-shm
 *.db-wal
 nul
+# .NET build outputs (already covered, verifying)
+bin/
+obj/
+*.user
+*.suo
+
+# ClientApp
+src/Web/ClientApp/dist/
+src/Web/ClientApp/build/
+
+# npm
+*.log
+npm-debug.log*
+
+# docs
+*.pdf

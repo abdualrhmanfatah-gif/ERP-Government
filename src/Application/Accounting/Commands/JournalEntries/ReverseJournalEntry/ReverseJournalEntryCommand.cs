@@ -109,6 +109,16 @@ public class ReverseJournalEntryCommandHandler(
         // Mark original as reversed
         original.EntryStatus = EntryStatus.Reversed;
 
+        // Clear AccrualJournalEntryId if this entry was linked to a disbursement request
+        var linkedDisbursementRequest = await context.DisbursementRequests
+            .FirstOrDefaultAsync(d => d.AccrualJournalEntryId == original.Id, cancellationToken);
+        if (linkedDisbursementRequest is not null)
+        {
+            linkedDisbursementRequest.AccrualJournalEntryId = null;
+            linkedDisbursementRequest.LastModified = DateTimeOffset.UtcNow;
+            linkedDisbursementRequest.LastModifiedBy = "System";
+        }
+
         // FR-001 (revised): AccountBalances removed (DEP-026) — reversal lines themselves adjust live aggregation
 
         await context.SaveChangesAsync(cancellationToken);

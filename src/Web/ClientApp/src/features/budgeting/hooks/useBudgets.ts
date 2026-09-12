@@ -33,8 +33,8 @@ export function useBudgetDetail(id: number) {
 function useBudgetTransition(fn: (id: number, body: BudgetActionRequest) => Promise<void>) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...data }: Record<string, unknown> & { id: number }) =>
-      fn(id, new BudgetActionRequest({ notes: data.notes as string | undefined })),
+    mutationFn: ({ id, rowVersion, ...data }: Record<string, unknown> & { id: number; rowVersion: string }) =>
+      fn(id, new BudgetActionRequest({ rowVersion, notes: data.notes as string | undefined })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['budgets'] }),
   });
 }
@@ -58,14 +58,14 @@ export function useUpdateBudget() {
 }
 
 export const useSubmitBudget = () =>
-  useBudgetTransition((id, body) => client.submitPATCH2(id, body));
+  useBudgetTransition((id, body) => client.submitPATCH(id, body));
 export const useApproveBudget = () =>
-  useBudgetTransition((id, body) => client.approvePATCH2(id, body));
+  useBudgetTransition((id, body) => client.approvePATCH(id, body));
 export const useActivateBudget = () =>
-  useBudgetTransition((id, body) => client.activatePATCH2(id, body));
+  useBudgetTransition((id, body) => client.activatePATCH(id, body));
 export const useSuspendBudget = () =>
-  useBudgetTransition((id, body) => client.suspend2(id, body));
+  useBudgetTransition((id, body) => client.suspend(id, body));
 export const useCloseBudget = () =>
-  useBudgetTransition((id, body) => client.closePATCH2(id, body));
+  useBudgetTransition((id, body) => client.closePATCH(id, body));
 export const useCancelBudget = () =>
-  useBudgetTransition((id, body) => client.cancelPATCH2(id, body));
+  useBudgetTransition((id, body) => client.cancelPATCH(id, body));

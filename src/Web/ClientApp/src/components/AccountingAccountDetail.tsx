@@ -1,15 +1,8 @@
 import type { AccountDto } from '@/features/accounting/types';
+import { normalBalanceLabel } from '@/shared/utils/formatters';
 
 interface AccountDetailProps {
   account: AccountDto;
-}
-
-function normalBalanceLabel(val?: string): string {
-  if (!val) return '—';
-  const v = val.toLowerCase();
-  if (v === 'debit') return 'مدين';
-  if (v === 'credit') return 'دائن';
-  return val;
 }
 
 export function AccountDetail({ account }: AccountDetailProps) {
@@ -20,7 +13,7 @@ export function AccountDetail({ account }: AccountDetailProps) {
     { label: 'المجموعة', value: account.accountGroupName },
     { label: 'الحساب الأب', value: account.parentId ?? '—' },
     { label: 'المستوى', value: account.level },
-    { label: 'الرصيد الطبيعي', value: normalBalanceLabel(account.normalBalance) },
+    { label: 'نوع الحساب ', value: normalBalanceLabel(account.normalBalance) },
     { label: 'قابل للترحيل', value: account.isPostable ? 'نعم' : 'لا' },
     { label: 'قابل للموازنة', value: account.isReconcilable ? 'نعم' : 'لا' },
     { label: 'العملة', value: account.currencyId ?? '—' },

@@ -3,7 +3,7 @@ import { Page, Button, EmptyState } from '@/components/ui';
 import { JournalForm } from '@/components/AccountingJournalForm';
 import { useJournalById } from '../../hooks/useJournalById';
 import { useUpdateJournal } from '../../hooks/useUpdateJournal';
-import { showToast } from '@/components/ui/Toast';
+import { notify } from '@/features/notifications/notify';
 
 const lockedFieldsWhenUsed = [
   'code', 'name', 'type', 'accountId', 'suspenseAccountId',
@@ -45,10 +45,10 @@ export function JournalEditPage() {
           rowVersion: journal.rowVersion,
         },
       });
-      showToast('success', 'تم تعديل الدفتر بنجاح');
+      notify({ type: 'success', title: 'تم تعديل الدفتر بنجاح' });
       navigate('/accounting/journals');
     } catch {
-      showToast('error', 'فشل تعديل الدفتر — تحقق من صلاحية التعديل أو تعارض البيانات');
+      notify({ type: 'error', title: 'فشل تعديل الدفتر — تحقق من صلاحية التعديل أو تعارض البيانات' });
     }
   };
 

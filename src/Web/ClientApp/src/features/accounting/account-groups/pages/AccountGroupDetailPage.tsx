@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { Page, StatusBadge, DataGrid, Button, Card } from '@/components/ui';
+import { Page, StatusBadge, DataGrid, Button, Card, Badge } from '@/components/ui';
 import { useAccountGroupDetail } from '../hooks/useAccountGroupDetail';
 import { useToggleAccountGroupActive } from '../hooks/useToggleAccountGroupActive';
 import { usePermission } from '@/shared/hooks/usePermission';
@@ -10,6 +10,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { AccountGroupForm } from '@/components/AccountingAccountGroupForm';
 import { useUpdateAccountGroup } from '../hooks/useUpdateAccountGroup';
 import { ArrowRight, Layers, BookOpen } from 'lucide-react';
+import { getActiveStatusLabel } from '@/shared/constants/labels';
 
 export function AccountGroupDetailPage() {
   const { id } = useParams();
@@ -48,7 +49,7 @@ export function AccountGroupDetailPage() {
       header: 'الحالة',
       cell: (row: { isActive: boolean }) => (
         <StatusBadge variant={row.isActive ? 'active' : 'closed'}>
-          {row.isActive ? 'نشط' : 'معطل'}
+          {getActiveStatusLabel(row.isActive)}
         </StatusBadge>
       ),
     },
@@ -72,7 +73,7 @@ export function AccountGroupDetailPage() {
       header: 'الحالة',
       cell: (row: { isActive: boolean }) => (
         <StatusBadge variant={row.isActive ? 'active' : 'closed'}>
-          {row.isActive ? 'نشط' : 'معطل'}
+          {getActiveStatusLabel(row.isActive)}
         </StatusBadge>
       ),
     },
@@ -81,9 +82,9 @@ export function AccountGroupDetailPage() {
       accessorKey: 'isPostable',
       header: 'قابل للترحيل',
       cell: (row: { isPostable: boolean }) => (
-        <span className={row.isPostable ? 'text-[var(--color-success)]' : 'text-[var(--color-on-surface-variant)]'}>
+        <Badge variant={row.isPostable ? 'success' : 'default'}>
           {row.isPostable ? 'نعم' : 'لا'}
-        </span>
+        </Badge>
       ),
     },
   ];
@@ -147,7 +148,7 @@ export function AccountGroupDetailPage() {
           <div>
             <span className="text-sm font-semibold text-[var(--color-on-surface-variant)]">الحالة: </span>
             <StatusBadge variant={g.isActive ? 'active' : 'closed'}>
-              {g.isActive ? 'نشط' : 'معطل'}
+              {getActiveStatusLabel(g.isActive)}
             </StatusBadge>
           </div>
           <div>

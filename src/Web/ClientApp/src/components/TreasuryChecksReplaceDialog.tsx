@@ -121,7 +121,7 @@ export function TreasuryChecksReplaceDialog({
         </>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" aria-label="استبدال الشيك">
         <FormField label="طريقة الدفع" error={errors.paymentMethod}>
           <Select
             value={paymentMethod}

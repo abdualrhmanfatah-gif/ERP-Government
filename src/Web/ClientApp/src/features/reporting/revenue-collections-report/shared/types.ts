@@ -26,3 +26,15 @@ export interface RevenueCollectionsFilters {
   partyId?: number;
   paymentMethod?: string;
 }
+
+export const paymentMethodLabels: Record<string, string> = {
+  Cash: 'نقدي',
+  Check: 'شيك',
+  Transfer: 'تحويل',
+};
+
+export const depositStatusLabels: Record<string, string> = {
+  Pending: 'قيد الانتظار',
+  Deposited: 'تم الإيداع',
+  Rejected: 'مرفوض',
+};

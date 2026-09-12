@@ -9,8 +9,8 @@ namespace ERP_Government.Application.Accounting.EventHandlers;
 /// <summary>
 /// Handles domain events by matching active PostingRules and generating JournalEntries directly
 /// (DEP-026 — AccountingEvent staging entity removed; outbox shape retained via OutboxMessages).
-/// No-rules matches are skipped with a warning; generation exceptions are logged and swallowed so
-/// the originating document save completes (failure is observable via application logs).
+/// No-rules matches are skipped with a warning; generation exceptions propagate to the caller
+/// so the originating document save fails atomically — no document is persisted without its journal entry.
 /// </summary>
 public class PostingPipelineHandler : INotificationHandler<BaseEvent>
 {
@@ -52,34 +52,27 @@ public class PostingPipelineHandler : INotificationHandler<BaseEvent>
             return;
         }
 
-        try
+        var documentDate = DateOnly.FromDateTime(DateTime.Today);
+        var entryCount = 0;
+
+        foreach (var rule in rules)
         {
-            var documentDate = DateOnly.FromDateTime(DateTime.Today);
-            var entryCount = 0;
+            var journalEntry = await _journalEntryGenerator.GenerateJournalEntryAsync(
+                eventType,
+                rule,
+                sourceEntity,
+                documentDate,
+                cancellationToken);
+            entryCount++;
 
-            foreach (var rule in rules)
-            {
-                var journalEntry = await _journalEntryGenerator.GenerateJournalEntryAsync(
-                    eventType,
-                    rule,
-                    sourceEntity,
-                    documentDate,
-                    cancellationToken);
-                entryCount++;
-
-                _logger.LogDebug("JournalEntry generated: JournalEntryId={JournalEntryId}, EntryNumber={EntryNumber}, JournalId={JournalId}, CorrelationId={CorrelationId}",
-                    journalEntry.Id, journalEntry.EntryNumber, journalEntry.JournalId, correlationId);
-            }
-
-            _logger.LogInformation("Posting pipeline completed: JournalEntriesGenerated={JournalEntriesGenerated}, CorrelationId={CorrelationId}",
-                entryCount, correlationId);
+            _logger.LogDebug("JournalEntry generated: JournalEntryId={JournalEntryId}, EntryNumber={EntryNumber}, JournalId={JournalId}, CorrelationId={CorrelationId}",
+                journalEntry.Id, journalEntry.EntryNumber, journalEntry.JournalId, correlationId);
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Posting pipeline failed: EventType={EventType}, SourceTable={SourceTable}, SourceId={SourceId}, CorrelationId={CorrelationId}",
-                eventType, sourceEntity.SourceEntityType, sourceEntity.SourceEntityId, correlationId);
-        }
+
+        _logger.LogInformation("Posting pipeline completed: JournalEntriesGenerated={JournalEntriesGenerated}, CorrelationId={CorrelationId}",
+            entryCount, correlationId);
     }
 
     private static EventType MapEventType(string eventName) => EventTypeMapper.MapFrom(eventName);
 }
+

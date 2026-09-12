@@ -57,16 +57,7 @@ export function useCreateJournalEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (command: CreateJournalEntryCommand) => {
-      const response = await fetch('/api/JournalEntries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(command),
-      });
-      if (!response.ok) throw new Error('Failed to create');
-      const data = await response.json();
-      return data.id as number;
-    },
+    mutationFn: (command: CreateJournalEntryCommand) => client.journalEntriesPOST(command),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
     },

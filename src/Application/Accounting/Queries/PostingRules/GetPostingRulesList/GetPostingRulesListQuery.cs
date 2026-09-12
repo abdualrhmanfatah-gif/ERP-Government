@@ -21,6 +21,7 @@ public class GetPostingRulesListQueryHandler(
     {
         var query = context.PostingRules
             .Include(x => x.Journal)
+            .Include(x => x.Lines).ThenInclude(l => l.FixedAccount)
             .AsQueryable();
 
         if (request.IsActive.HasValue)

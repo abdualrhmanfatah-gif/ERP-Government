@@ -2,15 +2,15 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { notify } from '@/features/notifications/notify';
 import { Pencil, Save, X, Shield, Lock, Users as UsersIcon } from 'lucide-react';
-import { Page, Button, Card, EmptyState, StatusBadge, Input, Select, FormField, Tabs, Skeleton } from '@/components/ui';
+import { Page, Button, Card, EmptyState, StatusBadge, Input, Select, FormField, Tabs } from '@/components/ui';
 import { useUserDetail, useUpdateUser } from '../hooks';
 import { useOrganizationalUnits } from '../../../organization/hooks';
 import { RolesTab } from '@/components/SecurityUsersRolesTab';
 import { PermissionsTab } from '@/components/SecurityUsersPermissionsTab';
 import { SessionsTab } from '@/components/SecurityUsersSessionsTab';
 import { AuditTab } from '@/components/SecurityUsersAuditTab';
-import { DeactivateUserDialog } from '@/components/SecurityUsersDeactivateDialog';
-import { ReactivateUserDialog } from '@/components/SecurityUsersReactivateDialog';
+import { UserStatusDialog } from '@/components/SecurityUsersStatusDialog';
+import { getActiveStatusLabel } from '@/shared/constants/labels';
 
 export function UserDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -57,13 +57,7 @@ export function UserDetailPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton variant="heading" className="w-1/3" />
-        <Skeleton variant="card" />
-        <Skeleton variant="table" lines={4} />
-      </div>
-    );
+    return <Page title="جارٍ التحميل..." loading />;
   }
 
   if (error || !user) {
@@ -112,7 +106,7 @@ export function UserDetailPage() {
 
       <div className="flex flex-wrap gap-3 items-center">
         <StatusBadge variant={user.isActive ? 'active' : 'draft'}>
-          {user.isActive ? 'نشط' : 'غير نشط'}
+          {getActiveStatusLabel(user.isActive)}
         </StatusBadge>
         {user.mfaEnabled && (
           <StatusBadge variant="active">المصادقة الثنائية مفعّلة</StatusBadge>
@@ -179,8 +173,8 @@ export function UserDetailPage() {
 
       <Tabs tabs={tabs} />
 
-      <DeactivateUserDialog open={showDeactivate} onClose={() => setShowDeactivate(false)} userId={userId} userName={user.login} />
-      <ReactivateUserDialog open={showReactivate} onClose={() => setShowReactivate(false)} userId={userId} userName={user.login} />
+      <UserStatusDialog open={showDeactivate} onClose={() => setShowDeactivate(false)} userId={userId} userName={user.login} action="deactivate" />
+      <UserStatusDialog open={showReactivate} onClose={() => setShowReactivate(false)} userId={userId} userName={user.login} action="reactivate" />
     </Page>
   );
 }

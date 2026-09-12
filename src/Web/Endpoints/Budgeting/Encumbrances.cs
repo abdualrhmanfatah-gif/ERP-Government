@@ -73,11 +73,10 @@ public class Encumbrances : IEndpointGroup
 
     public static async Task<List<EncumbranceListItemDto>> GetEncumbrances(
         [FromServices] ISender sender,
-        int? appropriationId,
         EncumbranceType? type,
         EncumbranceStatus? status)
     {
-        return await sender.Send(new GetEncumbrancesListQuery(appropriationId, type, status));
+        return await sender.Send(new GetEncumbrancesListQuery(type, status));
     }
 
     public static async Task<IResult> GetEncumbranceById(
@@ -93,8 +92,10 @@ public class Encumbrances : IEndpointGroup
         [FromBody] CreateEncumbranceRequest body)
     {
         var result = await sender.Send(new CreateEncumbranceCommand(
-            body.AppropriationId, body.EncumbranceType, body.VendorId, body.PurchaseOrderId,
-            body.DocumentType, body.DocumentId, body.Description, body.EncumbranceDate, body.Amount));
+            body.EncumbranceType, body.VendorId, body.PurchaseOrderId,
+            body.DocumentType, body.DocumentId, body.Description, body.EncumbranceDate,
+            body.Lines.Select(l => new ERP_Government.Application.Budgeting.Commands.Encumbrances.EncumbranceLineRequest(
+                l.BudgetItemId, l.Amount, l.Description)).ToList()));
         if (!result.Succeeded)
             return Results.BadRequest(result.Errors);
         return Results.Created($"/api/Encumbrances/{result.Value}", result.Value);
@@ -106,7 +107,7 @@ public class Encumbrances : IEndpointGroup
         [FromBody] UpdateEncumbranceRequest body)
     {
         var result = await sender.Send(new UpdateEncumbranceCommand(
-            id, body.Description, body.EncumbranceDate, body.Amount, body.VendorId, body.PurchaseOrderId, body.RowVersion));
+            id, body.Description, body.EncumbranceDate, body.PurchaseOrderId, body.RowVersion));
         if (!result.Succeeded)
             return Results.BadRequest(result.Errors);
         return Results.NoContent();
@@ -202,21 +203,23 @@ public class Encumbrances : IEndpointGroup
 }
 
 public record CreateEncumbranceRequest(
-    int AppropriationId,
     EncumbranceType EncumbranceType,
     int? VendorId,
     int? PurchaseOrderId,
-    string DocumentType,
-    int DocumentId,
+    string? DocumentType,
+    int? DocumentId,
     string? Description,
     DateOnly EncumbranceDate,
-    decimal Amount);
+    List<EncumbranceLineRequest> Lines);
+
+public record EncumbranceLineRequest(
+    int BudgetItemId,
+    decimal Amount,
+    string? Description);
 
 public record UpdateEncumbranceRequest(
     string? Description,
     DateOnly? EncumbranceDate,
-    decimal? Amount,
-    int? VendorId,
     int? PurchaseOrderId,
     byte[] RowVersion);
 

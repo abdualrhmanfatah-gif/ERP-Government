@@ -4,7 +4,7 @@ import { useAuth } from '../../shared/hooks/useAuth';
 import { Page } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { showToast } from '@/components/ui/Toast';
+import { notify } from '@/features/notifications/notify';
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
@@ -22,7 +22,7 @@ export function LoginPage() {
     try {
       await login(email, password);
       const returnUrl = (location.state as { returnUrl?: string })?.returnUrl ?? '/';
-      showToast('success', 'تم تسجيل الدخول بنجاح');
+      notify({ type: 'success', title: 'تم تسجيل الدخول بنجاح' });
       navigate(returnUrl, { replace: true });
     } catch {
       setError('بريد إلكتروني أو كلمة مرور غير صحيحة');
@@ -40,7 +40,7 @@ export function LoginPage() {
           </div>
         ) : null}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5" aria-label="تسجيل الدخول">
           <Input
             label="البريد الإلكتروني"
             type="email"

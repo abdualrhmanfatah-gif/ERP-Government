@@ -33,7 +33,7 @@ Existing entity `src/Domain/Accounting/Entities/AccountGroup.cs` (extends `BaseA
 - Code: NotEmpty, 1-20 after Trim, unique normalized permanent → 400 "الكود موجود مسبقاً".
 - Name: NotEmpty, 1-200 after Trim.
 - Type: IsInEnum.
-- NormalBalance: IsInEnum + matrix vs Type → 400 "الرصيد الطبيعي غير متوافق مع النوع".
+- NormalBalance: IsInEnum + matrix vs Type → 400 "نوع الحساب  غير متوافق مع النوع".
 - Description: Max 500.
 - ParentId: if set → exists 404, IsActive==true (except when toggling), Type == child Type → 400, Level+subtree depth ≤5 → 400, not self nor descendant → 400.
 

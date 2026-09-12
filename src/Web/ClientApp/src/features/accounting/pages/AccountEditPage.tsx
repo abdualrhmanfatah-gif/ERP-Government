@@ -5,7 +5,7 @@ import { useAccountDetail } from '../hooks/useAccountDetail';
 import { useUpdateAccount } from '../hooks/useUpdateAccount';
 import { useAccountGroups } from '../hooks/useAccountGroups';
 import { useAccountsList } from '../hooks/useAccountsList';
-import { showToast } from '@/components/ui/Toast';
+import { notify } from '@/features/notifications/notify';
 
 export function AccountEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -44,10 +44,10 @@ export function AccountEditPage() {
           rowVersion: account.rowVersion,
         },
       });
-      showToast('success', 'تم تعديل الحساب بنجاح');
+      notify({ type: 'success', title: 'تم تعديل الحساب بنجاح' });
       navigate(`/accounting/accounts/${accountId}`);
     } catch {
-      showToast('error', 'فشل تعديل الحساب');
+      notify({ type: 'error', title: 'فشل تعديل الحساب' });
     }
   };
 

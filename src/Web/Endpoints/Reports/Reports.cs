@@ -84,6 +84,8 @@ public class Reports : IEndpointGroup
         string reportType,
         [FromQuery] string format,
         [FromServices] ISender sender,
+        [FromServices] ERP_Government.Infrastructure.Services.PdfReportExporter pdfExporter,
+        [FromServices] ERP_Government.Infrastructure.Services.ExcelReportExporter excelExporter,
         [FromQuery] DateOnly? asOfDate,
         [FromQuery] DateOnly? startDate,
         [FromQuery] DateOnly? endDate,
@@ -151,13 +153,11 @@ public class Reports : IEndpointGroup
         var stream = new MemoryStream();
         if (format?.ToLower() == "pdf")
         {
-            var exporter = new PdfReportExporter();
-            await exporter.ExportPdfAsync(reportResult, reportName, stream);
+            await pdfExporter.ExportPdfAsync(reportResult, reportName, stream);
         }
         else
         {
-            var exporter = new ExcelReportExporter();
-            await exporter.ExportExcelAsync(reportResult, reportName, stream);
+            await excelExporter.ExportExcelAsync(reportResult, reportName, stream);
         }
         stream.Position = 0;
 

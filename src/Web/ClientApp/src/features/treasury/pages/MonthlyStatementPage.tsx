@@ -1,7 +1,7 @@
 // Monthly statement — US4: month + fund selectors, summary, vouchers + clearings tables
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { MoneyDisplay, Loading, EmptyState, Input, Select, Page } from '@/components/ui';
+import { Button, MoneyDisplay, Loading, EmptyState, Input, Select, Page } from '@/components/ui';
 import { DepositSlipsClient, FundsClient } from '../../../web-api-client';
 
 const slipClient = new DepositSlipsClient();
@@ -18,7 +18,7 @@ export default function MonthlyStatementPage() {
     queryFn: () => fundsClient.fundsAll(),
   });
 
-  const { data: statement, isLoading } = useQuery({
+  const { data: statement, isLoading, isError: isStatementError, refetch: refetchStatement } = useQuery({
     queryKey: ['monthly-statement', year, month, fundId],
     queryFn: () => slipClient.monthlyStatement(year, month, fundId!),
     enabled: fundId != null,
@@ -61,6 +61,11 @@ export default function MonthlyStatementPage() {
         <EmptyState message="اختر صندوقاً لعرض الكشف" />
       ) : isLoading ? (
         <Loading />
+      ) : isStatementError ? (
+        <div className="p-4 text-center">
+          <p className="text-sm text-[var(--color-error)]">فشل تحميل البيانات</p>
+          <Button variant="outline" size="sm" className="mt-2" onClick={() => refetchStatement()}>إعادة المحاولة</Button>
+        </div>
       ) : !hasData ? (
         <EmptyState message="لا توجد بيانات لهذا الشهر" />
       ) : (

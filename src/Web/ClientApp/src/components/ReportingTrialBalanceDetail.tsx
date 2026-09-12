@@ -52,7 +52,7 @@ export function ReportingTrialBalanceDetail({
               <tbody>
                 {movement.entries.map((e, i) => (
                   <tr key={i} className="border-b">
-                    <td className="py-2 text-sm">{e.documentDate ? new Date(e.documentDate).toLocaleDateString('ar-EG') : '—'}</td>
+                    <td className="py-2 text-sm">{e.documentDate ? new Date(e.documentDate).toLocaleDateString('ar-YE') : '—'}</td>
                     <td className="py-2"><span dir="ltr" className="font-mono">{e.entryNumber ?? '—'}</span></td>
                     <td className="py-2 text-sm">{e.reference ?? '—'}</td>
                     <td className="py-2 text-sm">{e.narration ?? '—'}</td>

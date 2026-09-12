@@ -220,6 +220,7 @@ export default function ReceiptVoucherDetailPage() {
             onChange={(e) => setCancelReason(e.target.value)}
             rows={3}
             placeholder="اذكر سبب الإلغاء..."
+            label="سبب الإلغاء"
           />
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => setCancelOpen(false)}>تراجع</Button>

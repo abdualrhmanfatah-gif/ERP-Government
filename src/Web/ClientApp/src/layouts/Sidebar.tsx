@@ -58,7 +58,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         aria-label="القائمة الرئيسية"
         style={{ background: 'var(--gradient-sidebar, #002045)' }}
         className={`w-[300px] max-w-[85vw] text-white flex flex-col fixed inset-y-0 end-0 z-50 lg:hidden shadow-2xl transition-transform duration-300 ease-out will-change-transform ${
-          open ? 'translate-x-0' : 'translate-x-full'
+          open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Brand */}

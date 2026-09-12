@@ -15,12 +15,8 @@ import {
 import { trialBalanceFilterSchema } from '../shared/schemas';
 import { ReportingTrialBalanceFilters } from '@/components/ReportingTrialBalanceFilters';
 import { ReportingTrialBalanceDetail } from '@/components/ReportingTrialBalanceDetail';
-import { Page } from '@/components/ui/Page';
-import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
-import { MoneyDisplay } from '@/components/ui/MoneyDisplay';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { ErrorState } from '@/components/ui/ErrorState';
-import { Button } from '@/components/ui/Button';
+import { Page, DataGrid, MoneyDisplay, EmptyState, ErrorState, Button, Alert, Badge } from '@/components/ui';
+import type { DataGridColumn } from '@/components/ui/DataGrid';
 
 const accountTypeLabels: Record<string, string> = {
   Asset: 'أصول',
@@ -114,24 +110,19 @@ export default function TrialBalanceReportPage() {
       }
     >
       {isPartialData && (
-        <div
-          role="status"
-          className="mb-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200"
-        >
+        <Alert variant="warning">
           أرقام قابلة للتغير — الفترة غير مغلقة
-        </div>
+        </Alert>
       )}
       {totals && (
         <div className="mb-3 flex items-center gap-2">
           {isBalanced ? (
-            <span className="rounded-md border border-green-300 bg-green-50 px-3 py-1 text-sm text-green-800 dark:border-green-700 dark:bg-green-950 dark:text-green-200">
-              ميزان — متماثل (عرض)
-            </span>
+            <Badge variant="success">ميزان — متماثل (عرض)</Badge>
           ) : (
-            <span className="flex items-center gap-1 rounded-md border border-red-300 bg-red-50 px-3 py-1 text-sm text-red-800 dark:border-red-700 dark:bg-red-950 dark:text-red-200">
-              <AlertTriangle size={14} />
+            <Badge variant="danger">
+              <AlertTriangle size={14} className="me-1 inline" />
               تنبيه: عدم توازن في الدفاتر
-            </span>
+            </Badge>
           )}
         </div>
       )}

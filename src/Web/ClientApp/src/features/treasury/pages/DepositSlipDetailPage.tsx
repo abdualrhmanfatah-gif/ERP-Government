@@ -2,29 +2,20 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, MoneyDisplay, Badge, EmptyState, Input, Dialog, Page } from '@/components/ui';
+import { Button, MoneyDisplay, Badge, EmptyState, Input, Dialog, Page, Card, ErrorState } from '@/components/ui';
 import { notify } from '@/features/notifications/notify';
 import { DepositSlipsClient, FormType, DepositSlipStatus } from '../../../web-api-client';
 import { useEligibleVouchers } from '../hooks/useEligibleVouchers';
+import { depositSlipStatusLabels, depositSlipFormTypeLabels } from '../shared/types';
 
 const slipClient = new DepositSlipsClient();
-
-const statusLabels: Record<string, string> = {
-  Draft: 'مسودة',
-  Approved: 'معتمدة',
-};
-
-const formTypeLabels: Record<string, string> = {
-  Form47: 'نقدية (47)',
-  Form48: 'شيكات (48)',
-};
 
 export default function DepositSlipDetailPage() {
   const { id } = useParams<{ id: string }>();
   const slipId = Number(id);
   const queryClient = useQueryClient();
 
-  const { data: slip, isLoading } = useQuery({
+  const { data: slip, isLoading, isError: isSlipError, refetch: refetchSlip } = useQuery({
     queryKey: ['deposit-slips', slipId],
     queryFn: () => slipClient.depositSlipsGET(slipId),
     enabled: !!slipId,
@@ -93,10 +84,17 @@ export default function DepositSlipDetailPage() {
   });
 
   if (isLoading) return <Page title="">{undefined}</Page>;
+  if (isSlipError) {
+    return (
+      <Page title="بطاقة إيداع">
+        <ErrorState message="فشل تحميل البيانات" onRetry={() => refetchSlip()} />
+      </Page>
+    );
+  }
   if (!slip)
     return (
-      <Page title="" error="البطاقة غير موجودة" onRetry={() => window.location.reload()}>
-        {undefined}
+      <Page title="بطاقة إيداع">
+        <ErrorState message="البطاقة غير موجودة" onRetry={() => refetchSlip()} />
       </Page>
     );
 
@@ -116,30 +114,34 @@ export default function DepositSlipDetailPage() {
     >
 
       {/* Summary */}
-      <div className="grid grid-cols-4 gap-4 text-sm">
-        <div>
-          <span className="text-muted-foreground">الرقم:</span>{' '}
-          <span className="font-medium tabular-nums">{slip.slipNumber}</span>
+      <Card>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div>
+            <span className="text-muted-foreground">الرقم:</span>{' '}
+            <span className="font-medium tabular-nums">{slip.slipNumber}</span>
+          </div>
+          <div>
+            <span className="text-muted-foreground">التاريخ:</span>{' '}
+            {new Date(slip.slipDate!).toLocaleDateString('ar-YE')}
+          </div>
+          <div>
+            <span className="text-muted-foreground">النوع:</span>{' '}
+            {depositSlipFormTypeLabels[slipFormType]}
+          </div>
+          <div>
+            <span className="text-muted-foreground">الحالة:</span>{' '}
+            <Badge variant={isDraft ? 'warning' : 'success'}>
+              {depositSlipStatusLabels[slipStatus]}
+            </Badge>
+          </div>
         </div>
-        <div>
-          <span className="text-muted-foreground">التاريخ:</span>{' '}
-          {new Date(slip.slipDate!).toLocaleDateString('ar-YE')}
-        </div>
-        <div>
-          <span className="text-muted-foreground">النوع:</span>{' '}
-          {formTypeLabels[slipFormType]}
-        </div>
-        <div>
-          <span className="text-muted-foreground">الحالة:</span>{' '}
-          <Badge variant={isDraft ? 'warning' : 'success'}>
-            {statusLabels[slipStatus]}
-          </Badge>
-        </div>
-      </div>
+      </Card>
 
-      <div className="text-lg font-semibold">
-        الإجمالي: <MoneyDisplay value={slip.totalAmount ?? 0} />
-      </div>
+      <Card>
+        <div className="text-lg font-semibold">
+          الإجمالي: <MoneyDisplay value={slip.totalAmount ?? 0} />
+        </div>
+      </Card>
 
       {/* Members */}
       <div className="flex items-center justify-between">

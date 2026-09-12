@@ -1,12 +1,19 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
 import { useEncumbrancesList, useSubmitEncumbrance, useApproveEncumbrance, useActivateEncumbrance, useCloseEncumbrance, useCancelEncumbrance, useReverseEncumbrance } from '../../hooks/useEncumbrances';
 import { encumbranceTypeLabels, encumbranceStatusLabels, EncumbranceStatus } from '../../shared/types';
 import { BUDGET_PERMISSIONS } from '@/shared/constants/permissions';
 import { usePermission } from '@/shared/hooks/usePermission';
-import { LifecycleActions, type LifecycleAction } from '@/components/BudgetingLifecycleActions';
-import { Page, Button, Badge } from '@/components/ui';
+import { Page, Button, Badge, ConfirmDialog } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, RotateCcw } from 'lucide-react';
+
+interface LifecycleAction {
+  key: string;
+  label: string;
+  permission?: string;
+  confirmMessage?: string;
+}
 
 const encumbranceActions: Record<number, LifecycleAction[]> = {
   [EncumbranceStatus.Draft]: [
@@ -23,7 +30,7 @@ const encumbranceActions: Record<number, LifecycleAction[]> = {
     { key: 'cancel', label: 'إلغاء', permission: BUDGET_PERMISSIONS.Encumbrances.Cancel },
     { key: 'reverse', label: 'عكس', permission: BUDGET_PERMISSIONS.Encumbrances.Reverse, confirmMessage: 'هل أنت متأكد من عكس هذا الالتزام؟' },
   ],
-  [EncumbranceStatus.PartialReleased]: [
+  [EncumbranceStatus.PartiallyReleased]: [
     { key: 'close', label: 'إغلاق', permission: BUDGET_PERMISSIONS.Encumbrances.Close },
     { key: 'cancel', label: 'إلغاء', permission: BUDGET_PERMISSIONS.Encumbrances.Cancel },
   ],
@@ -32,11 +39,11 @@ const encumbranceActions: Record<number, LifecycleAction[]> = {
 export default function EncumbrancesListPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const appropriationId = searchParams.get('appropriationId') ? Number(searchParams.get('appropriationId')) : undefined;
+  const budgetId = searchParams.get('budgetId') ? Number(searchParams.get('budgetId')) : undefined;
   const { hasPermission } = usePermission();
   const can = (_permission?: string) => hasPermission;
 
-  const { data: encumbrances, isLoading } = useEncumbrancesList({ appropriationId });
+  const { data: encumbrances, isLoading } = useEncumbrancesList({ budgetId });
   const submit = useSubmitEncumbrance();
   const approve = useApproveEncumbrance();
   const activate = useActivateEncumbrance();
@@ -57,7 +64,7 @@ export default function EncumbrancesListPage() {
   const columns: DataGridColumn<any>[] = [
     { header: 'رقم الالتزام', cell: (row) => <span className="font-mono">{row.encumbranceNumber}</span> },
     { header: 'النوع', cell: (row) => <Badge variant="outline">{encumbranceTypeLabels[row.encumbranceType]}</Badge> },
-    { header: 'المبلغ', cell: (row) => <span className="font-mono">{row.amount.toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</span> },
+    { header: 'المبلغ', cell: (row) => <span className="font-mono">{row.amount.toLocaleString('ar-YE', { minimumFractionDigits: 2 })}</span> },
     { header: 'التاريخ', cell: (row) => row.encumbranceDate },
     {
       header: 'الحالة',
@@ -76,7 +83,7 @@ export default function EncumbrancesListPage() {
     {
       header: 'إجراءات',
       cell: (row) => (
-        <LifecycleActions
+        <RowActionButtons
           actions={encumbranceActions[row.status] ?? []}
           can={can}
           onAction={(key) => handleAction(key, row.id, row.rowVersion)}
@@ -88,7 +95,6 @@ export default function EncumbrancesListPage() {
   return (
     <Page
       title="الالتزامات"
-      loading={isLoading}
       actions={
         <Button variant="primary" size="sm" onClick={() => navigate('/budgeting/encumbrances/create')}>
           <Plus size={16} className="ms-1" />
@@ -104,5 +110,50 @@ export default function EncumbrancesListPage() {
         rowKey={(row) => row.id}
       />
     </Page>
+  );
+}
+
+interface RowActionButtonsProps {
+  actions: LifecycleAction[];
+  can: (permission?: string) => boolean;
+  onAction: (key: string) => void;
+}
+
+function RowActionButtons({ actions, can, onAction }: RowActionButtonsProps) {
+  const [confirming, setConfirming] = useState<LifecycleAction | null>(null);
+  const visible = actions.filter((a) => can(a.permission));
+  if (visible.length === 0) return null;
+
+  return (
+    <>
+      <div className="flex flex-wrap gap-2" role="group" aria-label="إجراءات دورة الحياة">
+        {visible.map((action) => (
+          <Button
+            key={action.key}
+            variant="primary"
+            size="sm"
+            onClick={() => {
+              if (action.confirmMessage) {
+                setConfirming(action);
+                return;
+              }
+              onAction(action.key);
+            }}
+          >
+            {action.label}
+          </Button>
+        ))}
+      </div>
+      <ConfirmDialog
+        open={confirming !== null}
+        onClose={() => setConfirming(null)}
+        onConfirm={() => {
+          if (confirming) onAction(confirming.key);
+          setConfirming(null);
+        }}
+        title="تأكيد الإجراء"
+        message={confirming?.confirmMessage ?? ''}
+      />
+    </>
   );
 }

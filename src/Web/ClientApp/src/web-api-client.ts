@@ -4903,795 +4903,6 @@ export class FiscalYearsClient {
     }
 }
 
-export class AppropriationsClient {
-    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
-
-    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
-        this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "";
-    }
-
-    /**
-     * Get all appropriations with optional filters
-     * @param budgetId (optional) 
-     * @param budgetItemId (optional) 
-     * @param status (optional) 
-     * @param appropriationType (optional) 
-     * @return OK
-     */
-    appropriationsAll(budgetId: number | undefined, budgetItemId: number | undefined, status: AppropriationStatus | undefined, appropriationType: AppropriationType | undefined): Promise<AppropriationDto[]> {
-        let url_ = this.baseUrl + "/api/Appropriations?";
-        if (budgetId === null)
-            throw new globalThis.Error("The parameter 'budgetId' cannot be null.");
-        else if (budgetId !== undefined)
-            url_ += "BudgetId=" + encodeURIComponent("" + budgetId) + "&";
-        if (budgetItemId === null)
-            throw new globalThis.Error("The parameter 'budgetItemId' cannot be null.");
-        else if (budgetItemId !== undefined)
-            url_ += "BudgetItemId=" + encodeURIComponent("" + budgetItemId) + "&";
-        if (status === null)
-            throw new globalThis.Error("The parameter 'status' cannot be null.");
-        else if (status !== undefined)
-            url_ += "Status=" + encodeURIComponent("" + status) + "&";
-        if (appropriationType === null)
-            throw new globalThis.Error("The parameter 'appropriationType' cannot be null.");
-        else if (appropriationType !== undefined)
-            url_ += "AppropriationType=" + encodeURIComponent("" + appropriationType) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processAppropriationsAll(_response);
-        });
-    }
-
-    protected processAppropriationsAll(response: Response): Promise<AppropriationDto[]> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(AppropriationDto.fromJS(item));
-            }
-            else {
-                result200 = null as any;
-            }
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<AppropriationDto[]>(null as any);
-    }
-
-    /**
-     * Create a new appropriation
-     * @return Created
-     */
-    appropriationsPOST(body: CreateAppropriationRequest): Promise<number> {
-        let url_ = this.baseUrl + "/api/Appropriations";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processAppropriationsPOST(_response);
-        });
-    }
-
-    protected processAppropriationsPOST(response: Response): Promise<number> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 201) {
-            return response.text().then((_responseText) => {
-            let result201: any = null;
-            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                result201 = resultData201 !== undefined ? resultData201 : null as any;
-    
-            return result201;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<number>(null as any);
-    }
-
-    /**
-     * Get appropriation by ID
-     * @return OK
-     */
-    appropriationsGET(id: number): Promise<AppropriationDto> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processAppropriationsGET(_response);
-        });
-    }
-
-    protected processAppropriationsGET(response: Response): Promise<AppropriationDto> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = AppropriationDto.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status === 404) {
-            return response.text().then((_responseText) => {
-            return throwException("Not Found", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<AppropriationDto>(null as any);
-    }
-
-    /**
-     * Update an appropriation (Draft only)
-     * @return No Content
-     */
-    appropriationsPUT(id: number, body: UpdateAppropriationRequest): Promise<void> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processAppropriationsPUT(_response);
-        });
-    }
-
-    protected processAppropriationsPUT(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Delete an appropriation (Draft only)
-     * @return No Content
-     */
-    appropriationsDELETE(id: number): Promise<void> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "DELETE",
-            headers: {
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processAppropriationsDELETE(_response);
-        });
-    }
-
-    protected processAppropriationsDELETE(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Get availability for the appropriation's budget item
-     * @return OK
-     */
-    availability(id: number): Promise<BudgetAvailabilitySummary> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}/availability";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processAvailability(_response);
-        });
-    }
-
-    protected processAvailability(response: Response): Promise<BudgetAvailabilitySummary> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = BudgetAvailabilitySummary.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status === 404) {
-            return response.text().then((_responseText) => {
-            return throwException("Not Found", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<BudgetAvailabilitySummary>(null as any);
-    }
-
-    /**
-     * Create a transfer pair (negative source + positive target)
-     * @return OK
-     */
-    transfers(body: CreateTransferRequest): Promise<TransferPairResult> {
-        let url_ = this.baseUrl + "/api/Appropriations/transfers";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processTransfers(_response);
-        });
-    }
-
-    protected processTransfers(response: Response): Promise<TransferPairResult> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = TransferPairResult.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<TransferPairResult>(null as any);
-    }
-
-    /**
-     * Submit an appropriation for approval
-     * @return No Content
-     */
-    submitPATCH(id: number, body: AppropriationActionRequest): Promise<void> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}/submit";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processSubmitPATCH(_response);
-        });
-    }
-
-    protected processSubmitPATCH(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Approve a submitted appropriation
-     * @return No Content
-     */
-    approvePATCH(id: number, body: AppropriationActionRequest): Promise<void> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}/approve";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprovePATCH(_response);
-        });
-    }
-
-    protected processApprovePATCH(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Activate an approved appropriation
-     * @return No Content
-     */
-    activatePATCH(id: number, body: AppropriationActionRequest): Promise<void> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}/activate";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processActivatePATCH(_response);
-        });
-    }
-
-    protected processActivatePATCH(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Suspend an active appropriation
-     * @return No Content
-     */
-    suspend(id: number, body: AppropriationActionRequest): Promise<void> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}/suspend";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processSuspend(_response);
-        });
-    }
-
-    protected processSuspend(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Close an active or suspended appropriation
-     * @return No Content
-     */
-    closePATCH(id: number, body: AppropriationActionRequest): Promise<void> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}/close";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processClosePATCH(_response);
-        });
-    }
-
-    protected processClosePATCH(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Cancel a draft, pending, or suspended appropriation
-     * @return No Content
-     */
-    cancelPATCH(id: number, body: AppropriationActionRequest): Promise<void> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}/cancel";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancelPATCH(_response);
-        });
-    }
-
-    protected processCancelPATCH(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 204) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
-     * Reverse an active appropriation (creates Adjustment with negative amount)
-     * @return OK
-     */
-    reversePATCH(id: number, body: AppropriationActionRequest): Promise<number> {
-        let url_ = this.baseUrl + "/api/Appropriations/{id}/reverse";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processReversePATCH(_response);
-        });
-    }
-
-    protected processReversePATCH(response: Response): Promise<number> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                result200 = resultData200 !== undefined ? resultData200 : null as any;
-    
-            return result200;
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            return throwException("Bad Request", status, _responseText, _headers);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<number>(null as any);
-    }
-}
-
 export class BudgetClassificationsClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -6035,7 +5246,7 @@ export class BudgetClassificationsClient {
     }
 }
 
-export class BudgetItemsClient {
+export class BudgetItemAllocationsClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -6048,7 +5259,345 @@ export class BudgetItemsClient {
     /**
      * @return OK
      */
-    availability2(id: number): Promise<BudgetAvailabilitySummary> {
+    budgetItemAllocationsAll(budgetId: number): Promise<BudgetItemAllocationDto[]> {
+        let url_ = this.baseUrl + "/api/BudgetItemAllocations?";
+        if (budgetId === undefined || budgetId === null)
+            throw new globalThis.Error("The parameter 'budgetId' must be defined and cannot be null.");
+        else
+            url_ += "budgetId=" + encodeURIComponent("" + budgetId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetItemAllocationsAll(_response);
+        });
+    }
+
+    protected processBudgetItemAllocationsAll(response: Response): Promise<BudgetItemAllocationDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(BudgetItemAllocationDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetItemAllocationDto[]>(null as any);
+    }
+
+    /**
+     * @return Created
+     */
+    budgetItemAllocationsPOST(body: CreateBudgetItemAllocationRequest): Promise<number> {
+        let url_ = this.baseUrl + "/api/BudgetItemAllocations";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetItemAllocationsPOST(_response);
+        });
+    }
+
+    protected processBudgetItemAllocationsPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result201 = resultData201 !== undefined ? resultData201 : null as any;
+    
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    budgetItemAllocationsGET(id: number): Promise<BudgetItemAllocationDetailDto> {
+        let url_ = this.baseUrl + "/api/BudgetItemAllocations/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetItemAllocationsGET(_response);
+        });
+    }
+
+    protected processBudgetItemAllocationsGET(response: Response): Promise<BudgetItemAllocationDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BudgetItemAllocationDetailDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("Not Found", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetItemAllocationDetailDto>(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    budgetItemAllocationsPUT(id: number, body: UpdateBudgetItemAllocationRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/BudgetItemAllocations/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetItemAllocationsPUT(_response);
+        });
+    }
+
+    protected processBudgetItemAllocationsPUT(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    budgetItemAllocationsDELETE(id: number): Promise<void> {
+        let url_ = this.baseUrl + "/api/BudgetItemAllocations/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetItemAllocationsDELETE(_response);
+        });
+    }
+
+    protected processBudgetItemAllocationsDELETE(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
+export class BudgetItemsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Get all active budget items across all budgets
+     * @return OK
+     */
+    budgetItems(): Promise<BudgetItemDto[]> {
+        let url_ = this.baseUrl + "/api/BudgetItems";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetItems(_response);
+        });
+    }
+
+    protected processBudgetItems(response: Response): Promise<BudgetItemDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(BudgetItemDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetItemDto[]>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    availability(id: number): Promise<BudgetAvailabilitySummary> {
         let url_ = this.baseUrl + "/api/BudgetItems/{id}/availability";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -6063,11 +5612,11 @@ export class BudgetItemsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processAvailability2(_response);
+            return this.processAvailability(_response);
         });
     }
 
-    protected processAvailability2(response: Response): Promise<BudgetAvailabilitySummary> {
+    protected processAvailability(response: Response): Promise<BudgetAvailabilitySummary> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -6469,7 +6018,7 @@ export class BudgetsClient {
      * Submit a budget for approval
      * @return No Content
      */
-    submitPATCH2(id: number, body: BudgetActionRequest): Promise<void> {
+    submitPATCH(id: number, body: BudgetActionRequest): Promise<void> {
         let url_ = this.baseUrl + "/api/Budgets/{id}/submit";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -6487,11 +6036,11 @@ export class BudgetsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processSubmitPATCH2(_response);
+            return this.processSubmitPATCH(_response);
         });
     }
 
-    protected processSubmitPATCH2(response: Response): Promise<void> {
+    protected processSubmitPATCH(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -6522,7 +6071,7 @@ export class BudgetsClient {
      * Approve a submitted budget
      * @return No Content
      */
-    approvePATCH2(id: number, body: BudgetActionRequest): Promise<void> {
+    approvePATCH(id: number, body: BudgetActionRequest): Promise<void> {
         let url_ = this.baseUrl + "/api/Budgets/{id}/approve";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -6540,11 +6089,64 @@ export class BudgetsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprovePATCH2(_response);
+            return this.processApprovePATCH(_response);
         });
     }
 
-    protected processApprovePATCH2(response: Response): Promise<void> {
+    protected processApprovePATCH(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Reject a submitted budget
+     * @return No Content
+     */
+    rejectPATCH(id: number, body: RejectBudgetRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/Budgets/{id}/reject";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRejectPATCH(_response);
+        });
+    }
+
+    protected processRejectPATCH(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -6575,7 +6177,7 @@ export class BudgetsClient {
      * Activate an approved budget
      * @return No Content
      */
-    activatePATCH2(id: number, body: BudgetActionRequest): Promise<void> {
+    activatePATCH(id: number, body: BudgetActionRequest): Promise<void> {
         let url_ = this.baseUrl + "/api/Budgets/{id}/activate";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -6593,11 +6195,11 @@ export class BudgetsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processActivatePATCH2(_response);
+            return this.processActivatePATCH(_response);
         });
     }
 
-    protected processActivatePATCH2(response: Response): Promise<void> {
+    protected processActivatePATCH(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -6628,7 +6230,7 @@ export class BudgetsClient {
      * Suspend an active budget
      * @return No Content
      */
-    suspend2(id: number, body: BudgetActionRequest): Promise<void> {
+    suspend(id: number, body: BudgetActionRequest): Promise<void> {
         let url_ = this.baseUrl + "/api/Budgets/{id}/suspend";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -6646,11 +6248,11 @@ export class BudgetsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processSuspend2(_response);
+            return this.processSuspend(_response);
         });
     }
 
-    protected processSuspend2(response: Response): Promise<void> {
+    protected processSuspend(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -6681,7 +6283,7 @@ export class BudgetsClient {
      * Close an active or suspended budget
      * @return No Content
      */
-    closePATCH2(id: number, body: BudgetActionRequest): Promise<void> {
+    closePATCH(id: number, body: BudgetActionRequest): Promise<void> {
         let url_ = this.baseUrl + "/api/Budgets/{id}/close";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -6699,11 +6301,11 @@ export class BudgetsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processClosePATCH2(_response);
+            return this.processClosePATCH(_response);
         });
     }
 
-    protected processClosePATCH2(response: Response): Promise<void> {
+    protected processClosePATCH(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -6734,7 +6336,7 @@ export class BudgetsClient {
      * Cancel a draft, submitted, or suspended budget
      * @return No Content
      */
-    cancelPATCH2(id: number, body: BudgetActionRequest): Promise<void> {
+    cancelPATCH(id: number, body: BudgetActionRequest): Promise<void> {
         let url_ = this.baseUrl + "/api/Budgets/{id}/cancel";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -6752,11 +6354,11 @@ export class BudgetsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancelPATCH2(_response);
+            return this.processCancelPATCH(_response);
         });
     }
 
-    protected processCancelPATCH2(response: Response): Promise<void> {
+    protected processCancelPATCH(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -7126,6 +6728,458 @@ export class BudgetsClient {
     }
 }
 
+export class BudgetTransactionsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param budgetItemAllocationId (optional) 
+     * @param transactionType (optional) 
+     * @param status (optional) 
+     * @return OK
+     */
+    budgetTransactionsAll(budgetItemAllocationId: number | undefined, transactionType: BudgetTransactionType | undefined, status: BudgetTransactionStatus | undefined): Promise<BudgetTransactionListItemDto[]> {
+        let url_ = this.baseUrl + "/api/BudgetTransactions?";
+        if (budgetItemAllocationId === null)
+            throw new globalThis.Error("The parameter 'budgetItemAllocationId' cannot be null.");
+        else if (budgetItemAllocationId !== undefined)
+            url_ += "budgetItemAllocationId=" + encodeURIComponent("" + budgetItemAllocationId) + "&";
+        if (transactionType === null)
+            throw new globalThis.Error("The parameter 'transactionType' cannot be null.");
+        else if (transactionType !== undefined)
+            url_ += "transactionType=" + encodeURIComponent("" + transactionType) + "&";
+        if (status === null)
+            throw new globalThis.Error("The parameter 'status' cannot be null.");
+        else if (status !== undefined)
+            url_ += "status=" + encodeURIComponent("" + status) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetTransactionsAll(_response);
+        });
+    }
+
+    protected processBudgetTransactionsAll(response: Response): Promise<BudgetTransactionListItemDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(BudgetTransactionListItemDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetTransactionListItemDto[]>(null as any);
+    }
+
+    /**
+     * @return Created
+     */
+    budgetTransactionsPOST(body: CreateBudgetTransactionRequest): Promise<number> {
+        let url_ = this.baseUrl + "/api/BudgetTransactions";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetTransactionsPOST(_response);
+        });
+    }
+
+    protected processBudgetTransactionsPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result201 = resultData201 !== undefined ? resultData201 : null as any;
+    
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    budgetTransactionsGET(id: number): Promise<BudgetTransactionDetailDto> {
+        let url_ = this.baseUrl + "/api/BudgetTransactions/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBudgetTransactionsGET(_response);
+        });
+    }
+
+    protected processBudgetTransactionsGET(response: Response): Promise<BudgetTransactionDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BudgetTransactionDetailDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("Not Found", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BudgetTransactionDetailDto>(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    submitPATCH2(id: number, body: BudgetTransactionActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/BudgetTransactions/{id}/submit";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSubmitPATCH2(_response);
+        });
+    }
+
+    protected processSubmitPATCH2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    approvePATCH2(id: number, body: BudgetTransactionActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/BudgetTransactions/{id}/approve";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processApprovePATCH2(_response);
+        });
+    }
+
+    protected processApprovePATCH2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    postPATCH(id: number, body: BudgetTransactionActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/BudgetTransactions/{id}/post";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPostPATCH(_response);
+        });
+    }
+
+    protected processPostPATCH(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    cancelPATCH2(id: number, body: BudgetTransactionActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/BudgetTransactions/{id}/cancel";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCancelPATCH2(_response);
+        });
+    }
+
+    protected processCancelPATCH2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return Created
+     */
+    reversePATCH(id: number, body: BudgetTransactionActionRequest): Promise<void> {
+        let url_ = this.baseUrl + "/api/BudgetTransactions/{id}/reverse";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processReversePATCH(_response);
+        });
+    }
+
+    protected processReversePATCH(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
 export class BudgetTypesClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -7423,17 +7477,12 @@ export class EncumbrancesClient {
     }
 
     /**
-     * @param appropriationId (optional) 
      * @param type (optional) 
      * @param status (optional) 
      * @return OK
      */
-    encumbrancesAll(appropriationId: number | undefined, type: EncumbranceType | undefined, status: EncumbranceStatus | undefined): Promise<EncumbranceListItemDto[]> {
+    encumbrancesAll(type: EncumbranceType | undefined, status: EncumbranceStatus | undefined): Promise<EncumbranceListItemDto[]> {
         let url_ = this.baseUrl + "/api/Encumbrances?";
-        if (appropriationId === null)
-            throw new globalThis.Error("The parameter 'appropriationId' cannot be null.");
-        else if (appropriationId !== undefined)
-            url_ += "appropriationId=" + encodeURIComponent("" + appropriationId) + "&";
         if (type === null)
             throw new globalThis.Error("The parameter 'type' cannot be null.");
         else if (type !== undefined)
@@ -7814,7 +7863,7 @@ export class EncumbrancesClient {
     /**
      * @return No Content
      */
-    activatePATCH3(id: number, body: EncumbranceActionRequest): Promise<void> {
+    activatePATCH2(id: number, body: EncumbranceActionRequest): Promise<void> {
         let url_ = this.baseUrl + "/api/Encumbrances/{id}/activate";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -7832,11 +7881,11 @@ export class EncumbrancesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processActivatePATCH3(_response);
+            return this.processActivatePATCH2(_response);
         });
     }
 
-    protected processActivatePATCH3(response: Response): Promise<void> {
+    protected processActivatePATCH2(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -7866,7 +7915,7 @@ export class EncumbrancesClient {
     /**
      * @return No Content
      */
-    suspend3(id: number, body: EncumbranceActionRequest): Promise<void> {
+    suspend2(id: number, body: EncumbranceActionRequest): Promise<void> {
         let url_ = this.baseUrl + "/api/Encumbrances/{id}/suspend";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -7884,11 +7933,11 @@ export class EncumbrancesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processSuspend3(_response);
+            return this.processSuspend2(_response);
         });
     }
 
-    protected processSuspend3(response: Response): Promise<void> {
+    protected processSuspend2(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -7918,7 +7967,7 @@ export class EncumbrancesClient {
     /**
      * @return No Content
      */
-    closePATCH3(id: number, body: EncumbranceActionRequest): Promise<void> {
+    closePATCH2(id: number, body: EncumbranceActionRequest): Promise<void> {
         let url_ = this.baseUrl + "/api/Encumbrances/{id}/close";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -7936,11 +7985,11 @@ export class EncumbrancesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processClosePATCH3(_response);
+            return this.processClosePATCH2(_response);
         });
     }
 
-    protected processClosePATCH3(response: Response): Promise<void> {
+    protected processClosePATCH2(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -13180,6 +13229,2057 @@ export class TrialBalanceReportsClient {
     }
 }
 
+export class GoodsReceiptNotesClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param purchaseOrderId (optional) 
+     * @param status (optional) 
+     * @param search (optional) 
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @return OK
+     */
+    goodsReceiptNotesGET(purchaseOrderId: number | undefined, status: GRNStatus | null | undefined, search: string | undefined, page: number | undefined, pageSize: number | undefined): Promise<any> {
+        let url_ = this.baseUrl + "/api/GoodsReceiptNotes?";
+        if (purchaseOrderId === null)
+            throw new globalThis.Error("The parameter 'purchaseOrderId' cannot be null.");
+        else if (purchaseOrderId !== undefined)
+            url_ += "purchaseOrderId=" + encodeURIComponent("" + purchaseOrderId) + "&";
+        if (status !== undefined && status !== null)
+            url_ += "status=" + encodeURIComponent("" + status) + "&";
+        if (search === null)
+            throw new globalThis.Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "search=" + encodeURIComponent("" + search) + "&";
+        if (page === null)
+            throw new globalThis.Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGoodsReceiptNotesGET(_response);
+        });
+    }
+
+    protected processGoodsReceiptNotesGET(response: Response): Promise<any> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<any>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    goodsReceiptNotesPOST(body: CreateGRNCommand): Promise<number> {
+        let url_ = this.baseUrl + "/api/GoodsReceiptNotes";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGoodsReceiptNotesPOST(_response);
+        });
+    }
+
+    protected processGoodsReceiptNotesPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    goodsReceiptNotesGET2(id: number): Promise<GRNDetailResponse> {
+        let url_ = this.baseUrl + "/api/GoodsReceiptNotes/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGoodsReceiptNotesGET2(_response);
+        });
+    }
+
+    protected processGoodsReceiptNotesGET2(response: Response): Promise<GRNDetailResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = GRNDetailResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GRNDetailResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    confirm(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/GoodsReceiptNotes/{id}/confirm";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processConfirm(_response);
+        });
+    }
+
+    protected processConfirm(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    rejectPATCH2(id: number, body: RejectGRNCommand): Promise<Result> {
+        let url_ = this.baseUrl + "/api/GoodsReceiptNotes/{id}/reject";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRejectPATCH2(_response);
+        });
+    }
+
+    protected processRejectPATCH2(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+}
+
+export class ProcurementDashboardClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    procurementDashboard(): Promise<ProcurementDashboardResponse> {
+        let url_ = this.baseUrl + "/api/ProcurementDashboard";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processProcurementDashboard(_response);
+        });
+    }
+
+    protected processProcurementDashboard(response: Response): Promise<ProcurementDashboardResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ProcurementDashboardResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ProcurementDashboardResponse>(null as any);
+    }
+}
+
+export class PurchaseOrdersClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param purchaseRequestId (optional) 
+     * @param quotationId (optional) 
+     * @param supplierPartyId (optional) 
+     * @param status (optional) 
+     * @param search (optional) 
+     * @param expectedDeliveryDateFrom (optional) 
+     * @param expectedDeliveryDateTo (optional) 
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @return OK
+     */
+    purchaseOrdersGET(purchaseRequestId: number | undefined, quotationId: number | undefined, supplierPartyId: number | undefined, status: PurchaseOrderStatus | undefined, search: string | undefined, expectedDeliveryDateFrom: Date | undefined, expectedDeliveryDateTo: Date | undefined, page: number | undefined, pageSize: number | undefined): Promise<ResultOfPaginatedListOfPurchaseOrderListItem> {
+        let url_ = this.baseUrl + "/api/PurchaseOrders?";
+        if (purchaseRequestId === null)
+            throw new globalThis.Error("The parameter 'purchaseRequestId' cannot be null.");
+        else if (purchaseRequestId !== undefined)
+            url_ += "purchaseRequestId=" + encodeURIComponent("" + purchaseRequestId) + "&";
+        if (quotationId === null)
+            throw new globalThis.Error("The parameter 'quotationId' cannot be null.");
+        else if (quotationId !== undefined)
+            url_ += "quotationId=" + encodeURIComponent("" + quotationId) + "&";
+        if (supplierPartyId === null)
+            throw new globalThis.Error("The parameter 'supplierPartyId' cannot be null.");
+        else if (supplierPartyId !== undefined)
+            url_ += "supplierPartyId=" + encodeURIComponent("" + supplierPartyId) + "&";
+        if (status === null)
+            throw new globalThis.Error("The parameter 'status' cannot be null.");
+        else if (status !== undefined)
+            url_ += "status=" + encodeURIComponent("" + status) + "&";
+        if (search === null)
+            throw new globalThis.Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "search=" + encodeURIComponent("" + search) + "&";
+        if (expectedDeliveryDateFrom === null)
+            throw new globalThis.Error("The parameter 'expectedDeliveryDateFrom' cannot be null.");
+        else if (expectedDeliveryDateFrom !== undefined)
+            url_ += "expectedDeliveryDateFrom=" + encodeURIComponent(expectedDeliveryDateFrom ? "" + expectedDeliveryDateFrom.toISOString() : "") + "&";
+        if (expectedDeliveryDateTo === null)
+            throw new globalThis.Error("The parameter 'expectedDeliveryDateTo' cannot be null.");
+        else if (expectedDeliveryDateTo !== undefined)
+            url_ += "expectedDeliveryDateTo=" + encodeURIComponent(expectedDeliveryDateTo ? "" + expectedDeliveryDateTo.toISOString() : "") + "&";
+        if (page === null)
+            throw new globalThis.Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPurchaseOrdersGET(_response);
+        });
+    }
+
+    protected processPurchaseOrdersGET(response: Response): Promise<ResultOfPaginatedListOfPurchaseOrderListItem> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ResultOfPaginatedListOfPurchaseOrderListItem.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResultOfPaginatedListOfPurchaseOrderListItem>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    purchaseOrdersPOST(body: CreatePurchaseOrderCommand): Promise<number> {
+        let url_ = this.baseUrl + "/api/PurchaseOrders";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPurchaseOrdersPOST(_response);
+        });
+    }
+
+    protected processPurchaseOrdersPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    purchaseOrdersGET2(id: number): Promise<ResultOfPurchaseOrderDetailResponse> {
+        let url_ = this.baseUrl + "/api/PurchaseOrders/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPurchaseOrdersGET2(_response);
+        });
+    }
+
+    protected processPurchaseOrdersGET2(response: Response): Promise<ResultOfPurchaseOrderDetailResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ResultOfPurchaseOrderDetailResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResultOfPurchaseOrderDetailResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    purchaseOrdersPUT(id: number, body: UpdatePurchaseOrderCommand): Promise<Result> {
+        let url_ = this.baseUrl + "/api/PurchaseOrders/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPurchaseOrdersPUT(_response);
+        });
+    }
+
+    protected processPurchaseOrdersPUT(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    submitPATCH4(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/PurchaseOrders/{id}/submit";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSubmitPATCH4(_response);
+        });
+    }
+
+    protected processSubmitPATCH4(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    approvePATCH4(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/PurchaseOrders/{id}/approve";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processApprovePATCH4(_response);
+        });
+    }
+
+    protected processApprovePATCH4(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    issue(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/PurchaseOrders/{id}/issue";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processIssue(_response);
+        });
+    }
+
+    protected processIssue(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    cancelPATCH4(id: number, body: CancelPurchaseOrderCommand): Promise<Result> {
+        let url_ = this.baseUrl + "/api/PurchaseOrders/{id}/cancel";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCancelPATCH4(_response);
+        });
+    }
+
+    protected processCancelPATCH4(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    closePATCH3(id: number, body: ClosePurchaseOrderCommand): Promise<Result> {
+        let url_ = this.baseUrl + "/api/PurchaseOrders/{id}/close";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processClosePATCH3(_response);
+        });
+    }
+
+    protected processClosePATCH3(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+}
+
+export class PurchaseRequestsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param status (optional) 
+     * @param priority (optional) 
+     * @param search (optional) 
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @return OK
+     */
+    purchaseRequestsAll(status: PurchaseRequestStatus | undefined, priority: PurchaseRequestPriority | undefined, search: string | undefined, page: number | undefined, pageSize: number | undefined): Promise<PurchaseRequestListItem[]> {
+        let url_ = this.baseUrl + "/api/PurchaseRequests?";
+        if (status === null)
+            throw new globalThis.Error("The parameter 'status' cannot be null.");
+        else if (status !== undefined)
+            url_ += "status=" + encodeURIComponent("" + status) + "&";
+        if (priority === null)
+            throw new globalThis.Error("The parameter 'priority' cannot be null.");
+        else if (priority !== undefined)
+            url_ += "priority=" + encodeURIComponent("" + priority) + "&";
+        if (search === null)
+            throw new globalThis.Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "search=" + encodeURIComponent("" + search) + "&";
+        if (page === null)
+            throw new globalThis.Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPurchaseRequestsAll(_response);
+        });
+    }
+
+    protected processPurchaseRequestsAll(response: Response): Promise<PurchaseRequestListItem[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(PurchaseRequestListItem.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PurchaseRequestListItem[]>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    purchaseRequestsPOST(body: CreatePurchaseRequestCommand): Promise<number> {
+        let url_ = this.baseUrl + "/api/PurchaseRequests";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPurchaseRequestsPOST(_response);
+        });
+    }
+
+    protected processPurchaseRequestsPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    purchaseRequestsGET(id: number): Promise<PurchaseRequestDetailResponse> {
+        let url_ = this.baseUrl + "/api/PurchaseRequests/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPurchaseRequestsGET(_response);
+        });
+    }
+
+    protected processPurchaseRequestsGET(response: Response): Promise<PurchaseRequestDetailResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PurchaseRequestDetailResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PurchaseRequestDetailResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    purchaseRequestsPUT(id: number, body: UpdatePurchaseRequestCommand): Promise<Result> {
+        let url_ = this.baseUrl + "/api/PurchaseRequests/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPurchaseRequestsPUT(_response);
+        });
+    }
+
+    protected processPurchaseRequestsPUT(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    submitPATCH5(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/PurchaseRequests/{id}/submit";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSubmitPATCH5(_response);
+        });
+    }
+
+    protected processSubmitPATCH5(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    approvePATCH5(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/PurchaseRequests/{id}/approve";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processApprovePATCH5(_response);
+        });
+    }
+
+    protected processApprovePATCH5(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    rejectPATCH3(id: number, body: RejectPurchaseRequestRequest): Promise<Result> {
+        let url_ = this.baseUrl + "/api/PurchaseRequests/{id}/reject";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRejectPATCH3(_response);
+        });
+    }
+
+    protected processRejectPATCH3(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    cancelPATCH5(id: number, body: CancelPurchaseRequestRequest): Promise<Result> {
+        let url_ = this.baseUrl + "/api/PurchaseRequests/{id}/cancel";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCancelPATCH5(_response);
+        });
+    }
+
+    protected processCancelPATCH5(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+}
+
+export class QuotationsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param supplierPartyId (optional) 
+     * @param status (optional) 
+     * @param search (optional) 
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @return OK
+     */
+    quotationsAll(supplierPartyId: number | undefined, status: QuotationStatus | undefined, search: string | undefined, page: number | undefined, pageSize: number | undefined): Promise<QuotationListItem[]> {
+        let url_ = this.baseUrl + "/api/Quotations?";
+        if (supplierPartyId === null)
+            throw new globalThis.Error("The parameter 'supplierPartyId' cannot be null.");
+        else if (supplierPartyId !== undefined)
+            url_ += "supplierPartyId=" + encodeURIComponent("" + supplierPartyId) + "&";
+        if (status === null)
+            throw new globalThis.Error("The parameter 'status' cannot be null.");
+        else if (status !== undefined)
+            url_ += "status=" + encodeURIComponent("" + status) + "&";
+        if (search === null)
+            throw new globalThis.Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "search=" + encodeURIComponent("" + search) + "&";
+        if (page === null)
+            throw new globalThis.Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processQuotationsAll(_response);
+        });
+    }
+
+    protected processQuotationsAll(response: Response): Promise<QuotationListItem[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(QuotationListItem.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<QuotationListItem[]>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    quotationsPOST(body: CreateQuotationCommand): Promise<number> {
+        let url_ = this.baseUrl + "/api/Quotations";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processQuotationsPOST(_response);
+        });
+    }
+
+    protected processQuotationsPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    quotationsGET(id: number): Promise<QuotationDetailResponse> {
+        let url_ = this.baseUrl + "/api/Quotations/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processQuotationsGET(_response);
+        });
+    }
+
+    protected processQuotationsGET(response: Response): Promise<QuotationDetailResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = QuotationDetailResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<QuotationDetailResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    quotationsPUT(id: number, body: UpdateQuotationCommand): Promise<Result> {
+        let url_ = this.baseUrl + "/api/Quotations/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processQuotationsPUT(_response);
+        });
+    }
+
+    protected processQuotationsPUT(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    submitPATCH6(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/Quotations/{id}/submit";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSubmitPATCH6(_response);
+        });
+    }
+
+    protected processSubmitPATCH6(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    startEvaluation(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/Quotations/{id}/start-evaluation";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processStartEvaluation(_response);
+        });
+    }
+
+    protected processStartEvaluation(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    completeEvaluation(id: number, body: CompleteEvaluationRequest): Promise<Result> {
+        let url_ = this.baseUrl + "/api/Quotations/{id}/complete-evaluation";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCompleteEvaluation(_response);
+        });
+    }
+
+    protected processCompleteEvaluation(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    select(id: number, body: SelectQuotationRequest): Promise<Result> {
+        let url_ = this.baseUrl + "/api/Quotations/{id}/select";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSelect(_response);
+        });
+    }
+
+    protected processSelect(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    award(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/Quotations/{id}/award";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAward(_response);
+        });
+    }
+
+    protected processAward(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    rejectPATCH4(id: number, body: RejectQuotationRequest): Promise<Result> {
+        let url_ = this.baseUrl + "/api/Quotations/{id}/reject";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRejectPATCH4(_response);
+        });
+    }
+
+    protected processRejectPATCH4(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+}
+
+export class SupplierInvoicesClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param purchaseOrderId (optional) 
+     * @param status (optional) 
+     * @param search (optional) 
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @return OK
+     */
+    supplierInvoicesGET(purchaseOrderId: number | undefined, status: SupplierInvoiceStatus | null | undefined, search: string | undefined, page: number | undefined, pageSize: number | undefined): Promise<any> {
+        let url_ = this.baseUrl + "/api/SupplierInvoices?";
+        if (purchaseOrderId === null)
+            throw new globalThis.Error("The parameter 'purchaseOrderId' cannot be null.");
+        else if (purchaseOrderId !== undefined)
+            url_ += "purchaseOrderId=" + encodeURIComponent("" + purchaseOrderId) + "&";
+        if (status !== undefined && status !== null)
+            url_ += "status=" + encodeURIComponent("" + status) + "&";
+        if (search === null)
+            throw new globalThis.Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "search=" + encodeURIComponent("" + search) + "&";
+        if (page === null)
+            throw new globalThis.Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSupplierInvoicesGET(_response);
+        });
+    }
+
+    protected processSupplierInvoicesGET(response: Response): Promise<any> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<any>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    supplierInvoicesPOST(body: CreateSupplierInvoiceCommand): Promise<number> {
+        let url_ = this.baseUrl + "/api/SupplierInvoices";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSupplierInvoicesPOST(_response);
+        });
+    }
+
+    protected processSupplierInvoicesPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    supplierInvoicesGET2(id: number): Promise<SupplierInvoiceDetailResponse> {
+        let url_ = this.baseUrl + "/api/SupplierInvoices/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSupplierInvoicesGET2(_response);
+        });
+    }
+
+    protected processSupplierInvoicesGET2(response: Response): Promise<SupplierInvoiceDetailResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = SupplierInvoiceDetailResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<SupplierInvoiceDetailResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    submitPATCH7(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/SupplierInvoices/{id}/submit";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSubmitPATCH7(_response);
+        });
+    }
+
+    protected processSubmitPATCH7(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    match(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/SupplierInvoices/{id}/match";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processMatch(_response);
+        });
+    }
+
+    protected processMatch(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    cancelPATCH6(id: number, body: CancelSupplierInvoiceCommand): Promise<Result> {
+        let url_ = this.baseUrl + "/api/SupplierInvoices/{id}/cancel";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCancelPATCH6(_response);
+        });
+    }
+
+    protected processCancelPATCH6(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+}
+
 export class BankAccountsClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -13523,24 +15623,24 @@ export class PaymentOrdersClient {
     /**
      * Get all payment orders
      * @param status (optional) 
-     * @param vendorId (optional) 
      * @param fundId (optional) 
+     * @param fiscalYearId (optional) 
      * @return OK
      */
-    paymentOrdersAll(status: PaymentOrderStatus | undefined, vendorId: number | undefined, fundId: number | undefined): Promise<PaymentOrderDto[]> {
+    paymentOrdersAll(status: PaymentOrderStatus | undefined, fundId: number | undefined, fiscalYearId: number | undefined): Promise<PaymentOrderDto[]> {
         let url_ = this.baseUrl + "/api/PaymentOrders?";
         if (status === null)
             throw new globalThis.Error("The parameter 'status' cannot be null.");
         else if (status !== undefined)
             url_ += "Status=" + encodeURIComponent("" + status) + "&";
-        if (vendorId === null)
-            throw new globalThis.Error("The parameter 'vendorId' cannot be null.");
-        else if (vendorId !== undefined)
-            url_ += "VendorId=" + encodeURIComponent("" + vendorId) + "&";
         if (fundId === null)
             throw new globalThis.Error("The parameter 'fundId' cannot be null.");
         else if (fundId !== undefined)
             url_ += "FundId=" + encodeURIComponent("" + fundId) + "&";
+        if (fiscalYearId === null)
+            throw new globalThis.Error("The parameter 'fiscalYearId' cannot be null.");
+        else if (fiscalYearId !== undefined)
+            url_ += "FiscalYearId=" + encodeURIComponent("" + fiscalYearId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {
@@ -14190,6 +16290,14 @@ export class PaymentsClient {
             return response.text().then((_responseText) => {
             return throwException("Bad Request", status, _responseText, _headers);
             });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -14235,6 +16343,14 @@ export class PaymentsClient {
             return response.text().then((_responseText) => {
             return throwException("Bad Request", status, _responseText, _headers);
             });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -14278,6 +16394,14 @@ export class PaymentsClient {
         } else if (status === 400) {
             return response.text().then((_responseText) => {
             return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
@@ -14951,6 +17075,1491 @@ export class NotificationsClient {
             });
         }
         return Promise.resolve<void>(null as any);
+    }
+}
+
+export class ItemCategoriesClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param search (optional) 
+     * @param isActive (optional) 
+     * @return OK
+     */
+    itemCategoriesAll(search: string | undefined, isActive: boolean | undefined): Promise<ItemCategoryResponse[]> {
+        let url_ = this.baseUrl + "/api/ItemCategories?";
+        if (search === null)
+            throw new globalThis.Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "search=" + encodeURIComponent("" + search) + "&";
+        if (isActive === null)
+            throw new globalThis.Error("The parameter 'isActive' cannot be null.");
+        else if (isActive !== undefined)
+            url_ += "isActive=" + encodeURIComponent("" + isActive) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processItemCategoriesAll(_response);
+        });
+    }
+
+    protected processItemCategoriesAll(response: Response): Promise<ItemCategoryResponse[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ItemCategoryResponse.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ItemCategoryResponse[]>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    itemCategoriesPOST(body: CreateItemCategoryRequest): Promise<number> {
+        let url_ = this.baseUrl + "/api/ItemCategories";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processItemCategoriesPOST(_response);
+        });
+    }
+
+    protected processItemCategoriesPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    itemCategoriesGET(id: number): Promise<ItemCategoryResponse> {
+        let url_ = this.baseUrl + "/api/ItemCategories/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processItemCategoriesGET(_response);
+        });
+    }
+
+    protected processItemCategoriesGET(response: Response): Promise<ItemCategoryResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ItemCategoryResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ItemCategoryResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    itemCategoriesPUT(id: number, body: UpdateItemCategoryRequest): Promise<Result> {
+        let url_ = this.baseUrl + "/api/ItemCategories/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processItemCategoriesPUT(_response);
+        });
+    }
+
+    protected processItemCategoriesPUT(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    toggleActivePATCH5(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/ItemCategories/{id}/toggle-active";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processToggleActivePATCH5(_response);
+        });
+    }
+
+    protected processToggleActivePATCH5(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+}
+
+export class ItemsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param search (optional) 
+     * @param categoryId (optional) 
+     * @param unitId (optional) 
+     * @param itemType (optional) 
+     * @param isActive (optional) 
+     * @param underReorderLevel (optional) 
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @return OK
+     */
+    itemsGET(search: string | undefined, categoryId: number | undefined, unitId: number | undefined, itemType: ItemType | null | undefined, isActive: boolean | undefined, underReorderLevel: boolean | undefined, page: number | undefined, pageSize: number | undefined): Promise<PaginatedListOfItemResponse> {
+        let url_ = this.baseUrl + "/api/Items?";
+        if (search === null)
+            throw new globalThis.Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "search=" + encodeURIComponent("" + search) + "&";
+        if (categoryId === null)
+            throw new globalThis.Error("The parameter 'categoryId' cannot be null.");
+        else if (categoryId !== undefined)
+            url_ += "categoryId=" + encodeURIComponent("" + categoryId) + "&";
+        if (unitId === null)
+            throw new globalThis.Error("The parameter 'unitId' cannot be null.");
+        else if (unitId !== undefined)
+            url_ += "unitId=" + encodeURIComponent("" + unitId) + "&";
+        if (itemType !== undefined && itemType !== null)
+            url_ += "itemType=" + encodeURIComponent("" + itemType) + "&";
+        if (isActive === null)
+            throw new globalThis.Error("The parameter 'isActive' cannot be null.");
+        else if (isActive !== undefined)
+            url_ += "isActive=" + encodeURIComponent("" + isActive) + "&";
+        if (underReorderLevel === null)
+            throw new globalThis.Error("The parameter 'underReorderLevel' cannot be null.");
+        else if (underReorderLevel !== undefined)
+            url_ += "underReorderLevel=" + encodeURIComponent("" + underReorderLevel) + "&";
+        if (page === null)
+            throw new globalThis.Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processItemsGET(_response);
+        });
+    }
+
+    protected processItemsGET(response: Response): Promise<PaginatedListOfItemResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PaginatedListOfItemResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PaginatedListOfItemResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    itemsPOST(body: CreateItemRequest): Promise<number> {
+        let url_ = this.baseUrl + "/api/Items";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processItemsPOST(_response);
+        });
+    }
+
+    protected processItemsPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    itemsGET2(id: number): Promise<ItemDetailResponse> {
+        let url_ = this.baseUrl + "/api/Items/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processItemsGET2(_response);
+        });
+    }
+
+    protected processItemsGET2(response: Response): Promise<ItemDetailResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ItemDetailResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ItemDetailResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    itemsPUT(id: number, body: UpdateItemRequest): Promise<Result> {
+        let url_ = this.baseUrl + "/api/Items/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processItemsPUT(_response);
+        });
+    }
+
+    protected processItemsPUT(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    toggleActivePATCH6(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/Items/{id}/toggle-active";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processToggleActivePATCH6(_response);
+        });
+    }
+
+    protected processToggleActivePATCH6(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    unitsAll(itemId: number): Promise<ItemUnitResponse[]> {
+        let url_ = this.baseUrl + "/api/Items/{itemId}/units";
+        if (itemId === undefined || itemId === null)
+            throw new globalThis.Error("The parameter 'itemId' must be defined.");
+        url_ = url_.replace("{itemId}", encodeURIComponent("" + itemId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUnitsAll(_response);
+        });
+    }
+
+    protected processUnitsAll(response: Response): Promise<ItemUnitResponse[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ItemUnitResponse.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ItemUnitResponse[]>(null as any);
+    }
+}
+
+export class ItemUnitsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    unitsAll2(itemId: number): Promise<ItemUnitResponse[]> {
+        let url_ = this.baseUrl + "/api/ItemUnits/items/{itemId}/units";
+        if (itemId === undefined || itemId === null)
+            throw new globalThis.Error("The parameter 'itemId' must be defined.");
+        url_ = url_.replace("{itemId}", encodeURIComponent("" + itemId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUnitsAll2(_response);
+        });
+    }
+
+    protected processUnitsAll2(response: Response): Promise<ItemUnitResponse[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ItemUnitResponse.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ItemUnitResponse[]>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    unitsPOST(itemId: number, body: AddItemUnitRequest): Promise<number> {
+        let url_ = this.baseUrl + "/api/ItemUnits/items/{itemId}/units";
+        if (itemId === undefined || itemId === null)
+            throw new globalThis.Error("The parameter 'itemId' must be defined.");
+        url_ = url_.replace("{itemId}", encodeURIComponent("" + itemId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUnitsPOST(_response);
+        });
+    }
+
+    protected processUnitsPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    unitsPUT(itemId: number, id: number, body: UpdateItemUnitRequest): Promise<Result> {
+        let url_ = this.baseUrl + "/api/ItemUnits/items/{itemId}/units/{id}";
+        if (itemId === undefined || itemId === null)
+            throw new globalThis.Error("The parameter 'itemId' must be defined.");
+        url_ = url_.replace("{itemId}", encodeURIComponent("" + itemId));
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUnitsPUT(_response);
+        });
+    }
+
+    protected processUnitsPUT(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    unitsDELETE(itemId: number, id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/ItemUnits/items/{itemId}/units/{id}";
+        if (itemId === undefined || itemId === null)
+            throw new globalThis.Error("The parameter 'itemId' must be defined.");
+        url_ = url_.replace("{itemId}", encodeURIComponent("" + itemId));
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUnitsDELETE(_response);
+        });
+    }
+
+    protected processUnitsDELETE(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+}
+
+export class UnitsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param search (optional) 
+     * @param isActive (optional) 
+     * @return OK
+     */
+    unitsAll(search: string | undefined, isActive: boolean | undefined): Promise<UnitResponse[]> {
+        let url_ = this.baseUrl + "/api/Units?";
+        if (search === null)
+            throw new globalThis.Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "search=" + encodeURIComponent("" + search) + "&";
+        if (isActive === null)
+            throw new globalThis.Error("The parameter 'isActive' cannot be null.");
+        else if (isActive !== undefined)
+            url_ += "isActive=" + encodeURIComponent("" + isActive) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUnitsAll(_response);
+        });
+    }
+
+    protected processUnitsAll(response: Response): Promise<UnitResponse[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(UnitResponse.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UnitResponse[]>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    unitsPOST(body: CreateUnitRequest): Promise<number> {
+        let url_ = this.baseUrl + "/api/Units";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUnitsPOST(_response);
+        });
+    }
+
+    protected processUnitsPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    unitsGET(id: number): Promise<UnitResponse> {
+        let url_ = this.baseUrl + "/api/Units/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUnitsGET(_response);
+        });
+    }
+
+    protected processUnitsGET(response: Response): Promise<UnitResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UnitResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UnitResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    unitsPUT(id: number, body: UpdateUnitRequest): Promise<Result> {
+        let url_ = this.baseUrl + "/api/Units/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUnitsPUT(_response);
+        });
+    }
+
+    protected processUnitsPUT(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    toggleActivePATCH7(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/Units/{id}/toggle-active";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processToggleActivePATCH7(_response);
+        });
+    }
+
+    protected processToggleActivePATCH7(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+}
+
+export class WarehousesClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param search (optional) 
+     * @param isActive (optional) 
+     * @return OK
+     */
+    warehousesAll(search: string | undefined, isActive: boolean | undefined): Promise<WarehouseResponse[]> {
+        let url_ = this.baseUrl + "/api/Warehouses?";
+        if (search === null)
+            throw new globalThis.Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "search=" + encodeURIComponent("" + search) + "&";
+        if (isActive === null)
+            throw new globalThis.Error("The parameter 'isActive' cannot be null.");
+        else if (isActive !== undefined)
+            url_ += "isActive=" + encodeURIComponent("" + isActive) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processWarehousesAll(_response);
+        });
+    }
+
+    protected processWarehousesAll(response: Response): Promise<WarehouseResponse[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(WarehouseResponse.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<WarehouseResponse[]>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    warehousesPOST(body: CreateWarehouseRequest): Promise<number> {
+        let url_ = this.baseUrl + "/api/Warehouses";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processWarehousesPOST(_response);
+        });
+    }
+
+    protected processWarehousesPOST(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    warehousesGET(id: number): Promise<WarehouseResponse> {
+        let url_ = this.baseUrl + "/api/Warehouses/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processWarehousesGET(_response);
+        });
+    }
+
+    protected processWarehousesGET(response: Response): Promise<WarehouseResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = WarehouseResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<WarehouseResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    warehousesPUT(id: number, body: UpdateWarehouseRequest): Promise<Result> {
+        let url_ = this.baseUrl + "/api/Warehouses/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processWarehousesPUT(_response);
+        });
+    }
+
+    protected processWarehousesPUT(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    toggleActivePATCH8(id: number): Promise<Result> {
+        let url_ = this.baseUrl + "/api/Warehouses/{id}/toggle-active";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processToggleActivePATCH8(_response);
+        });
+    }
+
+    protected processToggleActivePATCH8(response: Response): Promise<Result> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Result.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Result>(null as any);
     }
 }
 
@@ -15794,34 +19403,19 @@ export class DisbursementRequestsClient {
 
     /**
      * @param status (optional) 
-     * @param fundId (optional) 
-     * @param fromDate (optional) 
-     * @param toDate (optional) 
-     * @param paymentOrderId (optional) 
+     * @param requestedById (optional) 
      * @return OK
      */
-    disbursementRequestsAll(status: DisbursementRequestStatus | undefined, fundId: number | undefined, fromDate: Date | undefined, toDate: Date | undefined, paymentOrderId: number | undefined): Promise<DisbursementRequestDto[]> {
+    disbursementRequestsAll(status: DisbursementRequestStatus | undefined, requestedById: number | undefined): Promise<DisbursementRequestDto[]> {
         let url_ = this.baseUrl + "/api/DisbursementRequests?";
         if (status === null)
             throw new globalThis.Error("The parameter 'status' cannot be null.");
         else if (status !== undefined)
             url_ += "status=" + encodeURIComponent("" + status) + "&";
-        if (fundId === null)
-            throw new globalThis.Error("The parameter 'fundId' cannot be null.");
-        else if (fundId !== undefined)
-            url_ += "fundId=" + encodeURIComponent("" + fundId) + "&";
-        if (fromDate === null)
-            throw new globalThis.Error("The parameter 'fromDate' cannot be null.");
-        else if (fromDate !== undefined)
-            url_ += "fromDate=" + encodeURIComponent(fromDate ? "" + fromDate.toISOString() : "") + "&";
-        if (toDate === null)
-            throw new globalThis.Error("The parameter 'toDate' cannot be null.");
-        else if (toDate !== undefined)
-            url_ += "toDate=" + encodeURIComponent(toDate ? "" + toDate.toISOString() : "") + "&";
-        if (paymentOrderId === null)
-            throw new globalThis.Error("The parameter 'paymentOrderId' cannot be null.");
-        else if (paymentOrderId !== undefined)
-            url_ += "paymentOrderId=" + encodeURIComponent("" + paymentOrderId) + "&";
+        if (requestedById === null)
+            throw new globalThis.Error("The parameter 'requestedById' cannot be null.");
+        else if (requestedById !== undefined)
+            url_ += "requestedById=" + encodeURIComponent("" + requestedById) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {
@@ -15981,7 +19575,63 @@ export class DisbursementRequestsClient {
     /**
      * @return OK
      */
-    submitPATCH4(id: number): Promise<Result> {
+    disbursementRequestsPATCH(id: number, body: UpdateDisbursementRequestRequest): Promise<DisbursementRequestDto> {
+        let url_ = this.baseUrl + "/api/DisbursementRequests/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDisbursementRequestsPATCH(_response);
+        });
+    }
+
+    protected processDisbursementRequestsPATCH(response: Response): Promise<DisbursementRequestDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DisbursementRequestDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<DisbursementRequestDto>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    submitPATCH8(id: number): Promise<Result> {
         let url_ = this.baseUrl + "/api/DisbursementRequests/{id}/submit";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -15996,11 +19646,11 @@ export class DisbursementRequestsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processSubmitPATCH4(_response);
+            return this.processSubmitPATCH8(_response);
         });
     }
 
-    protected processSubmitPATCH4(response: Response): Promise<Result> {
+    protected processSubmitPATCH8(response: Response): Promise<Result> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -16033,7 +19683,7 @@ export class DisbursementRequestsClient {
     /**
      * @return OK
      */
-    approvePATCH4(id: number, body: ApproveDisbursementRequestRequest): Promise<Result> {
+    approvePATCH6(id: number, body: ApproveDisbursementRequestRequest): Promise<Result> {
         let url_ = this.baseUrl + "/api/DisbursementRequests/{id}/approve";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -16052,11 +19702,11 @@ export class DisbursementRequestsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processApprovePATCH4(_response);
+            return this.processApprovePATCH6(_response);
         });
     }
 
-    protected processApprovePATCH4(response: Response): Promise<Result> {
+    protected processApprovePATCH6(response: Response): Promise<Result> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -16089,7 +19739,7 @@ export class DisbursementRequestsClient {
     /**
      * @return OK
      */
-    rejectPATCH(id: number, body: RejectDisbursementRequestRequest): Promise<Result> {
+    rejectPATCH5(id: number, body: RejectDisbursementRequestRequest): Promise<Result> {
         let url_ = this.baseUrl + "/api/DisbursementRequests/{id}/reject";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -16108,11 +19758,11 @@ export class DisbursementRequestsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processRejectPATCH(_response);
+            return this.processRejectPATCH5(_response);
         });
     }
 
-    protected processRejectPATCH(response: Response): Promise<Result> {
+    protected processRejectPATCH5(response: Response): Promise<Result> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -16145,7 +19795,7 @@ export class DisbursementRequestsClient {
     /**
      * @return OK
      */
-    cancelPATCH4(id: number, body: CancelDisbursementRequestRequest): Promise<Result> {
+    cancelPATCH7(id: number, body: CancelDisbursementRequestRequest): Promise<Result> {
         let url_ = this.baseUrl + "/api/DisbursementRequests/{id}/cancel";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -16164,11 +19814,11 @@ export class DisbursementRequestsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCancelPATCH4(_response);
+            return this.processCancelPATCH7(_response);
         });
     }
 
-    protected processCancelPATCH4(response: Response): Promise<Result> {
+    protected processCancelPATCH7(response: Response): Promise<Result> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -16196,6 +19846,114 @@ export class DisbursementRequestsClient {
             });
         }
         return Promise.resolve<Result>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    accrualEntryPOST(id: number, body: CreateAccrualEntryRequest): Promise<ResultOfint> {
+        let url_ = this.baseUrl + "/api/DisbursementRequests/{id}/accrual-entry";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAccrualEntryPOST(_response);
+        });
+    }
+
+    protected processAccrualEntryPOST(response: Response): Promise<ResultOfint> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ResultOfint.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResultOfint>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    accrualEntryGET(id: number): Promise<AccrualEntryDto> {
+        let url_ = this.baseUrl + "/api/DisbursementRequests/{id}/accrual-entry";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAccrualEntryGET(_response);
+        });
+    }
+
+    protected processAccrualEntryGET(response: Response): Promise<AccrualEntryDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = AccrualEntryDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<AccrualEntryDto>(null as any);
     }
 }
 
@@ -18222,7 +21980,7 @@ export class JournalEntriesClient {
      * Post an approved journal entry
      * @return No Content
      */
-    post(id: number, body: PostJournalEntryCommand): Promise<void> {
+    postPOST(id: number, body: PostJournalEntryCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/JournalEntries/{id}/post";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -18240,11 +21998,11 @@ export class JournalEntriesClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processPost(_response);
+            return this.processPostPOST(_response);
         });
     }
 
-    protected processPost(response: Response): Promise<void> {
+    protected processPostPOST(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 204) {
@@ -20266,6 +24024,94 @@ export enum AccountType {
     Service = "Service",
 }
 
+export class AccrualEntryDto implements IAccrualEntryDto {
+    id!: number;
+    entryNumber!: string;
+    documentDate!: Date;
+    amount!: number;
+    expenseAccountId!: number;
+    expenseAccountCode!: string;
+    expenseAccountName!: string;
+    liabilityAccountId!: number;
+    liabilityAccountCode!: string;
+    liabilityAccountName!: string;
+    narration!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IAccrualEntryDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.entryNumber = _data["entryNumber"];
+            this.documentDate = _data["documentDate"] ? new Date(_data["documentDate"].toString()) : undefined as any;
+            this.amount = _data["amount"];
+            this.expenseAccountId = _data["expenseAccountId"];
+            this.expenseAccountCode = _data["expenseAccountCode"];
+            this.expenseAccountName = _data["expenseAccountName"];
+            this.liabilityAccountId = _data["liabilityAccountId"];
+            this.liabilityAccountCode = _data["liabilityAccountCode"];
+            this.liabilityAccountName = _data["liabilityAccountName"];
+            this.narration = _data["narration"];
+        }
+    }
+
+    static fromJS(data: any): AccrualEntryDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AccrualEntryDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["entryNumber"] = this.entryNumber;
+        data["documentDate"] = this.documentDate ? formatDate(this.documentDate) : undefined as any;
+        data["amount"] = this.amount;
+        data["expenseAccountId"] = this.expenseAccountId;
+        data["expenseAccountCode"] = this.expenseAccountCode;
+        data["expenseAccountName"] = this.expenseAccountName;
+        data["liabilityAccountId"] = this.liabilityAccountId;
+        data["liabilityAccountCode"] = this.liabilityAccountCode;
+        data["liabilityAccountName"] = this.liabilityAccountName;
+        data["narration"] = this.narration;
+        return data;
+    }
+}
+
+export interface IAccrualEntryDto {
+    id: number;
+    entryNumber: string;
+    documentDate: Date;
+    amount: number;
+    expenseAccountId: number;
+    expenseAccountCode: string;
+    expenseAccountName: string;
+    liabilityAccountId: number;
+    liabilityAccountCode: string;
+    liabilityAccountName: string;
+    narration: string | undefined;
+
+    [key: string]: any;
+}
+
 export class ActivateBankAccountCommand implements IActivateBankAccountCommand {
     id?: number;
     rowVersion?: string;
@@ -20586,6 +24432,62 @@ export interface IAddCommitteeMemberCommand {
     [key: string]: any;
 }
 
+export class AddItemUnitRequest implements IAddItemUnitRequest {
+    unitId!: number;
+    conversionFactor!: number;
+    isBase!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: IAddItemUnitRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.unitId = _data["unitId"];
+            this.conversionFactor = _data["conversionFactor"];
+            this.isBase = _data["isBase"];
+        }
+    }
+
+    static fromJS(data: any): AddItemUnitRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddItemUnitRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["unitId"] = this.unitId;
+        data["conversionFactor"] = this.conversionFactor;
+        data["isBase"] = this.isBase;
+        return data;
+    }
+}
+
+export interface IAddItemUnitRequest {
+    unitId: number;
+    conversionFactor: number;
+    isBase: boolean;
+
+    [key: string]: any;
+}
+
 export class AddVoucherToSlipCommand implements IAddVoucherToSlipCommand {
     slipId?: number;
     voucherId?: number;
@@ -20698,257 +24600,6 @@ export interface IAncestorRefDto {
     [key: string]: any;
 }
 
-export class AppropriationActionRequest implements IAppropriationActionRequest {
-    rowVersion!: string;
-
-    [key: string]: any;
-
-    constructor(data?: IAppropriationActionRequest) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): AppropriationActionRequest {
-        data = typeof data === 'object' ? data : {};
-        let result = new AppropriationActionRequest();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface IAppropriationActionRequest {
-    rowVersion: string;
-
-    [key: string]: any;
-}
-
-export class AppropriationDetailDto implements IAppropriationDetailDto {
-    appropriationId?: number;
-    appropriationNumber?: string;
-    type?: string;
-    amount?: number;
-    status?: string;
-
-    [key: string]: any;
-
-    constructor(data?: IAppropriationDetailDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.appropriationId = _data["appropriationId"];
-            this.appropriationNumber = _data["appropriationNumber"];
-            this.type = _data["type"];
-            this.amount = _data["amount"];
-            this.status = _data["status"];
-        }
-    }
-
-    static fromJS(data: any): AppropriationDetailDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new AppropriationDetailDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["appropriationId"] = this.appropriationId;
-        data["appropriationNumber"] = this.appropriationNumber;
-        data["type"] = this.type;
-        data["amount"] = this.amount;
-        data["status"] = this.status;
-        return data;
-    }
-}
-
-export interface IAppropriationDetailDto {
-    appropriationId?: number;
-    appropriationNumber?: string;
-    type?: string;
-    amount?: number;
-    status?: string;
-
-    [key: string]: any;
-}
-
-export class AppropriationDto implements IAppropriationDto {
-    id?: number;
-    appropriationNumber?: string;
-    budgetId?: number;
-    budgetItemId?: number;
-    appropriationType?: AppropriationType;
-    documentType?: string;
-    documentId?: number;
-    amount?: number;
-    status?: AppropriationStatus;
-    rowVersion?: string;
-    created?: Date;
-    createdBy?: string | undefined;
-    fundNumber?: string;
-    fundName?: string;
-    fiscalYearName?: string;
-    budgetNumber?: string;
-    budgetName?: string;
-    itemCode?: string;
-    itemName?: string;
-
-    [key: string]: any;
-
-    constructor(data?: IAppropriationDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.appropriationNumber = _data["appropriationNumber"];
-            this.budgetId = _data["budgetId"];
-            this.budgetItemId = _data["budgetItemId"];
-            this.appropriationType = _data["appropriationType"];
-            this.documentType = _data["documentType"];
-            this.documentId = _data["documentId"];
-            this.amount = _data["amount"];
-            this.status = _data["status"];
-            this.rowVersion = _data["rowVersion"];
-            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
-            this.createdBy = _data["createdBy"];
-            this.fundNumber = _data["fundNumber"];
-            this.fundName = _data["fundName"];
-            this.fiscalYearName = _data["fiscalYearName"];
-            this.budgetNumber = _data["budgetNumber"];
-            this.budgetName = _data["budgetName"];
-            this.itemCode = _data["itemCode"];
-            this.itemName = _data["itemName"];
-        }
-    }
-
-    static fromJS(data: any): AppropriationDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new AppropriationDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["appropriationNumber"] = this.appropriationNumber;
-        data["budgetId"] = this.budgetId;
-        data["budgetItemId"] = this.budgetItemId;
-        data["appropriationType"] = this.appropriationType;
-        data["documentType"] = this.documentType;
-        data["documentId"] = this.documentId;
-        data["amount"] = this.amount;
-        data["status"] = this.status;
-        data["rowVersion"] = this.rowVersion;
-        data["created"] = this.created ? this.created.toISOString() : undefined as any;
-        data["createdBy"] = this.createdBy;
-        data["fundNumber"] = this.fundNumber;
-        data["fundName"] = this.fundName;
-        data["fiscalYearName"] = this.fiscalYearName;
-        data["budgetNumber"] = this.budgetNumber;
-        data["budgetName"] = this.budgetName;
-        data["itemCode"] = this.itemCode;
-        data["itemName"] = this.itemName;
-        return data;
-    }
-}
-
-export interface IAppropriationDto {
-    id?: number;
-    appropriationNumber?: string;
-    budgetId?: number;
-    budgetItemId?: number;
-    appropriationType?: AppropriationType;
-    documentType?: string;
-    documentId?: number;
-    amount?: number;
-    status?: AppropriationStatus;
-    rowVersion?: string;
-    created?: Date;
-    createdBy?: string | undefined;
-    fundNumber?: string;
-    fundName?: string;
-    fiscalYearName?: string;
-    budgetNumber?: string;
-    budgetName?: string;
-    itemCode?: string;
-    itemName?: string;
-
-    [key: string]: any;
-}
-
-export enum AppropriationStatus {
-    Draft = "Draft",
-    PendingApproval = "PendingApproval",
-    Approved = "Approved",
-    Active = "Active",
-    Suspended = "Suspended",
-    Closed = "Closed",
-    Cancelled = "Cancelled",
-    Reversed = "Reversed",
-}
-
-export enum AppropriationType {
-    Original = "Original",
-    Supplement = "Supplement",
-    Reduction = "Reduction",
-    Transfer = "Transfer",
-    Adjustment = "Adjustment",
-}
-
 export class ApprovalRuleDto implements IApprovalRuleDto {
     id?: number;
     documentType?: string;
@@ -21036,6 +24687,7 @@ export class ApprovalStepDto implements IApprovalStepDto {
     role!: string;
     decision!: string;
     decisionAt!: Date;
+    approvedAmount!: number | undefined;
 
     [key: string]: any;
 
@@ -21060,6 +24712,7 @@ export class ApprovalStepDto implements IApprovalStepDto {
             this.role = _data["role"];
             this.decision = _data["decision"];
             this.decisionAt = _data["decisionAt"] ? new Date(_data["decisionAt"].toString()) : undefined as any;
+            this.approvedAmount = _data["approvedAmount"];
         }
     }
 
@@ -21082,6 +24735,7 @@ export class ApprovalStepDto implements IApprovalStepDto {
         data["role"] = this.role;
         data["decision"] = this.decision;
         data["decisionAt"] = this.decisionAt ? this.decisionAt.toISOString() : undefined as any;
+        data["approvedAmount"] = this.approvedAmount;
         return data;
     }
 }
@@ -21093,6 +24747,7 @@ export interface IApprovalStepDto {
     role: string;
     decision: string;
     decisionAt: Date;
+    approvedAmount: number | undefined;
 
     [key: string]: any;
 }
@@ -21154,7 +24809,9 @@ export interface IApproveDepositSlipCommand {
 }
 
 export class ApproveDisbursementRequestRequest implements IApproveDisbursementRequestRequest {
+    approvedAmount!: number | undefined;
     reason!: string | undefined;
+    rowVersion!: string;
 
     [key: string]: any;
 
@@ -21173,7 +24830,9 @@ export class ApproveDisbursementRequestRequest implements IApproveDisbursementRe
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
+            this.approvedAmount = _data["approvedAmount"];
             this.reason = _data["reason"];
+            this.rowVersion = _data["rowVersion"];
         }
     }
 
@@ -21190,13 +24849,17 @@ export class ApproveDisbursementRequestRequest implements IApproveDisbursementRe
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
+        data["approvedAmount"] = this.approvedAmount;
         data["reason"] = this.reason;
+        data["rowVersion"] = this.rowVersion;
         return data;
     }
 }
 
 export interface IApproveDisbursementRequestRequest {
+    approvedAmount: number | undefined;
     reason: string | undefined;
+    rowVersion: string;
 
     [key: string]: any;
 }
@@ -21729,7 +25392,7 @@ export class AvailabilitySnapshotDetailDto implements IAvailabilitySnapshotDetai
     budgetItemId?: number;
     itemCode?: string;
     itemName?: string;
-    appropriations?: AppropriationDetailDto[];
+    transactions?: BudgetTransactionDetailDto[];
     encumbrances?: EncumbranceDetailDto[];
     payments?: PaymentDetailDto[];
 
@@ -21753,10 +25416,10 @@ export class AvailabilitySnapshotDetailDto implements IAvailabilitySnapshotDetai
             this.budgetItemId = _data["budgetItemId"];
             this.itemCode = _data["itemCode"];
             this.itemName = _data["itemName"];
-            if (Array.isArray(_data["appropriations"])) {
-                this.appropriations = [] as any;
-                for (let item of _data["appropriations"])
-                    this.appropriations!.push(AppropriationDetailDto.fromJS(item));
+            if (Array.isArray(_data["transactions"])) {
+                this.transactions = [] as any;
+                for (let item of _data["transactions"])
+                    this.transactions!.push(BudgetTransactionDetailDto.fromJS(item));
             }
             if (Array.isArray(_data["encumbrances"])) {
                 this.encumbrances = [] as any;
@@ -21787,10 +25450,10 @@ export class AvailabilitySnapshotDetailDto implements IAvailabilitySnapshotDetai
         data["budgetItemId"] = this.budgetItemId;
         data["itemCode"] = this.itemCode;
         data["itemName"] = this.itemName;
-        if (Array.isArray(this.appropriations)) {
-            data["appropriations"] = [];
-            for (let item of this.appropriations)
-                data["appropriations"].push(item ? item.toJSON() : undefined as any);
+        if (Array.isArray(this.transactions)) {
+            data["transactions"] = [];
+            for (let item of this.transactions)
+                data["transactions"].push(item ? item.toJSON() : undefined as any);
         }
         if (Array.isArray(this.encumbrances)) {
             data["encumbrances"] = [];
@@ -21810,7 +25473,7 @@ export interface IAvailabilitySnapshotDetailDto {
     budgetItemId?: number;
     itemCode?: string;
     itemName?: string;
-    appropriations?: AppropriationDetailDto[];
+    transactions?: BudgetTransactionDetailDto[];
     encumbrances?: EncumbranceDetailDto[];
     payments?: PaymentDetailDto[];
 
@@ -23062,10 +26725,12 @@ export interface IBudgetActionRequest {
 }
 
 export class BudgetAvailabilitySummary implements IBudgetAvailabilitySummary {
-    budgetItemId!: number;
-    netAppropriated!: number;
-    encumbered!: number;
-    available!: number;
+    budgetItemAllocationId!: number;
+    approvedAmount!: number;
+    actualExpenditure!: number;
+    remainingAmount!: number;
+    outstandingEncumbrance!: number;
+    availableAmount!: number;
     effectiveAllowOverrun!: boolean;
     budgetControlMethod!: BudgetControlMethod;
 
@@ -23086,10 +26751,12 @@ export class BudgetAvailabilitySummary implements IBudgetAvailabilitySummary {
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.budgetItemId = _data["budgetItemId"];
-            this.netAppropriated = _data["netAppropriated"];
-            this.encumbered = _data["encumbered"];
-            this.available = _data["available"];
+            this.budgetItemAllocationId = _data["budgetItemAllocationId"];
+            this.approvedAmount = _data["approvedAmount"];
+            this.actualExpenditure = _data["actualExpenditure"];
+            this.remainingAmount = _data["remainingAmount"];
+            this.outstandingEncumbrance = _data["outstandingEncumbrance"];
+            this.availableAmount = _data["availableAmount"];
             this.effectiveAllowOverrun = _data["effectiveAllowOverrun"];
             this.budgetControlMethod = _data["budgetControlMethod"];
         }
@@ -23108,10 +26775,12 @@ export class BudgetAvailabilitySummary implements IBudgetAvailabilitySummary {
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["budgetItemId"] = this.budgetItemId;
-        data["netAppropriated"] = this.netAppropriated;
-        data["encumbered"] = this.encumbered;
-        data["available"] = this.available;
+        data["budgetItemAllocationId"] = this.budgetItemAllocationId;
+        data["approvedAmount"] = this.approvedAmount;
+        data["actualExpenditure"] = this.actualExpenditure;
+        data["remainingAmount"] = this.remainingAmount;
+        data["outstandingEncumbrance"] = this.outstandingEncumbrance;
+        data["availableAmount"] = this.availableAmount;
         data["effectiveAllowOverrun"] = this.effectiveAllowOverrun;
         data["budgetControlMethod"] = this.budgetControlMethod;
         return data;
@@ -23119,21 +26788,16 @@ export class BudgetAvailabilitySummary implements IBudgetAvailabilitySummary {
 }
 
 export interface IBudgetAvailabilitySummary {
-    budgetItemId: number;
-    netAppropriated: number;
-    encumbered: number;
-    available: number;
+    budgetItemAllocationId: number;
+    approvedAmount: number;
+    actualExpenditure: number;
+    remainingAmount: number;
+    outstandingEncumbrance: number;
+    availableAmount: number;
     effectiveAllowOverrun: boolean;
     budgetControlMethod: BudgetControlMethod;
 
     [key: string]: any;
-}
-
-export enum BudgetCheckStatus {
-    Pending = "Pending",
-    Passed = "Passed",
-    Failed = "Failed",
-    Overridden = "Overridden",
 }
 
 export class BudgetClassificationDto implements IBudgetClassificationDto {
@@ -23702,6 +27366,210 @@ export interface IBudgetExecutionTotalDto {
     [key: string]: any;
 }
 
+export class BudgetItemAllocationDetailDto implements IBudgetItemAllocationDetailDto {
+    actualExpenditure?: number;
+    outstandingEncumbrance?: number;
+    remainingAmount?: number | undefined;
+    availableAmount?: number | undefined;
+    status?: string;
+    id?: number;
+    budgetId?: number;
+    budgetItemId?: number;
+    budgetItemCode?: string;
+    budgetItemName?: string;
+    accountId?: number | undefined;
+    costCenterId?: number | undefined;
+    budgetClassificationId?: number | undefined;
+    proposedAmount?: number;
+    approvedAmount?: number | undefined;
+    remarks?: string | undefined;
+    rowVersion?: string;
+
+    [key: string]: any;
+
+    constructor(data?: IBudgetItemAllocationDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.actualExpenditure = _data["actualExpenditure"];
+            this.outstandingEncumbrance = _data["outstandingEncumbrance"];
+            this.remainingAmount = _data["remainingAmount"];
+            this.availableAmount = _data["availableAmount"];
+            this.status = _data["status"];
+            this.id = _data["id"];
+            this.budgetId = _data["budgetId"];
+            this.budgetItemId = _data["budgetItemId"];
+            this.budgetItemCode = _data["budgetItemCode"];
+            this.budgetItemName = _data["budgetItemName"];
+            this.accountId = _data["accountId"];
+            this.costCenterId = _data["costCenterId"];
+            this.budgetClassificationId = _data["budgetClassificationId"];
+            this.proposedAmount = _data["proposedAmount"];
+            this.approvedAmount = _data["approvedAmount"];
+            this.remarks = _data["remarks"];
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): BudgetItemAllocationDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BudgetItemAllocationDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["actualExpenditure"] = this.actualExpenditure;
+        data["outstandingEncumbrance"] = this.outstandingEncumbrance;
+        data["remainingAmount"] = this.remainingAmount;
+        data["availableAmount"] = this.availableAmount;
+        data["status"] = this.status;
+        data["id"] = this.id;
+        data["budgetId"] = this.budgetId;
+        data["budgetItemId"] = this.budgetItemId;
+        data["budgetItemCode"] = this.budgetItemCode;
+        data["budgetItemName"] = this.budgetItemName;
+        data["accountId"] = this.accountId;
+        data["costCenterId"] = this.costCenterId;
+        data["budgetClassificationId"] = this.budgetClassificationId;
+        data["proposedAmount"] = this.proposedAmount;
+        data["approvedAmount"] = this.approvedAmount;
+        data["remarks"] = this.remarks;
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IBudgetItemAllocationDetailDto {
+    actualExpenditure?: number;
+    outstandingEncumbrance?: number;
+    remainingAmount?: number | undefined;
+    availableAmount?: number | undefined;
+    status?: string;
+    id?: number;
+    budgetId?: number;
+    budgetItemId?: number;
+    budgetItemCode?: string;
+    budgetItemName?: string;
+    accountId?: number | undefined;
+    costCenterId?: number | undefined;
+    budgetClassificationId?: number | undefined;
+    proposedAmount?: number;
+    approvedAmount?: number | undefined;
+    remarks?: string | undefined;
+    rowVersion?: string;
+
+    [key: string]: any;
+}
+
+export class BudgetItemAllocationDto implements IBudgetItemAllocationDto {
+    id?: number;
+    budgetId?: number;
+    budgetItemId?: number;
+    budgetItemCode?: string;
+    budgetItemName?: string;
+    accountId?: number | undefined;
+    costCenterId?: number | undefined;
+    budgetClassificationId?: number | undefined;
+    proposedAmount?: number;
+    approvedAmount?: number | undefined;
+    remarks?: string | undefined;
+    rowVersion?: string;
+
+    [key: string]: any;
+
+    constructor(data?: IBudgetItemAllocationDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.budgetId = _data["budgetId"];
+            this.budgetItemId = _data["budgetItemId"];
+            this.budgetItemCode = _data["budgetItemCode"];
+            this.budgetItemName = _data["budgetItemName"];
+            this.accountId = _data["accountId"];
+            this.costCenterId = _data["costCenterId"];
+            this.budgetClassificationId = _data["budgetClassificationId"];
+            this.proposedAmount = _data["proposedAmount"];
+            this.approvedAmount = _data["approvedAmount"];
+            this.remarks = _data["remarks"];
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): BudgetItemAllocationDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BudgetItemAllocationDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["budgetId"] = this.budgetId;
+        data["budgetItemId"] = this.budgetItemId;
+        data["budgetItemCode"] = this.budgetItemCode;
+        data["budgetItemName"] = this.budgetItemName;
+        data["accountId"] = this.accountId;
+        data["costCenterId"] = this.costCenterId;
+        data["budgetClassificationId"] = this.budgetClassificationId;
+        data["proposedAmount"] = this.proposedAmount;
+        data["approvedAmount"] = this.approvedAmount;
+        data["remarks"] = this.remarks;
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IBudgetItemAllocationDto {
+    id?: number;
+    budgetId?: number;
+    budgetItemId?: number;
+    budgetItemCode?: string;
+    budgetItemName?: string;
+    accountId?: number | undefined;
+    costCenterId?: number | undefined;
+    budgetClassificationId?: number | undefined;
+    proposedAmount?: number;
+    approvedAmount?: number | undefined;
+    remarks?: string | undefined;
+    rowVersion?: string;
+
+    [key: string]: any;
+}
+
 export class BudgetItemDto implements IBudgetItemDto {
     id?: number;
     budgetId?: number;
@@ -23712,6 +27580,7 @@ export class BudgetItemDto implements IBudgetItemDto {
     accountName?: string | undefined;
     fundId?: number | undefined;
     fundName?: string | undefined;
+    budgetName?: string | undefined;
     costCenterId?: number | undefined;
     costCenterName?: string | undefined;
     budgetClassificationId?: number | undefined;
@@ -23752,6 +27621,7 @@ export class BudgetItemDto implements IBudgetItemDto {
             this.accountName = _data["accountName"];
             this.fundId = _data["fundId"];
             this.fundName = _data["fundName"];
+            this.budgetName = _data["budgetName"];
             this.costCenterId = _data["costCenterId"];
             this.costCenterName = _data["costCenterName"];
             this.budgetClassificationId = _data["budgetClassificationId"];
@@ -23794,6 +27664,7 @@ export class BudgetItemDto implements IBudgetItemDto {
         data["accountName"] = this.accountName;
         data["fundId"] = this.fundId;
         data["fundName"] = this.fundName;
+        data["budgetName"] = this.budgetName;
         data["costCenterId"] = this.costCenterId;
         data["costCenterName"] = this.costCenterName;
         data["budgetClassificationId"] = this.budgetClassificationId;
@@ -23825,6 +27696,7 @@ export interface IBudgetItemDto {
     accountName?: string | undefined;
     fundId?: number | undefined;
     fundName?: string | undefined;
+    budgetName?: string | undefined;
     costCenterId?: number | undefined;
     costCenterName?: string | undefined;
     budgetClassificationId?: number | undefined;
@@ -23850,6 +27722,293 @@ export enum BudgetStatus {
     Suspended = "Suspended",
     Closed = "Closed",
     Cancelled = "Cancelled",
+}
+
+export class BudgetTransactionActionRequest implements IBudgetTransactionActionRequest {
+    rowVersion!: string;
+    reason?: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IBudgetTransactionActionRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.rowVersion = _data["rowVersion"];
+            this.reason = _data["reason"];
+        }
+    }
+
+    static fromJS(data: any): BudgetTransactionActionRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new BudgetTransactionActionRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["rowVersion"] = this.rowVersion;
+        data["reason"] = this.reason;
+        return data;
+    }
+}
+
+export interface IBudgetTransactionActionRequest {
+    rowVersion: string;
+    reason?: string | undefined;
+
+    [key: string]: any;
+}
+
+export class BudgetTransactionDetailDto implements IBudgetTransactionDetailDto {
+    id?: number;
+    transactionNumber?: string;
+    budgetItemAllocationId?: number;
+    transactionType?: BudgetTransactionType;
+    transactionDate?: Date;
+    amount?: number;
+    direction?: TransactionDirection;
+    documentType?: string | undefined;
+    documentId?: number | undefined;
+    description?: string | undefined;
+    status?: BudgetTransactionStatus;
+    approvedAt?: Date | undefined;
+    approvedBy?: string | undefined;
+    postedAt?: Date | undefined;
+    postedBy?: string | undefined;
+    reversalOfId?: number | undefined;
+    reversalReason?: string | undefined;
+    rowVersion?: string;
+    created?: Date;
+
+    [key: string]: any;
+
+    constructor(data?: IBudgetTransactionDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.transactionNumber = _data["transactionNumber"];
+            this.budgetItemAllocationId = _data["budgetItemAllocationId"];
+            this.transactionType = _data["transactionType"];
+            this.transactionDate = _data["transactionDate"] ? new Date(_data["transactionDate"].toString()) : undefined as any;
+            this.amount = _data["amount"];
+            this.direction = _data["direction"];
+            this.documentType = _data["documentType"];
+            this.documentId = _data["documentId"];
+            this.description = _data["description"];
+            this.status = _data["status"];
+            this.approvedAt = _data["approvedAt"] ? new Date(_data["approvedAt"].toString()) : undefined as any;
+            this.approvedBy = _data["approvedBy"];
+            this.postedAt = _data["postedAt"] ? new Date(_data["postedAt"].toString()) : undefined as any;
+            this.postedBy = _data["postedBy"];
+            this.reversalOfId = _data["reversalOfId"];
+            this.reversalReason = _data["reversalReason"];
+            this.rowVersion = _data["rowVersion"];
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): BudgetTransactionDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BudgetTransactionDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["transactionNumber"] = this.transactionNumber;
+        data["budgetItemAllocationId"] = this.budgetItemAllocationId;
+        data["transactionType"] = this.transactionType;
+        data["transactionDate"] = this.transactionDate ? formatDate(this.transactionDate) : undefined as any;
+        data["amount"] = this.amount;
+        data["direction"] = this.direction;
+        data["documentType"] = this.documentType;
+        data["documentId"] = this.documentId;
+        data["description"] = this.description;
+        data["status"] = this.status;
+        data["approvedAt"] = this.approvedAt ? this.approvedAt.toISOString() : undefined as any;
+        data["approvedBy"] = this.approvedBy;
+        data["postedAt"] = this.postedAt ? this.postedAt.toISOString() : undefined as any;
+        data["postedBy"] = this.postedBy;
+        data["reversalOfId"] = this.reversalOfId;
+        data["reversalReason"] = this.reversalReason;
+        data["rowVersion"] = this.rowVersion;
+        data["created"] = this.created ? this.created.toISOString() : undefined as any;
+        return data;
+    }
+}
+
+export interface IBudgetTransactionDetailDto {
+    id?: number;
+    transactionNumber?: string;
+    budgetItemAllocationId?: number;
+    transactionType?: BudgetTransactionType;
+    transactionDate?: Date;
+    amount?: number;
+    direction?: TransactionDirection;
+    documentType?: string | undefined;
+    documentId?: number | undefined;
+    description?: string | undefined;
+    status?: BudgetTransactionStatus;
+    approvedAt?: Date | undefined;
+    approvedBy?: string | undefined;
+    postedAt?: Date | undefined;
+    postedBy?: string | undefined;
+    reversalOfId?: number | undefined;
+    reversalReason?: string | undefined;
+    rowVersion?: string;
+    created?: Date;
+
+    [key: string]: any;
+}
+
+export class BudgetTransactionListItemDto implements IBudgetTransactionListItemDto {
+    id?: number;
+    transactionNumber?: string;
+    budgetItemAllocationId?: number;
+    transactionType?: BudgetTransactionType;
+    transactionDate?: Date;
+    amount?: number;
+    direction?: TransactionDirection;
+    description?: string | undefined;
+    status?: BudgetTransactionStatus;
+    isReversed?: boolean;
+    reversalOfId?: number | undefined;
+    rowVersion?: string;
+    created?: Date;
+
+    [key: string]: any;
+
+    constructor(data?: IBudgetTransactionListItemDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.transactionNumber = _data["transactionNumber"];
+            this.budgetItemAllocationId = _data["budgetItemAllocationId"];
+            this.transactionType = _data["transactionType"];
+            this.transactionDate = _data["transactionDate"] ? new Date(_data["transactionDate"].toString()) : undefined as any;
+            this.amount = _data["amount"];
+            this.direction = _data["direction"];
+            this.description = _data["description"];
+            this.status = _data["status"];
+            this.isReversed = _data["isReversed"];
+            this.reversalOfId = _data["reversalOfId"];
+            this.rowVersion = _data["rowVersion"];
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): BudgetTransactionListItemDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BudgetTransactionListItemDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["transactionNumber"] = this.transactionNumber;
+        data["budgetItemAllocationId"] = this.budgetItemAllocationId;
+        data["transactionType"] = this.transactionType;
+        data["transactionDate"] = this.transactionDate ? formatDate(this.transactionDate) : undefined as any;
+        data["amount"] = this.amount;
+        data["direction"] = this.direction;
+        data["description"] = this.description;
+        data["status"] = this.status;
+        data["isReversed"] = this.isReversed;
+        data["reversalOfId"] = this.reversalOfId;
+        data["rowVersion"] = this.rowVersion;
+        data["created"] = this.created ? this.created.toISOString() : undefined as any;
+        return data;
+    }
+}
+
+export interface IBudgetTransactionListItemDto {
+    id?: number;
+    transactionNumber?: string;
+    budgetItemAllocationId?: number;
+    transactionType?: BudgetTransactionType;
+    transactionDate?: Date;
+    amount?: number;
+    direction?: TransactionDirection;
+    description?: string | undefined;
+    status?: BudgetTransactionStatus;
+    isReversed?: boolean;
+    reversalOfId?: number | undefined;
+    rowVersion?: string;
+    created?: Date;
+
+    [key: string]: any;
+}
+
+export enum BudgetTransactionStatus {
+    Draft = "Draft",
+    Submitted = "Submitted",
+    Approved = "Approved",
+    Posted = "Posted",
+    Reversed = "Reversed",
+    Rejected = "Rejected",
+}
+
+export enum BudgetTransactionType {
+    InitialAppropriation = "InitialAppropriation",
+    Supplement = "Supplement",
+    Reduction = "Reduction",
+    CarryForward = "CarryForward",
+    Adjustment = "Adjustment",
+    Lapse = "Lapse",
+    Reversal = "Reversal",
 }
 
 export class BudgetTypeDto implements IBudgetTypeDto {
@@ -24094,6 +28253,7 @@ export interface ICancelBackgroundJobResponse {
 
 export class CancelDisbursementRequestRequest implements ICancelDisbursementRequestRequest {
     reason!: string;
+    rowVersion!: string;
 
     [key: string]: any;
 
@@ -24113,6 +28273,7 @@ export class CancelDisbursementRequestRequest implements ICancelDisbursementRequ
                     this[property] = _data[property];
             }
             this.reason = _data["reason"];
+            this.rowVersion = _data["rowVersion"];
         }
     }
 
@@ -24130,12 +28291,14 @@ export class CancelDisbursementRequestRequest implements ICancelDisbursementRequ
                 data[property] = this[property];
         }
         data["reason"] = this.reason;
+        data["rowVersion"] = this.rowVersion;
         return data;
     }
 }
 
 export interface ICancelDisbursementRequestRequest {
     reason: string;
+    rowVersion: string;
 
     [key: string]: any;
 }
@@ -24248,6 +28411,106 @@ export interface ICancelPaymentOrderCommand {
     [key: string]: any;
 }
 
+export class CancelPurchaseOrderCommand implements ICancelPurchaseOrderCommand {
+    id!: number;
+    reason?: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: ICancelPurchaseOrderCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.reason = _data["reason"];
+        }
+    }
+
+    static fromJS(data: any): CancelPurchaseOrderCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CancelPurchaseOrderCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["reason"] = this.reason;
+        return data;
+    }
+}
+
+export interface ICancelPurchaseOrderCommand {
+    id: number;
+    reason?: string | undefined;
+
+    [key: string]: any;
+}
+
+export class CancelPurchaseRequestRequest implements ICancelPurchaseRequestRequest {
+    reason!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: ICancelPurchaseRequestRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.reason = _data["reason"];
+        }
+    }
+
+    static fromJS(data: any): CancelPurchaseRequestRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new CancelPurchaseRequestRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["reason"] = this.reason;
+        return data;
+    }
+}
+
+export interface ICancelPurchaseRequestRequest {
+    reason: string | undefined;
+
+    [key: string]: any;
+}
+
 export class CancelReceiptVoucherCommand implements ICancelReceiptVoucherCommand {
     id?: number;
     reason?: string;
@@ -24356,6 +28619,58 @@ export interface ICancelRecurringEntryCommand {
     id?: number;
     reason?: string | undefined;
     rowVersion?: string;
+
+    [key: string]: any;
+}
+
+export class CancelSupplierInvoiceCommand implements ICancelSupplierInvoiceCommand {
+    id!: number;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: ICancelSupplierInvoiceCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): CancelSupplierInvoiceCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CancelSupplierInvoiceCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface ICancelSupplierInvoiceCommand {
+    id: number;
+    notes: string | undefined;
 
     [key: string]: any;
 }
@@ -24902,6 +29217,58 @@ export interface IClearCheckCommand {
     id?: number;
     clearedAt?: Date;
     rowVersion?: string;
+
+    [key: string]: any;
+}
+
+export class ClosePurchaseOrderCommand implements IClosePurchaseOrderCommand {
+    id!: number;
+    reason?: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IClosePurchaseOrderCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.reason = _data["reason"];
+        }
+    }
+
+    static fromJS(data: any): ClosePurchaseOrderCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new ClosePurchaseOrderCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["reason"] = this.reason;
+        return data;
+    }
+}
+
+export interface IClosePurchaseOrderCommand {
+    id: number;
+    reason?: string | undefined;
 
     [key: string]: any;
 }
@@ -25478,6 +29845,62 @@ export enum CommitteeType {
     Audit = "Audit",
 }
 
+export class CompleteEvaluationRequest implements ICompleteEvaluationRequest {
+    technicalScore!: number | undefined;
+    financialScore!: number | undefined;
+    rejectionReason!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: ICompleteEvaluationRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.technicalScore = _data["technicalScore"];
+            this.financialScore = _data["financialScore"];
+            this.rejectionReason = _data["rejectionReason"];
+        }
+    }
+
+    static fromJS(data: any): CompleteEvaluationRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new CompleteEvaluationRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["technicalScore"] = this.technicalScore;
+        data["financialScore"] = this.financialScore;
+        data["rejectionReason"] = this.rejectionReason;
+        return data;
+    }
+}
+
+export interface ICompleteEvaluationRequest {
+    technicalScore: number | undefined;
+    financialScore: number | undefined;
+    rejectionReason: string | undefined;
+
+    [key: string]: any;
+}
+
 export class CostCenterDto implements ICostCenterDto {
     id?: number;
     code?: string;
@@ -25698,17 +30121,17 @@ export interface ICreateAccountGroupCommand {
     [key: string]: any;
 }
 
-export class CreateAppropriationRequest implements ICreateAppropriationRequest {
-    budgetId!: number;
-    budgetItemId!: number;
-    appropriationType!: AppropriationType;
-    documentType!: string;
-    documentId!: number;
+export class CreateAccrualEntryRequest implements ICreateAccrualEntryRequest {
+    expenseAccountId!: number;
+    liabilityAccountId!: number;
     amount!: number;
+    currencyId!: number;
+    costCenterId!: number | undefined;
+    narration!: string | undefined;
 
     [key: string]: any;
 
-    constructor(data?: ICreateAppropriationRequest) {
+    constructor(data?: ICreateAccrualEntryRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -25723,18 +30146,18 @@ export class CreateAppropriationRequest implements ICreateAppropriationRequest {
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.budgetId = _data["budgetId"];
-            this.budgetItemId = _data["budgetItemId"];
-            this.appropriationType = _data["appropriationType"];
-            this.documentType = _data["documentType"];
-            this.documentId = _data["documentId"];
+            this.expenseAccountId = _data["expenseAccountId"];
+            this.liabilityAccountId = _data["liabilityAccountId"];
             this.amount = _data["amount"];
+            this.currencyId = _data["currencyId"];
+            this.costCenterId = _data["costCenterId"];
+            this.narration = _data["narration"];
         }
     }
 
-    static fromJS(data: any): CreateAppropriationRequest {
+    static fromJS(data: any): CreateAccrualEntryRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new CreateAppropriationRequest();
+        let result = new CreateAccrualEntryRequest();
         result.init(data);
         return result;
     }
@@ -25745,23 +30168,23 @@ export class CreateAppropriationRequest implements ICreateAppropriationRequest {
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["budgetId"] = this.budgetId;
-        data["budgetItemId"] = this.budgetItemId;
-        data["appropriationType"] = this.appropriationType;
-        data["documentType"] = this.documentType;
-        data["documentId"] = this.documentId;
+        data["expenseAccountId"] = this.expenseAccountId;
+        data["liabilityAccountId"] = this.liabilityAccountId;
         data["amount"] = this.amount;
+        data["currencyId"] = this.currencyId;
+        data["costCenterId"] = this.costCenterId;
+        data["narration"] = this.narration;
         return data;
     }
 }
 
-export interface ICreateAppropriationRequest {
-    budgetId: number;
-    budgetItemId: number;
-    appropriationType: AppropriationType;
-    documentType: string;
-    documentId: number;
+export interface ICreateAccrualEntryRequest {
+    expenseAccountId: number;
+    liabilityAccountId: number;
     amount: number;
+    currencyId: number;
+    costCenterId: number | undefined;
+    narration: string | undefined;
 
     [key: string]: any;
 }
@@ -26274,6 +30697,66 @@ export interface ICreateBudgetClassificationRequest {
     [key: string]: any;
 }
 
+export class CreateBudgetItemAllocationRequest implements ICreateBudgetItemAllocationRequest {
+    budgetId!: number;
+    budgetItemId!: number;
+    proposedAmount!: number;
+    remarks!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: ICreateBudgetItemAllocationRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.budgetId = _data["budgetId"];
+            this.budgetItemId = _data["budgetItemId"];
+            this.proposedAmount = _data["proposedAmount"];
+            this.remarks = _data["remarks"];
+        }
+    }
+
+    static fromJS(data: any): CreateBudgetItemAllocationRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateBudgetItemAllocationRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["budgetId"] = this.budgetId;
+        data["budgetItemId"] = this.budgetItemId;
+        data["proposedAmount"] = this.proposedAmount;
+        data["remarks"] = this.remarks;
+        return data;
+    }
+}
+
+export interface ICreateBudgetItemAllocationRequest {
+    budgetId: number;
+    budgetItemId: number;
+    proposedAmount: number;
+    remarks: string | undefined;
+
+    [key: string]: any;
+}
+
 export class CreateBudgetItemRequest implements ICreateBudgetItemRequest {
     itemCode!: string;
     itemName!: string;
@@ -26410,6 +30893,82 @@ export interface ICreateBudgetRequest {
     fiscalYearId: number;
     fundId: number;
     budgetTypeId: number;
+
+    [key: string]: any;
+}
+
+export class CreateBudgetTransactionRequest implements ICreateBudgetTransactionRequest {
+    budgetItemAllocationId!: number;
+    transactionType!: BudgetTransactionType;
+    transactionDate!: Date;
+    amount!: number;
+    direction!: TransactionDirection;
+    documentType!: string | undefined;
+    documentId!: number | undefined;
+    description!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: ICreateBudgetTransactionRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.budgetItemAllocationId = _data["budgetItemAllocationId"];
+            this.transactionType = _data["transactionType"];
+            this.transactionDate = _data["transactionDate"] ? new Date(_data["transactionDate"].toString()) : undefined as any;
+            this.amount = _data["amount"];
+            this.direction = _data["direction"];
+            this.documentType = _data["documentType"];
+            this.documentId = _data["documentId"];
+            this.description = _data["description"];
+        }
+    }
+
+    static fromJS(data: any): CreateBudgetTransactionRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateBudgetTransactionRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["budgetItemAllocationId"] = this.budgetItemAllocationId;
+        data["transactionType"] = this.transactionType;
+        data["transactionDate"] = this.transactionDate ? formatDate(this.transactionDate) : undefined as any;
+        data["amount"] = this.amount;
+        data["direction"] = this.direction;
+        data["documentType"] = this.documentType;
+        data["documentId"] = this.documentId;
+        data["description"] = this.description;
+        return data;
+    }
+}
+
+export interface ICreateBudgetTransactionRequest {
+    budgetItemAllocationId: number;
+    transactionType: BudgetTransactionType;
+    transactionDate: Date;
+    amount: number;
+    direction: TransactionDirection;
+    documentType: string | undefined;
+    documentId: number | undefined;
+    description: string | undefined;
 
     [key: string]: any;
 }
@@ -26883,7 +31442,11 @@ export interface ICreateDepositSlipCommand {
 }
 
 export class CreateDisbursementRequestRequest implements ICreateDisbursementRequestRequest {
-    paymentOrderId!: number;
+    beneficiaryName!: string;
+    requestedAmount!: number;
+    currencyId!: number;
+    purpose!: string;
+    financialYearId!: number;
     notes!: string | undefined;
 
     [key: string]: any;
@@ -26903,7 +31466,11 @@ export class CreateDisbursementRequestRequest implements ICreateDisbursementRequ
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.paymentOrderId = _data["paymentOrderId"];
+            this.beneficiaryName = _data["beneficiaryName"];
+            this.requestedAmount = _data["requestedAmount"];
+            this.currencyId = _data["currencyId"];
+            this.purpose = _data["purpose"];
+            this.financialYearId = _data["financialYearId"];
             this.notes = _data["notes"];
         }
     }
@@ -26921,14 +31488,22 @@ export class CreateDisbursementRequestRequest implements ICreateDisbursementRequ
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["paymentOrderId"] = this.paymentOrderId;
+        data["beneficiaryName"] = this.beneficiaryName;
+        data["requestedAmount"] = this.requestedAmount;
+        data["currencyId"] = this.currencyId;
+        data["purpose"] = this.purpose;
+        data["financialYearId"] = this.financialYearId;
         data["notes"] = this.notes;
         return data;
     }
 }
 
 export interface ICreateDisbursementRequestRequest {
-    paymentOrderId: number;
+    beneficiaryName: string;
+    requestedAmount: number;
+    currencyId: number;
+    purpose: string;
+    financialYearId: number;
     notes: string | undefined;
 
     [key: string]: any;
@@ -27067,15 +31642,14 @@ export interface ICreateEmployeeCommand {
 }
 
 export class CreateEncumbranceRequest implements ICreateEncumbranceRequest {
-    appropriationId!: number;
     encumbranceType!: EncumbranceType;
     vendorId!: number | undefined;
     purchaseOrderId!: number | undefined;
-    documentType!: string;
-    documentId!: number;
+    documentType!: string | undefined;
+    documentId!: number | undefined;
     description!: string | undefined;
     encumbranceDate!: Date;
-    amount!: number;
+    lines!: EncumbranceLineRequest[];
 
     [key: string]: any;
 
@@ -27086,6 +31660,9 @@ export class CreateEncumbranceRequest implements ICreateEncumbranceRequest {
                     (this as any)[property] = (data as any)[property];
             }
         }
+        if (!data) {
+            this.lines = [];
+        }
     }
 
     init(_data?: any) {
@@ -27094,7 +31671,6 @@ export class CreateEncumbranceRequest implements ICreateEncumbranceRequest {
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.appropriationId = _data["appropriationId"];
             this.encumbranceType = _data["encumbranceType"];
             this.vendorId = _data["vendorId"];
             this.purchaseOrderId = _data["purchaseOrderId"];
@@ -27102,7 +31678,11 @@ export class CreateEncumbranceRequest implements ICreateEncumbranceRequest {
             this.documentId = _data["documentId"];
             this.description = _data["description"];
             this.encumbranceDate = _data["encumbranceDate"] ? new Date(_data["encumbranceDate"].toString()) : undefined as any;
-            this.amount = _data["amount"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(EncumbranceLineRequest.fromJS(item));
+            }
         }
     }
 
@@ -27119,7 +31699,6 @@ export class CreateEncumbranceRequest implements ICreateEncumbranceRequest {
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["appropriationId"] = this.appropriationId;
         data["encumbranceType"] = this.encumbranceType;
         data["vendorId"] = this.vendorId;
         data["purchaseOrderId"] = this.purchaseOrderId;
@@ -27127,21 +31706,24 @@ export class CreateEncumbranceRequest implements ICreateEncumbranceRequest {
         data["documentId"] = this.documentId;
         data["description"] = this.description;
         data["encumbranceDate"] = this.encumbranceDate ? formatDate(this.encumbranceDate) : undefined as any;
-        data["amount"] = this.amount;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
         return data;
     }
 }
 
 export interface ICreateEncumbranceRequest {
-    appropriationId: number;
     encumbranceType: EncumbranceType;
     vendorId: number | undefined;
     purchaseOrderId: number | undefined;
-    documentType: string;
-    documentId: number;
+    documentType: string | undefined;
+    documentId: number | undefined;
     description: string | undefined;
     encumbranceDate: Date;
-    amount: number;
+    lines: EncumbranceLineRequest[];
 
     [key: string]: any;
 }
@@ -27339,10 +31921,10 @@ export class CreateFundRequest implements ICreateFundRequest {
     fundName!: string;
     fundType!: FundType;
     fundCategory!: FundCategory;
-    fiscalYearId!: number | undefined;
     legalAuthority!: string;
     description!: string | undefined;
-    defaultRevenueDebitAccountId!: number | undefined;
+    defaultRevenueAccountId!: number | undefined;
+    currencyId!: number | undefined;
 
     [key: string]: any;
 
@@ -27365,10 +31947,10 @@ export class CreateFundRequest implements ICreateFundRequest {
             this.fundName = _data["fundName"];
             this.fundType = _data["fundType"];
             this.fundCategory = _data["fundCategory"];
-            this.fiscalYearId = _data["fiscalYearId"];
             this.legalAuthority = _data["legalAuthority"];
             this.description = _data["description"];
-            this.defaultRevenueDebitAccountId = _data["defaultRevenueDebitAccountId"];
+            this.defaultRevenueAccountId = _data["defaultRevenueAccountId"];
+            this.currencyId = _data["currencyId"];
         }
     }
 
@@ -27389,10 +31971,10 @@ export class CreateFundRequest implements ICreateFundRequest {
         data["fundName"] = this.fundName;
         data["fundType"] = this.fundType;
         data["fundCategory"] = this.fundCategory;
-        data["fiscalYearId"] = this.fiscalYearId;
         data["legalAuthority"] = this.legalAuthority;
         data["description"] = this.description;
-        data["defaultRevenueDebitAccountId"] = this.defaultRevenueDebitAccountId;
+        data["defaultRevenueAccountId"] = this.defaultRevenueAccountId;
+        data["currencyId"] = this.currencyId;
         return data;
     }
 }
@@ -27402,10 +31984,377 @@ export interface ICreateFundRequest {
     fundName: string;
     fundType: FundType;
     fundCategory: FundCategory;
-    fiscalYearId: number | undefined;
     legalAuthority: string;
     description: string | undefined;
-    defaultRevenueDebitAccountId: number | undefined;
+    defaultRevenueAccountId: number | undefined;
+    currencyId: number | undefined;
+
+    [key: string]: any;
+}
+
+export class CreateGRNCommand implements ICreateGRNCommand {
+    grnDate!: Date;
+    purchaseOrderId!: number;
+    warehouseId!: number;
+    locationId!: number;
+    receivedBy!: number | undefined;
+    notes!: string | undefined;
+    details!: CreateGRNDetailDto[];
+
+    [key: string]: any;
+
+    constructor(data?: ICreateGRNCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.details = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.grnDate = _data["grnDate"] ? new Date(_data["grnDate"].toString()) : undefined as any;
+            this.purchaseOrderId = _data["purchaseOrderId"];
+            this.warehouseId = _data["warehouseId"];
+            this.locationId = _data["locationId"];
+            this.receivedBy = _data["receivedBy"];
+            this.notes = _data["notes"];
+            if (Array.isArray(_data["details"])) {
+                this.details = [] as any;
+                for (let item of _data["details"])
+                    this.details!.push(CreateGRNDetailDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): CreateGRNCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateGRNCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["grnDate"] = this.grnDate ? this.grnDate.toISOString() : undefined as any;
+        data["purchaseOrderId"] = this.purchaseOrderId;
+        data["warehouseId"] = this.warehouseId;
+        data["locationId"] = this.locationId;
+        data["receivedBy"] = this.receivedBy;
+        data["notes"] = this.notes;
+        if (Array.isArray(this.details)) {
+            data["details"] = [];
+            for (let item of this.details)
+                data["details"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface ICreateGRNCommand {
+    grnDate: Date;
+    purchaseOrderId: number;
+    warehouseId: number;
+    locationId: number;
+    receivedBy: number | undefined;
+    notes: string | undefined;
+    details: CreateGRNDetailDto[];
+
+    [key: string]: any;
+}
+
+export class CreateGRNDetailDto implements ICreateGRNDetailDto {
+    purchaseOrderDetailId!: number;
+    itemId!: number;
+    unitId!: number;
+    orderedQuantity!: number;
+    receivedQuantity!: number;
+    acceptedQuantity!: number | undefined;
+    rejectedQuantity!: number | undefined;
+    remainingQuantity!: number;
+    unitCost!: number | undefined;
+    totalCost!: number | undefined;
+    batchNumber!: string | undefined;
+    expiryDate!: Date | undefined;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: ICreateGRNDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.purchaseOrderDetailId = _data["purchaseOrderDetailId"];
+            this.itemId = _data["itemId"];
+            this.unitId = _data["unitId"];
+            this.orderedQuantity = _data["orderedQuantity"];
+            this.receivedQuantity = _data["receivedQuantity"];
+            this.acceptedQuantity = _data["acceptedQuantity"];
+            this.rejectedQuantity = _data["rejectedQuantity"];
+            this.remainingQuantity = _data["remainingQuantity"];
+            this.unitCost = _data["unitCost"];
+            this.totalCost = _data["totalCost"];
+            this.batchNumber = _data["batchNumber"];
+            this.expiryDate = _data["expiryDate"] ? new Date(_data["expiryDate"].toString()) : undefined as any;
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): CreateGRNDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateGRNDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["purchaseOrderDetailId"] = this.purchaseOrderDetailId;
+        data["itemId"] = this.itemId;
+        data["unitId"] = this.unitId;
+        data["orderedQuantity"] = this.orderedQuantity;
+        data["receivedQuantity"] = this.receivedQuantity;
+        data["acceptedQuantity"] = this.acceptedQuantity;
+        data["rejectedQuantity"] = this.rejectedQuantity;
+        data["remainingQuantity"] = this.remainingQuantity;
+        data["unitCost"] = this.unitCost;
+        data["totalCost"] = this.totalCost;
+        data["batchNumber"] = this.batchNumber;
+        data["expiryDate"] = this.expiryDate ? formatDate(this.expiryDate) : undefined as any;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface ICreateGRNDetailDto {
+    purchaseOrderDetailId: number;
+    itemId: number;
+    unitId: number;
+    orderedQuantity: number;
+    receivedQuantity: number;
+    acceptedQuantity: number | undefined;
+    rejectedQuantity: number | undefined;
+    remainingQuantity: number;
+    unitCost: number | undefined;
+    totalCost: number | undefined;
+    batchNumber: string | undefined;
+    expiryDate: Date | undefined;
+    notes: string | undefined;
+
+    [key: string]: any;
+}
+
+export class CreateItemCategoryRequest implements ICreateItemCategoryRequest {
+    code!: string;
+    name!: string;
+    nameEn!: string | undefined;
+    description!: string | undefined;
+    parentItemCategoryId!: number | undefined;
+    expenseAccountId!: number | undefined;
+    inventoryAccountId!: number | undefined;
+    taxAccountId!: number | undefined;
+    taxClass!: string | undefined;
+    isActive!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: ICreateItemCategoryRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.nameEn = _data["nameEn"];
+            this.description = _data["description"];
+            this.parentItemCategoryId = _data["parentItemCategoryId"];
+            this.expenseAccountId = _data["expenseAccountId"];
+            this.inventoryAccountId = _data["inventoryAccountId"];
+            this.taxAccountId = _data["taxAccountId"];
+            this.taxClass = _data["taxClass"];
+            this.isActive = _data["isActive"];
+        }
+    }
+
+    static fromJS(data: any): CreateItemCategoryRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateItemCategoryRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["nameEn"] = this.nameEn;
+        data["description"] = this.description;
+        data["parentItemCategoryId"] = this.parentItemCategoryId;
+        data["expenseAccountId"] = this.expenseAccountId;
+        data["inventoryAccountId"] = this.inventoryAccountId;
+        data["taxAccountId"] = this.taxAccountId;
+        data["taxClass"] = this.taxClass;
+        data["isActive"] = this.isActive;
+        return data;
+    }
+}
+
+export interface ICreateItemCategoryRequest {
+    code: string;
+    name: string;
+    nameEn: string | undefined;
+    description: string | undefined;
+    parentItemCategoryId: number | undefined;
+    expenseAccountId: number | undefined;
+    inventoryAccountId: number | undefined;
+    taxAccountId: number | undefined;
+    taxClass: string | undefined;
+    isActive: boolean;
+
+    [key: string]: any;
+}
+
+export class CreateItemRequest implements ICreateItemRequest {
+    name!: string;
+    nameEn!: string | undefined;
+    description!: string | undefined;
+    categoryId!: number | undefined;
+    unitId!: number;
+    supplierId!: number | undefined;
+    barcode!: string | undefined;
+    itemType!: string;
+    openingStock!: number | undefined;
+    minimumStock!: number | undefined;
+    maximumStock!: number | undefined;
+    reorderLevel!: number | undefined;
+    reorderQuantity!: number | undefined;
+    leadTimeDays!: number | undefined;
+    isActive!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: ICreateItemRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.name = _data["name"];
+            this.nameEn = _data["nameEn"];
+            this.description = _data["description"];
+            this.categoryId = _data["categoryId"];
+            this.unitId = _data["unitId"];
+            this.supplierId = _data["supplierId"];
+            this.barcode = _data["barcode"];
+            this.itemType = _data["itemType"];
+            this.openingStock = _data["openingStock"];
+            this.minimumStock = _data["minimumStock"];
+            this.maximumStock = _data["maximumStock"];
+            this.reorderLevel = _data["reorderLevel"];
+            this.reorderQuantity = _data["reorderQuantity"];
+            this.leadTimeDays = _data["leadTimeDays"];
+            this.isActive = _data["isActive"];
+        }
+    }
+
+    static fromJS(data: any): CreateItemRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateItemRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["name"] = this.name;
+        data["nameEn"] = this.nameEn;
+        data["description"] = this.description;
+        data["categoryId"] = this.categoryId;
+        data["unitId"] = this.unitId;
+        data["supplierId"] = this.supplierId;
+        data["barcode"] = this.barcode;
+        data["itemType"] = this.itemType;
+        data["openingStock"] = this.openingStock;
+        data["minimumStock"] = this.minimumStock;
+        data["maximumStock"] = this.maximumStock;
+        data["reorderLevel"] = this.reorderLevel;
+        data["reorderQuantity"] = this.reorderQuantity;
+        data["leadTimeDays"] = this.leadTimeDays;
+        data["isActive"] = this.isActive;
+        return data;
+    }
+}
+
+export interface ICreateItemRequest {
+    name: string;
+    nameEn: string | undefined;
+    description: string | undefined;
+    categoryId: number | undefined;
+    unitId: number;
+    supplierId: number | undefined;
+    barcode: string | undefined;
+    itemType: string;
+    openingStock: number | undefined;
+    minimumStock: number | undefined;
+    maximumStock: number | undefined;
+    reorderLevel: number | undefined;
+    reorderQuantity: number | undefined;
+    leadTimeDays: number | undefined;
+    isActive: boolean;
 
     [key: string]: any;
 }
@@ -27774,13 +32723,12 @@ export class CreatePaymentOrderCommand implements ICreatePaymentOrderCommand {
     paymentOrderDate?: Date;
     dueDate?: Date | undefined;
     paymentOrderType?: string;
-    vendorId?: number;
     fundId?: number;
-    fiscalYearId?: number;
-    appropriationId?: number;
+    fiscalYearId?: number | undefined;
+    budgetItemAllocationId?: number | undefined;
     budgetClassificationId?: number | undefined;
     costCenterId?: number | undefined;
-    projectId?: number | undefined;
+    accountId?: number | undefined;
     purchaseOrderId?: number | undefined;
     encumbranceId?: number | undefined;
     currencyId?: number;
@@ -27790,11 +32738,9 @@ export class CreatePaymentOrderCommand implements ICreatePaymentOrderCommand {
     paymentMethod?: PaymentMethod;
     bankAccountId?: number | undefined;
     beneficiaryName?: string;
-    beneficiaryIban?: string | undefined;
     beneficiaryAccountNumber?: string | undefined;
     beneficiaryBankName?: string | undefined;
     notes?: string | undefined;
-    lines?: CreatePaymentOrderLineDto[];
     deductions?: CreatePaymentOrderDeductionDto[];
 
     [key: string]: any;
@@ -27817,13 +32763,12 @@ export class CreatePaymentOrderCommand implements ICreatePaymentOrderCommand {
             this.paymentOrderDate = _data["paymentOrderDate"] ? new Date(_data["paymentOrderDate"].toString()) : undefined as any;
             this.dueDate = _data["dueDate"] ? new Date(_data["dueDate"].toString()) : undefined as any;
             this.paymentOrderType = _data["paymentOrderType"];
-            this.vendorId = _data["vendorId"];
             this.fundId = _data["fundId"];
             this.fiscalYearId = _data["fiscalYearId"];
-            this.appropriationId = _data["appropriationId"];
+            this.budgetItemAllocationId = _data["budgetItemAllocationId"];
             this.budgetClassificationId = _data["budgetClassificationId"];
             this.costCenterId = _data["costCenterId"];
-            this.projectId = _data["projectId"];
+            this.accountId = _data["accountId"];
             this.purchaseOrderId = _data["purchaseOrderId"];
             this.encumbranceId = _data["encumbranceId"];
             this.currencyId = _data["currencyId"];
@@ -27833,15 +32778,9 @@ export class CreatePaymentOrderCommand implements ICreatePaymentOrderCommand {
             this.paymentMethod = _data["paymentMethod"];
             this.bankAccountId = _data["bankAccountId"];
             this.beneficiaryName = _data["beneficiaryName"];
-            this.beneficiaryIban = _data["beneficiaryIban"];
             this.beneficiaryAccountNumber = _data["beneficiaryAccountNumber"];
             this.beneficiaryBankName = _data["beneficiaryBankName"];
             this.notes = _data["notes"];
-            if (Array.isArray(_data["lines"])) {
-                this.lines = [] as any;
-                for (let item of _data["lines"])
-                    this.lines!.push(CreatePaymentOrderLineDto.fromJS(item));
-            }
             if (Array.isArray(_data["deductions"])) {
                 this.deductions = [] as any;
                 for (let item of _data["deductions"])
@@ -27866,13 +32805,12 @@ export class CreatePaymentOrderCommand implements ICreatePaymentOrderCommand {
         data["paymentOrderDate"] = this.paymentOrderDate ? this.paymentOrderDate.toISOString() : undefined as any;
         data["dueDate"] = this.dueDate ? this.dueDate.toISOString() : undefined as any;
         data["paymentOrderType"] = this.paymentOrderType;
-        data["vendorId"] = this.vendorId;
         data["fundId"] = this.fundId;
         data["fiscalYearId"] = this.fiscalYearId;
-        data["appropriationId"] = this.appropriationId;
+        data["budgetItemAllocationId"] = this.budgetItemAllocationId;
         data["budgetClassificationId"] = this.budgetClassificationId;
         data["costCenterId"] = this.costCenterId;
-        data["projectId"] = this.projectId;
+        data["accountId"] = this.accountId;
         data["purchaseOrderId"] = this.purchaseOrderId;
         data["encumbranceId"] = this.encumbranceId;
         data["currencyId"] = this.currencyId;
@@ -27882,15 +32820,9 @@ export class CreatePaymentOrderCommand implements ICreatePaymentOrderCommand {
         data["paymentMethod"] = this.paymentMethod;
         data["bankAccountId"] = this.bankAccountId;
         data["beneficiaryName"] = this.beneficiaryName;
-        data["beneficiaryIban"] = this.beneficiaryIban;
         data["beneficiaryAccountNumber"] = this.beneficiaryAccountNumber;
         data["beneficiaryBankName"] = this.beneficiaryBankName;
         data["notes"] = this.notes;
-        if (Array.isArray(this.lines)) {
-            data["lines"] = [];
-            for (let item of this.lines)
-                data["lines"].push(item ? item.toJSON() : undefined as any);
-        }
         if (Array.isArray(this.deductions)) {
             data["deductions"] = [];
             for (let item of this.deductions)
@@ -27904,13 +32836,12 @@ export interface ICreatePaymentOrderCommand {
     paymentOrderDate?: Date;
     dueDate?: Date | undefined;
     paymentOrderType?: string;
-    vendorId?: number;
     fundId?: number;
-    fiscalYearId?: number;
-    appropriationId?: number;
+    fiscalYearId?: number | undefined;
+    budgetItemAllocationId?: number | undefined;
     budgetClassificationId?: number | undefined;
     costCenterId?: number | undefined;
-    projectId?: number | undefined;
+    accountId?: number | undefined;
     purchaseOrderId?: number | undefined;
     encumbranceId?: number | undefined;
     currencyId?: number;
@@ -27920,11 +32851,9 @@ export interface ICreatePaymentOrderCommand {
     paymentMethod?: PaymentMethod;
     bankAccountId?: number | undefined;
     beneficiaryName?: string;
-    beneficiaryIban?: string | undefined;
     beneficiaryAccountNumber?: string | undefined;
     beneficiaryBankName?: string | undefined;
     notes?: string | undefined;
-    lines?: CreatePaymentOrderLineDto[];
     deductions?: CreatePaymentOrderDeductionDto[];
 
     [key: string]: any;
@@ -28010,90 +32939,6 @@ export interface ICreatePaymentOrderDeductionDto {
     isTaxDeduction?: boolean;
     taxAuthorityId?: number | undefined;
     referenceNumber?: string | undefined;
-
-    [key: string]: any;
-}
-
-export class CreatePaymentOrderLineDto implements ICreatePaymentOrderLineDto {
-    lineType?: PaymentOrderLineType;
-    description?: string | undefined;
-    accountId?: number;
-    amount?: number;
-    taxAmount?: number | undefined;
-    fundId?: number | undefined;
-    appropriationId?: number | undefined;
-    organizationUnitId?: number | undefined;
-    costCenterId?: number | undefined;
-    projectId?: number | undefined;
-
-    [key: string]: any;
-
-    constructor(data?: ICreatePaymentOrderLineDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.lineType = _data["lineType"];
-            this.description = _data["description"];
-            this.accountId = _data["accountId"];
-            this.amount = _data["amount"];
-            this.taxAmount = _data["taxAmount"];
-            this.fundId = _data["fundId"];
-            this.appropriationId = _data["appropriationId"];
-            this.organizationUnitId = _data["organizationUnitId"];
-            this.costCenterId = _data["costCenterId"];
-            this.projectId = _data["projectId"];
-        }
-    }
-
-    static fromJS(data: any): CreatePaymentOrderLineDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new CreatePaymentOrderLineDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["lineType"] = this.lineType;
-        data["description"] = this.description;
-        data["accountId"] = this.accountId;
-        data["amount"] = this.amount;
-        data["taxAmount"] = this.taxAmount;
-        data["fundId"] = this.fundId;
-        data["appropriationId"] = this.appropriationId;
-        data["organizationUnitId"] = this.organizationUnitId;
-        data["costCenterId"] = this.costCenterId;
-        data["projectId"] = this.projectId;
-        return data;
-    }
-}
-
-export interface ICreatePaymentOrderLineDto {
-    lineType?: PaymentOrderLineType;
-    description?: string | undefined;
-    accountId?: number;
-    amount?: number;
-    taxAmount?: number | undefined;
-    fundId?: number | undefined;
-    appropriationId?: number | undefined;
-    organizationUnitId?: number | undefined;
-    costCenterId?: number | undefined;
-    projectId?: number | undefined;
 
     [key: string]: any;
 }
@@ -28238,6 +33083,303 @@ export interface ICreateProjectCommand {
     startDate?: Date | undefined;
     endDate?: Date | undefined;
     budgetAmount?: number | undefined;
+
+    [key: string]: any;
+}
+
+export class CreatePurchaseOrderCommand implements ICreatePurchaseOrderCommand {
+    purchaseRequestId!: number | undefined;
+    quotationId!: number | undefined;
+    supplierPartyId!: number;
+    warehouseId!: number | undefined;
+    deliveryLocationId!: number | undefined;
+    currencyCode!: string | undefined;
+    exchangeRate!: number | undefined;
+    paymentTerms!: string | undefined;
+    deliveryTerms!: string | undefined;
+    expectedDeliveryDate!: Date | undefined;
+    notes!: string | undefined;
+    lines!: PurchaseOrderLineDto[];
+
+    [key: string]: any;
+
+    constructor(data?: ICreatePurchaseOrderCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.lines = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.purchaseRequestId = _data["purchaseRequestId"];
+            this.quotationId = _data["quotationId"];
+            this.supplierPartyId = _data["supplierPartyId"];
+            this.warehouseId = _data["warehouseId"];
+            this.deliveryLocationId = _data["deliveryLocationId"];
+            this.currencyCode = _data["currencyCode"];
+            this.exchangeRate = _data["exchangeRate"];
+            this.paymentTerms = _data["paymentTerms"];
+            this.deliveryTerms = _data["deliveryTerms"];
+            this.expectedDeliveryDate = _data["expectedDeliveryDate"] ? new Date(_data["expectedDeliveryDate"].toString()) : undefined as any;
+            this.notes = _data["notes"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(PurchaseOrderLineDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): CreatePurchaseOrderCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreatePurchaseOrderCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["purchaseRequestId"] = this.purchaseRequestId;
+        data["quotationId"] = this.quotationId;
+        data["supplierPartyId"] = this.supplierPartyId;
+        data["warehouseId"] = this.warehouseId;
+        data["deliveryLocationId"] = this.deliveryLocationId;
+        data["currencyCode"] = this.currencyCode;
+        data["exchangeRate"] = this.exchangeRate;
+        data["paymentTerms"] = this.paymentTerms;
+        data["deliveryTerms"] = this.deliveryTerms;
+        data["expectedDeliveryDate"] = this.expectedDeliveryDate ? this.expectedDeliveryDate.toISOString() : undefined as any;
+        data["notes"] = this.notes;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface ICreatePurchaseOrderCommand {
+    purchaseRequestId: number | undefined;
+    quotationId: number | undefined;
+    supplierPartyId: number;
+    warehouseId: number | undefined;
+    deliveryLocationId: number | undefined;
+    currencyCode: string | undefined;
+    exchangeRate: number | undefined;
+    paymentTerms: string | undefined;
+    deliveryTerms: string | undefined;
+    expectedDeliveryDate: Date | undefined;
+    notes: string | undefined;
+    lines: PurchaseOrderLineDto[];
+
+    [key: string]: any;
+}
+
+export class CreatePurchaseRequestCommand implements ICreatePurchaseRequestCommand {
+    requestDate!: Date;
+    requiredDate!: Date | undefined;
+    departmentId!: number | undefined;
+    costCenterId!: number | undefined;
+    requesterName!: string;
+    priority!: PurchaseRequestPriority;
+    notes!: string | undefined;
+    lines!: PurchaseRequestLineDto[];
+
+    [key: string]: any;
+
+    constructor(data?: ICreatePurchaseRequestCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.lines = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.requestDate = _data["requestDate"] ? new Date(_data["requestDate"].toString()) : undefined as any;
+            this.requiredDate = _data["requiredDate"] ? new Date(_data["requiredDate"].toString()) : undefined as any;
+            this.departmentId = _data["departmentId"];
+            this.costCenterId = _data["costCenterId"];
+            this.requesterName = _data["requesterName"];
+            this.priority = _data["priority"];
+            this.notes = _data["notes"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(PurchaseRequestLineDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): CreatePurchaseRequestCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreatePurchaseRequestCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["requestDate"] = this.requestDate ? this.requestDate.toISOString() : undefined as any;
+        data["requiredDate"] = this.requiredDate ? formatDate(this.requiredDate) : undefined as any;
+        data["departmentId"] = this.departmentId;
+        data["costCenterId"] = this.costCenterId;
+        data["requesterName"] = this.requesterName;
+        data["priority"] = this.priority;
+        data["notes"] = this.notes;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface ICreatePurchaseRequestCommand {
+    requestDate: Date;
+    requiredDate: Date | undefined;
+    departmentId: number | undefined;
+    costCenterId: number | undefined;
+    requesterName: string;
+    priority: PurchaseRequestPriority;
+    notes: string | undefined;
+    lines: PurchaseRequestLineDto[];
+
+    [key: string]: any;
+}
+
+export class CreateQuotationCommand implements ICreateQuotationCommand {
+    supplierPartyId!: number;
+    quotationDate!: Date;
+    validUntil!: Date | undefined;
+    currencyCode!: string | undefined;
+    exchangeRate!: number | undefined;
+    shippingCost!: number | undefined;
+    otherCharges!: number | undefined;
+    paymentTerms!: string | undefined;
+    deliveryTerms!: string | undefined;
+    leadTimeDays!: number | undefined;
+    warrantyPeriodMonths!: number | undefined;
+    notes!: string | undefined;
+    lines!: QuotationLineDto[];
+
+    [key: string]: any;
+
+    constructor(data?: ICreateQuotationCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.lines = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.supplierPartyId = _data["supplierPartyId"];
+            this.quotationDate = _data["quotationDate"] ? new Date(_data["quotationDate"].toString()) : undefined as any;
+            this.validUntil = _data["validUntil"] ? new Date(_data["validUntil"].toString()) : undefined as any;
+            this.currencyCode = _data["currencyCode"];
+            this.exchangeRate = _data["exchangeRate"];
+            this.shippingCost = _data["shippingCost"];
+            this.otherCharges = _data["otherCharges"];
+            this.paymentTerms = _data["paymentTerms"];
+            this.deliveryTerms = _data["deliveryTerms"];
+            this.leadTimeDays = _data["leadTimeDays"];
+            this.warrantyPeriodMonths = _data["warrantyPeriodMonths"];
+            this.notes = _data["notes"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(QuotationLineDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): CreateQuotationCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateQuotationCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["supplierPartyId"] = this.supplierPartyId;
+        data["quotationDate"] = this.quotationDate ? this.quotationDate.toISOString() : undefined as any;
+        data["validUntil"] = this.validUntil ? this.validUntil.toISOString() : undefined as any;
+        data["currencyCode"] = this.currencyCode;
+        data["exchangeRate"] = this.exchangeRate;
+        data["shippingCost"] = this.shippingCost;
+        data["otherCharges"] = this.otherCharges;
+        data["paymentTerms"] = this.paymentTerms;
+        data["deliveryTerms"] = this.deliveryTerms;
+        data["leadTimeDays"] = this.leadTimeDays;
+        data["warrantyPeriodMonths"] = this.warrantyPeriodMonths;
+        data["notes"] = this.notes;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface ICreateQuotationCommand {
+    supplierPartyId: number;
+    quotationDate: Date;
+    validUntil: Date | undefined;
+    currencyCode: string | undefined;
+    exchangeRate: number | undefined;
+    shippingCost: number | undefined;
+    otherCharges: number | undefined;
+    paymentTerms: string | undefined;
+    deliveryTerms: string | undefined;
+    leadTimeDays: number | undefined;
+    warrantyPeriodMonths: number | undefined;
+    notes: string | undefined;
+    lines: QuotationLineDto[];
 
     [key: string]: any;
 }
@@ -28602,6 +33744,197 @@ export interface ICreateSessionRequest {
     [key: string]: any;
 }
 
+export class CreateSupplierInvoiceCommand implements ICreateSupplierInvoiceCommand {
+    purchaseOrderId!: number;
+    supplierInvoiceNumber!: string;
+    invoiceDate!: Date;
+    currencyCode!: string | undefined;
+    exchangeRate!: number | undefined;
+    subTotal!: number | undefined;
+    discountAmount!: number | undefined;
+    taxAmount!: number | undefined;
+    shippingCost!: number | undefined;
+    otherCharges!: number | undefined;
+    grandTotal!: number | undefined;
+    dueDate!: Date | undefined;
+    notes!: string | undefined;
+    details!: CreateSupplierInvoiceDetailDto[];
+
+    [key: string]: any;
+
+    constructor(data?: ICreateSupplierInvoiceCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.details = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.purchaseOrderId = _data["purchaseOrderId"];
+            this.supplierInvoiceNumber = _data["supplierInvoiceNumber"];
+            this.invoiceDate = _data["invoiceDate"] ? new Date(_data["invoiceDate"].toString()) : undefined as any;
+            this.currencyCode = _data["currencyCode"];
+            this.exchangeRate = _data["exchangeRate"];
+            this.subTotal = _data["subTotal"];
+            this.discountAmount = _data["discountAmount"];
+            this.taxAmount = _data["taxAmount"];
+            this.shippingCost = _data["shippingCost"];
+            this.otherCharges = _data["otherCharges"];
+            this.grandTotal = _data["grandTotal"];
+            this.dueDate = _data["dueDate"] ? new Date(_data["dueDate"].toString()) : undefined as any;
+            this.notes = _data["notes"];
+            if (Array.isArray(_data["details"])) {
+                this.details = [] as any;
+                for (let item of _data["details"])
+                    this.details!.push(CreateSupplierInvoiceDetailDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): CreateSupplierInvoiceCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateSupplierInvoiceCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["purchaseOrderId"] = this.purchaseOrderId;
+        data["supplierInvoiceNumber"] = this.supplierInvoiceNumber;
+        data["invoiceDate"] = this.invoiceDate ? formatDate(this.invoiceDate) : undefined as any;
+        data["currencyCode"] = this.currencyCode;
+        data["exchangeRate"] = this.exchangeRate;
+        data["subTotal"] = this.subTotal;
+        data["discountAmount"] = this.discountAmount;
+        data["taxAmount"] = this.taxAmount;
+        data["shippingCost"] = this.shippingCost;
+        data["otherCharges"] = this.otherCharges;
+        data["grandTotal"] = this.grandTotal;
+        data["dueDate"] = this.dueDate ? formatDate(this.dueDate) : undefined as any;
+        data["notes"] = this.notes;
+        if (Array.isArray(this.details)) {
+            data["details"] = [];
+            for (let item of this.details)
+                data["details"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface ICreateSupplierInvoiceCommand {
+    purchaseOrderId: number;
+    supplierInvoiceNumber: string;
+    invoiceDate: Date;
+    currencyCode: string | undefined;
+    exchangeRate: number | undefined;
+    subTotal: number | undefined;
+    discountAmount: number | undefined;
+    taxAmount: number | undefined;
+    shippingCost: number | undefined;
+    otherCharges: number | undefined;
+    grandTotal: number | undefined;
+    dueDate: Date | undefined;
+    notes: string | undefined;
+    details: CreateSupplierInvoiceDetailDto[];
+
+    [key: string]: any;
+}
+
+export class CreateSupplierInvoiceDetailDto implements ICreateSupplierInvoiceDetailDto {
+    purchaseOrderDetailId!: number;
+    goodsReceiptNoteDetailId!: number | undefined;
+    itemId!: number;
+    quantity!: number;
+    unitPrice!: number;
+    discountAmount!: number | undefined;
+    taxAmount!: number | undefined;
+    lineTotal!: number | undefined;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: ICreateSupplierInvoiceDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.purchaseOrderDetailId = _data["purchaseOrderDetailId"];
+            this.goodsReceiptNoteDetailId = _data["goodsReceiptNoteDetailId"];
+            this.itemId = _data["itemId"];
+            this.quantity = _data["quantity"];
+            this.unitPrice = _data["unitPrice"];
+            this.discountAmount = _data["discountAmount"];
+            this.taxAmount = _data["taxAmount"];
+            this.lineTotal = _data["lineTotal"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): CreateSupplierInvoiceDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateSupplierInvoiceDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["purchaseOrderDetailId"] = this.purchaseOrderDetailId;
+        data["goodsReceiptNoteDetailId"] = this.goodsReceiptNoteDetailId;
+        data["itemId"] = this.itemId;
+        data["quantity"] = this.quantity;
+        data["unitPrice"] = this.unitPrice;
+        data["discountAmount"] = this.discountAmount;
+        data["taxAmount"] = this.taxAmount;
+        data["lineTotal"] = this.lineTotal;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface ICreateSupplierInvoiceDetailDto {
+    purchaseOrderDetailId: number;
+    goodsReceiptNoteDetailId: number | undefined;
+    itemId: number;
+    quantity: number;
+    unitPrice: number;
+    discountAmount: number | undefined;
+    taxAmount: number | undefined;
+    lineTotal: number | undefined;
+    notes: string | undefined;
+
+    [key: string]: any;
+}
+
 export class CreateTemplateCommand implements ICreateTemplateCommand {
     templateName?: string;
     description?: string | undefined;
@@ -28742,15 +34075,18 @@ export interface ICreateTemplateLineCommand {
     [key: string]: any;
 }
 
-export class CreateTransferRequest implements ICreateTransferRequest {
-    budgetId!: number;
-    sourceBudgetItemId!: number;
-    targetBudgetItemId!: number;
-    amount!: number;
+export class CreateUnitRequest implements ICreateUnitRequest {
+    code!: string;
+    name!: string;
+    nameAr!: string | undefined;
+    unitType!: string | undefined;
+    baseUnitId!: number | undefined;
+    conversionToBase!: number | undefined;
+    isActive!: boolean;
 
     [key: string]: any;
 
-    constructor(data?: ICreateTransferRequest) {
+    constructor(data?: ICreateUnitRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -28765,16 +34101,19 @@ export class CreateTransferRequest implements ICreateTransferRequest {
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.budgetId = _data["budgetId"];
-            this.sourceBudgetItemId = _data["sourceBudgetItemId"];
-            this.targetBudgetItemId = _data["targetBudgetItemId"];
-            this.amount = _data["amount"];
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.nameAr = _data["nameAr"];
+            this.unitType = _data["unitType"];
+            this.baseUnitId = _data["baseUnitId"];
+            this.conversionToBase = _data["conversionToBase"];
+            this.isActive = _data["isActive"];
         }
     }
 
-    static fromJS(data: any): CreateTransferRequest {
+    static fromJS(data: any): CreateUnitRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new CreateTransferRequest();
+        let result = new CreateUnitRequest();
         result.init(data);
         return result;
     }
@@ -28785,19 +34124,25 @@ export class CreateTransferRequest implements ICreateTransferRequest {
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["budgetId"] = this.budgetId;
-        data["sourceBudgetItemId"] = this.sourceBudgetItemId;
-        data["targetBudgetItemId"] = this.targetBudgetItemId;
-        data["amount"] = this.amount;
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["nameAr"] = this.nameAr;
+        data["unitType"] = this.unitType;
+        data["baseUnitId"] = this.baseUnitId;
+        data["conversionToBase"] = this.conversionToBase;
+        data["isActive"] = this.isActive;
         return data;
     }
 }
 
-export interface ICreateTransferRequest {
-    budgetId: number;
-    sourceBudgetItemId: number;
-    targetBudgetItemId: number;
-    amount: number;
+export interface ICreateUnitRequest {
+    code: string;
+    name: string;
+    nameAr: string | undefined;
+    unitType: string | undefined;
+    baseUnitId: number | undefined;
+    conversionToBase: number | undefined;
+    isActive: boolean;
 
     [key: string]: any;
 }
@@ -28854,6 +34199,94 @@ export interface ICreateUserCommand {
     login?: string;
     accountType?: AccountType | undefined;
     departmentId?: number | undefined;
+
+    [key: string]: any;
+}
+
+export class CreateWarehouseRequest implements ICreateWarehouseRequest {
+    code!: string;
+    name!: string;
+    locationId!: number | undefined;
+    managerId!: number | undefined;
+    address!: string | undefined;
+    city!: string | undefined;
+    phone!: string | undefined;
+    email!: string | undefined;
+    totalCapacity!: number | undefined;
+    currentLoad!: number | undefined;
+    isActive!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: ICreateWarehouseRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.locationId = _data["locationId"];
+            this.managerId = _data["managerId"];
+            this.address = _data["address"];
+            this.city = _data["city"];
+            this.phone = _data["phone"];
+            this.email = _data["email"];
+            this.totalCapacity = _data["totalCapacity"];
+            this.currentLoad = _data["currentLoad"];
+            this.isActive = _data["isActive"];
+        }
+    }
+
+    static fromJS(data: any): CreateWarehouseRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateWarehouseRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["locationId"] = this.locationId;
+        data["managerId"] = this.managerId;
+        data["address"] = this.address;
+        data["city"] = this.city;
+        data["phone"] = this.phone;
+        data["email"] = this.email;
+        data["totalCapacity"] = this.totalCapacity;
+        data["currentLoad"] = this.currentLoad;
+        data["isActive"] = this.isActive;
+        return data;
+    }
+}
+
+export interface ICreateWarehouseRequest {
+    code: string;
+    name: string;
+    locationId: number | undefined;
+    managerId: number | undefined;
+    address: string | undefined;
+    city: string | undefined;
+    phone: string | undefined;
+    email: string | undefined;
+    totalCapacity: number | undefined;
+    currentLoad: number | undefined;
+    isActive: boolean;
 
     [key: string]: any;
 }
@@ -29407,6 +34840,9 @@ export class DisbursementRegisterDetailDto implements IDisbursementRegisterDetai
     fundCode?: string;
     approverName?: string | undefined;
     paidAt?: Date | undefined;
+    accrualJournalEntryId?: number | undefined;
+    accrualEntryNumber?: string | undefined;
+    accrualEntryStatus?: string | undefined;
     payments?: PaymentDetailDto[];
 
     [key: string]: any;
@@ -29435,6 +34871,9 @@ export class DisbursementRegisterDetailDto implements IDisbursementRegisterDetai
             this.fundCode = _data["fundCode"];
             this.approverName = _data["approverName"];
             this.paidAt = _data["paidAt"] ? new Date(_data["paidAt"].toString()) : undefined as any;
+            this.accrualJournalEntryId = _data["accrualJournalEntryId"];
+            this.accrualEntryNumber = _data["accrualEntryNumber"];
+            this.accrualEntryStatus = _data["accrualEntryStatus"];
             if (Array.isArray(_data["payments"])) {
                 this.payments = [] as any;
                 for (let item of _data["payments"])
@@ -29465,6 +34904,9 @@ export class DisbursementRegisterDetailDto implements IDisbursementRegisterDetai
         data["fundCode"] = this.fundCode;
         data["approverName"] = this.approverName;
         data["paidAt"] = this.paidAt ? formatDate(this.paidAt) : undefined as any;
+        data["accrualJournalEntryId"] = this.accrualJournalEntryId;
+        data["accrualEntryNumber"] = this.accrualEntryNumber;
+        data["accrualEntryStatus"] = this.accrualEntryStatus;
         if (Array.isArray(this.payments)) {
             data["payments"] = [];
             for (let item of this.payments)
@@ -29484,6 +34926,9 @@ export interface IDisbursementRegisterDetailDto {
     fundCode?: string;
     approverName?: string | undefined;
     paidAt?: Date | undefined;
+    accrualJournalEntryId?: number | undefined;
+    accrualEntryNumber?: string | undefined;
+    accrualEntryStatus?: string | undefined;
     payments?: PaymentDetailDto[];
 
     [key: string]: any;
@@ -29570,6 +35015,9 @@ export class DisbursementRegisterLineDto implements IDisbursementRegisterLineDto
     approverId?: number | undefined;
     approverName?: string | undefined;
     paidAt?: Date | undefined;
+    accrualJournalEntryId?: number | undefined;
+    accrualEntryNumber?: string | undefined;
+    accrualEntryStatus?: string | undefined;
 
     [key: string]: any;
 
@@ -29600,6 +35048,9 @@ export class DisbursementRegisterLineDto implements IDisbursementRegisterLineDto
             this.approverId = _data["approverId"];
             this.approverName = _data["approverName"];
             this.paidAt = _data["paidAt"] ? new Date(_data["paidAt"].toString()) : undefined as any;
+            this.accrualJournalEntryId = _data["accrualJournalEntryId"];
+            this.accrualEntryNumber = _data["accrualEntryNumber"];
+            this.accrualEntryStatus = _data["accrualEntryStatus"];
         }
     }
 
@@ -29628,6 +35079,9 @@ export class DisbursementRegisterLineDto implements IDisbursementRegisterLineDto
         data["approverId"] = this.approverId;
         data["approverName"] = this.approverName;
         data["paidAt"] = this.paidAt ? formatDate(this.paidAt) : undefined as any;
+        data["accrualJournalEntryId"] = this.accrualJournalEntryId;
+        data["accrualEntryNumber"] = this.accrualEntryNumber;
+        data["accrualEntryStatus"] = this.accrualEntryStatus;
         return data;
     }
 }
@@ -29645,6 +35099,9 @@ export interface IDisbursementRegisterLineDto {
     approverId?: number | undefined;
     approverName?: string | undefined;
     paidAt?: Date | undefined;
+    accrualJournalEntryId?: number | undefined;
+    accrualEntryNumber?: string | undefined;
+    accrualEntryStatus?: string | undefined;
 
     [key: string]: any;
 }
@@ -29728,15 +35185,21 @@ export interface IDisbursementRegisterTotalDto {
 export class DisbursementRequestDetailDto implements IDisbursementRequestDetailDto {
     id!: number;
     requestNumber!: string;
-    paymentOrderId!: number;
-    paymentOrderNumber!: string;
     requestedById!: number;
     requestedByName!: string;
+    beneficiaryName!: string;
+    requestedAmount!: number;
+    currencyId!: number;
+    purpose!: string;
+    financialYearId!: number;
     requestDate!: Date;
     status!: DisbursementRequestStatus;
-    hasWarning!: boolean;
     notes!: string | undefined;
-    requestedAmount!: number;
+    paymentDate!: Date | undefined;
+    paymentOrderId!: number | undefined;
+    paymentOrderNumber!: string | undefined;
+    accrualJournalEntryId!: number | undefined;
+    accrualEntryNumber!: string | undefined;
     approvals!: ApprovalStepDto[];
 
     [key: string]: any;
@@ -29761,15 +35224,21 @@ export class DisbursementRequestDetailDto implements IDisbursementRequestDetailD
             }
             this.id = _data["id"];
             this.requestNumber = _data["requestNumber"];
-            this.paymentOrderId = _data["paymentOrderId"];
-            this.paymentOrderNumber = _data["paymentOrderNumber"];
             this.requestedById = _data["requestedById"];
             this.requestedByName = _data["requestedByName"];
+            this.beneficiaryName = _data["beneficiaryName"];
+            this.requestedAmount = _data["requestedAmount"];
+            this.currencyId = _data["currencyId"];
+            this.purpose = _data["purpose"];
+            this.financialYearId = _data["financialYearId"];
             this.requestDate = _data["requestDate"] ? new Date(_data["requestDate"].toString()) : undefined as any;
             this.status = _data["status"];
-            this.hasWarning = _data["hasWarning"];
             this.notes = _data["notes"];
-            this.requestedAmount = _data["requestedAmount"];
+            this.paymentDate = _data["paymentDate"] ? new Date(_data["paymentDate"].toString()) : undefined as any;
+            this.paymentOrderId = _data["paymentOrderId"];
+            this.paymentOrderNumber = _data["paymentOrderNumber"];
+            this.accrualJournalEntryId = _data["accrualJournalEntryId"];
+            this.accrualEntryNumber = _data["accrualEntryNumber"];
             if (Array.isArray(_data["approvals"])) {
                 this.approvals = [] as any;
                 for (let item of _data["approvals"])
@@ -29793,15 +35262,21 @@ export class DisbursementRequestDetailDto implements IDisbursementRequestDetailD
         }
         data["id"] = this.id;
         data["requestNumber"] = this.requestNumber;
-        data["paymentOrderId"] = this.paymentOrderId;
-        data["paymentOrderNumber"] = this.paymentOrderNumber;
         data["requestedById"] = this.requestedById;
         data["requestedByName"] = this.requestedByName;
+        data["beneficiaryName"] = this.beneficiaryName;
+        data["requestedAmount"] = this.requestedAmount;
+        data["currencyId"] = this.currencyId;
+        data["purpose"] = this.purpose;
+        data["financialYearId"] = this.financialYearId;
         data["requestDate"] = this.requestDate ? formatDate(this.requestDate) : undefined as any;
         data["status"] = this.status;
-        data["hasWarning"] = this.hasWarning;
         data["notes"] = this.notes;
-        data["requestedAmount"] = this.requestedAmount;
+        data["paymentDate"] = this.paymentDate ? this.paymentDate.toISOString() : undefined as any;
+        data["paymentOrderId"] = this.paymentOrderId;
+        data["paymentOrderNumber"] = this.paymentOrderNumber;
+        data["accrualJournalEntryId"] = this.accrualJournalEntryId;
+        data["accrualEntryNumber"] = this.accrualEntryNumber;
         if (Array.isArray(this.approvals)) {
             data["approvals"] = [];
             for (let item of this.approvals)
@@ -29814,15 +35289,21 @@ export class DisbursementRequestDetailDto implements IDisbursementRequestDetailD
 export interface IDisbursementRequestDetailDto {
     id: number;
     requestNumber: string;
-    paymentOrderId: number;
-    paymentOrderNumber: string;
     requestedById: number;
     requestedByName: string;
+    beneficiaryName: string;
+    requestedAmount: number;
+    currencyId: number;
+    purpose: string;
+    financialYearId: number;
     requestDate: Date;
     status: DisbursementRequestStatus;
-    hasWarning: boolean;
     notes: string | undefined;
-    requestedAmount: number;
+    paymentDate: Date | undefined;
+    paymentOrderId: number | undefined;
+    paymentOrderNumber: string | undefined;
+    accrualJournalEntryId: number | undefined;
+    accrualEntryNumber: string | undefined;
     approvals: ApprovalStepDto[];
 
     [key: string]: any;
@@ -29831,19 +35312,22 @@ export interface IDisbursementRequestDetailDto {
 export class DisbursementRequestDto implements IDisbursementRequestDto {
     id!: number;
     requestNumber!: string;
-    paymentOrderId!: number;
-    paymentOrderNumber!: string;
     requestedById!: number;
     requestedByName!: string;
+    beneficiaryName!: string;
+    requestedAmount!: number;
+    currencyId!: number;
+    purpose!: string;
+    financialYearId!: number;
     requestDate!: Date;
     status!: DisbursementRequestStatus;
-    hasWarning!: boolean;
     notes!: string | undefined;
-    requestedAmount!: number;
-    payeeName!: string | undefined;
-    fundName!: string | undefined;
-    approvalDate!: Date | undefined;
     paymentDate!: Date | undefined;
+    paymentOrderId!: number | undefined;
+    paymentOrderNumber!: string | undefined;
+    accrualJournalEntryId!: number | undefined;
+    accrualEntryNumber!: string | undefined;
+    approvals!: ApprovalStepDto[];
 
     [key: string]: any;
 
@@ -29853,6 +35337,9 @@ export class DisbursementRequestDto implements IDisbursementRequestDto {
                 if (data.hasOwnProperty(property))
                     (this as any)[property] = (data as any)[property];
             }
+        }
+        if (!data) {
+            this.approvals = [];
         }
     }
 
@@ -29864,19 +35351,26 @@ export class DisbursementRequestDto implements IDisbursementRequestDto {
             }
             this.id = _data["id"];
             this.requestNumber = _data["requestNumber"];
-            this.paymentOrderId = _data["paymentOrderId"];
-            this.paymentOrderNumber = _data["paymentOrderNumber"];
             this.requestedById = _data["requestedById"];
             this.requestedByName = _data["requestedByName"];
+            this.beneficiaryName = _data["beneficiaryName"];
+            this.requestedAmount = _data["requestedAmount"];
+            this.currencyId = _data["currencyId"];
+            this.purpose = _data["purpose"];
+            this.financialYearId = _data["financialYearId"];
             this.requestDate = _data["requestDate"] ? new Date(_data["requestDate"].toString()) : undefined as any;
             this.status = _data["status"];
-            this.hasWarning = _data["hasWarning"];
             this.notes = _data["notes"];
-            this.requestedAmount = _data["requestedAmount"];
-            this.payeeName = _data["payeeName"];
-            this.fundName = _data["fundName"];
-            this.approvalDate = _data["approvalDate"] ? new Date(_data["approvalDate"].toString()) : undefined as any;
             this.paymentDate = _data["paymentDate"] ? new Date(_data["paymentDate"].toString()) : undefined as any;
+            this.paymentOrderId = _data["paymentOrderId"];
+            this.paymentOrderNumber = _data["paymentOrderNumber"];
+            this.accrualJournalEntryId = _data["accrualJournalEntryId"];
+            this.accrualEntryNumber = _data["accrualEntryNumber"];
+            if (Array.isArray(_data["approvals"])) {
+                this.approvals = [] as any;
+                for (let item of _data["approvals"])
+                    this.approvals!.push(ApprovalStepDto.fromJS(item));
+            }
         }
     }
 
@@ -29895,19 +35389,26 @@ export class DisbursementRequestDto implements IDisbursementRequestDto {
         }
         data["id"] = this.id;
         data["requestNumber"] = this.requestNumber;
-        data["paymentOrderId"] = this.paymentOrderId;
-        data["paymentOrderNumber"] = this.paymentOrderNumber;
         data["requestedById"] = this.requestedById;
         data["requestedByName"] = this.requestedByName;
+        data["beneficiaryName"] = this.beneficiaryName;
+        data["requestedAmount"] = this.requestedAmount;
+        data["currencyId"] = this.currencyId;
+        data["purpose"] = this.purpose;
+        data["financialYearId"] = this.financialYearId;
         data["requestDate"] = this.requestDate ? formatDate(this.requestDate) : undefined as any;
         data["status"] = this.status;
-        data["hasWarning"] = this.hasWarning;
         data["notes"] = this.notes;
-        data["requestedAmount"] = this.requestedAmount;
-        data["payeeName"] = this.payeeName;
-        data["fundName"] = this.fundName;
-        data["approvalDate"] = this.approvalDate ? this.approvalDate.toISOString() : undefined as any;
         data["paymentDate"] = this.paymentDate ? this.paymentDate.toISOString() : undefined as any;
+        data["paymentOrderId"] = this.paymentOrderId;
+        data["paymentOrderNumber"] = this.paymentOrderNumber;
+        data["accrualJournalEntryId"] = this.accrualJournalEntryId;
+        data["accrualEntryNumber"] = this.accrualEntryNumber;
+        if (Array.isArray(this.approvals)) {
+            data["approvals"] = [];
+            for (let item of this.approvals)
+                data["approvals"].push(item ? item.toJSON() : undefined as any);
+        }
         return data;
     }
 }
@@ -29915,19 +35416,22 @@ export class DisbursementRequestDto implements IDisbursementRequestDto {
 export interface IDisbursementRequestDto {
     id: number;
     requestNumber: string;
-    paymentOrderId: number;
-    paymentOrderNumber: string;
     requestedById: number;
     requestedByName: string;
+    beneficiaryName: string;
+    requestedAmount: number;
+    currencyId: number;
+    purpose: string;
+    financialYearId: number;
     requestDate: Date;
     status: DisbursementRequestStatus;
-    hasWarning: boolean;
     notes: string | undefined;
-    requestedAmount: number;
-    payeeName: string | undefined;
-    fundName: string | undefined;
-    approvalDate: Date | undefined;
     paymentDate: Date | undefined;
+    paymentOrderId: number | undefined;
+    paymentOrderNumber: string | undefined;
+    accrualJournalEntryId: number | undefined;
+    accrualEntryNumber: string | undefined;
+    approvals: ApprovalStepDto[];
 
     [key: string]: any;
 }
@@ -30295,21 +35799,18 @@ export interface IEncumbranceActionRequest {
 }
 
 export class EncumbranceDetailDto implements IEncumbranceDetailDto {
-    vendorId?: number | undefined;
+    vendorPartyId?: number | undefined;
     purchaseOrderId?: number | undefined;
-    documentType?: string;
-    documentId?: number;
+    documentType?: string | undefined;
+    documentId?: number | undefined;
     reversalReason?: string | undefined;
-    appropriationNumber?: string;
-    itemCode?: string;
-    fundNumber?: string;
+    lines?: EncumbranceLineDto[];
     id?: number;
     encumbranceNumber?: string;
-    appropriationId?: number;
     encumbranceType?: EncumbranceType;
     description?: string | undefined;
     encumbranceDate?: Date;
-    amount?: number;
+    totalAmount?: number;
     status?: EncumbranceStatus;
     isReversed?: boolean;
     reversalOfId?: number | undefined;
@@ -30333,21 +35834,22 @@ export class EncumbranceDetailDto implements IEncumbranceDetailDto {
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.vendorId = _data["vendorId"];
+            this.vendorPartyId = _data["vendorPartyId"];
             this.purchaseOrderId = _data["purchaseOrderId"];
             this.documentType = _data["documentType"];
             this.documentId = _data["documentId"];
             this.reversalReason = _data["reversalReason"];
-            this.appropriationNumber = _data["appropriationNumber"];
-            this.itemCode = _data["itemCode"];
-            this.fundNumber = _data["fundNumber"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(EncumbranceLineDto.fromJS(item));
+            }
             this.id = _data["id"];
             this.encumbranceNumber = _data["encumbranceNumber"];
-            this.appropriationId = _data["appropriationId"];
             this.encumbranceType = _data["encumbranceType"];
             this.description = _data["description"];
             this.encumbranceDate = _data["encumbranceDate"] ? new Date(_data["encumbranceDate"].toString()) : undefined as any;
-            this.amount = _data["amount"];
+            this.totalAmount = _data["totalAmount"];
             this.status = _data["status"];
             this.isReversed = _data["isReversed"];
             this.reversalOfId = _data["reversalOfId"];
@@ -30369,21 +35871,22 @@ export class EncumbranceDetailDto implements IEncumbranceDetailDto {
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["vendorId"] = this.vendorId;
+        data["vendorPartyId"] = this.vendorPartyId;
         data["purchaseOrderId"] = this.purchaseOrderId;
         data["documentType"] = this.documentType;
         data["documentId"] = this.documentId;
         data["reversalReason"] = this.reversalReason;
-        data["appropriationNumber"] = this.appropriationNumber;
-        data["itemCode"] = this.itemCode;
-        data["fundNumber"] = this.fundNumber;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
         data["id"] = this.id;
         data["encumbranceNumber"] = this.encumbranceNumber;
-        data["appropriationId"] = this.appropriationId;
         data["encumbranceType"] = this.encumbranceType;
         data["description"] = this.description;
         data["encumbranceDate"] = this.encumbranceDate ? formatDate(this.encumbranceDate) : undefined as any;
-        data["amount"] = this.amount;
+        data["totalAmount"] = this.totalAmount;
         data["status"] = this.status;
         data["isReversed"] = this.isReversed;
         data["reversalOfId"] = this.reversalOfId;
@@ -30394,21 +35897,18 @@ export class EncumbranceDetailDto implements IEncumbranceDetailDto {
 }
 
 export interface IEncumbranceDetailDto {
-    vendorId?: number | undefined;
+    vendorPartyId?: number | undefined;
     purchaseOrderId?: number | undefined;
-    documentType?: string;
-    documentId?: number;
+    documentType?: string | undefined;
+    documentId?: number | undefined;
     reversalReason?: string | undefined;
-    appropriationNumber?: string;
-    itemCode?: string;
-    fundNumber?: string;
+    lines?: EncumbranceLineDto[];
     id?: number;
     encumbranceNumber?: string;
-    appropriationId?: number;
     encumbranceType?: EncumbranceType;
     description?: string | undefined;
     encumbranceDate?: Date;
-    amount?: number;
+    totalAmount?: number;
     status?: EncumbranceStatus;
     isReversed?: boolean;
     reversalOfId?: number | undefined;
@@ -30418,14 +35918,137 @@ export interface IEncumbranceDetailDto {
     [key: string]: any;
 }
 
+export class EncumbranceLineDto implements IEncumbranceLineDto {
+    id!: number;
+    budgetItemId!: number;
+    amount!: number;
+    liquidatedAmount!: number;
+    cancelledAmount!: number;
+    description!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IEncumbranceLineDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.budgetItemId = _data["budgetItemId"];
+            this.amount = _data["amount"];
+            this.liquidatedAmount = _data["liquidatedAmount"];
+            this.cancelledAmount = _data["cancelledAmount"];
+            this.description = _data["description"];
+        }
+    }
+
+    static fromJS(data: any): EncumbranceLineDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new EncumbranceLineDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["budgetItemId"] = this.budgetItemId;
+        data["amount"] = this.amount;
+        data["liquidatedAmount"] = this.liquidatedAmount;
+        data["cancelledAmount"] = this.cancelledAmount;
+        data["description"] = this.description;
+        return data;
+    }
+}
+
+export interface IEncumbranceLineDto {
+    id: number;
+    budgetItemId: number;
+    amount: number;
+    liquidatedAmount: number;
+    cancelledAmount: number;
+    description: string | undefined;
+
+    [key: string]: any;
+}
+
+export class EncumbranceLineRequest implements IEncumbranceLineRequest {
+    budgetItemId!: number;
+    amount!: number;
+    description!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IEncumbranceLineRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.budgetItemId = _data["budgetItemId"];
+            this.amount = _data["amount"];
+            this.description = _data["description"];
+        }
+    }
+
+    static fromJS(data: any): EncumbranceLineRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new EncumbranceLineRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["budgetItemId"] = this.budgetItemId;
+        data["amount"] = this.amount;
+        data["description"] = this.description;
+        return data;
+    }
+}
+
+export interface IEncumbranceLineRequest {
+    budgetItemId: number;
+    amount: number;
+    description: string | undefined;
+
+    [key: string]: any;
+}
+
 export class EncumbranceListItemDto implements IEncumbranceListItemDto {
     id?: number;
     encumbranceNumber?: string;
-    appropriationId?: number;
     encumbranceType?: EncumbranceType;
     description?: string | undefined;
     encumbranceDate?: Date;
-    amount?: number;
+    totalAmount?: number;
     status?: EncumbranceStatus;
     isReversed?: boolean;
     reversalOfId?: number | undefined;
@@ -30451,11 +36074,10 @@ export class EncumbranceListItemDto implements IEncumbranceListItemDto {
             }
             this.id = _data["id"];
             this.encumbranceNumber = _data["encumbranceNumber"];
-            this.appropriationId = _data["appropriationId"];
             this.encumbranceType = _data["encumbranceType"];
             this.description = _data["description"];
             this.encumbranceDate = _data["encumbranceDate"] ? new Date(_data["encumbranceDate"].toString()) : undefined as any;
-            this.amount = _data["amount"];
+            this.totalAmount = _data["totalAmount"];
             this.status = _data["status"];
             this.isReversed = _data["isReversed"];
             this.reversalOfId = _data["reversalOfId"];
@@ -30479,11 +36101,10 @@ export class EncumbranceListItemDto implements IEncumbranceListItemDto {
         }
         data["id"] = this.id;
         data["encumbranceNumber"] = this.encumbranceNumber;
-        data["appropriationId"] = this.appropriationId;
         data["encumbranceType"] = this.encumbranceType;
         data["description"] = this.description;
         data["encumbranceDate"] = this.encumbranceDate ? formatDate(this.encumbranceDate) : undefined as any;
-        data["amount"] = this.amount;
+        data["totalAmount"] = this.totalAmount;
         data["status"] = this.status;
         data["isReversed"] = this.isReversed;
         data["reversalOfId"] = this.reversalOfId;
@@ -30496,11 +36117,10 @@ export class EncumbranceListItemDto implements IEncumbranceListItemDto {
 export interface IEncumbranceListItemDto {
     id?: number;
     encumbranceNumber?: string;
-    appropriationId?: number;
     encumbranceType?: EncumbranceType;
     description?: string | undefined;
     encumbranceDate?: Date;
-    amount?: number;
+    totalAmount?: number;
     status?: EncumbranceStatus;
     isReversed?: boolean;
     reversalOfId?: number | undefined;
@@ -30522,6 +36142,62 @@ export enum EncumbranceStatus {
     Cancelled = "Cancelled",
     Reversed = "Reversed",
     Suspended = "Suspended",
+}
+
+export class EncumbranceSummaryDto implements IEncumbranceSummaryDto {
+    totalEncumbered!: number;
+    totalLiquidated!: number;
+    totalOutstanding!: number;
+
+    [key: string]: any;
+
+    constructor(data?: IEncumbranceSummaryDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.totalEncumbered = _data["totalEncumbered"];
+            this.totalLiquidated = _data["totalLiquidated"];
+            this.totalOutstanding = _data["totalOutstanding"];
+        }
+    }
+
+    static fromJS(data: any): EncumbranceSummaryDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new EncumbranceSummaryDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["totalEncumbered"] = this.totalEncumbered;
+        data["totalLiquidated"] = this.totalLiquidated;
+        data["totalOutstanding"] = this.totalOutstanding;
+        return data;
+    }
+}
+
+export interface IEncumbranceSummaryDto {
+    totalEncumbered: number;
+    totalLiquidated: number;
+    totalOutstanding: number;
+
+    [key: string]: any;
 }
 
 export enum EncumbranceType {
@@ -30826,12 +36502,12 @@ export enum FinalAccountLineDimension {
 
 export class FinalAccountLineResponse implements IFinalAccountLineResponse {
     dimension!: FinalAccountLineDimension;
-    dimensionId!: number;
+    dimensionId!: number | undefined;
     dimensionCode!: string;
     dimensionName!: string;
-    budgetedAmount!: number;
+    originalBudgetAmount!: number;
     actualAmount!: number;
-    variance!: number;
+    varianceAmount!: number;
 
     [key: string]: any;
 
@@ -30854,9 +36530,9 @@ export class FinalAccountLineResponse implements IFinalAccountLineResponse {
             this.dimensionId = _data["dimensionId"];
             this.dimensionCode = _data["dimensionCode"];
             this.dimensionName = _data["dimensionName"];
-            this.budgetedAmount = _data["budgetedAmount"];
+            this.originalBudgetAmount = _data["originalBudgetAmount"];
             this.actualAmount = _data["actualAmount"];
-            this.variance = _data["variance"];
+            this.varianceAmount = _data["varianceAmount"];
         }
     }
 
@@ -30877,21 +36553,21 @@ export class FinalAccountLineResponse implements IFinalAccountLineResponse {
         data["dimensionId"] = this.dimensionId;
         data["dimensionCode"] = this.dimensionCode;
         data["dimensionName"] = this.dimensionName;
-        data["budgetedAmount"] = this.budgetedAmount;
+        data["originalBudgetAmount"] = this.originalBudgetAmount;
         data["actualAmount"] = this.actualAmount;
-        data["variance"] = this.variance;
+        data["varianceAmount"] = this.varianceAmount;
         return data;
     }
 }
 
 export interface IFinalAccountLineResponse {
     dimension: FinalAccountLineDimension;
-    dimensionId: number;
+    dimensionId: number | undefined;
     dimensionCode: string;
     dimensionName: string;
-    budgetedAmount: number;
+    originalBudgetAmount: number;
     actualAmount: number;
-    variance: number;
+    varianceAmount: number;
 
     [key: string]: any;
 }
@@ -31732,6 +37408,219 @@ export interface IGetFiscalYearPeriodByDateResult {
     [key: string]: any;
 }
 
+export class GRNDetailLineResponse implements IGRNDetailLineResponse {
+    id!: number;
+    purchaseOrderDetailId!: number;
+    itemId!: number;
+    itemNameAr!: string | undefined;
+    unitId!: number;
+    orderedQuantity!: number;
+    receivedQuantity!: number;
+    acceptedQuantity!: number | undefined;
+    rejectedQuantity!: number | undefined;
+    remainingQuantity!: number;
+    unitCost!: number | undefined;
+    totalCost!: number | undefined;
+    batchNumber!: string | undefined;
+    expiryDate!: Date | undefined;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IGRNDetailLineResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.purchaseOrderDetailId = _data["purchaseOrderDetailId"];
+            this.itemId = _data["itemId"];
+            this.itemNameAr = _data["itemNameAr"];
+            this.unitId = _data["unitId"];
+            this.orderedQuantity = _data["orderedQuantity"];
+            this.receivedQuantity = _data["receivedQuantity"];
+            this.acceptedQuantity = _data["acceptedQuantity"];
+            this.rejectedQuantity = _data["rejectedQuantity"];
+            this.remainingQuantity = _data["remainingQuantity"];
+            this.unitCost = _data["unitCost"];
+            this.totalCost = _data["totalCost"];
+            this.batchNumber = _data["batchNumber"];
+            this.expiryDate = _data["expiryDate"] ? new Date(_data["expiryDate"].toString()) : undefined as any;
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): GRNDetailLineResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new GRNDetailLineResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["purchaseOrderDetailId"] = this.purchaseOrderDetailId;
+        data["itemId"] = this.itemId;
+        data["itemNameAr"] = this.itemNameAr;
+        data["unitId"] = this.unitId;
+        data["orderedQuantity"] = this.orderedQuantity;
+        data["receivedQuantity"] = this.receivedQuantity;
+        data["acceptedQuantity"] = this.acceptedQuantity;
+        data["rejectedQuantity"] = this.rejectedQuantity;
+        data["remainingQuantity"] = this.remainingQuantity;
+        data["unitCost"] = this.unitCost;
+        data["totalCost"] = this.totalCost;
+        data["batchNumber"] = this.batchNumber;
+        data["expiryDate"] = this.expiryDate ? formatDate(this.expiryDate) : undefined as any;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface IGRNDetailLineResponse {
+    id: number;
+    purchaseOrderDetailId: number;
+    itemId: number;
+    itemNameAr: string | undefined;
+    unitId: number;
+    orderedQuantity: number;
+    receivedQuantity: number;
+    acceptedQuantity: number | undefined;
+    rejectedQuantity: number | undefined;
+    remainingQuantity: number;
+    unitCost: number | undefined;
+    totalCost: number | undefined;
+    batchNumber: string | undefined;
+    expiryDate: Date | undefined;
+    notes: string | undefined;
+
+    [key: string]: any;
+}
+
+export class GRNDetailResponse implements IGRNDetailResponse {
+    id!: number;
+    grnNumber!: string;
+    purchaseOrderId!: number;
+    purchaseOrderNumber!: string | undefined;
+    supplierPartyId!: number | undefined;
+    warehouseId!: number;
+    locationId!: number;
+    receivedBy!: number | undefined;
+    status!: GRNStatus | undefined;
+    grnDate!: Date;
+    notes!: string | undefined;
+    lines!: GRNDetailLineResponse[];
+
+    [key: string]: any;
+
+    constructor(data?: IGRNDetailResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.lines = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.grnNumber = _data["grnNumber"];
+            this.purchaseOrderId = _data["purchaseOrderId"];
+            this.purchaseOrderNumber = _data["purchaseOrderNumber"];
+            this.supplierPartyId = _data["supplierPartyId"];
+            this.warehouseId = _data["warehouseId"];
+            this.locationId = _data["locationId"];
+            this.receivedBy = _data["receivedBy"];
+            this.status = _data["status"];
+            this.grnDate = _data["grnDate"] ? new Date(_data["grnDate"].toString()) : undefined as any;
+            this.notes = _data["notes"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(GRNDetailLineResponse.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): GRNDetailResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new GRNDetailResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["grnNumber"] = this.grnNumber;
+        data["purchaseOrderId"] = this.purchaseOrderId;
+        data["purchaseOrderNumber"] = this.purchaseOrderNumber;
+        data["supplierPartyId"] = this.supplierPartyId;
+        data["warehouseId"] = this.warehouseId;
+        data["locationId"] = this.locationId;
+        data["receivedBy"] = this.receivedBy;
+        data["status"] = this.status;
+        data["grnDate"] = this.grnDate ? this.grnDate.toISOString() : undefined as any;
+        data["notes"] = this.notes;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IGRNDetailResponse {
+    id: number;
+    grnNumber: string;
+    purchaseOrderId: number;
+    purchaseOrderNumber: string | undefined;
+    supplierPartyId: number | undefined;
+    warehouseId: number;
+    locationId: number;
+    receivedBy: number | undefined;
+    status: GRNStatus | undefined;
+    grnDate: Date;
+    notes: string | undefined;
+    lines: GRNDetailLineResponse[];
+
+    [key: string]: any;
+}
+
+export enum GRNStatus {
+    Draft = "Draft",
+    Confirmed = "Confirmed",
+    Rejected = "Rejected",
+}
+
 export class ImportBankStatementCommand implements IImportBankStatementCommand {
     id?: number;
 
@@ -31964,6 +37853,441 @@ export interface IIso4217CodeDto {
     code?: string;
     name?: string;
     decimalPlaces?: number;
+
+    [key: string]: any;
+}
+
+export class ItemCategoryResponse implements IItemCategoryResponse {
+    id!: number;
+    code!: string;
+    name!: string;
+    nameEn!: string | undefined;
+    description!: string | undefined;
+    parentItemCategoryId!: number | undefined;
+    parentName!: string | undefined;
+    level!: number | undefined;
+    breadcrumb!: string | undefined;
+    isActive!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: IItemCategoryResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.nameEn = _data["nameEn"];
+            this.description = _data["description"];
+            this.parentItemCategoryId = _data["parentItemCategoryId"];
+            this.parentName = _data["parentName"];
+            this.level = _data["level"];
+            this.breadcrumb = _data["breadcrumb"];
+            this.isActive = _data["isActive"];
+        }
+    }
+
+    static fromJS(data: any): ItemCategoryResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new ItemCategoryResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["nameEn"] = this.nameEn;
+        data["description"] = this.description;
+        data["parentItemCategoryId"] = this.parentItemCategoryId;
+        data["parentName"] = this.parentName;
+        data["level"] = this.level;
+        data["breadcrumb"] = this.breadcrumb;
+        data["isActive"] = this.isActive;
+        return data;
+    }
+}
+
+export interface IItemCategoryResponse {
+    id: number;
+    code: string;
+    name: string;
+    nameEn: string | undefined;
+    description: string | undefined;
+    parentItemCategoryId: number | undefined;
+    parentName: string | undefined;
+    level: number | undefined;
+    breadcrumb: string | undefined;
+    isActive: boolean;
+
+    [key: string]: any;
+}
+
+export class ItemDetailResponse implements IItemDetailResponse {
+    id!: number;
+    code!: string;
+    name!: string;
+    nameEn!: string | undefined;
+    description!: string | undefined;
+    categoryId!: number | undefined;
+    categoryName!: string | undefined;
+    unitId!: number;
+    unitName!: string;
+    supplierId!: number | undefined;
+    barcode!: string | undefined;
+    itemType!: string;
+    openingStock!: number | undefined;
+    availableQuantity!: number | undefined;
+    reservedQuantity!: number | undefined;
+    averageCost!: number | undefined;
+    minimumStock!: number | undefined;
+    maximumStock!: number | undefined;
+    reorderLevel!: number | undefined;
+    reorderQuantity!: number | undefined;
+    leadTimeDays!: number | undefined;
+    isActive!: boolean;
+    itemUnits!: ItemUnitResponse[];
+
+    [key: string]: any;
+
+    constructor(data?: IItemDetailResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.itemUnits = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.nameEn = _data["nameEn"];
+            this.description = _data["description"];
+            this.categoryId = _data["categoryId"];
+            this.categoryName = _data["categoryName"];
+            this.unitId = _data["unitId"];
+            this.unitName = _data["unitName"];
+            this.supplierId = _data["supplierId"];
+            this.barcode = _data["barcode"];
+            this.itemType = _data["itemType"];
+            this.openingStock = _data["openingStock"];
+            this.availableQuantity = _data["availableQuantity"];
+            this.reservedQuantity = _data["reservedQuantity"];
+            this.averageCost = _data["averageCost"];
+            this.minimumStock = _data["minimumStock"];
+            this.maximumStock = _data["maximumStock"];
+            this.reorderLevel = _data["reorderLevel"];
+            this.reorderQuantity = _data["reorderQuantity"];
+            this.leadTimeDays = _data["leadTimeDays"];
+            this.isActive = _data["isActive"];
+            if (Array.isArray(_data["itemUnits"])) {
+                this.itemUnits = [] as any;
+                for (let item of _data["itemUnits"])
+                    this.itemUnits!.push(ItemUnitResponse.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): ItemDetailResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new ItemDetailResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["nameEn"] = this.nameEn;
+        data["description"] = this.description;
+        data["categoryId"] = this.categoryId;
+        data["categoryName"] = this.categoryName;
+        data["unitId"] = this.unitId;
+        data["unitName"] = this.unitName;
+        data["supplierId"] = this.supplierId;
+        data["barcode"] = this.barcode;
+        data["itemType"] = this.itemType;
+        data["openingStock"] = this.openingStock;
+        data["availableQuantity"] = this.availableQuantity;
+        data["reservedQuantity"] = this.reservedQuantity;
+        data["averageCost"] = this.averageCost;
+        data["minimumStock"] = this.minimumStock;
+        data["maximumStock"] = this.maximumStock;
+        data["reorderLevel"] = this.reorderLevel;
+        data["reorderQuantity"] = this.reorderQuantity;
+        data["leadTimeDays"] = this.leadTimeDays;
+        data["isActive"] = this.isActive;
+        if (Array.isArray(this.itemUnits)) {
+            data["itemUnits"] = [];
+            for (let item of this.itemUnits)
+                data["itemUnits"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IItemDetailResponse {
+    id: number;
+    code: string;
+    name: string;
+    nameEn: string | undefined;
+    description: string | undefined;
+    categoryId: number | undefined;
+    categoryName: string | undefined;
+    unitId: number;
+    unitName: string;
+    supplierId: number | undefined;
+    barcode: string | undefined;
+    itemType: string;
+    openingStock: number | undefined;
+    availableQuantity: number | undefined;
+    reservedQuantity: number | undefined;
+    averageCost: number | undefined;
+    minimumStock: number | undefined;
+    maximumStock: number | undefined;
+    reorderLevel: number | undefined;
+    reorderQuantity: number | undefined;
+    leadTimeDays: number | undefined;
+    isActive: boolean;
+    itemUnits: ItemUnitResponse[];
+
+    [key: string]: any;
+}
+
+export class ItemResponse implements IItemResponse {
+    id!: number;
+    code!: string;
+    name!: string;
+    nameEn!: string | undefined;
+    description!: string | undefined;
+    categoryId!: number | undefined;
+    categoryName!: string | undefined;
+    unitId!: number;
+    unitName!: string;
+    barcode!: string | undefined;
+    itemType!: string;
+    openingStock!: number | undefined;
+    availableQuantity!: number | undefined;
+    reservedQuantity!: number | undefined;
+    averageCost!: number | undefined;
+    minimumStock!: number | undefined;
+    maximumStock!: number | undefined;
+    reorderLevel!: number | undefined;
+    reorderQuantity!: number | undefined;
+    leadTimeDays!: number | undefined;
+    isActive!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: IItemResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.nameEn = _data["nameEn"];
+            this.description = _data["description"];
+            this.categoryId = _data["categoryId"];
+            this.categoryName = _data["categoryName"];
+            this.unitId = _data["unitId"];
+            this.unitName = _data["unitName"];
+            this.barcode = _data["barcode"];
+            this.itemType = _data["itemType"];
+            this.openingStock = _data["openingStock"];
+            this.availableQuantity = _data["availableQuantity"];
+            this.reservedQuantity = _data["reservedQuantity"];
+            this.averageCost = _data["averageCost"];
+            this.minimumStock = _data["minimumStock"];
+            this.maximumStock = _data["maximumStock"];
+            this.reorderLevel = _data["reorderLevel"];
+            this.reorderQuantity = _data["reorderQuantity"];
+            this.leadTimeDays = _data["leadTimeDays"];
+            this.isActive = _data["isActive"];
+        }
+    }
+
+    static fromJS(data: any): ItemResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new ItemResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["nameEn"] = this.nameEn;
+        data["description"] = this.description;
+        data["categoryId"] = this.categoryId;
+        data["categoryName"] = this.categoryName;
+        data["unitId"] = this.unitId;
+        data["unitName"] = this.unitName;
+        data["barcode"] = this.barcode;
+        data["itemType"] = this.itemType;
+        data["openingStock"] = this.openingStock;
+        data["availableQuantity"] = this.availableQuantity;
+        data["reservedQuantity"] = this.reservedQuantity;
+        data["averageCost"] = this.averageCost;
+        data["minimumStock"] = this.minimumStock;
+        data["maximumStock"] = this.maximumStock;
+        data["reorderLevel"] = this.reorderLevel;
+        data["reorderQuantity"] = this.reorderQuantity;
+        data["leadTimeDays"] = this.leadTimeDays;
+        data["isActive"] = this.isActive;
+        return data;
+    }
+}
+
+export interface IItemResponse {
+    id: number;
+    code: string;
+    name: string;
+    nameEn: string | undefined;
+    description: string | undefined;
+    categoryId: number | undefined;
+    categoryName: string | undefined;
+    unitId: number;
+    unitName: string;
+    barcode: string | undefined;
+    itemType: string;
+    openingStock: number | undefined;
+    availableQuantity: number | undefined;
+    reservedQuantity: number | undefined;
+    averageCost: number | undefined;
+    minimumStock: number | undefined;
+    maximumStock: number | undefined;
+    reorderLevel: number | undefined;
+    reorderQuantity: number | undefined;
+    leadTimeDays: number | undefined;
+    isActive: boolean;
+
+    [key: string]: any;
+}
+
+export enum ItemType {
+    Goods = "Goods",
+    Service = "Service",
+    RawMaterial = "RawMaterial",
+    Consumable = "Consumable",
+    FixedAsset = "FixedAsset",
+}
+
+export class ItemUnitResponse implements IItemUnitResponse {
+    id!: number;
+    itemId!: number;
+    unitId!: number;
+    unitName!: string;
+    conversionFactor!: number;
+    isBase!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: IItemUnitResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.itemId = _data["itemId"];
+            this.unitId = _data["unitId"];
+            this.unitName = _data["unitName"];
+            this.conversionFactor = _data["conversionFactor"];
+            this.isBase = _data["isBase"];
+        }
+    }
+
+    static fromJS(data: any): ItemUnitResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new ItemUnitResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["itemId"] = this.itemId;
+        data["unitId"] = this.unitId;
+        data["unitName"] = this.unitName;
+        data["conversionFactor"] = this.conversionFactor;
+        data["isBase"] = this.isBase;
+        return data;
+    }
+}
+
+export interface IItemUnitResponse {
+    id: number;
+    itemId: number;
+    unitId: number;
+    unitName: string;
+    conversionFactor: number;
+    isBase: boolean;
 
     [key: string]: any;
 }
@@ -32970,7 +39294,7 @@ export interface ILoginRequest {
 
 export class MonthlyPlanDto implements IMonthlyPlanDto {
     id!: number;
-    month!: number;
+    fiscalPeriodId!: number;
     plannedAmount!: number;
     rowVersion!: string;
 
@@ -32992,7 +39316,7 @@ export class MonthlyPlanDto implements IMonthlyPlanDto {
                     this[property] = _data[property];
             }
             this.id = _data["id"];
-            this.month = _data["month"];
+            this.fiscalPeriodId = _data["fiscalPeriodId"];
             this.plannedAmount = _data["plannedAmount"];
             this.rowVersion = _data["rowVersion"];
         }
@@ -33012,7 +39336,7 @@ export class MonthlyPlanDto implements IMonthlyPlanDto {
                 data[property] = this[property];
         }
         data["id"] = this.id;
-        data["month"] = this.month;
+        data["fiscalPeriodId"] = this.fiscalPeriodId;
         data["plannedAmount"] = this.plannedAmount;
         data["rowVersion"] = this.rowVersion;
         return data;
@@ -33021,7 +39345,7 @@ export class MonthlyPlanDto implements IMonthlyPlanDto {
 
 export interface IMonthlyPlanDto {
     id: number;
-    month: number;
+    fiscalPeriodId: number;
     plannedAmount: number;
     rowVersion: string;
 
@@ -33029,7 +39353,7 @@ export interface IMonthlyPlanDto {
 }
 
 export class MonthlyPlanEntry implements IMonthlyPlanEntry {
-    month!: number;
+    fiscalPeriodId!: number;
     plannedAmount!: number;
 
     [key: string]: any;
@@ -33049,7 +39373,7 @@ export class MonthlyPlanEntry implements IMonthlyPlanEntry {
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.month = _data["month"];
+            this.fiscalPeriodId = _data["fiscalPeriodId"];
             this.plannedAmount = _data["plannedAmount"];
         }
     }
@@ -33067,14 +39391,14 @@ export class MonthlyPlanEntry implements IMonthlyPlanEntry {
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["month"] = this.month;
+        data["fiscalPeriodId"] = this.fiscalPeriodId;
         data["plannedAmount"] = this.plannedAmount;
         return data;
     }
 }
 
 export interface IMonthlyPlanEntry {
-    month: number;
+    fiscalPeriodId: number;
     plannedAmount: number;
 
     [key: string]: any;
@@ -33299,6 +39623,7 @@ export enum MoveEntryType {
     Closing = "Closing",
     Opening = "Opening",
     SystemGenerated = "SystemGenerated",
+    Accrual = "Accrual",
 }
 
 export enum NormalBalanceType {
@@ -33602,6 +39927,172 @@ export interface IPaginatedAccountGroupsResponse {
     totalCount?: number;
     totalPages?: number;
     items?: AccountGroupDto[];
+
+    [key: string]: any;
+}
+
+export class PaginatedListOfItemResponse implements IPaginatedListOfItemResponse {
+    items!: ItemResponse[];
+    totalCount!: number;
+    page!: number;
+    pageSize!: number;
+    totalPages?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: IPaginatedListOfItemResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.items = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items!.push(ItemResponse.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+            this.page = _data["page"];
+            this.pageSize = _data["pageSize"];
+            this.totalPages = _data["totalPages"];
+            this.hasPreviousPage = _data["hasPreviousPage"];
+            this.hasNextPage = _data["hasNextPage"];
+        }
+    }
+
+    static fromJS(data: any): PaginatedListOfItemResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new PaginatedListOfItemResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item ? item.toJSON() : undefined as any);
+        }
+        data["totalCount"] = this.totalCount;
+        data["page"] = this.page;
+        data["pageSize"] = this.pageSize;
+        data["totalPages"] = this.totalPages;
+        data["hasPreviousPage"] = this.hasPreviousPage;
+        data["hasNextPage"] = this.hasNextPage;
+        return data;
+    }
+}
+
+export interface IPaginatedListOfItemResponse {
+    items: ItemResponse[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+
+    [key: string]: any;
+}
+
+export class PaginatedListOfPurchaseOrderListItem implements IPaginatedListOfPurchaseOrderListItem {
+    items!: PurchaseOrderListItem[];
+    totalCount!: number;
+    page!: number;
+    pageSize!: number;
+    totalPages?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: IPaginatedListOfPurchaseOrderListItem) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.items = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items!.push(PurchaseOrderListItem.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+            this.page = _data["page"];
+            this.pageSize = _data["pageSize"];
+            this.totalPages = _data["totalPages"];
+            this.hasPreviousPage = _data["hasPreviousPage"];
+            this.hasNextPage = _data["hasNextPage"];
+        }
+    }
+
+    static fromJS(data: any): PaginatedListOfPurchaseOrderListItem {
+        data = typeof data === 'object' ? data : {};
+        let result = new PaginatedListOfPurchaseOrderListItem();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item ? item.toJSON() : undefined as any);
+        }
+        data["totalCount"] = this.totalCount;
+        data["page"] = this.page;
+        data["pageSize"] = this.pageSize;
+        data["totalPages"] = this.totalPages;
+        data["hasPreviousPage"] = this.hasPreviousPage;
+        data["hasNextPage"] = this.hasNextPage;
+        return data;
+    }
+}
+
+export interface IPaginatedListOfPurchaseOrderListItem {
+    items: PurchaseOrderListItem[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
 
     [key: string]: any;
 }
@@ -34165,13 +40656,12 @@ export class PaymentOrderDto implements IPaymentOrderDto {
     paymentOrderDate?: Date;
     dueDate?: Date | undefined;
     paymentOrderType?: string;
-    vendorId?: number;
     fundId?: number;
     fiscalYearId?: number;
-    appropriationId?: number;
+    budgetItemAllocationId?: number | undefined;
     budgetClassificationId?: number | undefined;
     costCenterId?: number | undefined;
-    projectId?: number | undefined;
+    accountId?: number | undefined;
     purchaseOrderId?: number | undefined;
     encumbranceId?: number | undefined;
     currencyId?: number;
@@ -34182,18 +40672,16 @@ export class PaymentOrderDto implements IPaymentOrderDto {
     paymentMethodName?: string;
     bankAccountId?: number | undefined;
     beneficiaryName?: string;
-    beneficiaryIban?: string | undefined;
     beneficiaryAccountNumber?: string | undefined;
     beneficiaryBankName?: string | undefined;
     status?: PaymentOrderStatus;
-    budgetCheckStatus?: BudgetCheckStatus;
-    treasuryStatus?: string | undefined;
-    treasuryReference?: string | undefined;
     treasurySentAt?: Date | undefined;
     paidAt?: Date | undefined;
     journalEntryId?: number | undefined;
     notes?: string | undefined;
-    lines?: PaymentOrderLineDto[];
+    disbursementRequestId?: number | undefined;
+    disbursementRequestNumber?: string | undefined;
+    rowVersion?: string | undefined;
     deductions?: PaymentOrderDeductionDto[];
 
     [key: string]: any;
@@ -34218,13 +40706,12 @@ export class PaymentOrderDto implements IPaymentOrderDto {
             this.paymentOrderDate = _data["paymentOrderDate"] ? new Date(_data["paymentOrderDate"].toString()) : undefined as any;
             this.dueDate = _data["dueDate"] ? new Date(_data["dueDate"].toString()) : undefined as any;
             this.paymentOrderType = _data["paymentOrderType"];
-            this.vendorId = _data["vendorId"];
             this.fundId = _data["fundId"];
             this.fiscalYearId = _data["fiscalYearId"];
-            this.appropriationId = _data["appropriationId"];
+            this.budgetItemAllocationId = _data["budgetItemAllocationId"];
             this.budgetClassificationId = _data["budgetClassificationId"];
             this.costCenterId = _data["costCenterId"];
-            this.projectId = _data["projectId"];
+            this.accountId = _data["accountId"];
             this.purchaseOrderId = _data["purchaseOrderId"];
             this.encumbranceId = _data["encumbranceId"];
             this.currencyId = _data["currencyId"];
@@ -34235,22 +40722,16 @@ export class PaymentOrderDto implements IPaymentOrderDto {
             this.paymentMethodName = _data["paymentMethodName"];
             this.bankAccountId = _data["bankAccountId"];
             this.beneficiaryName = _data["beneficiaryName"];
-            this.beneficiaryIban = _data["beneficiaryIban"];
             this.beneficiaryAccountNumber = _data["beneficiaryAccountNumber"];
             this.beneficiaryBankName = _data["beneficiaryBankName"];
             this.status = _data["status"];
-            this.budgetCheckStatus = _data["budgetCheckStatus"];
-            this.treasuryStatus = _data["treasuryStatus"];
-            this.treasuryReference = _data["treasuryReference"];
             this.treasurySentAt = _data["treasurySentAt"] ? new Date(_data["treasurySentAt"].toString()) : undefined as any;
             this.paidAt = _data["paidAt"] ? new Date(_data["paidAt"].toString()) : undefined as any;
             this.journalEntryId = _data["journalEntryId"];
             this.notes = _data["notes"];
-            if (Array.isArray(_data["lines"])) {
-                this.lines = [] as any;
-                for (let item of _data["lines"])
-                    this.lines!.push(PaymentOrderLineDto.fromJS(item));
-            }
+            this.disbursementRequestId = _data["disbursementRequestId"];
+            this.disbursementRequestNumber = _data["disbursementRequestNumber"];
+            this.rowVersion = _data["rowVersion"];
             if (Array.isArray(_data["deductions"])) {
                 this.deductions = [] as any;
                 for (let item of _data["deductions"])
@@ -34277,13 +40758,12 @@ export class PaymentOrderDto implements IPaymentOrderDto {
         data["paymentOrderDate"] = this.paymentOrderDate ? this.paymentOrderDate.toISOString() : undefined as any;
         data["dueDate"] = this.dueDate ? this.dueDate.toISOString() : undefined as any;
         data["paymentOrderType"] = this.paymentOrderType;
-        data["vendorId"] = this.vendorId;
         data["fundId"] = this.fundId;
         data["fiscalYearId"] = this.fiscalYearId;
-        data["appropriationId"] = this.appropriationId;
+        data["budgetItemAllocationId"] = this.budgetItemAllocationId;
         data["budgetClassificationId"] = this.budgetClassificationId;
         data["costCenterId"] = this.costCenterId;
-        data["projectId"] = this.projectId;
+        data["accountId"] = this.accountId;
         data["purchaseOrderId"] = this.purchaseOrderId;
         data["encumbranceId"] = this.encumbranceId;
         data["currencyId"] = this.currencyId;
@@ -34294,22 +40774,16 @@ export class PaymentOrderDto implements IPaymentOrderDto {
         data["paymentMethodName"] = this.paymentMethodName;
         data["bankAccountId"] = this.bankAccountId;
         data["beneficiaryName"] = this.beneficiaryName;
-        data["beneficiaryIban"] = this.beneficiaryIban;
         data["beneficiaryAccountNumber"] = this.beneficiaryAccountNumber;
         data["beneficiaryBankName"] = this.beneficiaryBankName;
         data["status"] = this.status;
-        data["budgetCheckStatus"] = this.budgetCheckStatus;
-        data["treasuryStatus"] = this.treasuryStatus;
-        data["treasuryReference"] = this.treasuryReference;
         data["treasurySentAt"] = this.treasurySentAt ? this.treasurySentAt.toISOString() : undefined as any;
         data["paidAt"] = this.paidAt ? this.paidAt.toISOString() : undefined as any;
         data["journalEntryId"] = this.journalEntryId;
         data["notes"] = this.notes;
-        if (Array.isArray(this.lines)) {
-            data["lines"] = [];
-            for (let item of this.lines)
-                data["lines"].push(item ? item.toJSON() : undefined as any);
-        }
+        data["disbursementRequestId"] = this.disbursementRequestId;
+        data["disbursementRequestNumber"] = this.disbursementRequestNumber;
+        data["rowVersion"] = this.rowVersion;
         if (Array.isArray(this.deductions)) {
             data["deductions"] = [];
             for (let item of this.deductions)
@@ -34325,13 +40799,12 @@ export interface IPaymentOrderDto {
     paymentOrderDate?: Date;
     dueDate?: Date | undefined;
     paymentOrderType?: string;
-    vendorId?: number;
     fundId?: number;
     fiscalYearId?: number;
-    appropriationId?: number;
+    budgetItemAllocationId?: number | undefined;
     budgetClassificationId?: number | undefined;
     costCenterId?: number | undefined;
-    projectId?: number | undefined;
+    accountId?: number | undefined;
     purchaseOrderId?: number | undefined;
     encumbranceId?: number | undefined;
     currencyId?: number;
@@ -34342,121 +40815,19 @@ export interface IPaymentOrderDto {
     paymentMethodName?: string;
     bankAccountId?: number | undefined;
     beneficiaryName?: string;
-    beneficiaryIban?: string | undefined;
     beneficiaryAccountNumber?: string | undefined;
     beneficiaryBankName?: string | undefined;
     status?: PaymentOrderStatus;
-    budgetCheckStatus?: BudgetCheckStatus;
-    treasuryStatus?: string | undefined;
-    treasuryReference?: string | undefined;
     treasurySentAt?: Date | undefined;
     paidAt?: Date | undefined;
     journalEntryId?: number | undefined;
     notes?: string | undefined;
-    lines?: PaymentOrderLineDto[];
+    disbursementRequestId?: number | undefined;
+    disbursementRequestNumber?: string | undefined;
+    rowVersion?: string | undefined;
     deductions?: PaymentOrderDeductionDto[];
 
     [key: string]: any;
-}
-
-export class PaymentOrderLineDto implements IPaymentOrderLineDto {
-    id?: number;
-    lineNumber?: number;
-    lineType?: PaymentOrderLineType;
-    description?: string | undefined;
-    accountId?: number;
-    amount?: number;
-    taxAmount?: number | undefined;
-    fundId?: number | undefined;
-    appropriationId?: number | undefined;
-    organizationUnitId?: number | undefined;
-    costCenterId?: number | undefined;
-    projectId?: number | undefined;
-
-    [key: string]: any;
-
-    constructor(data?: IPaymentOrderLineDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.id = _data["id"];
-            this.lineNumber = _data["lineNumber"];
-            this.lineType = _data["lineType"];
-            this.description = _data["description"];
-            this.accountId = _data["accountId"];
-            this.amount = _data["amount"];
-            this.taxAmount = _data["taxAmount"];
-            this.fundId = _data["fundId"];
-            this.appropriationId = _data["appropriationId"];
-            this.organizationUnitId = _data["organizationUnitId"];
-            this.costCenterId = _data["costCenterId"];
-            this.projectId = _data["projectId"];
-        }
-    }
-
-    static fromJS(data: any): PaymentOrderLineDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new PaymentOrderLineDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["id"] = this.id;
-        data["lineNumber"] = this.lineNumber;
-        data["lineType"] = this.lineType;
-        data["description"] = this.description;
-        data["accountId"] = this.accountId;
-        data["amount"] = this.amount;
-        data["taxAmount"] = this.taxAmount;
-        data["fundId"] = this.fundId;
-        data["appropriationId"] = this.appropriationId;
-        data["organizationUnitId"] = this.organizationUnitId;
-        data["costCenterId"] = this.costCenterId;
-        data["projectId"] = this.projectId;
-        return data;
-    }
-}
-
-export interface IPaymentOrderLineDto {
-    id?: number;
-    lineNumber?: number;
-    lineType?: PaymentOrderLineType;
-    description?: string | undefined;
-    accountId?: number;
-    amount?: number;
-    taxAmount?: number | undefined;
-    fundId?: number | undefined;
-    appropriationId?: number | undefined;
-    organizationUnitId?: number | undefined;
-    costCenterId?: number | undefined;
-    projectId?: number | undefined;
-
-    [key: string]: any;
-}
-
-export enum PaymentOrderLineType {
-    Invoice = "Invoice",
-    Advance = "Advance",
-    Deduction = "Deduction",
-    Adjustment = "Adjustment",
-    Other = "Other",
 }
 
 export enum PaymentOrderStatus {
@@ -34465,7 +40836,6 @@ export enum PaymentOrderStatus {
     Approved = "Approved",
     SentToTreasury = "SentToTreasury",
     Paid = "Paid",
-    PartiallyPaid = "PartiallyPaid",
     Cancelled = "Cancelled",
     Rejected = "Rejected",
     Voided = "Voided",
@@ -34628,6 +40998,7 @@ export class PostingRuleDto implements IPostingRuleDto {
     journalName?: string;
     priority?: number;
     isActive?: boolean;
+    lines?: PostingRuleLineDto[];
 
     [key: string]: any;
 
@@ -34653,6 +41024,11 @@ export class PostingRuleDto implements IPostingRuleDto {
             this.journalName = _data["journalName"];
             this.priority = _data["priority"];
             this.isActive = _data["isActive"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(PostingRuleLineDto.fromJS(item));
+            }
         }
     }
 
@@ -34676,6 +41052,11 @@ export class PostingRuleDto implements IPostingRuleDto {
         data["journalName"] = this.journalName;
         data["priority"] = this.priority;
         data["isActive"] = this.isActive;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
         return data;
     }
 }
@@ -34688,19 +41069,24 @@ export interface IPostingRuleDto {
     journalName?: string;
     priority?: number;
     isActive?: boolean;
+    lines?: PostingRuleLineDto[];
 
     [key: string]: any;
 }
 
 export class PostingRuleLineDto implements IPostingRuleLineDto {
+    id?: number;
+    postingRuleId?: number;
     sequence?: number;
     accountSource?: string;
     fixedAccountId?: number | undefined;
+    fixedAccountCode?: string | undefined;
     debitOrCredit?: string;
     amountSource?: string;
     fundDimensionRequired?: boolean;
     costCenterDimensionRequired?: boolean;
     projectDimensionRequired?: boolean;
+    isActive?: boolean;
 
     [key: string]: any;
 
@@ -34719,14 +41105,18 @@ export class PostingRuleLineDto implements IPostingRuleLineDto {
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
+            this.id = _data["id"];
+            this.postingRuleId = _data["postingRuleId"];
             this.sequence = _data["sequence"];
             this.accountSource = _data["accountSource"];
             this.fixedAccountId = _data["fixedAccountId"];
+            this.fixedAccountCode = _data["fixedAccountCode"];
             this.debitOrCredit = _data["debitOrCredit"];
             this.amountSource = _data["amountSource"];
             this.fundDimensionRequired = _data["fundDimensionRequired"];
             this.costCenterDimensionRequired = _data["costCenterDimensionRequired"];
             this.projectDimensionRequired = _data["projectDimensionRequired"];
+            this.isActive = _data["isActive"];
         }
     }
 
@@ -34743,27 +41133,35 @@ export class PostingRuleLineDto implements IPostingRuleLineDto {
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
+        data["id"] = this.id;
+        data["postingRuleId"] = this.postingRuleId;
         data["sequence"] = this.sequence;
         data["accountSource"] = this.accountSource;
         data["fixedAccountId"] = this.fixedAccountId;
+        data["fixedAccountCode"] = this.fixedAccountCode;
         data["debitOrCredit"] = this.debitOrCredit;
         data["amountSource"] = this.amountSource;
         data["fundDimensionRequired"] = this.fundDimensionRequired;
         data["costCenterDimensionRequired"] = this.costCenterDimensionRequired;
         data["projectDimensionRequired"] = this.projectDimensionRequired;
+        data["isActive"] = this.isActive;
         return data;
     }
 }
 
 export interface IPostingRuleLineDto {
+    id?: number;
+    postingRuleId?: number;
     sequence?: number;
     accountSource?: string;
     fixedAccountId?: number | undefined;
+    fixedAccountCode?: string | undefined;
     debitOrCredit?: string;
     amountSource?: string;
     fundDimensionRequired?: boolean;
     costCenterDimensionRequired?: boolean;
     projectDimensionRequired?: boolean;
+    isActive?: boolean;
 
     [key: string]: any;
 }
@@ -34816,6 +41214,73 @@ export class PostJournalEntryCommand implements IPostJournalEntryCommand {
 export interface IPostJournalEntryCommand {
     id?: number;
     rowVersion?: string;
+
+    [key: string]: any;
+}
+
+export class ProcurementDashboardResponse implements IProcurementDashboardResponse {
+    pendingApprovals!: number;
+    openPurchaseOrders!: number;
+    pendingReceipts!: number;
+    pendingInvoices!: number;
+    encumbranceSummary!: EncumbranceSummaryDto;
+
+    [key: string]: any;
+
+    constructor(data?: IProcurementDashboardResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.encumbranceSummary = new EncumbranceSummaryDto();
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.pendingApprovals = _data["pendingApprovals"];
+            this.openPurchaseOrders = _data["openPurchaseOrders"];
+            this.pendingReceipts = _data["pendingReceipts"];
+            this.pendingInvoices = _data["pendingInvoices"];
+            this.encumbranceSummary = _data["encumbranceSummary"] ? EncumbranceSummaryDto.fromJS(_data["encumbranceSummary"]) : new EncumbranceSummaryDto();
+        }
+    }
+
+    static fromJS(data: any): ProcurementDashboardResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new ProcurementDashboardResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["pendingApprovals"] = this.pendingApprovals;
+        data["openPurchaseOrders"] = this.openPurchaseOrders;
+        data["pendingReceipts"] = this.pendingReceipts;
+        data["pendingInvoices"] = this.pendingInvoices;
+        data["encumbranceSummary"] = this.encumbranceSummary ? this.encumbranceSummary.toJSON() : undefined as any;
+        return data;
+    }
+}
+
+export interface IProcurementDashboardResponse {
+    pendingApprovals: number;
+    openPurchaseOrders: number;
+    pendingReceipts: number;
+    pendingInvoices: number;
+    encumbranceSummary: EncumbranceSummaryDto;
 
     [key: string]: any;
 }
@@ -34906,6 +41371,1178 @@ export interface IProjectDto {
     isActive?: boolean;
 
     [key: string]: any;
+}
+
+export class PurchaseOrderDetailLineResponse implements IPurchaseOrderDetailLineResponse {
+    id!: number;
+    itemId!: number;
+    unitId!: number;
+    purchaseRequestDetailId!: number;
+    quotationDetailId!: number | undefined;
+    orderedQuantity!: number;
+    receivedQuantity!: number;
+    remainingQuantity!: number;
+    unitPrice!: number;
+    discountPercent!: number | undefined;
+    discountAmount!: number | undefined;
+    netUnitPrice!: number | undefined;
+    taxPercent!: number | undefined;
+    taxAmount!: number | undefined;
+    lineTotal!: number | undefined;
+    lineTotalWithTax!: number | undefined;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IPurchaseOrderDetailLineResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.itemId = _data["itemId"];
+            this.unitId = _data["unitId"];
+            this.purchaseRequestDetailId = _data["purchaseRequestDetailId"];
+            this.quotationDetailId = _data["quotationDetailId"];
+            this.orderedQuantity = _data["orderedQuantity"];
+            this.receivedQuantity = _data["receivedQuantity"];
+            this.remainingQuantity = _data["remainingQuantity"];
+            this.unitPrice = _data["unitPrice"];
+            this.discountPercent = _data["discountPercent"];
+            this.discountAmount = _data["discountAmount"];
+            this.netUnitPrice = _data["netUnitPrice"];
+            this.taxPercent = _data["taxPercent"];
+            this.taxAmount = _data["taxAmount"];
+            this.lineTotal = _data["lineTotal"];
+            this.lineTotalWithTax = _data["lineTotalWithTax"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): PurchaseOrderDetailLineResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new PurchaseOrderDetailLineResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["itemId"] = this.itemId;
+        data["unitId"] = this.unitId;
+        data["purchaseRequestDetailId"] = this.purchaseRequestDetailId;
+        data["quotationDetailId"] = this.quotationDetailId;
+        data["orderedQuantity"] = this.orderedQuantity;
+        data["receivedQuantity"] = this.receivedQuantity;
+        data["remainingQuantity"] = this.remainingQuantity;
+        data["unitPrice"] = this.unitPrice;
+        data["discountPercent"] = this.discountPercent;
+        data["discountAmount"] = this.discountAmount;
+        data["netUnitPrice"] = this.netUnitPrice;
+        data["taxPercent"] = this.taxPercent;
+        data["taxAmount"] = this.taxAmount;
+        data["lineTotal"] = this.lineTotal;
+        data["lineTotalWithTax"] = this.lineTotalWithTax;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface IPurchaseOrderDetailLineResponse {
+    id: number;
+    itemId: number;
+    unitId: number;
+    purchaseRequestDetailId: number;
+    quotationDetailId: number | undefined;
+    orderedQuantity: number;
+    receivedQuantity: number;
+    remainingQuantity: number;
+    unitPrice: number;
+    discountPercent: number | undefined;
+    discountAmount: number | undefined;
+    netUnitPrice: number | undefined;
+    taxPercent: number | undefined;
+    taxAmount: number | undefined;
+    lineTotal: number | undefined;
+    lineTotalWithTax: number | undefined;
+    notes: string | undefined;
+
+    [key: string]: any;
+}
+
+export class PurchaseOrderDetailResponse implements IPurchaseOrderDetailResponse {
+    id!: number;
+    poNumber!: string;
+    purchaseRequestId!: number | undefined;
+    supplierPartyId!: number;
+    supplierName!: string | undefined;
+    quotationId!: number | undefined;
+    status!: PurchaseOrderStatus;
+    poDate!: Date | undefined;
+    expectedDeliveryDate!: Date | undefined;
+    paymentTerms!: string | undefined;
+    deliveryTerms!: string | undefined;
+    subTotal!: number | undefined;
+    discountAmount!: number | undefined;
+    taxAmount!: number | undefined;
+    shippingCost!: number | undefined;
+    otherCharges!: number | undefined;
+    grandTotal!: number | undefined;
+    notes!: string | undefined;
+    lines!: PurchaseOrderDetailLineResponse[];
+
+    [key: string]: any;
+
+    constructor(data?: IPurchaseOrderDetailResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.lines = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.poNumber = _data["poNumber"];
+            this.purchaseRequestId = _data["purchaseRequestId"];
+            this.supplierPartyId = _data["supplierPartyId"];
+            this.supplierName = _data["supplierName"];
+            this.quotationId = _data["quotationId"];
+            this.status = _data["status"];
+            this.poDate = _data["poDate"] ? new Date(_data["poDate"].toString()) : undefined as any;
+            this.expectedDeliveryDate = _data["expectedDeliveryDate"] ? new Date(_data["expectedDeliveryDate"].toString()) : undefined as any;
+            this.paymentTerms = _data["paymentTerms"];
+            this.deliveryTerms = _data["deliveryTerms"];
+            this.subTotal = _data["subTotal"];
+            this.discountAmount = _data["discountAmount"];
+            this.taxAmount = _data["taxAmount"];
+            this.shippingCost = _data["shippingCost"];
+            this.otherCharges = _data["otherCharges"];
+            this.grandTotal = _data["grandTotal"];
+            this.notes = _data["notes"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(PurchaseOrderDetailLineResponse.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): PurchaseOrderDetailResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new PurchaseOrderDetailResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["poNumber"] = this.poNumber;
+        data["purchaseRequestId"] = this.purchaseRequestId;
+        data["supplierPartyId"] = this.supplierPartyId;
+        data["supplierName"] = this.supplierName;
+        data["quotationId"] = this.quotationId;
+        data["status"] = this.status;
+        data["poDate"] = this.poDate ? this.poDate.toISOString() : undefined as any;
+        data["expectedDeliveryDate"] = this.expectedDeliveryDate ? this.expectedDeliveryDate.toISOString() : undefined as any;
+        data["paymentTerms"] = this.paymentTerms;
+        data["deliveryTerms"] = this.deliveryTerms;
+        data["subTotal"] = this.subTotal;
+        data["discountAmount"] = this.discountAmount;
+        data["taxAmount"] = this.taxAmount;
+        data["shippingCost"] = this.shippingCost;
+        data["otherCharges"] = this.otherCharges;
+        data["grandTotal"] = this.grandTotal;
+        data["notes"] = this.notes;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IPurchaseOrderDetailResponse {
+    id: number;
+    poNumber: string;
+    purchaseRequestId: number | undefined;
+    supplierPartyId: number;
+    supplierName: string | undefined;
+    quotationId: number | undefined;
+    status: PurchaseOrderStatus;
+    poDate: Date | undefined;
+    expectedDeliveryDate: Date | undefined;
+    paymentTerms: string | undefined;
+    deliveryTerms: string | undefined;
+    subTotal: number | undefined;
+    discountAmount: number | undefined;
+    taxAmount: number | undefined;
+    shippingCost: number | undefined;
+    otherCharges: number | undefined;
+    grandTotal: number | undefined;
+    notes: string | undefined;
+    lines: PurchaseOrderDetailLineResponse[];
+
+    [key: string]: any;
+}
+
+export class PurchaseOrderLineDto implements IPurchaseOrderLineDto {
+    id!: number | undefined;
+    purchaseRequestDetailId!: number;
+    quotationDetailId!: number | undefined;
+    itemId!: number;
+    unitId!: number;
+    orderedQuantity!: number;
+    unitPrice!: number;
+    discountPercent!: number | undefined;
+    taxPercent!: number | undefined;
+    expectedDeliveryDate!: Date | undefined;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IPurchaseOrderLineDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.purchaseRequestDetailId = _data["purchaseRequestDetailId"];
+            this.quotationDetailId = _data["quotationDetailId"];
+            this.itemId = _data["itemId"];
+            this.unitId = _data["unitId"];
+            this.orderedQuantity = _data["orderedQuantity"];
+            this.unitPrice = _data["unitPrice"];
+            this.discountPercent = _data["discountPercent"];
+            this.taxPercent = _data["taxPercent"];
+            this.expectedDeliveryDate = _data["expectedDeliveryDate"] ? new Date(_data["expectedDeliveryDate"].toString()) : undefined as any;
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): PurchaseOrderLineDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PurchaseOrderLineDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["purchaseRequestDetailId"] = this.purchaseRequestDetailId;
+        data["quotationDetailId"] = this.quotationDetailId;
+        data["itemId"] = this.itemId;
+        data["unitId"] = this.unitId;
+        data["orderedQuantity"] = this.orderedQuantity;
+        data["unitPrice"] = this.unitPrice;
+        data["discountPercent"] = this.discountPercent;
+        data["taxPercent"] = this.taxPercent;
+        data["expectedDeliveryDate"] = this.expectedDeliveryDate ? this.expectedDeliveryDate.toISOString() : undefined as any;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface IPurchaseOrderLineDto {
+    id: number | undefined;
+    purchaseRequestDetailId: number;
+    quotationDetailId: number | undefined;
+    itemId: number;
+    unitId: number;
+    orderedQuantity: number;
+    unitPrice: number;
+    discountPercent: number | undefined;
+    taxPercent: number | undefined;
+    expectedDeliveryDate: Date | undefined;
+    notes: string | undefined;
+
+    [key: string]: any;
+}
+
+export class PurchaseOrderListItem implements IPurchaseOrderListItem {
+    id!: number;
+    purchaseOrderNumber!: string;
+    purchaseRequestId!: number;
+    supplierPartyId!: number;
+    supplierName!: string | undefined;
+    status!: PurchaseOrderStatus;
+    grandTotal!: number | undefined;
+    expectedDeliveryDate!: Date | undefined;
+    created!: Date;
+
+    [key: string]: any;
+
+    constructor(data?: IPurchaseOrderListItem) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.purchaseOrderNumber = _data["purchaseOrderNumber"];
+            this.purchaseRequestId = _data["purchaseRequestId"];
+            this.supplierPartyId = _data["supplierPartyId"];
+            this.supplierName = _data["supplierName"];
+            this.status = _data["status"];
+            this.grandTotal = _data["grandTotal"];
+            this.expectedDeliveryDate = _data["expectedDeliveryDate"] ? new Date(_data["expectedDeliveryDate"].toString()) : undefined as any;
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): PurchaseOrderListItem {
+        data = typeof data === 'object' ? data : {};
+        let result = new PurchaseOrderListItem();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["purchaseOrderNumber"] = this.purchaseOrderNumber;
+        data["purchaseRequestId"] = this.purchaseRequestId;
+        data["supplierPartyId"] = this.supplierPartyId;
+        data["supplierName"] = this.supplierName;
+        data["status"] = this.status;
+        data["grandTotal"] = this.grandTotal;
+        data["expectedDeliveryDate"] = this.expectedDeliveryDate ? this.expectedDeliveryDate.toISOString() : undefined as any;
+        data["created"] = this.created ? this.created.toISOString() : undefined as any;
+        return data;
+    }
+}
+
+export interface IPurchaseOrderListItem {
+    id: number;
+    purchaseOrderNumber: string;
+    purchaseRequestId: number;
+    supplierPartyId: number;
+    supplierName: string | undefined;
+    status: PurchaseOrderStatus;
+    grandTotal: number | undefined;
+    expectedDeliveryDate: Date | undefined;
+    created: Date;
+
+    [key: string]: any;
+}
+
+export enum PurchaseOrderStatus {
+    Draft = "Draft",
+    Submitted = "Submitted",
+    Approved = "Approved",
+    Issued = "Issued",
+    PartiallyReceived = "PartiallyReceived",
+    Received = "Received",
+    Closed = "Closed",
+    Cancelled = "Cancelled",
+}
+
+export class PurchaseRequestDetailLineResponse implements IPurchaseRequestDetailLineResponse {
+    id!: number;
+    itemId!: number;
+    unitId!: number;
+    requestedQuantity!: number;
+    approvedQuantity!: number | undefined;
+    unitCostEstimate!: number | undefined;
+    totalCostEstimate!: number | undefined;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IPurchaseRequestDetailLineResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.itemId = _data["itemId"];
+            this.unitId = _data["unitId"];
+            this.requestedQuantity = _data["requestedQuantity"];
+            this.approvedQuantity = _data["approvedQuantity"];
+            this.unitCostEstimate = _data["unitCostEstimate"];
+            this.totalCostEstimate = _data["totalCostEstimate"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): PurchaseRequestDetailLineResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new PurchaseRequestDetailLineResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["itemId"] = this.itemId;
+        data["unitId"] = this.unitId;
+        data["requestedQuantity"] = this.requestedQuantity;
+        data["approvedQuantity"] = this.approvedQuantity;
+        data["unitCostEstimate"] = this.unitCostEstimate;
+        data["totalCostEstimate"] = this.totalCostEstimate;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface IPurchaseRequestDetailLineResponse {
+    id: number;
+    itemId: number;
+    unitId: number;
+    requestedQuantity: number;
+    approvedQuantity: number | undefined;
+    unitCostEstimate: number | undefined;
+    totalCostEstimate: number | undefined;
+    notes: string | undefined;
+
+    [key: string]: any;
+}
+
+export class PurchaseRequestDetailResponse implements IPurchaseRequestDetailResponse {
+    id!: number;
+    requestNumber!: string;
+    requestDate!: Date;
+    requiredDate!: Date | undefined;
+    departmentId!: number | undefined;
+    costCenterId!: number | undefined;
+    requesterName!: string;
+    priority!: PurchaseRequestPriority;
+    status!: PurchaseRequestStatus;
+    totalEstimatedCost!: number | undefined;
+    notes!: string | undefined;
+    lines!: PurchaseRequestDetailLineResponse[];
+
+    [key: string]: any;
+
+    constructor(data?: IPurchaseRequestDetailResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.lines = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.requestNumber = _data["requestNumber"];
+            this.requestDate = _data["requestDate"] ? new Date(_data["requestDate"].toString()) : undefined as any;
+            this.requiredDate = _data["requiredDate"] ? new Date(_data["requiredDate"].toString()) : undefined as any;
+            this.departmentId = _data["departmentId"];
+            this.costCenterId = _data["costCenterId"];
+            this.requesterName = _data["requesterName"];
+            this.priority = _data["priority"];
+            this.status = _data["status"];
+            this.totalEstimatedCost = _data["totalEstimatedCost"];
+            this.notes = _data["notes"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(PurchaseRequestDetailLineResponse.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): PurchaseRequestDetailResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new PurchaseRequestDetailResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["requestNumber"] = this.requestNumber;
+        data["requestDate"] = this.requestDate ? this.requestDate.toISOString() : undefined as any;
+        data["requiredDate"] = this.requiredDate ? formatDate(this.requiredDate) : undefined as any;
+        data["departmentId"] = this.departmentId;
+        data["costCenterId"] = this.costCenterId;
+        data["requesterName"] = this.requesterName;
+        data["priority"] = this.priority;
+        data["status"] = this.status;
+        data["totalEstimatedCost"] = this.totalEstimatedCost;
+        data["notes"] = this.notes;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IPurchaseRequestDetailResponse {
+    id: number;
+    requestNumber: string;
+    requestDate: Date;
+    requiredDate: Date | undefined;
+    departmentId: number | undefined;
+    costCenterId: number | undefined;
+    requesterName: string;
+    priority: PurchaseRequestPriority;
+    status: PurchaseRequestStatus;
+    totalEstimatedCost: number | undefined;
+    notes: string | undefined;
+    lines: PurchaseRequestDetailLineResponse[];
+
+    [key: string]: any;
+}
+
+export class PurchaseRequestLineDto implements IPurchaseRequestLineDto {
+    itemId!: number;
+    unitId!: number;
+    requestedQuantity!: number;
+    unitCostEstimate!: number | undefined;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IPurchaseRequestLineDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.itemId = _data["itemId"];
+            this.unitId = _data["unitId"];
+            this.requestedQuantity = _data["requestedQuantity"];
+            this.unitCostEstimate = _data["unitCostEstimate"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): PurchaseRequestLineDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PurchaseRequestLineDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["itemId"] = this.itemId;
+        data["unitId"] = this.unitId;
+        data["requestedQuantity"] = this.requestedQuantity;
+        data["unitCostEstimate"] = this.unitCostEstimate;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface IPurchaseRequestLineDto {
+    itemId: number;
+    unitId: number;
+    requestedQuantity: number;
+    unitCostEstimate: number | undefined;
+    notes: string | undefined;
+
+    [key: string]: any;
+}
+
+export class PurchaseRequestListItem implements IPurchaseRequestListItem {
+    id!: number;
+    requestNumber!: string;
+    requestDate!: Date;
+    requesterName!: string;
+    priority!: PurchaseRequestPriority;
+    status!: PurchaseRequestStatus;
+    totalEstimatedCost!: number | undefined;
+    lineCount!: number;
+    created!: Date;
+
+    [key: string]: any;
+
+    constructor(data?: IPurchaseRequestListItem) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.requestNumber = _data["requestNumber"];
+            this.requestDate = _data["requestDate"] ? new Date(_data["requestDate"].toString()) : undefined as any;
+            this.requesterName = _data["requesterName"];
+            this.priority = _data["priority"];
+            this.status = _data["status"];
+            this.totalEstimatedCost = _data["totalEstimatedCost"];
+            this.lineCount = _data["lineCount"];
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): PurchaseRequestListItem {
+        data = typeof data === 'object' ? data : {};
+        let result = new PurchaseRequestListItem();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["requestNumber"] = this.requestNumber;
+        data["requestDate"] = this.requestDate ? this.requestDate.toISOString() : undefined as any;
+        data["requesterName"] = this.requesterName;
+        data["priority"] = this.priority;
+        data["status"] = this.status;
+        data["totalEstimatedCost"] = this.totalEstimatedCost;
+        data["lineCount"] = this.lineCount;
+        data["created"] = this.created ? this.created.toISOString() : undefined as any;
+        return data;
+    }
+}
+
+export interface IPurchaseRequestListItem {
+    id: number;
+    requestNumber: string;
+    requestDate: Date;
+    requesterName: string;
+    priority: PurchaseRequestPriority;
+    status: PurchaseRequestStatus;
+    totalEstimatedCost: number | undefined;
+    lineCount: number;
+    created: Date;
+
+    [key: string]: any;
+}
+
+export enum PurchaseRequestPriority {
+    Low = "Low",
+    Normal = "Normal",
+    High = "High",
+    Urgent = "Urgent",
+}
+
+export enum PurchaseRequestStatus {
+    Draft = "Draft",
+    Submitted = "Submitted",
+    Approved = "Approved",
+    UnderProcurement = "UnderProcurement",
+    Rejected = "Rejected",
+    Cancelled = "Cancelled",
+    Expired = "Expired",
+}
+
+export class QuotationDetailLineResponse implements IQuotationDetailLineResponse {
+    id!: number;
+    purchaseRequestDetailId!: number;
+    itemId!: number;
+    unitId!: number;
+    quantity!: number;
+    unitPrice!: number | undefined;
+    discountPercent!: number | undefined;
+    discountAmount!: number | undefined;
+    netUnitPrice!: number | undefined;
+    taxPercent!: number | undefined;
+    taxAmount!: number | undefined;
+    lineTotal!: number | undefined;
+    lineTotalWithTax!: number | undefined;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IQuotationDetailLineResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.purchaseRequestDetailId = _data["purchaseRequestDetailId"];
+            this.itemId = _data["itemId"];
+            this.unitId = _data["unitId"];
+            this.quantity = _data["quantity"];
+            this.unitPrice = _data["unitPrice"];
+            this.discountPercent = _data["discountPercent"];
+            this.discountAmount = _data["discountAmount"];
+            this.netUnitPrice = _data["netUnitPrice"];
+            this.taxPercent = _data["taxPercent"];
+            this.taxAmount = _data["taxAmount"];
+            this.lineTotal = _data["lineTotal"];
+            this.lineTotalWithTax = _data["lineTotalWithTax"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): QuotationDetailLineResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new QuotationDetailLineResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["purchaseRequestDetailId"] = this.purchaseRequestDetailId;
+        data["itemId"] = this.itemId;
+        data["unitId"] = this.unitId;
+        data["quantity"] = this.quantity;
+        data["unitPrice"] = this.unitPrice;
+        data["discountPercent"] = this.discountPercent;
+        data["discountAmount"] = this.discountAmount;
+        data["netUnitPrice"] = this.netUnitPrice;
+        data["taxPercent"] = this.taxPercent;
+        data["taxAmount"] = this.taxAmount;
+        data["lineTotal"] = this.lineTotal;
+        data["lineTotalWithTax"] = this.lineTotalWithTax;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface IQuotationDetailLineResponse {
+    id: number;
+    purchaseRequestDetailId: number;
+    itemId: number;
+    unitId: number;
+    quantity: number;
+    unitPrice: number | undefined;
+    discountPercent: number | undefined;
+    discountAmount: number | undefined;
+    netUnitPrice: number | undefined;
+    taxPercent: number | undefined;
+    taxAmount: number | undefined;
+    lineTotal: number | undefined;
+    lineTotalWithTax: number | undefined;
+    notes: string | undefined;
+
+    [key: string]: any;
+}
+
+export class QuotationDetailResponse implements IQuotationDetailResponse {
+    id!: number;
+    quotationNumber!: string;
+    supplierPartyId!: number;
+    quotationDate!: Date;
+    validUntil!: Date | undefined;
+    currencyCode!: string | undefined;
+    exchangeRate!: number | undefined;
+    subTotal!: number | undefined;
+    discountAmount!: number | undefined;
+    taxAmount!: number | undefined;
+    shippingCost!: number | undefined;
+    otherCharges!: number | undefined;
+    grandTotal!: number | undefined;
+    paymentTerms!: string | undefined;
+    deliveryTerms!: string | undefined;
+    leadTimeDays!: number | undefined;
+    warrantyPeriodMonths!: number | undefined;
+    status!: QuotationStatus;
+    technicalScore!: number | undefined;
+    financialScore!: number | undefined;
+    selectionReason!: string | undefined;
+    rejectionReason!: string | undefined;
+    notes!: string | undefined;
+    lines!: QuotationDetailLineResponse[];
+
+    [key: string]: any;
+
+    constructor(data?: IQuotationDetailResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.lines = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.quotationNumber = _data["quotationNumber"];
+            this.supplierPartyId = _data["supplierPartyId"];
+            this.quotationDate = _data["quotationDate"] ? new Date(_data["quotationDate"].toString()) : undefined as any;
+            this.validUntil = _data["validUntil"] ? new Date(_data["validUntil"].toString()) : undefined as any;
+            this.currencyCode = _data["currencyCode"];
+            this.exchangeRate = _data["exchangeRate"];
+            this.subTotal = _data["subTotal"];
+            this.discountAmount = _data["discountAmount"];
+            this.taxAmount = _data["taxAmount"];
+            this.shippingCost = _data["shippingCost"];
+            this.otherCharges = _data["otherCharges"];
+            this.grandTotal = _data["grandTotal"];
+            this.paymentTerms = _data["paymentTerms"];
+            this.deliveryTerms = _data["deliveryTerms"];
+            this.leadTimeDays = _data["leadTimeDays"];
+            this.warrantyPeriodMonths = _data["warrantyPeriodMonths"];
+            this.status = _data["status"];
+            this.technicalScore = _data["technicalScore"];
+            this.financialScore = _data["financialScore"];
+            this.selectionReason = _data["selectionReason"];
+            this.rejectionReason = _data["rejectionReason"];
+            this.notes = _data["notes"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(QuotationDetailLineResponse.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): QuotationDetailResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new QuotationDetailResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["quotationNumber"] = this.quotationNumber;
+        data["supplierPartyId"] = this.supplierPartyId;
+        data["quotationDate"] = this.quotationDate ? this.quotationDate.toISOString() : undefined as any;
+        data["validUntil"] = this.validUntil ? this.validUntil.toISOString() : undefined as any;
+        data["currencyCode"] = this.currencyCode;
+        data["exchangeRate"] = this.exchangeRate;
+        data["subTotal"] = this.subTotal;
+        data["discountAmount"] = this.discountAmount;
+        data["taxAmount"] = this.taxAmount;
+        data["shippingCost"] = this.shippingCost;
+        data["otherCharges"] = this.otherCharges;
+        data["grandTotal"] = this.grandTotal;
+        data["paymentTerms"] = this.paymentTerms;
+        data["deliveryTerms"] = this.deliveryTerms;
+        data["leadTimeDays"] = this.leadTimeDays;
+        data["warrantyPeriodMonths"] = this.warrantyPeriodMonths;
+        data["status"] = this.status;
+        data["technicalScore"] = this.technicalScore;
+        data["financialScore"] = this.financialScore;
+        data["selectionReason"] = this.selectionReason;
+        data["rejectionReason"] = this.rejectionReason;
+        data["notes"] = this.notes;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IQuotationDetailResponse {
+    id: number;
+    quotationNumber: string;
+    supplierPartyId: number;
+    quotationDate: Date;
+    validUntil: Date | undefined;
+    currencyCode: string | undefined;
+    exchangeRate: number | undefined;
+    subTotal: number | undefined;
+    discountAmount: number | undefined;
+    taxAmount: number | undefined;
+    shippingCost: number | undefined;
+    otherCharges: number | undefined;
+    grandTotal: number | undefined;
+    paymentTerms: string | undefined;
+    deliveryTerms: string | undefined;
+    leadTimeDays: number | undefined;
+    warrantyPeriodMonths: number | undefined;
+    status: QuotationStatus;
+    technicalScore: number | undefined;
+    financialScore: number | undefined;
+    selectionReason: string | undefined;
+    rejectionReason: string | undefined;
+    notes: string | undefined;
+    lines: QuotationDetailLineResponse[];
+
+    [key: string]: any;
+}
+
+export class QuotationLineDto implements IQuotationLineDto {
+    purchaseRequestDetailId!: number;
+    itemId!: number;
+    unitId!: number;
+    quantity!: number;
+    unitPrice!: number;
+    discountPercent!: number | undefined;
+    taxPercent!: number | undefined;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IQuotationLineDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.purchaseRequestDetailId = _data["purchaseRequestDetailId"];
+            this.itemId = _data["itemId"];
+            this.unitId = _data["unitId"];
+            this.quantity = _data["quantity"];
+            this.unitPrice = _data["unitPrice"];
+            this.discountPercent = _data["discountPercent"];
+            this.taxPercent = _data["taxPercent"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): QuotationLineDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new QuotationLineDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["purchaseRequestDetailId"] = this.purchaseRequestDetailId;
+        data["itemId"] = this.itemId;
+        data["unitId"] = this.unitId;
+        data["quantity"] = this.quantity;
+        data["unitPrice"] = this.unitPrice;
+        data["discountPercent"] = this.discountPercent;
+        data["taxPercent"] = this.taxPercent;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface IQuotationLineDto {
+    purchaseRequestDetailId: number;
+    itemId: number;
+    unitId: number;
+    quantity: number;
+    unitPrice: number;
+    discountPercent: number | undefined;
+    taxPercent: number | undefined;
+    notes: string | undefined;
+
+    [key: string]: any;
+}
+
+export class QuotationListItem implements IQuotationListItem {
+    id!: number;
+    quotationNumber!: string;
+    supplierPartyId!: number;
+    quotationDate!: Date;
+    status!: QuotationStatus;
+    grandTotal!: number | undefined;
+    created!: Date;
+
+    [key: string]: any;
+
+    constructor(data?: IQuotationListItem) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.quotationNumber = _data["quotationNumber"];
+            this.supplierPartyId = _data["supplierPartyId"];
+            this.quotationDate = _data["quotationDate"] ? new Date(_data["quotationDate"].toString()) : undefined as any;
+            this.status = _data["status"];
+            this.grandTotal = _data["grandTotal"];
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): QuotationListItem {
+        data = typeof data === 'object' ? data : {};
+        let result = new QuotationListItem();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["quotationNumber"] = this.quotationNumber;
+        data["supplierPartyId"] = this.supplierPartyId;
+        data["quotationDate"] = this.quotationDate ? this.quotationDate.toISOString() : undefined as any;
+        data["status"] = this.status;
+        data["grandTotal"] = this.grandTotal;
+        data["created"] = this.created ? this.created.toISOString() : undefined as any;
+        return data;
+    }
+}
+
+export interface IQuotationListItem {
+    id: number;
+    quotationNumber: string;
+    supplierPartyId: number;
+    quotationDate: Date;
+    status: QuotationStatus;
+    grandTotal: number | undefined;
+    created: Date;
+
+    [key: string]: any;
+}
+
+export enum QuotationStatus {
+    Draft = "Draft",
+    Submitted = "Submitted",
+    UnderEvaluation = "UnderEvaluation",
+    Evaluated = "Evaluated",
+    Selected = "Selected",
+    Awarded = "Awarded",
+    Rejected = "Rejected",
+    Expired = "Expired",
 }
 
 export class ReceiptVoucherDto implements IReceiptVoucherDto {
@@ -35149,7 +42786,7 @@ export enum ReconciliationLineType {
 }
 
 export class RecordPaymentRequest implements IRecordPaymentRequest {
-    disbursementRequestId!: number;
+    paymentOrderId!: number;
     paymentMethod!: PaymentMethod;
     referenceNumber!: string | undefined;
     notes!: string | undefined;
@@ -35171,7 +42808,7 @@ export class RecordPaymentRequest implements IRecordPaymentRequest {
                 if (_data.hasOwnProperty(property))
                     this[property] = _data[property];
             }
-            this.disbursementRequestId = _data["disbursementRequestId"];
+            this.paymentOrderId = _data["paymentOrderId"];
             this.paymentMethod = _data["paymentMethod"];
             this.referenceNumber = _data["referenceNumber"];
             this.notes = _data["notes"];
@@ -35191,7 +42828,7 @@ export class RecordPaymentRequest implements IRecordPaymentRequest {
             if (this.hasOwnProperty(property))
                 data[property] = this[property];
         }
-        data["disbursementRequestId"] = this.disbursementRequestId;
+        data["paymentOrderId"] = this.paymentOrderId;
         data["paymentMethod"] = this.paymentMethod;
         data["referenceNumber"] = this.referenceNumber;
         data["notes"] = this.notes;
@@ -35200,7 +42837,7 @@ export class RecordPaymentRequest implements IRecordPaymentRequest {
 }
 
 export interface IRecordPaymentRequest {
-    disbursementRequestId: number;
+    paymentOrderId: number;
     paymentMethod: PaymentMethod;
     referenceNumber: string | undefined;
     notes: string | undefined;
@@ -35450,8 +43087,65 @@ export interface IRejectBankReconciliationCommand {
     [key: string]: any;
 }
 
+export class RejectBudgetRequest implements IRejectBudgetRequest {
+    rowVersion!: string;
+    reason!: string | undefined;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IRejectBudgetRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.rowVersion = _data["rowVersion"];
+            this.reason = _data["reason"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): RejectBudgetRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new RejectBudgetRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["rowVersion"] = this.rowVersion;
+        data["reason"] = this.reason;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface IRejectBudgetRequest {
+    rowVersion: string;
+    reason: string | undefined;
+    notes: string | undefined;
+
+    [key: string]: any;
+}
+
 export class RejectDisbursementRequestRequest implements IRejectDisbursementRequestRequest {
     reason!: string;
+    rowVersion!: string;
 
     [key: string]: any;
 
@@ -35471,6 +43165,7 @@ export class RejectDisbursementRequestRequest implements IRejectDisbursementRequ
                     this[property] = _data[property];
             }
             this.reason = _data["reason"];
+            this.rowVersion = _data["rowVersion"];
         }
     }
 
@@ -35488,12 +43183,66 @@ export class RejectDisbursementRequestRequest implements IRejectDisbursementRequ
                 data[property] = this[property];
         }
         data["reason"] = this.reason;
+        data["rowVersion"] = this.rowVersion;
         return data;
     }
 }
 
 export interface IRejectDisbursementRequestRequest {
     reason: string;
+    rowVersion: string;
+
+    [key: string]: any;
+}
+
+export class RejectGRNCommand implements IRejectGRNCommand {
+    id!: number;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IRejectGRNCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): RejectGRNCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new RejectGRNCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface IRejectGRNCommand {
+    id: number;
+    notes: string | undefined;
 
     [key: string]: any;
 }
@@ -35550,6 +43299,102 @@ export interface IRejectPaymentOrderCommand {
     id?: number;
     rejectionReason?: string;
     rowVersion?: string;
+
+    [key: string]: any;
+}
+
+export class RejectPurchaseRequestRequest implements IRejectPurchaseRequestRequest {
+    reason!: string;
+
+    [key: string]: any;
+
+    constructor(data?: IRejectPurchaseRequestRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.reason = _data["reason"];
+        }
+    }
+
+    static fromJS(data: any): RejectPurchaseRequestRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new RejectPurchaseRequestRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["reason"] = this.reason;
+        return data;
+    }
+}
+
+export interface IRejectPurchaseRequestRequest {
+    reason: string;
+
+    [key: string]: any;
+}
+
+export class RejectQuotationRequest implements IRejectQuotationRequest {
+    rejectionReason!: string;
+
+    [key: string]: any;
+
+    constructor(data?: IRejectQuotationRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.rejectionReason = _data["rejectionReason"];
+        }
+    }
+
+    static fromJS(data: any): RejectQuotationRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new RejectQuotationRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["rejectionReason"] = this.rejectionReason;
+        return data;
+    }
+}
+
+export interface IRejectQuotationRequest {
+    rejectionReason: string;
 
     [key: string]: any;
 }
@@ -35713,7 +43558,7 @@ export interface IReopenFiscalYearRequest {
 export class ReopenFiscalYearResponse implements IReopenFiscalYearResponse {
     yearClosingRunId!: number;
     fiscalYearId!: number;
-    restoredAppropriationTotal!: number;
+    restoredBudgetTotal!: number;
     restoredEncumbranceTotal!: number;
 
     [key: string]: any;
@@ -35735,7 +43580,7 @@ export class ReopenFiscalYearResponse implements IReopenFiscalYearResponse {
             }
             this.yearClosingRunId = _data["yearClosingRunId"];
             this.fiscalYearId = _data["fiscalYearId"];
-            this.restoredAppropriationTotal = _data["restoredAppropriationTotal"];
+            this.restoredBudgetTotal = _data["restoredBudgetTotal"];
             this.restoredEncumbranceTotal = _data["restoredEncumbranceTotal"];
         }
     }
@@ -35755,7 +43600,7 @@ export class ReopenFiscalYearResponse implements IReopenFiscalYearResponse {
         }
         data["yearClosingRunId"] = this.yearClosingRunId;
         data["fiscalYearId"] = this.fiscalYearId;
-        data["restoredAppropriationTotal"] = this.restoredAppropriationTotal;
+        data["restoredBudgetTotal"] = this.restoredBudgetTotal;
         data["restoredEncumbranceTotal"] = this.restoredEncumbranceTotal;
         return data;
     }
@@ -35764,7 +43609,7 @@ export class ReopenFiscalYearResponse implements IReopenFiscalYearResponse {
 export interface IReopenFiscalYearResponse {
     yearClosingRunId: number;
     fiscalYearId: number;
-    restoredAppropriationTotal: number;
+    restoredBudgetTotal: number;
     restoredEncumbranceTotal: number;
 
     [key: string]: any;
@@ -36062,6 +43907,198 @@ export class Result implements IResult {
 
 export interface IResult {
     succeeded?: boolean;
+    errors?: string[];
+
+    [key: string]: any;
+}
+
+export class ResultOfint implements IResultOfint {
+    succeeded?: boolean;
+    value?: number;
+    errors?: string[];
+
+    [key: string]: any;
+
+    constructor(data?: IResultOfint) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.succeeded = _data["succeeded"];
+            this.value = _data["value"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): ResultOfint {
+        data = typeof data === 'object' ? data : {};
+        let result = new ResultOfint();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["succeeded"] = this.succeeded;
+        data["value"] = this.value;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface IResultOfint {
+    succeeded?: boolean;
+    value?: number;
+    errors?: string[];
+
+    [key: string]: any;
+}
+
+export class ResultOfPaginatedListOfPurchaseOrderListItem implements IResultOfPaginatedListOfPurchaseOrderListItem {
+    succeeded?: boolean;
+    value?: PaginatedListOfPurchaseOrderListItem | undefined;
+    errors?: string[];
+
+    [key: string]: any;
+
+    constructor(data?: IResultOfPaginatedListOfPurchaseOrderListItem) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.succeeded = _data["succeeded"];
+            this.value = _data["value"] ? PaginatedListOfPurchaseOrderListItem.fromJS(_data["value"]) : undefined as any;
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): ResultOfPaginatedListOfPurchaseOrderListItem {
+        data = typeof data === 'object' ? data : {};
+        let result = new ResultOfPaginatedListOfPurchaseOrderListItem();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["succeeded"] = this.succeeded;
+        data["value"] = this.value ? this.value.toJSON() : undefined as any;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface IResultOfPaginatedListOfPurchaseOrderListItem {
+    succeeded?: boolean;
+    value?: PaginatedListOfPurchaseOrderListItem | undefined;
+    errors?: string[];
+
+    [key: string]: any;
+}
+
+export class ResultOfPurchaseOrderDetailResponse implements IResultOfPurchaseOrderDetailResponse {
+    succeeded?: boolean;
+    value?: PurchaseOrderDetailResponse | undefined;
+    errors?: string[];
+
+    [key: string]: any;
+
+    constructor(data?: IResultOfPurchaseOrderDetailResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.succeeded = _data["succeeded"];
+            this.value = _data["value"] ? PurchaseOrderDetailResponse.fromJS(_data["value"]) : undefined as any;
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): ResultOfPurchaseOrderDetailResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new ResultOfPurchaseOrderDetailResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["succeeded"] = this.succeeded;
+        data["value"] = this.value ? this.value.toJSON() : undefined as any;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface IResultOfPurchaseOrderDetailResponse {
+    succeeded?: boolean;
+    value?: PurchaseOrderDetailResponse | undefined;
     errors?: string[];
 
     [key: string]: any;
@@ -36973,9 +45010,56 @@ export interface ISecurityRoleDto {
     [key: string]: any;
 }
 
+export class SelectQuotationRequest implements ISelectQuotationRequest {
+    selectionReason!: string;
+
+    [key: string]: any;
+
+    constructor(data?: ISelectQuotationRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.selectionReason = _data["selectionReason"];
+        }
+    }
+
+    static fromJS(data: any): SelectQuotationRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new SelectQuotationRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["selectionReason"] = this.selectionReason;
+        return data;
+    }
+}
+
+export interface ISelectQuotationRequest {
+    selectionReason: string;
+
+    [key: string]: any;
+}
+
 export class SendToTreasuryCommand implements ISendToTreasuryCommand {
     id?: number;
-    treasuryReference?: string;
     rowVersion?: string;
 
     [key: string]: any;
@@ -36996,7 +45080,6 @@ export class SendToTreasuryCommand implements ISendToTreasuryCommand {
                     this[property] = _data[property];
             }
             this.id = _data["id"];
-            this.treasuryReference = _data["treasuryReference"];
             this.rowVersion = _data["rowVersion"];
         }
     }
@@ -37015,7 +45098,6 @@ export class SendToTreasuryCommand implements ISendToTreasuryCommand {
                 data[property] = this[property];
         }
         data["id"] = this.id;
-        data["treasuryReference"] = this.treasuryReference;
         data["rowVersion"] = this.rowVersion;
         return data;
     }
@@ -37023,7 +45105,6 @@ export class SendToTreasuryCommand implements ISendToTreasuryCommand {
 
 export interface ISendToTreasuryCommand {
     id?: number;
-    treasuryReference?: string;
     rowVersion?: string;
 
     [key: string]: any;
@@ -37239,6 +45320,9 @@ export interface ISubmitJournalEntryCommand {
 
 export class SubmitPaymentOrderCommand implements ISubmitPaymentOrderCommand {
     id?: number;
+    fundId?: number;
+    accountId?: number | undefined;
+    budgetItemAllocationId?: number | undefined;
     rowVersion?: string;
 
     [key: string]: any;
@@ -37259,6 +45343,9 @@ export class SubmitPaymentOrderCommand implements ISubmitPaymentOrderCommand {
                     this[property] = _data[property];
             }
             this.id = _data["id"];
+            this.fundId = _data["fundId"];
+            this.accountId = _data["accountId"];
+            this.budgetItemAllocationId = _data["budgetItemAllocationId"];
             this.rowVersion = _data["rowVersion"];
         }
     }
@@ -37277,6 +45364,9 @@ export class SubmitPaymentOrderCommand implements ISubmitPaymentOrderCommand {
                 data[property] = this[property];
         }
         data["id"] = this.id;
+        data["fundId"] = this.fundId;
+        data["accountId"] = this.accountId;
+        data["budgetItemAllocationId"] = this.budgetItemAllocationId;
         data["rowVersion"] = this.rowVersion;
         return data;
     }
@@ -37284,6 +45374,9 @@ export class SubmitPaymentOrderCommand implements ISubmitPaymentOrderCommand {
 
 export interface ISubmitPaymentOrderCommand {
     id?: number;
+    fundId?: number;
+    accountId?: number | undefined;
+    budgetItemAllocationId?: number | undefined;
     rowVersion?: string;
 
     [key: string]: any;
@@ -37339,6 +45432,239 @@ export interface ISubmitReceiptVoucherCommand {
     rowVersion?: string;
 
     [key: string]: any;
+}
+
+export class SupplierInvoiceDetailLineResponse implements ISupplierInvoiceDetailLineResponse {
+    id!: number;
+    purchaseOrderDetailId!: number;
+    goodsReceiptNoteDetailId!: number | undefined;
+    itemId!: number;
+    itemNameAr!: string | undefined;
+    quantity!: number;
+    unitPrice!: number;
+    discountAmount!: number | undefined;
+    taxAmount!: number | undefined;
+    lineTotal!: number | undefined;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: ISupplierInvoiceDetailLineResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.purchaseOrderDetailId = _data["purchaseOrderDetailId"];
+            this.goodsReceiptNoteDetailId = _data["goodsReceiptNoteDetailId"];
+            this.itemId = _data["itemId"];
+            this.itemNameAr = _data["itemNameAr"];
+            this.quantity = _data["quantity"];
+            this.unitPrice = _data["unitPrice"];
+            this.discountAmount = _data["discountAmount"];
+            this.taxAmount = _data["taxAmount"];
+            this.lineTotal = _data["lineTotal"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): SupplierInvoiceDetailLineResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new SupplierInvoiceDetailLineResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["purchaseOrderDetailId"] = this.purchaseOrderDetailId;
+        data["goodsReceiptNoteDetailId"] = this.goodsReceiptNoteDetailId;
+        data["itemId"] = this.itemId;
+        data["itemNameAr"] = this.itemNameAr;
+        data["quantity"] = this.quantity;
+        data["unitPrice"] = this.unitPrice;
+        data["discountAmount"] = this.discountAmount;
+        data["taxAmount"] = this.taxAmount;
+        data["lineTotal"] = this.lineTotal;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface ISupplierInvoiceDetailLineResponse {
+    id: number;
+    purchaseOrderDetailId: number;
+    goodsReceiptNoteDetailId: number | undefined;
+    itemId: number;
+    itemNameAr: string | undefined;
+    quantity: number;
+    unitPrice: number;
+    discountAmount: number | undefined;
+    taxAmount: number | undefined;
+    lineTotal: number | undefined;
+    notes: string | undefined;
+
+    [key: string]: any;
+}
+
+export class SupplierInvoiceDetailResponse implements ISupplierInvoiceDetailResponse {
+    id!: number;
+    invoiceNumber!: string;
+    supplierInvoiceNumber!: string;
+    purchaseOrderId!: number;
+    purchaseOrderNumber!: string | undefined;
+    supplierPartyId!: number;
+    supplierName!: string | undefined;
+    invoiceDate!: Date;
+    currencyCode!: string | undefined;
+    exchangeRate!: number | undefined;
+    subTotal!: number | undefined;
+    discountAmount!: number | undefined;
+    taxAmount!: number | undefined;
+    shippingCost!: number | undefined;
+    otherCharges!: number | undefined;
+    grandTotal!: number | undefined;
+    dueDate!: Date | undefined;
+    status!: SupplierInvoiceStatus | undefined;
+    notes!: string | undefined;
+    lines!: SupplierInvoiceDetailLineResponse[];
+
+    [key: string]: any;
+
+    constructor(data?: ISupplierInvoiceDetailResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.lines = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.invoiceNumber = _data["invoiceNumber"];
+            this.supplierInvoiceNumber = _data["supplierInvoiceNumber"];
+            this.purchaseOrderId = _data["purchaseOrderId"];
+            this.purchaseOrderNumber = _data["purchaseOrderNumber"];
+            this.supplierPartyId = _data["supplierPartyId"];
+            this.supplierName = _data["supplierName"];
+            this.invoiceDate = _data["invoiceDate"] ? new Date(_data["invoiceDate"].toString()) : undefined as any;
+            this.currencyCode = _data["currencyCode"];
+            this.exchangeRate = _data["exchangeRate"];
+            this.subTotal = _data["subTotal"];
+            this.discountAmount = _data["discountAmount"];
+            this.taxAmount = _data["taxAmount"];
+            this.shippingCost = _data["shippingCost"];
+            this.otherCharges = _data["otherCharges"];
+            this.grandTotal = _data["grandTotal"];
+            this.dueDate = _data["dueDate"] ? new Date(_data["dueDate"].toString()) : undefined as any;
+            this.status = _data["status"];
+            this.notes = _data["notes"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(SupplierInvoiceDetailLineResponse.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): SupplierInvoiceDetailResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new SupplierInvoiceDetailResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["invoiceNumber"] = this.invoiceNumber;
+        data["supplierInvoiceNumber"] = this.supplierInvoiceNumber;
+        data["purchaseOrderId"] = this.purchaseOrderId;
+        data["purchaseOrderNumber"] = this.purchaseOrderNumber;
+        data["supplierPartyId"] = this.supplierPartyId;
+        data["supplierName"] = this.supplierName;
+        data["invoiceDate"] = this.invoiceDate ? formatDate(this.invoiceDate) : undefined as any;
+        data["currencyCode"] = this.currencyCode;
+        data["exchangeRate"] = this.exchangeRate;
+        data["subTotal"] = this.subTotal;
+        data["discountAmount"] = this.discountAmount;
+        data["taxAmount"] = this.taxAmount;
+        data["shippingCost"] = this.shippingCost;
+        data["otherCharges"] = this.otherCharges;
+        data["grandTotal"] = this.grandTotal;
+        data["dueDate"] = this.dueDate ? formatDate(this.dueDate) : undefined as any;
+        data["status"] = this.status;
+        data["notes"] = this.notes;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface ISupplierInvoiceDetailResponse {
+    id: number;
+    invoiceNumber: string;
+    supplierInvoiceNumber: string;
+    purchaseOrderId: number;
+    purchaseOrderNumber: string | undefined;
+    supplierPartyId: number;
+    supplierName: string | undefined;
+    invoiceDate: Date;
+    currencyCode: string | undefined;
+    exchangeRate: number | undefined;
+    subTotal: number | undefined;
+    discountAmount: number | undefined;
+    taxAmount: number | undefined;
+    shippingCost: number | undefined;
+    otherCharges: number | undefined;
+    grandTotal: number | undefined;
+    dueDate: Date | undefined;
+    status: SupplierInvoiceStatus | undefined;
+    notes: string | undefined;
+    lines: SupplierInvoiceDetailLineResponse[];
+
+    [key: string]: any;
+}
+
+export enum SupplierInvoiceStatus {
+    Draft = "Draft",
+    Submitted = "Submitted",
+    Matched = "Matched",
+    PartiallyPaid = "PartiallyPaid",
+    Paid = "Paid",
+    Disputed = "Disputed",
+    Cancelled = "Cancelled",
 }
 
 export class TaxNumberCheckResponse implements ITaxNumberCheckResponse {
@@ -37445,56 +45771,9 @@ export interface IToggleAccountGroupActiveCommand {
     [key: string]: any;
 }
 
-export class TransferPairResult implements ITransferPairResult {
-    sourceId!: number;
-    targetId!: number;
-
-    [key: string]: any;
-
-    constructor(data?: ITransferPairResult) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.sourceId = _data["sourceId"];
-            this.targetId = _data["targetId"];
-        }
-    }
-
-    static fromJS(data: any): TransferPairResult {
-        data = typeof data === 'object' ? data : {};
-        let result = new TransferPairResult();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["sourceId"] = this.sourceId;
-        data["targetId"] = this.targetId;
-        return data;
-    }
-}
-
-export interface ITransferPairResult {
-    sourceId: number;
-    targetId: number;
-
-    [key: string]: any;
+export enum TransactionDirection {
+    Increase = "Increase",
+    Decrease = "Decrease",
 }
 
 export class TrialBalanceDto implements ITrialBalanceDto {
@@ -37809,6 +46088,86 @@ export interface ITrialBalanceTotalDto {
     [key: string]: any;
 }
 
+export class UnitResponse implements IUnitResponse {
+    id!: number;
+    code!: string;
+    name!: string;
+    nameAr!: string | undefined;
+    unitType!: string | undefined;
+    baseUnitId!: number | undefined;
+    baseUnitName!: string | undefined;
+    conversionToBase!: number | undefined;
+    isActive!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: IUnitResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.nameAr = _data["nameAr"];
+            this.unitType = _data["unitType"];
+            this.baseUnitId = _data["baseUnitId"];
+            this.baseUnitName = _data["baseUnitName"];
+            this.conversionToBase = _data["conversionToBase"];
+            this.isActive = _data["isActive"];
+        }
+    }
+
+    static fromJS(data: any): UnitResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new UnitResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["nameAr"] = this.nameAr;
+        data["unitType"] = this.unitType;
+        data["baseUnitId"] = this.baseUnitId;
+        data["baseUnitName"] = this.baseUnitName;
+        data["conversionToBase"] = this.conversionToBase;
+        data["isActive"] = this.isActive;
+        return data;
+    }
+}
+
+export interface IUnitResponse {
+    id: number;
+    code: string;
+    name: string;
+    nameAr: string | undefined;
+    unitType: string | undefined;
+    baseUnitId: number | undefined;
+    baseUnitName: string | undefined;
+    conversionToBase: number | undefined;
+    isActive: boolean;
+
+    [key: string]: any;
+}
+
 export class UnreadCountDto implements IUnreadCountDto {
     count?: number;
 
@@ -38001,70 +46360,6 @@ export interface IUpdateAccountGroupCommand {
     description?: string | undefined;
     parentId?: number | undefined;
     rowVersion?: string;
-
-    [key: string]: any;
-}
-
-export class UpdateAppropriationRequest implements IUpdateAppropriationRequest {
-    appropriationType!: AppropriationType;
-    documentType!: string;
-    documentId!: number;
-    amount!: number;
-    rowVersion!: string;
-
-    [key: string]: any;
-
-    constructor(data?: IUpdateAppropriationRequest) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.appropriationType = _data["appropriationType"];
-            this.documentType = _data["documentType"];
-            this.documentId = _data["documentId"];
-            this.amount = _data["amount"];
-            this.rowVersion = _data["rowVersion"];
-        }
-    }
-
-    static fromJS(data: any): UpdateAppropriationRequest {
-        data = typeof data === 'object' ? data : {};
-        let result = new UpdateAppropriationRequest();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["appropriationType"] = this.appropriationType;
-        data["documentType"] = this.documentType;
-        data["documentId"] = this.documentId;
-        data["amount"] = this.amount;
-        data["rowVersion"] = this.rowVersion;
-        return data;
-    }
-}
-
-export interface IUpdateAppropriationRequest {
-    appropriationType: AppropriationType;
-    documentType: string;
-    documentId: number;
-    amount: number;
-    rowVersion: string;
 
     [key: string]: any;
 }
@@ -38373,8 +46668,68 @@ export interface IUpdateBudgetClassificationRequest {
     [key: string]: any;
 }
 
+export class UpdateBudgetItemAllocationRequest implements IUpdateBudgetItemAllocationRequest {
+    proposedAmount!: number;
+    remarks!: string | undefined;
+    rowVersion!: string;
+
+    [key: string]: any;
+
+    constructor(data?: IUpdateBudgetItemAllocationRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.proposedAmount = _data["proposedAmount"];
+            this.remarks = _data["remarks"];
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): UpdateBudgetItemAllocationRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateBudgetItemAllocationRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["proposedAmount"] = this.proposedAmount;
+        data["remarks"] = this.remarks;
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IUpdateBudgetItemAllocationRequest {
+    proposedAmount: number;
+    remarks: string | undefined;
+    rowVersion: string;
+
+    [key: string]: any;
+}
+
 export class UpdateBudgetItemRequest implements IUpdateBudgetItemRequest {
     itemName!: string;
+    accountId!: number | undefined;
+    costCenterId!: number | undefined;
+    budgetClassificationId!: number | undefined;
+    allowOverrun!: boolean | undefined;
     remarks!: string | undefined;
     rowVersion!: string;
 
@@ -38396,6 +46751,10 @@ export class UpdateBudgetItemRequest implements IUpdateBudgetItemRequest {
                     this[property] = _data[property];
             }
             this.itemName = _data["itemName"];
+            this.accountId = _data["accountId"];
+            this.costCenterId = _data["costCenterId"];
+            this.budgetClassificationId = _data["budgetClassificationId"];
+            this.allowOverrun = _data["allowOverrun"];
             this.remarks = _data["remarks"];
             this.rowVersion = _data["rowVersion"];
         }
@@ -38415,6 +46774,10 @@ export class UpdateBudgetItemRequest implements IUpdateBudgetItemRequest {
                 data[property] = this[property];
         }
         data["itemName"] = this.itemName;
+        data["accountId"] = this.accountId;
+        data["costCenterId"] = this.costCenterId;
+        data["budgetClassificationId"] = this.budgetClassificationId;
+        data["allowOverrun"] = this.allowOverrun;
         data["remarks"] = this.remarks;
         data["rowVersion"] = this.rowVersion;
         return data;
@@ -38423,6 +46786,10 @@ export class UpdateBudgetItemRequest implements IUpdateBudgetItemRequest {
 
 export interface IUpdateBudgetItemRequest {
     itemName: string;
+    accountId: number | undefined;
+    costCenterId: number | undefined;
+    budgetClassificationId: number | undefined;
+    allowOverrun: boolean | undefined;
     remarks: string | undefined;
     rowVersion: string;
 
@@ -38841,6 +47208,78 @@ export interface IUpdateCurrencyCommand {
     [key: string]: any;
 }
 
+export class UpdateDisbursementRequestRequest implements IUpdateDisbursementRequestRequest {
+    beneficiaryName!: string | undefined;
+    requestedAmount!: number | undefined;
+    currencyId!: number | undefined;
+    purpose!: string | undefined;
+    financialYearId!: number | undefined;
+    notes!: string | undefined;
+    rowVersion!: string;
+
+    [key: string]: any;
+
+    constructor(data?: IUpdateDisbursementRequestRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.beneficiaryName = _data["beneficiaryName"];
+            this.requestedAmount = _data["requestedAmount"];
+            this.currencyId = _data["currencyId"];
+            this.purpose = _data["purpose"];
+            this.financialYearId = _data["financialYearId"];
+            this.notes = _data["notes"];
+            this.rowVersion = _data["rowVersion"];
+        }
+    }
+
+    static fromJS(data: any): UpdateDisbursementRequestRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateDisbursementRequestRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["beneficiaryName"] = this.beneficiaryName;
+        data["requestedAmount"] = this.requestedAmount;
+        data["currencyId"] = this.currencyId;
+        data["purpose"] = this.purpose;
+        data["financialYearId"] = this.financialYearId;
+        data["notes"] = this.notes;
+        data["rowVersion"] = this.rowVersion;
+        return data;
+    }
+}
+
+export interface IUpdateDisbursementRequestRequest {
+    beneficiaryName: string | undefined;
+    requestedAmount: number | undefined;
+    currencyId: number | undefined;
+    purpose: string | undefined;
+    financialYearId: number | undefined;
+    notes: string | undefined;
+    rowVersion: string;
+
+    [key: string]: any;
+}
+
 export class UpdateDocumentSequenceCommand implements IUpdateDocumentSequenceCommand {
     id?: number;
     name?: string | undefined;
@@ -38984,8 +47423,6 @@ export interface IUpdateEmployeeRequest {
 export class UpdateEncumbranceRequest implements IUpdateEncumbranceRequest {
     description!: string | undefined;
     encumbranceDate!: Date | undefined;
-    amount!: number | undefined;
-    vendorId!: number | undefined;
     purchaseOrderId!: number | undefined;
     rowVersion!: string;
 
@@ -39008,8 +47445,6 @@ export class UpdateEncumbranceRequest implements IUpdateEncumbranceRequest {
             }
             this.description = _data["description"];
             this.encumbranceDate = _data["encumbranceDate"] ? new Date(_data["encumbranceDate"].toString()) : undefined as any;
-            this.amount = _data["amount"];
-            this.vendorId = _data["vendorId"];
             this.purchaseOrderId = _data["purchaseOrderId"];
             this.rowVersion = _data["rowVersion"];
         }
@@ -39030,8 +47465,6 @@ export class UpdateEncumbranceRequest implements IUpdateEncumbranceRequest {
         }
         data["description"] = this.description;
         data["encumbranceDate"] = this.encumbranceDate ? formatDate(this.encumbranceDate) : undefined as any;
-        data["amount"] = this.amount;
-        data["vendorId"] = this.vendorId;
         data["purchaseOrderId"] = this.purchaseOrderId;
         data["rowVersion"] = this.rowVersion;
         return data;
@@ -39041,8 +47474,6 @@ export class UpdateEncumbranceRequest implements IUpdateEncumbranceRequest {
 export interface IUpdateEncumbranceRequest {
     description: string | undefined;
     encumbranceDate: Date | undefined;
-    amount: number | undefined;
-    vendorId: number | undefined;
     purchaseOrderId: number | undefined;
     rowVersion: string;
 
@@ -39238,10 +47669,10 @@ export class UpdateFundRequest implements IUpdateFundRequest {
     fundName!: string;
     fundType!: FundType;
     fundCategory!: FundCategory;
-    fiscalYearId!: number | undefined;
     legalAuthority!: string;
     description!: string | undefined;
-    defaultRevenueDebitAccountId!: number | undefined;
+    defaultRevenueAccountId!: number | undefined;
+    currencyId!: number | undefined;
     rowVersion!: string;
 
     [key: string]: any;
@@ -39265,10 +47696,10 @@ export class UpdateFundRequest implements IUpdateFundRequest {
             this.fundName = _data["fundName"];
             this.fundType = _data["fundType"];
             this.fundCategory = _data["fundCategory"];
-            this.fiscalYearId = _data["fiscalYearId"];
             this.legalAuthority = _data["legalAuthority"];
             this.description = _data["description"];
-            this.defaultRevenueDebitAccountId = _data["defaultRevenueDebitAccountId"];
+            this.defaultRevenueAccountId = _data["defaultRevenueAccountId"];
+            this.currencyId = _data["currencyId"];
             this.rowVersion = _data["rowVersion"];
         }
     }
@@ -39290,10 +47721,10 @@ export class UpdateFundRequest implements IUpdateFundRequest {
         data["fundName"] = this.fundName;
         data["fundType"] = this.fundType;
         data["fundCategory"] = this.fundCategory;
-        data["fiscalYearId"] = this.fiscalYearId;
         data["legalAuthority"] = this.legalAuthority;
         data["description"] = this.description;
-        data["defaultRevenueDebitAccountId"] = this.defaultRevenueDebitAccountId;
+        data["defaultRevenueAccountId"] = this.defaultRevenueAccountId;
+        data["currencyId"] = this.currencyId;
         data["rowVersion"] = this.rowVersion;
         return data;
     }
@@ -39304,11 +47735,251 @@ export interface IUpdateFundRequest {
     fundName: string;
     fundType: FundType;
     fundCategory: FundCategory;
-    fiscalYearId: number | undefined;
     legalAuthority: string;
     description: string | undefined;
-    defaultRevenueDebitAccountId: number | undefined;
+    defaultRevenueAccountId: number | undefined;
+    currencyId: number | undefined;
     rowVersion: string;
+
+    [key: string]: any;
+}
+
+export class UpdateItemCategoryRequest implements IUpdateItemCategoryRequest {
+    code!: string;
+    name!: string;
+    nameEn!: string | undefined;
+    description!: string | undefined;
+    parentItemCategoryId!: number | undefined;
+    expenseAccountId!: number | undefined;
+    inventoryAccountId!: number | undefined;
+    taxAccountId!: number | undefined;
+    taxClass!: string | undefined;
+    isActive!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: IUpdateItemCategoryRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.nameEn = _data["nameEn"];
+            this.description = _data["description"];
+            this.parentItemCategoryId = _data["parentItemCategoryId"];
+            this.expenseAccountId = _data["expenseAccountId"];
+            this.inventoryAccountId = _data["inventoryAccountId"];
+            this.taxAccountId = _data["taxAccountId"];
+            this.taxClass = _data["taxClass"];
+            this.isActive = _data["isActive"];
+        }
+    }
+
+    static fromJS(data: any): UpdateItemCategoryRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateItemCategoryRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["nameEn"] = this.nameEn;
+        data["description"] = this.description;
+        data["parentItemCategoryId"] = this.parentItemCategoryId;
+        data["expenseAccountId"] = this.expenseAccountId;
+        data["inventoryAccountId"] = this.inventoryAccountId;
+        data["taxAccountId"] = this.taxAccountId;
+        data["taxClass"] = this.taxClass;
+        data["isActive"] = this.isActive;
+        return data;
+    }
+}
+
+export interface IUpdateItemCategoryRequest {
+    code: string;
+    name: string;
+    nameEn: string | undefined;
+    description: string | undefined;
+    parentItemCategoryId: number | undefined;
+    expenseAccountId: number | undefined;
+    inventoryAccountId: number | undefined;
+    taxAccountId: number | undefined;
+    taxClass: string | undefined;
+    isActive: boolean;
+
+    [key: string]: any;
+}
+
+export class UpdateItemRequest implements IUpdateItemRequest {
+    name!: string;
+    nameEn!: string | undefined;
+    description!: string | undefined;
+    categoryId!: number | undefined;
+    unitId!: number;
+    supplierId!: number | undefined;
+    barcode!: string | undefined;
+    itemType!: string;
+    openingStock!: number | undefined;
+    minimumStock!: number | undefined;
+    maximumStock!: number | undefined;
+    reorderLevel!: number | undefined;
+    reorderQuantity!: number | undefined;
+    leadTimeDays!: number | undefined;
+    isActive!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: IUpdateItemRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.name = _data["name"];
+            this.nameEn = _data["nameEn"];
+            this.description = _data["description"];
+            this.categoryId = _data["categoryId"];
+            this.unitId = _data["unitId"];
+            this.supplierId = _data["supplierId"];
+            this.barcode = _data["barcode"];
+            this.itemType = _data["itemType"];
+            this.openingStock = _data["openingStock"];
+            this.minimumStock = _data["minimumStock"];
+            this.maximumStock = _data["maximumStock"];
+            this.reorderLevel = _data["reorderLevel"];
+            this.reorderQuantity = _data["reorderQuantity"];
+            this.leadTimeDays = _data["leadTimeDays"];
+            this.isActive = _data["isActive"];
+        }
+    }
+
+    static fromJS(data: any): UpdateItemRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateItemRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["name"] = this.name;
+        data["nameEn"] = this.nameEn;
+        data["description"] = this.description;
+        data["categoryId"] = this.categoryId;
+        data["unitId"] = this.unitId;
+        data["supplierId"] = this.supplierId;
+        data["barcode"] = this.barcode;
+        data["itemType"] = this.itemType;
+        data["openingStock"] = this.openingStock;
+        data["minimumStock"] = this.minimumStock;
+        data["maximumStock"] = this.maximumStock;
+        data["reorderLevel"] = this.reorderLevel;
+        data["reorderQuantity"] = this.reorderQuantity;
+        data["leadTimeDays"] = this.leadTimeDays;
+        data["isActive"] = this.isActive;
+        return data;
+    }
+}
+
+export interface IUpdateItemRequest {
+    name: string;
+    nameEn: string | undefined;
+    description: string | undefined;
+    categoryId: number | undefined;
+    unitId: number;
+    supplierId: number | undefined;
+    barcode: string | undefined;
+    itemType: string;
+    openingStock: number | undefined;
+    minimumStock: number | undefined;
+    maximumStock: number | undefined;
+    reorderLevel: number | undefined;
+    reorderQuantity: number | undefined;
+    leadTimeDays: number | undefined;
+    isActive: boolean;
+
+    [key: string]: any;
+}
+
+export class UpdateItemUnitRequest implements IUpdateItemUnitRequest {
+    conversionFactor!: number;
+    isBase!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: IUpdateItemUnitRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.conversionFactor = _data["conversionFactor"];
+            this.isBase = _data["isBase"];
+        }
+    }
+
+    static fromJS(data: any): UpdateItemUnitRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateItemUnitRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["conversionFactor"] = this.conversionFactor;
+        data["isBase"] = this.isBase;
+        return data;
+    }
+}
+
+export interface IUpdateItemUnitRequest {
+    conversionFactor: number;
+    isBase: boolean;
 
     [key: string]: any;
 }
@@ -39679,15 +48350,14 @@ export class UpdatePaymentOrderCommand implements IUpdatePaymentOrderCommand {
     paymentOrderDate?: Date;
     dueDate?: Date | undefined;
     paymentOrderType?: string;
-    vendorId?: number;
     fundId?: number;
     fiscalYearId?: number;
-    appropriationId?: number;
     budgetClassificationId?: number | undefined;
     costCenterId?: number | undefined;
-    projectId?: number | undefined;
+    accountId?: number | undefined;
     purchaseOrderId?: number | undefined;
     encumbranceId?: number | undefined;
+    budgetItemAllocationId?: number | undefined;
     currencyId?: number;
     exchangeRate?: number | undefined;
     amountGross?: number;
@@ -39695,11 +48365,9 @@ export class UpdatePaymentOrderCommand implements IUpdatePaymentOrderCommand {
     paymentMethod?: PaymentMethod;
     bankAccountId?: number | undefined;
     beneficiaryName?: string;
-    beneficiaryIban?: string | undefined;
     beneficiaryAccountNumber?: string | undefined;
     beneficiaryBankName?: string | undefined;
     notes?: string | undefined;
-    lines?: UpdatePaymentOrderLineDto[];
     deductions?: UpdatePaymentOrderDeductionDto[];
 
     [key: string]: any;
@@ -39724,15 +48392,14 @@ export class UpdatePaymentOrderCommand implements IUpdatePaymentOrderCommand {
             this.paymentOrderDate = _data["paymentOrderDate"] ? new Date(_data["paymentOrderDate"].toString()) : undefined as any;
             this.dueDate = _data["dueDate"] ? new Date(_data["dueDate"].toString()) : undefined as any;
             this.paymentOrderType = _data["paymentOrderType"];
-            this.vendorId = _data["vendorId"];
             this.fundId = _data["fundId"];
             this.fiscalYearId = _data["fiscalYearId"];
-            this.appropriationId = _data["appropriationId"];
             this.budgetClassificationId = _data["budgetClassificationId"];
             this.costCenterId = _data["costCenterId"];
-            this.projectId = _data["projectId"];
+            this.accountId = _data["accountId"];
             this.purchaseOrderId = _data["purchaseOrderId"];
             this.encumbranceId = _data["encumbranceId"];
+            this.budgetItemAllocationId = _data["budgetItemAllocationId"];
             this.currencyId = _data["currencyId"];
             this.exchangeRate = _data["exchangeRate"];
             this.amountGross = _data["amountGross"];
@@ -39740,15 +48407,9 @@ export class UpdatePaymentOrderCommand implements IUpdatePaymentOrderCommand {
             this.paymentMethod = _data["paymentMethod"];
             this.bankAccountId = _data["bankAccountId"];
             this.beneficiaryName = _data["beneficiaryName"];
-            this.beneficiaryIban = _data["beneficiaryIban"];
             this.beneficiaryAccountNumber = _data["beneficiaryAccountNumber"];
             this.beneficiaryBankName = _data["beneficiaryBankName"];
             this.notes = _data["notes"];
-            if (Array.isArray(_data["lines"])) {
-                this.lines = [] as any;
-                for (let item of _data["lines"])
-                    this.lines!.push(UpdatePaymentOrderLineDto.fromJS(item));
-            }
             if (Array.isArray(_data["deductions"])) {
                 this.deductions = [] as any;
                 for (let item of _data["deductions"])
@@ -39775,15 +48436,14 @@ export class UpdatePaymentOrderCommand implements IUpdatePaymentOrderCommand {
         data["paymentOrderDate"] = this.paymentOrderDate ? this.paymentOrderDate.toISOString() : undefined as any;
         data["dueDate"] = this.dueDate ? this.dueDate.toISOString() : undefined as any;
         data["paymentOrderType"] = this.paymentOrderType;
-        data["vendorId"] = this.vendorId;
         data["fundId"] = this.fundId;
         data["fiscalYearId"] = this.fiscalYearId;
-        data["appropriationId"] = this.appropriationId;
         data["budgetClassificationId"] = this.budgetClassificationId;
         data["costCenterId"] = this.costCenterId;
-        data["projectId"] = this.projectId;
+        data["accountId"] = this.accountId;
         data["purchaseOrderId"] = this.purchaseOrderId;
         data["encumbranceId"] = this.encumbranceId;
+        data["budgetItemAllocationId"] = this.budgetItemAllocationId;
         data["currencyId"] = this.currencyId;
         data["exchangeRate"] = this.exchangeRate;
         data["amountGross"] = this.amountGross;
@@ -39791,15 +48451,9 @@ export class UpdatePaymentOrderCommand implements IUpdatePaymentOrderCommand {
         data["paymentMethod"] = this.paymentMethod;
         data["bankAccountId"] = this.bankAccountId;
         data["beneficiaryName"] = this.beneficiaryName;
-        data["beneficiaryIban"] = this.beneficiaryIban;
         data["beneficiaryAccountNumber"] = this.beneficiaryAccountNumber;
         data["beneficiaryBankName"] = this.beneficiaryBankName;
         data["notes"] = this.notes;
-        if (Array.isArray(this.lines)) {
-            data["lines"] = [];
-            for (let item of this.lines)
-                data["lines"].push(item ? item.toJSON() : undefined as any);
-        }
         if (Array.isArray(this.deductions)) {
             data["deductions"] = [];
             for (let item of this.deductions)
@@ -39815,15 +48469,14 @@ export interface IUpdatePaymentOrderCommand {
     paymentOrderDate?: Date;
     dueDate?: Date | undefined;
     paymentOrderType?: string;
-    vendorId?: number;
     fundId?: number;
     fiscalYearId?: number;
-    appropriationId?: number;
     budgetClassificationId?: number | undefined;
     costCenterId?: number | undefined;
-    projectId?: number | undefined;
+    accountId?: number | undefined;
     purchaseOrderId?: number | undefined;
     encumbranceId?: number | undefined;
+    budgetItemAllocationId?: number | undefined;
     currencyId?: number;
     exchangeRate?: number | undefined;
     amountGross?: number;
@@ -39831,11 +48484,9 @@ export interface IUpdatePaymentOrderCommand {
     paymentMethod?: PaymentMethod;
     bankAccountId?: number | undefined;
     beneficiaryName?: string;
-    beneficiaryIban?: string | undefined;
     beneficiaryAccountNumber?: string | undefined;
     beneficiaryBankName?: string | undefined;
     notes?: string | undefined;
-    lines?: UpdatePaymentOrderLineDto[];
     deductions?: UpdatePaymentOrderDeductionDto[];
 
     [key: string]: any;
@@ -39921,90 +48572,6 @@ export interface IUpdatePaymentOrderDeductionDto {
     isTaxDeduction?: boolean;
     taxAuthorityId?: number | undefined;
     referenceNumber?: string | undefined;
-
-    [key: string]: any;
-}
-
-export class UpdatePaymentOrderLineDto implements IUpdatePaymentOrderLineDto {
-    lineType?: PaymentOrderLineType;
-    description?: string | undefined;
-    accountId?: number;
-    amount?: number;
-    taxAmount?: number | undefined;
-    fundId?: number | undefined;
-    appropriationId?: number | undefined;
-    organizationUnitId?: number | undefined;
-    costCenterId?: number | undefined;
-    projectId?: number | undefined;
-
-    [key: string]: any;
-
-    constructor(data?: IUpdatePaymentOrderLineDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.lineType = _data["lineType"];
-            this.description = _data["description"];
-            this.accountId = _data["accountId"];
-            this.amount = _data["amount"];
-            this.taxAmount = _data["taxAmount"];
-            this.fundId = _data["fundId"];
-            this.appropriationId = _data["appropriationId"];
-            this.organizationUnitId = _data["organizationUnitId"];
-            this.costCenterId = _data["costCenterId"];
-            this.projectId = _data["projectId"];
-        }
-    }
-
-    static fromJS(data: any): UpdatePaymentOrderLineDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new UpdatePaymentOrderLineDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["lineType"] = this.lineType;
-        data["description"] = this.description;
-        data["accountId"] = this.accountId;
-        data["amount"] = this.amount;
-        data["taxAmount"] = this.taxAmount;
-        data["fundId"] = this.fundId;
-        data["appropriationId"] = this.appropriationId;
-        data["organizationUnitId"] = this.organizationUnitId;
-        data["costCenterId"] = this.costCenterId;
-        data["projectId"] = this.projectId;
-        return data;
-    }
-}
-
-export interface IUpdatePaymentOrderLineDto {
-    lineType?: PaymentOrderLineType;
-    description?: string | undefined;
-    accountId?: number;
-    amount?: number;
-    taxAmount?: number | undefined;
-    fundId?: number | undefined;
-    appropriationId?: number | undefined;
-    organizationUnitId?: number | undefined;
-    costCenterId?: number | undefined;
-    projectId?: number | undefined;
 
     [key: string]: any;
 }
@@ -40169,6 +48736,355 @@ export interface IUpdateProjectRequest {
     budgetAmount: number | undefined;
     status: string;
     isActive: boolean;
+
+    [key: string]: any;
+}
+
+export class UpdatePurchaseOrderCommand implements IUpdatePurchaseOrderCommand {
+    id!: number;
+    paymentTerms!: string | undefined;
+    deliveryTerms!: string | undefined;
+    expectedDeliveryDate!: Date | undefined;
+    notes!: string | undefined;
+    lines!: PurchaseOrderLineDto[];
+
+    [key: string]: any;
+
+    constructor(data?: IUpdatePurchaseOrderCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.lines = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.paymentTerms = _data["paymentTerms"];
+            this.deliveryTerms = _data["deliveryTerms"];
+            this.expectedDeliveryDate = _data["expectedDeliveryDate"] ? new Date(_data["expectedDeliveryDate"].toString()) : undefined as any;
+            this.notes = _data["notes"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(PurchaseOrderLineDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): UpdatePurchaseOrderCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdatePurchaseOrderCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["paymentTerms"] = this.paymentTerms;
+        data["deliveryTerms"] = this.deliveryTerms;
+        data["expectedDeliveryDate"] = this.expectedDeliveryDate ? this.expectedDeliveryDate.toISOString() : undefined as any;
+        data["notes"] = this.notes;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IUpdatePurchaseOrderCommand {
+    id: number;
+    paymentTerms: string | undefined;
+    deliveryTerms: string | undefined;
+    expectedDeliveryDate: Date | undefined;
+    notes: string | undefined;
+    lines: PurchaseOrderLineDto[];
+
+    [key: string]: any;
+}
+
+export class UpdatePurchaseRequestCommand implements IUpdatePurchaseRequestCommand {
+    id!: number;
+    requestDate!: Date;
+    requiredDate!: Date | undefined;
+    departmentId!: number | undefined;
+    costCenterId!: number | undefined;
+    requesterName!: string;
+    priority!: PurchaseRequestPriority;
+    notes!: string | undefined;
+    lines!: UpdatePurchaseRequestLineDto[];
+
+    [key: string]: any;
+
+    constructor(data?: IUpdatePurchaseRequestCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.lines = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.requestDate = _data["requestDate"] ? new Date(_data["requestDate"].toString()) : undefined as any;
+            this.requiredDate = _data["requiredDate"] ? new Date(_data["requiredDate"].toString()) : undefined as any;
+            this.departmentId = _data["departmentId"];
+            this.costCenterId = _data["costCenterId"];
+            this.requesterName = _data["requesterName"];
+            this.priority = _data["priority"];
+            this.notes = _data["notes"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(UpdatePurchaseRequestLineDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): UpdatePurchaseRequestCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdatePurchaseRequestCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["requestDate"] = this.requestDate ? this.requestDate.toISOString() : undefined as any;
+        data["requiredDate"] = this.requiredDate ? formatDate(this.requiredDate) : undefined as any;
+        data["departmentId"] = this.departmentId;
+        data["costCenterId"] = this.costCenterId;
+        data["requesterName"] = this.requesterName;
+        data["priority"] = this.priority;
+        data["notes"] = this.notes;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IUpdatePurchaseRequestCommand {
+    id: number;
+    requestDate: Date;
+    requiredDate: Date | undefined;
+    departmentId: number | undefined;
+    costCenterId: number | undefined;
+    requesterName: string;
+    priority: PurchaseRequestPriority;
+    notes: string | undefined;
+    lines: UpdatePurchaseRequestLineDto[];
+
+    [key: string]: any;
+}
+
+export class UpdatePurchaseRequestLineDto implements IUpdatePurchaseRequestLineDto {
+    id!: number | undefined;
+    itemId!: number;
+    unitId!: number;
+    requestedQuantity!: number;
+    unitCostEstimate!: number | undefined;
+    notes!: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IUpdatePurchaseRequestLineDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.itemId = _data["itemId"];
+            this.unitId = _data["unitId"];
+            this.requestedQuantity = _data["requestedQuantity"];
+            this.unitCostEstimate = _data["unitCostEstimate"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): UpdatePurchaseRequestLineDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdatePurchaseRequestLineDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["itemId"] = this.itemId;
+        data["unitId"] = this.unitId;
+        data["requestedQuantity"] = this.requestedQuantity;
+        data["unitCostEstimate"] = this.unitCostEstimate;
+        data["notes"] = this.notes;
+        return data;
+    }
+}
+
+export interface IUpdatePurchaseRequestLineDto {
+    id: number | undefined;
+    itemId: number;
+    unitId: number;
+    requestedQuantity: number;
+    unitCostEstimate: number | undefined;
+    notes: string | undefined;
+
+    [key: string]: any;
+}
+
+export class UpdateQuotationCommand implements IUpdateQuotationCommand {
+    id!: number;
+    supplierPartyId!: number;
+    quotationDate!: Date;
+    validUntil!: Date | undefined;
+    currencyCode!: string | undefined;
+    exchangeRate!: number | undefined;
+    shippingCost!: number | undefined;
+    otherCharges!: number | undefined;
+    paymentTerms!: string | undefined;
+    deliveryTerms!: string | undefined;
+    leadTimeDays!: number | undefined;
+    warrantyPeriodMonths!: number | undefined;
+    notes!: string | undefined;
+    lines!: QuotationLineDto[];
+
+    [key: string]: any;
+
+    constructor(data?: IUpdateQuotationCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+        if (!data) {
+            this.lines = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.supplierPartyId = _data["supplierPartyId"];
+            this.quotationDate = _data["quotationDate"] ? new Date(_data["quotationDate"].toString()) : undefined as any;
+            this.validUntil = _data["validUntil"] ? new Date(_data["validUntil"].toString()) : undefined as any;
+            this.currencyCode = _data["currencyCode"];
+            this.exchangeRate = _data["exchangeRate"];
+            this.shippingCost = _data["shippingCost"];
+            this.otherCharges = _data["otherCharges"];
+            this.paymentTerms = _data["paymentTerms"];
+            this.deliveryTerms = _data["deliveryTerms"];
+            this.leadTimeDays = _data["leadTimeDays"];
+            this.warrantyPeriodMonths = _data["warrantyPeriodMonths"];
+            this.notes = _data["notes"];
+            if (Array.isArray(_data["lines"])) {
+                this.lines = [] as any;
+                for (let item of _data["lines"])
+                    this.lines!.push(QuotationLineDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): UpdateQuotationCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateQuotationCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["supplierPartyId"] = this.supplierPartyId;
+        data["quotationDate"] = this.quotationDate ? this.quotationDate.toISOString() : undefined as any;
+        data["validUntil"] = this.validUntil ? this.validUntil.toISOString() : undefined as any;
+        data["currencyCode"] = this.currencyCode;
+        data["exchangeRate"] = this.exchangeRate;
+        data["shippingCost"] = this.shippingCost;
+        data["otherCharges"] = this.otherCharges;
+        data["paymentTerms"] = this.paymentTerms;
+        data["deliveryTerms"] = this.deliveryTerms;
+        data["leadTimeDays"] = this.leadTimeDays;
+        data["warrantyPeriodMonths"] = this.warrantyPeriodMonths;
+        data["notes"] = this.notes;
+        if (Array.isArray(this.lines)) {
+            data["lines"] = [];
+            for (let item of this.lines)
+                data["lines"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IUpdateQuotationCommand {
+    id: number;
+    supplierPartyId: number;
+    quotationDate: Date;
+    validUntil: Date | undefined;
+    currencyCode: string | undefined;
+    exchangeRate: number | undefined;
+    shippingCost: number | undefined;
+    otherCharges: number | undefined;
+    paymentTerms: string | undefined;
+    deliveryTerms: string | undefined;
+    leadTimeDays: number | undefined;
+    warrantyPeriodMonths: number | undefined;
+    notes: string | undefined;
+    lines: QuotationLineDto[];
 
     [key: string]: any;
 }
@@ -40405,6 +49321,78 @@ export interface IUpdateTemplateLineCommand {
     [key: string]: any;
 }
 
+export class UpdateUnitRequest implements IUpdateUnitRequest {
+    code!: string;
+    name!: string;
+    nameAr!: string | undefined;
+    unitType!: string | undefined;
+    baseUnitId!: number | undefined;
+    conversionToBase!: number | undefined;
+    isActive!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: IUpdateUnitRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.nameAr = _data["nameAr"];
+            this.unitType = _data["unitType"];
+            this.baseUnitId = _data["baseUnitId"];
+            this.conversionToBase = _data["conversionToBase"];
+            this.isActive = _data["isActive"];
+        }
+    }
+
+    static fromJS(data: any): UpdateUnitRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateUnitRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["nameAr"] = this.nameAr;
+        data["unitType"] = this.unitType;
+        data["baseUnitId"] = this.baseUnitId;
+        data["conversionToBase"] = this.conversionToBase;
+        data["isActive"] = this.isActive;
+        return data;
+    }
+}
+
+export interface IUpdateUnitRequest {
+    code: string;
+    name: string;
+    nameAr: string | undefined;
+    unitType: string | undefined;
+    baseUnitId: number | undefined;
+    conversionToBase: number | undefined;
+    isActive: boolean;
+
+    [key: string]: any;
+}
+
 export class UpdateUserCommand implements IUpdateUserCommand {
     id?: number;
     accountType?: AccountType | undefined;
@@ -40461,6 +49449,94 @@ export interface IUpdateUserCommand {
     accountType?: AccountType | undefined;
     departmentId?: number | undefined;
     mfaMethod?: string | undefined;
+
+    [key: string]: any;
+}
+
+export class UpdateWarehouseRequest implements IUpdateWarehouseRequest {
+    code!: string;
+    name!: string;
+    locationId!: number | undefined;
+    managerId!: number | undefined;
+    address!: string | undefined;
+    city!: string | undefined;
+    phone!: string | undefined;
+    email!: string | undefined;
+    totalCapacity!: number | undefined;
+    currentLoad!: number | undefined;
+    isActive!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: IUpdateWarehouseRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.locationId = _data["locationId"];
+            this.managerId = _data["managerId"];
+            this.address = _data["address"];
+            this.city = _data["city"];
+            this.phone = _data["phone"];
+            this.email = _data["email"];
+            this.totalCapacity = _data["totalCapacity"];
+            this.currentLoad = _data["currentLoad"];
+            this.isActive = _data["isActive"];
+        }
+    }
+
+    static fromJS(data: any): UpdateWarehouseRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateWarehouseRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["locationId"] = this.locationId;
+        data["managerId"] = this.managerId;
+        data["address"] = this.address;
+        data["city"] = this.city;
+        data["phone"] = this.phone;
+        data["email"] = this.email;
+        data["totalCapacity"] = this.totalCapacity;
+        data["currentLoad"] = this.currentLoad;
+        data["isActive"] = this.isActive;
+        return data;
+    }
+}
+
+export interface IUpdateWarehouseRequest {
+    code: string;
+    name: string;
+    locationId: number | undefined;
+    managerId: number | undefined;
+    address: string | undefined;
+    city: string | undefined;
+    phone: string | undefined;
+    email: string | undefined;
+    totalCapacity: number | undefined;
+    currentLoad: number | undefined;
+    isActive: boolean;
 
     [key: string]: any;
 }
@@ -41005,6 +50081,106 @@ export interface IVoidPaymentOrderCommand {
     id?: number;
     voidReason?: string;
     rowVersion?: string;
+
+    [key: string]: any;
+}
+
+export class WarehouseResponse implements IWarehouseResponse {
+    id!: number;
+    code!: string;
+    name!: string;
+    locationId!: number | undefined;
+    locationName!: string | undefined;
+    managerId!: number | undefined;
+    managerName!: string | undefined;
+    address!: string | undefined;
+    city!: string | undefined;
+    phone!: string | undefined;
+    email!: string | undefined;
+    totalCapacity!: number | undefined;
+    currentLoad!: number | undefined;
+    isActive!: boolean;
+
+    [key: string]: any;
+
+    constructor(data?: IWarehouseResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.locationId = _data["locationId"];
+            this.locationName = _data["locationName"];
+            this.managerId = _data["managerId"];
+            this.managerName = _data["managerName"];
+            this.address = _data["address"];
+            this.city = _data["city"];
+            this.phone = _data["phone"];
+            this.email = _data["email"];
+            this.totalCapacity = _data["totalCapacity"];
+            this.currentLoad = _data["currentLoad"];
+            this.isActive = _data["isActive"];
+        }
+    }
+
+    static fromJS(data: any): WarehouseResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new WarehouseResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["locationId"] = this.locationId;
+        data["locationName"] = this.locationName;
+        data["managerId"] = this.managerId;
+        data["managerName"] = this.managerName;
+        data["address"] = this.address;
+        data["city"] = this.city;
+        data["phone"] = this.phone;
+        data["email"] = this.email;
+        data["totalCapacity"] = this.totalCapacity;
+        data["currentLoad"] = this.currentLoad;
+        data["isActive"] = this.isActive;
+        return data;
+    }
+}
+
+export interface IWarehouseResponse {
+    id: number;
+    code: string;
+    name: string;
+    locationId: number | undefined;
+    locationName: string | undefined;
+    managerId: number | undefined;
+    managerName: string | undefined;
+    address: string | undefined;
+    city: string | undefined;
+    phone: string | undefined;
+    email: string | undefined;
+    totalCapacity: number | undefined;
+    currentLoad: number | undefined;
+    isActive: boolean;
 
     [key: string]: any;
 }

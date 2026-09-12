@@ -1,3 +1,5 @@
+import { cn } from '@/lib/utils';
+
 interface BalanceIndicatorProps {
   totalDebit: number;
   totalCredit: number;
@@ -11,11 +13,13 @@ export function BalanceIndicator({ totalDebit = 0, totalCredit = 0, className = 
   return (
     <div
       dir="rtl"
-      className={`flex flex-wrap items-center justify-between gap-3 text-sm p-3 rounded-lg ${className}`}
-      style={{
-        backgroundColor: isBalanced ? 'var(--color-successBg)' : 'var(--color-errorContainer)',
-        color: isBalanced ? 'var(--color-success)' : 'var(--color-error)',
-      }}
+      className={cn(
+        'flex flex-wrap items-center justify-between gap-3 text-sm p-3 rounded-lg',
+        isBalanced
+          ? 'bg-[var(--color-success-bg)] text-[var(--color-success)]'
+          : 'bg-[var(--color-error-container)] text-[var(--color-on-error-container)]',
+        className
+      )}
     >
       <div className="flex items-center gap-2">
         <span className="opacity-70">مدين:</span>

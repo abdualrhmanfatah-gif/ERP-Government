@@ -1,5 +1,5 @@
+import { FilterBar } from '@/components/ui/FilterBar';
 import { FilterSelect } from '@/components/ui/FilterSelect';
-import { Button } from '@/components/ui/Button';
 import type { FiscalYearDto } from '@/web-api-client';
 import type { DisbursementRegisterFilters } from '@/features/reporting/disbursement-register-report/shared/types';
 
@@ -30,7 +30,10 @@ export function ReportingDisbursementRegisterFilters({
   const hasFilters = value.fiscalPeriodId || value.fundId || value.status;
 
   return (
-    <div className="flex gap-2 items-center flex-wrap">
+    <FilterBar
+      hasFilters={hasFilters}
+      onClear={() => onChange({ fiscalYearId: value.fiscalYearId })}
+    >
       <FilterSelect
         value={value.fiscalYearId ? String(value.fiscalYearId) : ''}
         onChange={(v) => onChange({ ...value, fiscalYearId: v ? Number(v) : undefined })}
@@ -45,17 +48,6 @@ export function ReportingDisbursementRegisterFilters({
         placeholder="الحالة"
         label="الحالة"
       />
-      {hasFilters && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() =>
-            onChange({ fiscalYearId: value.fiscalYearId })
-          }
-        >
-          مسح الفلاتر
-        </Button>
-      )}
-    </div>
+    </FilterBar>
   );
 }

@@ -47,7 +47,7 @@ export function TemplateForm({ initialData, journals, onSubmit, loading }: Templ
   });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl">
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl" aria-label="نموذج القالب">
       <Input
         label="اسم القالب"
         {...register('templateName')}

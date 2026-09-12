@@ -52,7 +52,7 @@ public class DeleteWorkflowDefinitionCommandHandler(
         // Soft delete - set IsActive = false
         definition.IsActive = false;
         definition.LastModified = DateTimeOffset.UtcNow;
-        definition.LastModifiedBy = "system"; // TODO: Get from current user
+        definition.LastModifiedBy = userId.ToString();
 
         await context.SaveChangesAsync(cancellationToken);
 

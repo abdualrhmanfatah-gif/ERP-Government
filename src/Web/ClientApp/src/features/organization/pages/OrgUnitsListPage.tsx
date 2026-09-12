@@ -5,6 +5,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useOrganizationalUnits, useDeleteOrgUnit } from '../hooks';
 import { useState } from 'react';
+import { getActiveStatusLabel } from '@/shared/constants/labels';
 
 export function OrgUnitsListPage() {
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ export function OrgUnitsListPage() {
           { key: 'parentName', header: 'الأب', width: 150, render: (r) => r.parentName ?? '—' },
           { key: 'isActive', header: 'الحالة', width: 100, render: (r) => (
             <StatusBadge variant={r.isActive ? 'active' : 'draft'}>
-              {r.isActive ? 'نشط' : 'غير نشط'}
+              {getActiveStatusLabel(r.isActive)}
             </StatusBadge>
           )},
           { key: 'actions', header: 'الإجراءات', width: 100, render: (r) => (

@@ -6,34 +6,23 @@ import { Button, FilterBar, FilterSelect, Badge, EmptyState, MoneyDisplay, Page 
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Eye } from 'lucide-react';
 import { DepositSlipsClient } from '../../../web-api-client';
+import { depositSlipStatusLabels, depositSlipFormTypeLabels } from '../shared/types';
 
 const client = new DepositSlipsClient();
 
 const statusOptions = [
   { value: '', label: 'الكل' },
-  { value: 'Draft', label: 'مسودة' },
-  { value: 'Approved', label: 'معتمدة' },
+  ...Object.entries(depositSlipStatusLabels).map(([value, label]) => ({ value, label })),
 ];
 
 const formTypeOptions = [
   { value: '', label: 'الكل' },
-  { value: 'Form47', label: 'نقدية (47)' },
-  { value: 'Form48', label: 'شيكات (48)' },
+  ...Object.entries(depositSlipFormTypeLabels).map(([value, label]) => ({ value, label })),
 ];
 
 const statusBadgeVariant: Record<string, string> = {
   Draft: 'warning',
   Approved: 'success',
-};
-
-const statusLabels: Record<string, string> = {
-  Draft: 'مسودة',
-  Approved: 'معتمدة',
-};
-
-const formTypeLabels: Record<string, string> = {
-  Form47: 'نقدية (47)',
-  Form48: 'شيكات (48)',
 };
 
 export default function DepositSlipsListPage() {
@@ -69,14 +58,14 @@ export default function DepositSlipsListPage() {
       {
         key: 'formType',
         header: 'النوع',
-        render: (row) => formTypeLabels[row.formType as string] ?? '—',
+        render: (row) => depositSlipFormTypeLabels[row.formType as string] ?? '—',
       },
       {
         key: 'status',
         header: 'الحالة',
         render: (row) => (
           <Badge variant={(statusBadgeVariant[row.status as string] ?? 'default') as any}>
-            {statusLabels[row.status as string] ?? '—'}
+            {depositSlipStatusLabels[row.status as string] ?? '—'}
           </Badge>
         ),
       },
@@ -89,7 +78,7 @@ export default function DepositSlipsListPage() {
         key: 'actions',
         header: '',
         render: (row) => (
-          <Button variant="ghost" size="sm" onClick={() => navigate(`/treasury/deposit-slips/${row.id}`)}>
+          <Button variant="ghost" size="sm" aria-label="عرض" onClick={() => navigate(`/treasury/deposit-slips/${row.id}`)}>
             <Eye className="h-4 w-4" />
           </Button>
         ),

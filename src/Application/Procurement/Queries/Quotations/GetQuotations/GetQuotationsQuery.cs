@@ -1,0 +1,19 @@
+using ERP_Government.Domain.Procurement.Enums;
+
+namespace ERP_Government.Application.Procurement.Queries.Quotations.GetQuotations;
+
+public record GetQuotationsQuery(
+    int? SupplierPartyId = null,
+    QuotationStatus? Status = null,
+    string? Search = null,
+    int Page = 1,
+    int PageSize = 20) : IRequest<Result<PaginatedList<QuotationListItem>>>;
+
+public record QuotationListItem(
+    int Id,
+    string QuotationNumber,
+    int SupplierPartyId,
+    DateTime QuotationDate,
+    QuotationStatus Status,
+    decimal? GrandTotal,
+    DateTimeOffset Created);

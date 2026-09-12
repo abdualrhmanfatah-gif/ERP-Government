@@ -55,6 +55,9 @@ public class BudgetAuditGuardTests
 
         _contextMock.Setup(x => x.Budgets).Returns(budgetsMock.Object);
 
+        var allocations = new List<BudgetItemAllocation>().AsQueryable().BuildMockForAsync();
+        _contextMock.Setup(x => x.BudgetItemAllocations).Returns(allocations.Object);
+
         var approvalHistory = new List<ApprovalHistory>().AsQueryable().BuildMockForAsync();
         _contextMock.Setup(x => x.ApprovalHistory).Returns(approvalHistory.Object);
 

@@ -6,6 +6,7 @@ import { usePermission } from '@/shared/hooks/usePermission';
 import { Page, Button, Badge, Card, Input, Select } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Search } from 'lucide-react';
+import { activeStatusLabels, getActiveStatusLabel } from '@/shared/constants/labels';
 
 const partyTypeOptions = Object.entries(PARTY_TYPE_LABELS).map(([value, label]) => ({
   value: Number(value) as PartyType,
@@ -65,7 +66,7 @@ export default function PartiesListPage() {
     { header: 'الاسم', cell: (row) => <span className="cursor-pointer" onClick={() => navigate(`/parties/${row.id}`)}>{row.nameAr}</span> },
     { header: 'النوع', cell: (row) => PARTY_TYPE_LABELS[row.partyType] },
     { header: 'الرقم الضريبي', cell: (row) => <span className="font-mono">{row.taxNumber ?? '—'}</span> },
-    { header: 'الحالة', cell: (row) => <Badge variant={row.isActive ? 'success' : 'default'}>{row.isActive ? 'نشط' : 'غير نشط'}</Badge> },
+    { header: 'الحالة', cell: (row) => <Badge variant={row.isActive ? 'success' : 'default'}>{getActiveStatusLabel(row.isActive)}</Badge> },
     {
       header: 'إجراءات',
       cell: (row) => canUpdate
@@ -114,8 +115,8 @@ export default function PartiesListPage() {
             onChange={(e) => handleActiveFilter(e.target.value === '' ? undefined : e.target.value === 'true')}
             options={[
               { value: '', label: 'الكل' },
-              { value: 'true', label: 'نشط' },
-              { value: 'false', label: 'غير نشط' },
+              { value: 'true', label: activeStatusLabels.active },
+              { value: 'false', label: activeStatusLabels.inactive },
             ]}
             className="w-auto"
           />

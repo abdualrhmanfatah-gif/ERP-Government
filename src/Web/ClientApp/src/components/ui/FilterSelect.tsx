@@ -39,8 +39,8 @@ export function FilterSelect({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className={cn(
-          'w-full h-10 px-3 py-2 text-sm font-normal leading-normal',
-          'border rounded-lg bg-[var(--color-surface-container-lowest)] text-[var(--color-on-surface)]',
+          'w-full h-11 px-3 py-2.5 text-sm font-normal leading-normal',
+          'border-2 rounded-lg bg-[var(--color-surface-container-lowest)] text-[var(--color-on-surface)]',
           'focus:outline-2 focus:outline-[var(--color-focus-ring)] focus:outline-offset-2 focus:ring-0 focus:shadow-[0_0_0_4px_var(--color-focus-halo)]',
           'disabled:opacity-50 disabled:cursor-not-allowed',
           'transition-colors duration-150',

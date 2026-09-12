@@ -2,12 +2,13 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
-import { Page, Button, FilterBar, FilterSearch, FilterSelect, Switch, ConfirmDialog } from '@/components/ui';
+import { Page, Button, Badge, FilterBar, FilterSearch, FilterSelect, Switch, ConfirmDialog } from '@/components/ui';
 import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Eye } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { useExchangeRatesList, useActivateExchangeRate, useDeactivateExchangeRate } from '../../hooks/useExchangeRates';
 import { exchangeRateTypeLabels, ExchangeRateType } from '../../shared/types';
+import { getActiveStatusLabel } from '@/shared/constants/labels';
 
 const rateTypeOptions = Object.entries(exchangeRateTypeLabels).map(([value, label]) => ({ value, label }));
 
@@ -55,14 +56,14 @@ export default function ExchangeRatesListPage() {
   const columns: DataGridColumn<typeof items[0]>[] = [
     { header: 'العملة الأساسية', cell: (row) => <span className="font-mono">{row.baseCurrencyCode}</span> },
     { header: 'العملة', cell: (row) => <span className="font-mono">{row.currencyCode}</span> },
-    { header: 'التاريخ', cell: (row) => <span className="whitespace-nowrap">{new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium' }).format(new Date(row.rateDate))}</span> },
+    { header: 'التاريخ', cell: (row) => <span className="whitespace-nowrap">{new Intl.DateTimeFormat('ar-YE', { dateStyle: 'medium' }).format(new Date(row.rateDate))}</span> },
     { header: 'النوع', cell: (row) => exchangeRateTypeLabels[ExchangeRateType[row.rateType as keyof typeof ExchangeRateType] as ExchangeRateType] ?? row.rateType },
-    { header: 'السعر', align: 'left', cell: (row) => <span className="font-mono">{row.rate.toLocaleString('ar-EG', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}</span> },
+    { header: 'السعر', align: 'left', cell: (row) => <span className="font-mono">{row.rate.toLocaleString('ar-YE', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}</span> },
     {
       header: 'الحالة',
       cell: (row) => canCreate
-        ? <Switch checked={row.isActive} onChange={() => handleToggle(row)} label={row.isActive ? 'نشط' : 'معطل'} />
-        : <span className={row.isActive ? 'text-[var(--color-success)]' : 'text-[var(--color-error)]'}>{row.isActive ? 'نشط' : 'معطل'}</span>,
+        ? <Switch checked={row.isActive} onChange={() => handleToggle(row)} label={getActiveStatusLabel(row.isActive)} />
+        : <Badge variant={row.isActive ? 'success' : 'danger'}>{getActiveStatusLabel(row.isActive)}</Badge>,
     },
     {
       header: 'إجراءات',

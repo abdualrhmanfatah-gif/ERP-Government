@@ -15,10 +15,6 @@ internal class GetDisbursementRegisterDetailQueryHandler(IApplicationDbContext d
             .AsNoTracking()
             .FirstAsync(po => po.Id == request.PaymentOrderId, cancellationToken);
 
-        var vendor = await dbContext.Parties
-            .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.Id == paymentOrder.VendorId, cancellationToken);
-
         var fund = await dbContext.Funds
             .AsNoTracking()
             .FirstAsync(f => f.Id == paymentOrder.FundId, cancellationToken);
@@ -37,17 +33,46 @@ internal class GetDisbursementRegisterDetailQueryHandler(IApplicationDbContext d
             })
             .ToListAsync(cancellationToken);
 
+        // Get accrual entry data
+        int? accrualJournalEntryId = null;
+        string? accrualEntryNumber = null;
+        string? accrualEntryStatus = null;
+
+        if (paymentOrder.DisbursementRequestId.HasValue)
+        {
+            var disbursementRequest = await dbContext.DisbursementRequests
+                .AsNoTracking()
+                .FirstOrDefaultAsync(dr => dr.Id == paymentOrder.DisbursementRequestId.Value, cancellationToken);
+
+            if (disbursementRequest?.AccrualJournalEntryId.HasValue == true)
+            {
+                var accrualEntry = await dbContext.JournalEntries
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(je => je.Id == disbursementRequest.AccrualJournalEntryId.Value, cancellationToken);
+
+                if (accrualEntry is not null)
+                {
+                    accrualJournalEntryId = accrualEntry.Id;
+                    accrualEntryNumber = accrualEntry.EntryNumber;
+                    accrualEntryStatus = accrualEntry.EntryStatus.ToString();
+                }
+            }
+        }
+
         return new DisbursementRegisterDetailDto
         {
             PaymentOrderId = paymentOrder.Id,
             OrderNumber = paymentOrder.PaymentOrderNumber,
             OrderDate = paymentOrder.PaymentOrderDate,
-            PayeeName = vendor?.NameEn ?? vendor?.NameAr ?? paymentOrder.BeneficiaryName,
+            PayeeName = paymentOrder.BeneficiaryName,
             Amount = paymentOrder.AmountGross,
             Status = paymentOrder.Status.ToString(),
             FundCode = fund.FundNumber,
             ApproverName = null,
             PaidAt = paymentOrder.PaidAt.HasValue ? DateOnly.FromDateTime(paymentOrder.PaidAt.Value.DateTime) : null,
+            AccrualJournalEntryId = accrualJournalEntryId,
+            AccrualEntryNumber = accrualEntryNumber,
+            AccrualEntryStatus = accrualEntryStatus,
             Payments = payments
         };
     }

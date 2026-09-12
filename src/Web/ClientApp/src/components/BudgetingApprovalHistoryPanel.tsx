@@ -1,20 +1,11 @@
 import type { ApprovalDecisionDto } from '@/web-api-client';
 import { Loading } from '@/components/ui/Loading';
+import { formatDateTimeMedium } from '@/shared/utils/formatters';
 
 interface ApprovalHistoryPanelProps {
   decisions: (ApprovalDecisionDto | null | undefined)[];
   isLoading?: boolean;
   title?: string;
-}
-
-function formatDate(value?: Date | string): string {
-  if (!value) return '—';
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
-  return new Intl.DateTimeFormat('ar-EG', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(date);
 }
 
 export function ApprovalHistoryPanel({
@@ -44,7 +35,7 @@ export function ApprovalHistoryPanel({
               <div>
                 <p className="font-medium">{d.decision}</p>
                 <p className="text-xs text-[var(--color-on-surface-variant)]">
-                  {formatDate(d.decisionAt)} · {d.requiredRole ? `${d.requiredRole} · ` : ''}المستخدم #{d.approverUserId}
+                  {formatDateTimeMedium(d.decisionAt)} · {d.requiredRole ? `${d.requiredRole} · ` : ''}المستخدم #{d.approverUserId}
                 </p>
                 {d.reason ? <p className="mt-1 text-xs">{d.reason}</p> : null}
               </div>

@@ -29,6 +29,12 @@ public class CreateBudgetItemCommandHandler(
         if (!budgetExists)
             return Result<int>.Failure(["Budget not found."]);
 
+        var budget = await context.Budgets
+            .FirstOrDefaultAsync(x => x.Id == request.BudgetId, cancellationToken);
+
+        if (budget is not null && budget.Status != BudgetStatus.Draft)
+            return Result<int>.Failure(["Only Draft budgets can have items added."]);
+
         var exists = await context.BudgetItems
             .AnyAsync(x => x.BudgetId == request.BudgetId && x.ItemCode == request.ItemCode, cancellationToken);
 
@@ -51,7 +57,6 @@ public class CreateBudgetItemCommandHandler(
             ItemName = request.ItemName,
             ParentId = request.ParentId,
             AccountId = request.AccountId,
-            FundId = request.FundId,
             CostCenterId = request.CostCenterId,
             BudgetClassificationId = request.BudgetClassificationId,
             Remarks = request.Remarks,

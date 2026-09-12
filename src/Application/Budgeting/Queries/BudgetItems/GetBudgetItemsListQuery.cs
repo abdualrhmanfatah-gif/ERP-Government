@@ -16,12 +16,13 @@ public class GetBudgetItemsListQueryHandler(
         CancellationToken cancellationToken)
     {
         var items = await context.BudgetItems
+            .Include(x => x.Budget)
             .Where(x => x.BudgetId == request.BudgetId)
             .OrderBy(x => x.ItemCode)
             .ToListAsync(cancellationToken);
 
-        // Collect IDs for lookup
-        var fundIds = items.Where(x => x.FundId.HasValue).Select(x => x.FundId!.Value).Distinct().ToList();
+        // Collect IDs for lookup — FundId comes from Budget, not BudgetItem
+        var fundIds = items.Where(x => x.Budget.FundId != 0).Select(x => x.Budget.FundId).Distinct().ToList();
         var accountIds = items.Where(x => x.AccountId.HasValue).Select(x => x.AccountId!.Value).Distinct().ToList();
         var costCenterIds = items.Where(x => x.CostCenterId.HasValue).Select(x => x.CostCenterId!.Value).Distinct().ToList();
         var classificationIds = items.Where(x => x.BudgetClassificationId.HasValue).Select(x => x.BudgetClassificationId!.Value).Distinct().ToList();
@@ -47,7 +48,7 @@ public class GetBudgetItemsListQueryHandler(
         foreach (var dto in dtos)
         {
             var entity = items.First(x => x.Id == dto.Id);
-            if (entity.FundId.HasValue && funds.TryGetValue(entity.FundId.Value, out var fundName))
+            if (funds.TryGetValue(entity.Budget.FundId, out var fundName))
                 dto.FundName = fundName;
             if (entity.AccountId.HasValue && accounts.TryGetValue(entity.AccountId.Value, out var accountName))
                 dto.AccountName = accountName;

@@ -37,7 +37,7 @@ export default function ReceiptVouchersListPage() {
     [partyId, paymentMethod, status, fromDate, toDate],
   );
 
-  const { data: vouchers = [], isLoading } = useQuery({
+  const { data: vouchers = [], isLoading, isError: isVouchersError, refetch: refetchVouchers } = useQuery({
     queryKey: ['receipt-vouchers', 'list', filters],
     queryFn: () =>
       client.receiptVouchersAll(
@@ -162,7 +162,12 @@ export default function ReceiptVouchersListPage() {
       }
       loading={isLoading}
     >
-      {vouchers.length === 0 ? (
+      {isVouchersError ? (
+        <div className="p-4 text-center">
+          <p className="text-sm text-[var(--color-error)]">فشل تحميل البيانات</p>
+          <Button variant="outline" size="sm" className="mt-2" onClick={() => refetchVouchers()}>إعادة المحاولة</Button>
+        </div>
+      ) : vouchers.length === 0 ? (
         <EmptyState message="لم يتم العثور على سندات قبض مطابقة للفلاتر المحددة." />
       ) : (
         <DataGrid columns={columns} data={vouchers} rowKey={(row) => row.id ?? 0} />

@@ -11,6 +11,10 @@ public class BudgetItems : IEndpointGroup
 {
     public static void Map(RouteGroupBuilder groupBuilder)
     {
+        groupBuilder.MapGet("/", GetAllBudgetItems)
+            .Produces<List<BudgetItemDto>>()
+            .RequireAuthorization(PermissionCodes.BudgetItemsView);
+
         groupBuilder.MapGet("/{id:int}/availability", GetAvailability)
             .Produces<BudgetAvailabilitySummary>()
             .Produces(StatusCodes.Status404NotFound)
@@ -24,6 +28,13 @@ public class BudgetItems : IEndpointGroup
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
             .RequireAuthorization(PermissionCodes.BudgetItemsUpdate);
+    }
+
+    [EndpointSummary("Get all active budget items across all budgets")]
+    public static async Task<List<BudgetItemDto>> GetAllBudgetItems(
+        [FromServices] ISender sender)
+    {
+        return await sender.Send(new GetAllBudgetItemsQuery());
     }
 
     public static async Task<IResult> GetAvailability(

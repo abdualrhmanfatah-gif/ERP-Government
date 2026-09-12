@@ -22,22 +22,7 @@ export const moduleGroups: ModuleGroup[] = [
       { path: '/accounting/posting-rules', label: 'قواعد الترحيل', permission: 'Accounting.PostingRules.Read' },
     ],
   },
-  {
-    label: 'الأمان',
-    items: [
-      { path: '/security/users', label: 'المستخدمون', permission: 'Security.Users.Read' },
-      { path: '/security/roles', label: 'الأدوار', permission: 'Security.Roles.Read' },
-    ],
-  },
-  {
-    label: 'التنظيم',
-    items: [
-      { path: '/organization/units', label: 'الوحدات التنظيمية', permission: 'Organization.OrgUnits.Read' },
-      { path: '/organization/employees', label: 'الموظفون', permission: 'Organization.Employees.Read' },
-      { path: '/organization/cost-centers', label: 'مراكز التكلفة', permission: 'Organization.CostCenters.Read' },
-      { path: '/organization/projects', label: 'المشاريع', permission: 'Organization.Projects.Read' },
-    ],
-  },
+
   {
     label: 'الأطراف',
     items: [
@@ -51,7 +36,8 @@ export const moduleGroups: ModuleGroup[] = [
       { path: '/budgeting/funds', label: 'الصناديق', permission: 'Funds.View' },
       { path: '/budgeting/budget-classifications', label: 'التصنيفات المالية', permission: 'BudgetClassifications.View' },
       { path: '/budgeting/budgets', label: 'الموازنات', permission: 'Budgets.View' },
-      { path: '/budgeting/appropriations', label: 'التخصيصات', permission: 'Appropriations.View' },
+
+      { path: '/budgeting/transactions', label: 'المعاملات المالية', permission: 'BudgetTransactions.View' },
       { path: '/budgeting/encumbrances', label: 'الالتزامات', permission: 'Encumbrances.View' },
     ],
   },
@@ -86,6 +72,12 @@ export const moduleGroups: ModuleGroup[] = [
       { path: '/financial-settings/currencies', label: 'العملات', permission: 'Currencies.View' },
       { path: '/financial-settings/exchange-rates', label: 'أسعار الصرف', permission: 'ExchangeRates.View' },
       { path: '/financial-settings/closing-entries', label: 'قيود الإغلاق', permission: 'ClosingEntries.View' },
+      { path: '/security/users', label: 'المستخدمون', permission: 'Security.Users.Read' },
+      { path: '/security/roles', label: 'الأدوار', permission: 'Security.Roles.Read' },
+      { path: '/organization/units', label: 'الوحدات التنظيمية', permission: 'Organization.OrgUnits.Read' },
+      { path: '/organization/employees', label: 'الموظفون', permission: 'Organization.Employees.Read' },
+      { path: '/organization/cost-centers', label: 'مراكز التكلفة', permission: 'Organization.CostCenters.Read' },
+      { path: '/organization/projects', label: 'المشاريع', permission: 'Organization.Projects.Read' },
     ],
   },
   {
@@ -95,6 +87,26 @@ export const moduleGroups: ModuleGroup[] = [
       { path: '/payments/disbursement-requests', label: 'طلبات الصرف', permission: 'DisbursementRequests.View' },
       { path: '/payments/payments', label: 'المدفوعات', permission: 'Payments.View' },
       { path: '/payments/bank-accounts', label: 'الحسابات البنكية', permission: 'BankAccounts.View' },
+    ],
+  },
+  {
+    label: 'المشتريات',
+    items: [
+      { path: '/procurement/dashboard', label: 'لوحة المشتريات', permission: 'PurchaseRequests.View' },
+      { path: '/procurement/purchase-requests', label: 'طلبات الشراء', permission: 'PurchaseRequests.View' },
+      { path: '/procurement/quotations', label: 'عروض الأسعار', permission: 'Quotations.View' },
+      { path: '/procurement/purchase-orders', label: 'أوامر الشراء', permission: 'PurchaseOrdersCreate' },
+      { path: '/procurement/goods-receipt-notes', label: 'سندات استلام البضاعة', permission: 'GoodsReceiptsCreate' },
+      { path: '/procurement/supplier-invoices', label: 'فواتير الموردين', permission: 'SupplierInvoicesCreate' },
+    ],
+  },
+  {
+    label: 'المخزون',
+    items: [
+      { path: '/inventory/items', label: 'الأصناف', permission: 'Items.View' },
+      { path: '/inventory/item-categories', label: 'تصنيفات الأصناف', permission: 'ItemCategories.View' },
+      { path: '/inventory/units', label: 'الوحدات', permission: 'Units.View' },
+      { path: '/inventory/warehouses', label: 'المستودعات', permission: 'Warehouses.View' },
     ],
   },
 ];

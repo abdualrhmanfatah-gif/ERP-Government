@@ -6,8 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ERP_Government.Application.Security.Common;
 
 public class ApprovalService(
-    IApplicationDbContext context,
-    IIdentityService identityService) : IApprovalService
+    IApplicationDbContext context) : IApprovalService
 {
     public async Task<ApprovalResult> ValidateAndRecordAsync(
         string documentType,
@@ -27,28 +26,9 @@ public class ApprovalService(
         if (evaluationResults.Count == 0)
             return new ApprovalResult { Success = false, Errors = ["No approval rules defined for this document type."] };
 
-        // Check user has at least one required role
-        var hasRequiredRole = false;
-        string? matchedRole = null;
-
-        foreach (var rule in evaluationResults)
-        {
-            if (string.IsNullOrEmpty(rule.RequiredRole)) continue;
-
-            if (await identityService.IsInRoleAsync(executingUserId, rule.RequiredRole))
-            {
-                hasRequiredRole = true;
-                matchedRole = rule.RequiredRole;
-                break;
-            }
-        }
-
-        if (!hasRequiredRole)
-        {
-            var requiredRoles = evaluationResults.Select(r => r.RequiredRole).Where(r => !string.IsNullOrEmpty(r));
-            errors.Add($"User does not have any required approval role ({string.Join(", ", requiredRoles)}).");
-            return new ApprovalResult { Success = false, Errors = errors };
-        }
+        // Use first matched rule's role for audit trail (no role gate — permission is the gate via [Authorize])
+        var matchedRole = evaluationResults
+            .FirstOrDefault(r => !string.IsNullOrEmpty(r.RequiredRole))?.RequiredRole ?? "Unknown";
 
         // Create ApprovalHistory record
         var evaluationSnapshot = JsonSerializer.Serialize(evaluationResults.Select(r => new

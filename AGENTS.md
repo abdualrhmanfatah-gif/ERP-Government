@@ -23,6 +23,10 @@ Frontend stack — see `## Frontend Architecture` below.
   Full 5-project suite runs ONLY at gates: session preflight, /speckit.converge, pre-merge.
   Project scoping for cycle economy is NOT test-filtering-to-green (Hard Rule 4); no assertion
   is ever weakened, skipped, or deleted — full suite still gates every merge.
+- **Spec 045 exception (DEP-027)**: work scoped to `specs/045-payments-group/` does not use
+  TDD and does not add automated tests. Use scoped builds, frontend lint/build, manual quickstart
+  evidence, and the existing five backend test projects as convergence/pre-merge regression gates.
+  Existing tests remain intact; update fixtures only where the approved contract requires it.
 - **Frontend has NO test suite by governance decision** (see Frontend Architecture). Frontend
   `npm run lint` runs ESLint + dependency-cruiser only.
 
@@ -140,7 +144,7 @@ Frontend code does not use TDD or frontend automated tests. Backend testing requ
 - Git: branch per spec (auto-created at specify). Merge after converge: git checkout main; git merge --no-ff <branch>.
 - NEVER create a new spec for an existing feature — amend its spec.md/plan.md instead. Check specs/ before specifying.
 - Before implementing: read the spec's data-model.md AND verify against current entities — specs can lag code.
-- TDD mandatory (constitution XI): test first, observe red, implement, green. Never weaken/skip/delete tests.
+- TDD mandatory (constitution XI): test first, observe red, implement, green. Never weaken/skip/delete tests. Spec 045 alone follows the DEP-027 exception above.
 
 ## Docs
 - DESIGN.md — Agent-facing UI design tokens + rationale (YAML front matter + prose). Agents: read DESIGN.md before any UI work; tokens.ts remains SSOT (read-only by convention — edit only when justified); sync DESIGN.md ← tokens.ts in every token-change task.

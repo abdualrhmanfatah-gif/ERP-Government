@@ -10,13 +10,13 @@ import {
 const client = new EncumbrancesClient();
 
 export function useEncumbrancesList(filters?: {
-  appropriationId?: number;
+  budgetId?: number;
   status?: EncumbranceStatus | null;
 }) {
   return useQuery({
     queryKey: ['encumbrances', filters],
     queryFn: () =>
-      client.encumbrancesAll(filters?.appropriationId ?? undefined, filters?.status ?? undefined),
+      client.encumbrancesAll(filters?.budgetId ?? undefined, filters?.status ?? undefined),
   });
 }
 
@@ -28,23 +28,13 @@ export function useEncumbranceDetail(id: number) {
   });
 }
 
-export function useEncumbranceAvailability(appropriationId: number | undefined) {
-  return useQuery({
-    queryKey: ['encumbrance-availability', appropriationId],
-    queryFn: () => client.availability2(appropriationId!),
-    enabled: Number.isFinite(appropriationId),
-  });
-}
-
 function useEncumbranceTransition(fn: (id: number, body: EncumbranceActionRequest) => Promise<void>) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...data }: Record<string, unknown> & { id: number }) =>
-      fn(id, new EncumbranceActionRequest({ notes: data.notes as string | undefined })),
+    mutationFn: ({ id, rowVersion, ...data }: Record<string, unknown> & { id: number; rowVersion: string }) =>
+      fn(id, new EncumbranceActionRequest({ rowVersion, notes: data.notes as string | undefined })),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['encumbrances'] });
-      qc.invalidateQueries({ queryKey: ['encumbrance-availability'] });
-      qc.invalidateQueries({ queryKey: ['item-availability'] });
     },
   });
 }
@@ -56,8 +46,6 @@ export function useCreateEncumbrance() {
       client.encumbrancesPOST(new CreateEncumbranceRequest(data as any)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['encumbrances'] });
-      qc.invalidateQueries({ queryKey: ['encumbrance-availability'] });
-      qc.invalidateQueries({ queryKey: ['item-availability'] });
     },
   });
 }
@@ -79,8 +67,6 @@ export const useReverseEncumbrance = () => {
       client.reversePATCH2(id, new ReverseEncumbranceRequest(data as any)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['encumbrances'] });
-      qc.invalidateQueries({ queryKey: ['encumbrance-availability'] });
-      qc.invalidateQueries({ queryKey: ['item-availability'] });
     },
   });
 };

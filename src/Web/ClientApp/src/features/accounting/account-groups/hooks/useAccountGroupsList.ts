@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import type { PaginatedAccountGroupsResponse } from '../types';
+import { accountGroupsClient } from '../../shared/client';
+import type { AccountGroupType } from '../../../../web-api-client';
 
 type Params = {
   search?: string;
@@ -9,22 +10,16 @@ type Params = {
   pageSize?: number;
 };
 
-async function fetchList(params: Params): Promise<PaginatedAccountGroupsResponse> {
-  const qs = new URLSearchParams();
-  if (params.search) qs.set('search', params.search);
-  if (params.type) qs.set('type', params.type);
-  if (params.isActive !== undefined) qs.set('isActive', String(params.isActive));
-  qs.set('page', String(params.page ?? 1));
-  qs.set('pageSize', String(params.pageSize ?? 20));
-  const res = await fetch(`/api/AccountGroups?${qs.toString()}`, { credentials: 'include' });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
 export function useAccountGroupsList(params: Params) {
   return useQuery({
     queryKey: ['account-groups', params],
-    queryFn: () => fetchList(params),
+    queryFn: () => accountGroupsClient.accountGroupsGET(
+      params.search,
+      params.isActive,
+      params.type as AccountGroupType | null | undefined,
+      params.page ?? 1,
+      params.pageSize ?? 20,
+    ),
     staleTime: 30_000,
   });
 }

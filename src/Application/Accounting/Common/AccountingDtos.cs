@@ -223,13 +223,15 @@ public class PostingRuleDto
     public string JournalName { get; init; } = string.Empty;
     public int Priority { get; init; }
     public bool IsActive { get; init; }
+    public List<PostingRuleLineDto> Lines { get; init; } = [];
 
     private class Mapping : Profile
     {
         public Mapping()
         {
             CreateMap<PostingRule, PostingRuleDto>()
-                .ForMember(d => d.JournalName, opt => opt.MapFrom(s => s.Journal.Name));
+                .ForMember(d => d.JournalName, opt => opt.MapFrom(s => s.Journal.Name))
+                .ForMember(d => d.Lines, opt => opt.MapFrom(s => s.Lines));
         }
     }
 }

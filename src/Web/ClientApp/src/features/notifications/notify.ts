@@ -1,4 +1,4 @@
-import { toast } from 'sonner';
+import { notify as toastNotify } from '@/components/ui/Toast';
 import { useNotificationStore } from './store';
 import type { NotificationType, Source } from './types';
 
@@ -16,9 +16,7 @@ export interface NotifyOptions {
 }
 
 export function notify({ type = 'info', title, message, source = 'local' }: NotifyOptions) {
-  const toastFn =
-    type === 'success' ? toast.success : type === 'error' ? toast.error : type === 'warning' ? toast.warning : toast;
-  toastFn(title);
+  toastNotify({ type, title, message });
 
   if (_store) {
     _store.addLocal({

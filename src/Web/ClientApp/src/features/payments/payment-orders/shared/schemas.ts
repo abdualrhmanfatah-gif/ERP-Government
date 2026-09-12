@@ -1,18 +1,5 @@
 import { z } from 'zod';
 
-const lineSchema = z.object({
-  lineType: z.number().min(0),
-  description: z.string().optional(),
-  accountId: z.number().min(1, 'الحساب مطلوب'),
-  amount: z.number().min(0, 'المبلغ يجب أن يكون ≥ 0'),
-  taxAmount: z.number().optional(),
-  fundId: z.number().optional(),
-  appropriationId: z.number().optional(),
-  organizationUnitId: z.number().optional(),
-  costCenterId: z.number().optional(),
-  projectId: z.number().optional(),
-});
-
 const deductionSchema = z.object({
   deductionType: z.number().min(0),
   deductionCode: z.string().optional(),
@@ -30,41 +17,59 @@ export const createPaymentOrderSchema = z.object({
   paymentOrderDate: z.string().min(1, 'التاريخ مطلوب'),
   dueDate: z.string().optional(),
   paymentOrderType: z.string().min(1, 'نوع أمر الدفع مطلوب').max(20),
-  vendorId: z.number().min(1, 'المورد مطلوب'),
+  accountId: z.number().optional(),
+  disbursementRequestId: z.number().optional(),
   fundId: z.number().min(1, 'الصندوق مطلوب'),
-  fiscalYearId: z.number().min(1, 'السنة المالية مطلوبة'),
-  appropriationId: z.number().min(1, 'التخصيص مطلوب'),
+  fiscalYearId: z.number().optional(),
+  budgetItemAllocationId: z.number().optional(),
   budgetClassificationId: z.number().optional(),
   costCenterId: z.number().optional(),
-  projectId: z.number().optional(),
   purchaseOrderId: z.number().optional(),
   encumbranceId: z.number().optional(),
   currencyId: z.number().min(1, 'العملة مطلوبة'),
   exchangeRate: z.number().optional(),
   amountGross: z.number().min(0.01, 'المبلغ الإجمالي يجب أن يكون > 0'),
   deductionAmount: z.number().min(0, 'لا يمكن أن يكون سالباً'),
-  paymentMethod: z.number().optional(),
+  paymentMethod: z.string().optional(),
   bankAccountId: z.number().optional(),
   beneficiaryName: z.string().min(1, 'اسم المستفيد مطلوب').max(200),
-  beneficiaryIban: z.string().optional(),
   beneficiaryAccountNumber: z.string().optional(),
   beneficiaryBankName: z.string().optional(),
   notes: z.string().optional(),
-  lines: z.array(lineSchema).min(1, 'يجب إضافة سطر واحد على الأقل'),
   deductions: z.array(deductionSchema),
 }).refine(
   (data) => {
-    const net = data.amountGross - data.deductionAmount;
-    const linesSum = data.lines.reduce((sum, l) => sum + l.amount, 0);
-    return Math.abs(linesSum - net) <= 0.01;
+    if (data.paymentMethod === 'Check' && (!data.bankAccountId || data.bankAccountId <= 0)) {
+      return false;
+    }
+    return true;
   },
-  { message: 'مجمل الأسطر يجب أن يساوي المبلغ الصافي', path: ['lines'] },
-).refine(
-  (data) => {
-    const deductionsSum = data.deductions.reduce((sum, d) => sum + d.amount, 0);
-    return Math.abs(deductionsSum - data.deductionAmount) <= 0.01;
-  },
-  { message: 'مجمل الخصومات يجب أن يساوي مبلغ الخصم', path: ['deductions'] },
+  { message: 'الحساب البنكي مطلوب عند الدفع بشيك', path: ['bankAccountId'] },
 );
+
+export const updatePaymentOrderSchema = z.object({
+  paymentOrderDate: z.string().min(1, 'التاريخ مطلوب'),
+  dueDate: z.string().optional(),
+  paymentOrderType: z.string().min(1, 'نوع أمر الدفع مطلوب').max(20),
+  accountId: z.number().nullish(),
+  fundId: z.number().nullish(),
+  fiscalYearId: z.number().nullish(),
+  budgetItemAllocationId: z.number().nullish(),
+  budgetClassificationId: z.number().nullish(),
+  costCenterId: z.number().nullish(),
+  purchaseOrderId: z.number().nullish(),
+  encumbranceId: z.number().nullish(),
+  currencyId: z.number().nullish(),
+  exchangeRate: z.number().nullish(),
+  amountGross: z.number().min(0.01, 'المبلغ الإجمالي يجب أن يكون > 0'),
+  deductionAmount: z.number().min(0, 'لا يمكن أن يكون سالباً'),
+  paymentMethod: z.string().nullish(),
+  bankAccountId: z.number().nullish(),
+  beneficiaryName: z.string().min(1, 'اسم المستفيد مطلوب').max(200),
+  beneficiaryAccountNumber: z.string().nullish(),
+  beneficiaryBankName: z.string().nullish(),
+  notes: z.string().nullish(),
+  deductions: z.array(deductionSchema),
+});
 
 export type CreatePaymentOrderFormData = z.infer<typeof createPaymentOrderSchema>;

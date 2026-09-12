@@ -107,7 +107,9 @@ public class OutboxProcessorService : BackgroundService
             }
 
             // Publish via MediatR — this is where the actual event handling happens
-            var mediator = _serviceProvider.GetRequiredService<IMediator>();
+            // Use scoped provider because handlers (PostingPipelineHandler) are scoped
+            using var scope = _serviceProvider.CreateScope();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             await mediator.Publish(payload, cancellationToken);
 
             message.Status = OutboxMessageStatus.Processed;

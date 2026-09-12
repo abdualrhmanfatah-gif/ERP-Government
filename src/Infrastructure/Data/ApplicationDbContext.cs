@@ -76,8 +76,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<BudgetType> BudgetTypes => Set<BudgetType>();
     public DbSet<Budget> Budgets => Set<Budget>();
     public DbSet<BudgetItem> BudgetItems => Set<BudgetItem>();
-    public DbSet<Appropriation> Appropriations => Set<Appropriation>();
+    public DbSet<BudgetItemAllocation> BudgetItemAllocations => Set<BudgetItemAllocation>();
     public DbSet<Encumbrance> Encumbrances => Set<Encumbrance>();
+    public DbSet<EncumbranceLine> EncumbranceLines => Set<EncumbranceLine>();
+    public DbSet<BudgetTransaction> BudgetTransactions => Set<BudgetTransaction>();
     public DbSet<BudgetItemMonthlyPlan> BudgetItemMonthlyPlans => Set<BudgetItemMonthlyPlan>();
     public DbSet<YearClosingRun> YearClosingRuns => Set<YearClosingRun>();
     public DbSet<FinalAccount> FinalAccounts => Set<FinalAccount>();
@@ -86,12 +88,14 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     // Module 6: Procurement (Target)
     public DbSet<PurchaseRequest> PurchaseRequests => Set<PurchaseRequest>();
     public DbSet<PurchaseRequestDetail> PurchaseRequestDetails => Set<PurchaseRequestDetail>();
-    public DbSet<RequestForQuotation> RequestForQuotations => Set<RequestForQuotation>();
-    public DbSet<RFQSupplier> RFQSuppliers => Set<RFQSupplier>();
     public DbSet<Quotation> Quotations => Set<Quotation>();
     public DbSet<QuotationDetail> QuotationDetails => Set<QuotationDetail>();
     public DbSet<PurchaseOrder> PurchaseOrders => Set<PurchaseOrder>();
     public DbSet<PurchaseOrderDetail> PurchaseOrderDetails => Set<PurchaseOrderDetail>();
+    public DbSet<ERP_Government.Domain.Procurement.Entities.GoodsReceiptNote> GoodsReceiptNotes => Set<ERP_Government.Domain.Procurement.Entities.GoodsReceiptNote>();
+    public DbSet<ERP_Government.Domain.Procurement.Entities.GoodsReceiptNoteDetail> GoodsReceiptNoteDetails => Set<ERP_Government.Domain.Procurement.Entities.GoodsReceiptNoteDetail>();
+    public DbSet<SupplierInvoice> SupplierInvoices => Set<SupplierInvoice>();
+    public DbSet<SupplierInvoiceDetail> SupplierInvoiceDetails => Set<SupplierInvoiceDetail>();
 
     // Module 7: Parties
     public DbSet<ERP_Government.Domain.Parties.Entities.Party> Parties => Set<ERP_Government.Domain.Parties.Entities.Party>();
@@ -99,7 +103,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     // Module 8: Payments
     public DbSet<BankAccount> BankAccounts => Set<BankAccount>();
     public DbSet<PaymentOrder> PaymentOrders => Set<PaymentOrder>();
-    public DbSet<PaymentOrderLine> PaymentOrderLines => Set<PaymentOrderLine>();
+    // PaymentOrderLine removed per ADR-001 D-4
     public DbSet<PaymentOrderDeduction> PaymentOrderDeductions => Set<PaymentOrderDeduction>();
     public DbSet<DisbursementRequest> DisbursementRequests => Set<DisbursementRequest>();
     public DbSet<Payment> Payments => Set<Payment>();
@@ -136,8 +140,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Item> Items => Set<Item>();
     public DbSet<ItemUnit> ItemUnits => Set<ItemUnit>();
     public DbSet<StockTransaction> StockTransactions => Set<StockTransaction>();
-    public DbSet<GoodsReceiptNote> GoodsReceiptNotes => Set<GoodsReceiptNote>();
-    public DbSet<GoodsReceiptNoteDetail> GoodsReceiptNoteDetails => Set<GoodsReceiptNoteDetail>();
     public DbSet<StockTake> StockTakes => Set<StockTake>();
     public DbSet<StockTakeDetail> StockTakeDetails => Set<StockTakeDetail>();
 

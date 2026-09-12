@@ -9,10 +9,10 @@ public record CreateFundCommand(
     string FundName,
     FundType FundType,
     FundCategory FundCategory,
-    int? FiscalYearId,
     string LegalAuthority,
     string? Description,
-    int? DefaultRevenueDebitAccountId) : IRequest<Result<int>>;
+    int? DefaultRevenueAccountId,
+    int? CurrencyId) : IRequest<Result<int>>;
 
 public class CreateFundCommandHandler(
     IApplicationDbContext context) : IRequestHandler<CreateFundCommand, Result<int>>
@@ -27,25 +27,16 @@ public class CreateFundCommandHandler(
         if (exists)
             return Result<int>.Failure(["Fund number already exists."]);
 
-        if (request.FiscalYearId.HasValue)
-        {
-            var fiscalYearExists = await context.FiscalYears
-                .AnyAsync(x => x.Id == request.FiscalYearId.Value, cancellationToken);
-
-            if (!fiscalYearExists)
-                return Result<int>.Failure(["Fiscal year not found."]);
-        }
-
         var entity = new Domain.Budgeting.Entities.Fund
         {
             FundNumber = request.FundNumber,
             FundName = request.FundName,
             FundType = request.FundType,
             FundCategory = request.FundCategory,
-            FiscalYearId = request.FiscalYearId,
             LegalAuthority = request.LegalAuthority,
             Description = request.Description,
-            DefaultRevenueDebitAccountId = request.DefaultRevenueDebitAccountId,
+            DefaultRevenueAccountId = request.DefaultRevenueAccountId,
+            CurrencyId = request.CurrencyId,
             IsActive = true
         };
 

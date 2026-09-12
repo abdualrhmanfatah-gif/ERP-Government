@@ -17,28 +17,8 @@ import { usePendingApprovalsCount } from '../hooks/usePendingApprovalsCount';
 import { useCashPosition } from '../hooks/useCashPosition';
 import { useTotalTransactions } from '../hooks/useTotalTransactions';
 import { useRecentTransactions } from '../hooks/useRecentTransactions';
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('ar-SA', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('ar-SA', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(date);
-}
-
-const statusMap: Record<string, { label: string; variant: 'approved' | 'pending' | 'draft' }> = {
-  posted: { label: 'مرحل', variant: 'approved' },
-  pending: { label: 'معلق', variant: 'pending' },
-  draft: { label: 'مسودة', variant: 'draft' },
-};
+import { statusMap } from '../shared/types';
+import { formatDateCompact, formatCurrency } from '@/shared/utils/formatters';
 
 interface Transaction {
   id: number;
@@ -51,7 +31,7 @@ interface Transaction {
 }
 
 const txColumns: DataGridColumn<Transaction>[] = [
-  { header: 'التاريخ', cell: (row) => formatDate(row.date) },
+  { header: 'التاريخ', cell: (row) => formatDateCompact(row.date) },
   { header: 'الوصف', cell: (row) => <span className="font-medium">{row.description}</span> },
   { header: 'الحساب', cell: (row) => row.account },
   { header: 'المدين', align: 'left', cell: (row) => row.debit > 0 ? <span className="text-[var(--color-error)]">{formatCurrency(row.debit)}</span> : <span className="text-[var(--color-on-surface-variant)]">—</span> },

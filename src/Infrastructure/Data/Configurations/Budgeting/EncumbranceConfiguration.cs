@@ -21,13 +21,12 @@ public class EncumbranceConfiguration : IEntityTypeConfiguration<Encumbrance>
             .HasConversion<int>();
 
         builder.Property(e => e.DocumentType)
-            .HasMaxLength(50)
-            .IsRequired();
+            .HasMaxLength(50);
 
         builder.Property(e => e.Description)
             .HasMaxLength(500);
 
-        builder.Property(e => e.Amount)
+        builder.Property(e => e.TotalAmount)
             .HasColumnType("decimal(23,2)");
 
         builder.Property(e => e.Status)
@@ -41,10 +40,6 @@ public class EncumbranceConfiguration : IEntityTypeConfiguration<Encumbrance>
 
         builder.HasIndex(e => e.EncumbranceNumber)
             .IsUnique();
-
-        builder.HasIndex(e => e.AppropriationId);
-
-        builder.HasIndex(e => e.VendorId);
 
         builder.HasIndex(e => e.PurchaseOrderId);
 

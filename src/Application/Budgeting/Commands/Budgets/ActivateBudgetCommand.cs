@@ -1,6 +1,7 @@
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Parties.Common;
 using ERP_Government.Domain.Budgeting.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP_Government.Application.Budgeting.Commands.Budgets;
 
@@ -32,6 +33,16 @@ public class ActivateBudgetCommandHandler(
 
         if (!request.RowVersion.SequenceEqual(entity.RowVersion))
             return Result.Failure(["Concurrency conflict. The record has been modified by another user."]);
+
+        var allocations = await context.BudgetItemAllocations
+            .Where(x => x.BudgetId == entity.Id)
+            .ToListAsync(cancellationToken);
+
+        foreach (var allocation in allocations)
+        {
+            if (!allocation.ApprovedAmount.HasValue)
+                allocation.ApprovedAmount = allocation.ProposedAmount;
+        }
 
         entity.Status = BudgetStatus.Active;
 

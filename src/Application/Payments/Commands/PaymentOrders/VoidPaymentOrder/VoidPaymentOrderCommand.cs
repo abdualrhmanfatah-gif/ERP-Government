@@ -46,16 +46,21 @@ public class VoidPaymentOrderCommandHandler(
         var previousStatus = entity.Status.ToString();
         entity.Status = PaymentOrderStatus.Voided;
 
-        var linkedRequests = await context.DisbursementRequests
-            .Where(r => r.PaymentOrderId == entity.Id
-                && (r.Status == DisbursementRequestStatus.Draft
-                    || r.Status == DisbursementRequestStatus.PendingApproval
-                    || (r.Status == DisbursementRequestStatus.Approved && !context.Payments.Any(p => p.DisbursementRequestId == r.Id && p.Status == PaymentStatus.Completed))))
-            .ToListAsync(cancellationToken);
+        // ADR-001 D-2: link is one-directional (PaymentOrder.DisbursementRequestId)
+        var linkedRequests = entity.DisbursementRequestId.HasValue
+            ? await context.DisbursementRequests
+                .Where(r => r.Id == entity.DisbursementRequestId.Value
+                    && (r.Status == DisbursementRequestStatus.Draft
+                        || r.Status == DisbursementRequestStatus.PendingApproval
+                        || (r.Status == DisbursementRequestStatus.Approved
+                            && !context.Payments.Any(p => p.PaymentOrderId == entity.Id && p.Status == PaymentStatus.Completed))))
+                .ToListAsync(cancellationToken)
+            : [];
 
         foreach (var request_ in linkedRequests)
         {
             request_.Status = DisbursementRequestStatus.Invalidated;
+            request_.AccrualJournalEntryId = null;
 
             context.ApprovalHistory.Add(new Domain.Security.Entities.ApprovalHistory
             {

@@ -6,19 +6,20 @@ namespace ERP_Government.Application.Budgeting.Common;
 
 public interface IBudgetAvailabilityService
 {
-    Task<decimal> GetAvailableForAppropriationAsync(int budgetItemId);
-    Task<decimal> GetAvailableForEncumbranceAsync(int appropriationId);
-    Task<BudgetAvailabilitySummary> GetAvailabilitySummaryAsync(int budgetItemId);
-    Task<List<AvailabilityBreakdownDto>> GetAvailabilityBreakdownAsync(int budgetItemId, int fiscalYearId);
+    Task<decimal> GetAvailableForAppropriationAsync(int budgetItemAllocationId);
+    Task<BudgetAvailabilitySummary> GetAvailabilitySummaryAsync(int budgetItemAllocationId);
+    Task<List<AvailabilityBreakdownDto>> GetAvailabilityBreakdownAsync(int budgetItemAllocationId, int fiscalYearId);
     bool EvaluateAllowOverrun(bool? budgetItemAllowOverrun, bool? budgetAllowOverrun, bool budgetTypeAllowOverrun);
     (bool Allowed, string? Warning) EvaluateControlMethod(BudgetControlMethod controlMethod, decimal requested, decimal available);
 }
 
 public record BudgetAvailabilitySummary(
-    int BudgetItemId,
-    decimal NetAppropriated,
-    decimal Encumbered,
-    decimal Available,
+    int BudgetItemAllocationId,
+    decimal ApprovedAmount,
+    decimal ActualExpenditure,
+    decimal RemainingAmount,
+    decimal OutstandingEncumbrance,
+    decimal AvailableAmount,
     bool EffectiveAllowOverrun,
     BudgetControlMethod BudgetControlMethod);
 
@@ -31,174 +32,97 @@ public class BudgetAvailabilityService : IBudgetAvailabilityService
         _context = context;
     }
 
-    public async Task<decimal> GetAvailableForAppropriationAsync(int budgetItemId)
+    public async Task<decimal> GetAvailableForAppropriationAsync(int budgetItemAllocationId)
     {
-        var netAppropriated = await _context.Appropriations
-            .Where(a => a.BudgetItemId == budgetItemId && a.Status == AppropriationStatus.Active)
-            .SumAsync(a =>
-                a.AppropriationType == AppropriationType.Original ? a.Amount :
-                a.AppropriationType == AppropriationType.Supplement ? a.Amount :
-                a.AppropriationType == AppropriationType.Reduction ? -a.Amount :
-                a.AppropriationType == AppropriationType.Adjustment ? a.Amount :
-                0m);
+        var allocation = await _context.BudgetItemAllocations
+            .Include(a => a.BudgetItem)
+            .Include(a => a.Budget)
+            .FirstOrDefaultAsync(a => a.Id == budgetItemAllocationId);
 
-        return netAppropriated;
+        if (allocation is null)
+            return 0;
+
+        var approvedAmount = allocation.ApprovedAmount ?? allocation.ProposedAmount;
+
+        var actualExpenditure = await ComputeActualExpenditureAsync(allocation.BudgetItem.AccountId, allocation.Budget.FiscalYearId);
+        var outstandingEncumbrance = await ComputeOutstandingEncumbranceAsync(allocation.BudgetItemId);
+
+        return approvedAmount - actualExpenditure - outstandingEncumbrance;
     }
 
-    public async Task<decimal> GetAvailableForEncumbranceAsync(int appropriationId)
+    public async Task<BudgetAvailabilitySummary> GetAvailabilitySummaryAsync(int budgetItemAllocationId)
     {
-        // Get the budget item from the appropriation
-        var appropriation = await _context.Appropriations
-            .FirstOrDefaultAsync(a => a.Id == appropriationId);
+        var allocation = await _context.BudgetItemAllocations
+            .Include(a => a.BudgetItem)
+            .Include(a => a.Budget)
+                .ThenInclude(b => b.BudgetType)
+            .FirstOrDefaultAsync(a => a.Id == budgetItemAllocationId);
 
-        if (appropriation == null)
-            return 0m;
+        if (allocation is null)
+            return new BudgetAvailabilitySummary(budgetItemAllocationId, 0, 0, 0, 0, 0, false, BudgetControlMethod.None);
 
-        // Get net available from the budget item
-        var netAppropriated = await GetAvailableForAppropriationAsync(appropriation.BudgetItemId);
-
-        // Subtract encumbrances for this appropriation
-        var encumbered = await _context.Encumbrances
-            .Where(e => e.AppropriationId == appropriationId
-                && (e.Status == EncumbranceStatus.Active
-                    || e.Status == EncumbranceStatus.PartiallyReleased
-                    || e.Status == EncumbranceStatus.PartiallyLiquidated)
-                && e.ReversalOfId == null)
-            .SumAsync(e => e.Amount);
-
-        return netAppropriated - encumbered;
-    }
-
-    public async Task<BudgetAvailabilitySummary> GetAvailabilitySummaryAsync(int budgetItemId)
-    {
-        var item = await _context.BudgetItems
-            .FirstOrDefaultAsync(bi => bi.Id == budgetItemId);
-
-        if (item == null)
-            return new BudgetAvailabilitySummary(budgetItemId, 0, 0, 0, false, BudgetControlMethod.None);
-
-        var budget = await _context.Budgets
-            .Include(b => b.BudgetType)
-            .FirstOrDefaultAsync(b => b.Id == item.BudgetId);
-
-        var netAppropriated = await GetAvailableForAppropriationAsync(budgetItemId);
-
-        var encumbered = await _context.Encumbrances
-            .Where(e => _context.Appropriations.Any(a => a.BudgetItemId == budgetItemId && a.Id == e.AppropriationId)
-                && (e.Status == EncumbranceStatus.Active
-                    || e.Status == EncumbranceStatus.PartiallyReleased
-                    || e.Status == EncumbranceStatus.PartiallyLiquidated)
-                && e.ReversalOfId == null)
-            .SumAsync(e => e.Amount);
+        var approvedAmount = allocation.ApprovedAmount ?? 0;
+        var actualExpenditure = await ComputeActualExpenditureAsync(allocation.BudgetItem.AccountId, allocation.Budget.FiscalYearId);
+        var outstandingEncumbrance = await ComputeOutstandingEncumbranceAsync(allocation.BudgetItemId);
+        var remainingAmount = approvedAmount - actualExpenditure;
+        var availableAmount = remainingAmount - outstandingEncumbrance;
 
         var effectiveAllowOverrun = EvaluateAllowOverrun(
-            item.AllowOverrun,
-            budget?.AllowOverrun,
-            budget?.BudgetType?.AllowOverrun ?? false);
+            allocation.BudgetItem.AllowOverrun,
+            allocation.Budget.AllowOverrun,
+            allocation.Budget.BudgetType?.AllowOverrun ?? false);
 
-        var controlMethod = budget?.BudgetType?.ControlMethod ?? BudgetControlMethod.None;
+        var controlMethod = allocation.Budget.BudgetType?.ControlMethod ?? BudgetControlMethod.None;
 
         return new BudgetAvailabilitySummary(
-            budgetItemId,
-            netAppropriated,
-            encumbered,
-            netAppropriated - encumbered,
+            budgetItemAllocationId,
+            approvedAmount,
+            actualExpenditure,
+            remainingAmount,
+            outstandingEncumbrance,
+            availableAmount,
             effectiveAllowOverrun,
             controlMethod);
     }
 
-    public async Task<List<AvailabilityBreakdownDto>> GetAvailabilityBreakdownAsync(int budgetItemId, int fiscalYearId)
+    public async Task<List<AvailabilityBreakdownDto>> GetAvailabilityBreakdownAsync(int budgetItemAllocationId, int fiscalYearId)
     {
-        var item = await _context.BudgetItems
-            .FirstOrDefaultAsync(bi => bi.Id == budgetItemId);
+        var allocation = await _context.BudgetItemAllocations
+            .Include(a => a.BudgetItem)
+            .Include(a => a.Budget)
+            .FirstOrDefaultAsync(a => a.Id == budgetItemAllocationId);
 
-        if (item == null)
+        if (allocation is null)
             return [];
 
-        var budget = await _context.Budgets
-            .Include(b => b.BudgetType)
-            .FirstOrDefaultAsync(b => b.Id == item.BudgetId);
+        var approvedAmount = allocation.ApprovedAmount ?? 0;
+        var actualExpenditure = await ComputeActualExpenditureAsync(allocation.BudgetItem.AccountId, allocation.Budget.FiscalYearId);
+        var outstandingEncumbrance = await ComputeOutstandingEncumbranceAsync(allocation.BudgetItemId);
+        var available = approvedAmount - actualExpenditure - outstandingEncumbrance;
 
-        var effectiveAllowOverrun = EvaluateAllowOverrun(
-            item.AllowOverrun,
-            budget?.AllowOverrun,
-            budget?.BudgetType?.AllowOverrun ?? false);
-
-        var controlMethod = budget?.BudgetType?.ControlMethod ?? BudgetControlMethod.None;
-
-        var appropriations = await _context.Appropriations
-            .Where(a => a.BudgetItemId == budgetItemId
-                && a.Status == AppropriationStatus.Active)
-            .ToListAsync();
-
-        var appropriationIds = appropriations.Select(a => a.Id).ToList();
-
-        var encumbrances = await _context.Encumbrances
-            .Where(e => appropriationIds.Contains(e.AppropriationId)
-                && (e.Status == EncumbranceStatus.Active
-                    || e.Status == EncumbranceStatus.PartiallyReleased
-                    || e.Status == EncumbranceStatus.PartiallyLiquidated)
-                && e.ReversalOfId == null)
-            .ToListAsync();
-
-        var breakdown = appropriations
-            .GroupBy(a => new
-            {
-                FundId = item.FundId ?? 0,
-                FundCode = "DEFAULT",
-                FundName = "Default Fund",
-                ProgramId = (int?)null,
-                ProgramCode = (string?)null,
-                ProgramName = (string?)null,
-                ProjectId = (int?)null,
-                ProjectCode = (string?)null,
-                ProjectName = (string?)null
-            })
-            .Select(g => new AvailabilityBreakdownDto(
-                g.Key.FundId,
-                g.Key.FundCode,
-                g.Key.FundName,
-                g.Key.ProgramId,
-                g.Key.ProgramCode,
-                g.Key.ProgramName,
-                g.Key.ProjectId,
-                g.Key.ProjectCode,
-                g.Key.ProjectName,
-                budgetItemId,
-                item.ItemCode,
-                g.Sum(a => a.AppropriationType == Domain.Budgeting.Enums.AppropriationType.Original ? a.Amount :
-                    a.AppropriationType == Domain.Budgeting.Enums.AppropriationType.Supplement ? a.Amount :
-                    a.AppropriationType == Domain.Budgeting.Enums.AppropriationType.Reduction ? -a.Amount :
-                    a.AppropriationType == Domain.Budgeting.Enums.AppropriationType.Adjustment ? a.Amount : 0m),
-                encumbrances
-                    .Where(e => g.Any(a => a.Id == e.AppropriationId))
-                    .Sum(e => e.Amount),
-                0m,
-                0m))
-            .ToList();
-
-        var result = new List<AvailabilityBreakdownDto>();
-
-        foreach (var line in breakdown)
-        {
-            var lineEncumbered = encumbrances
-                .Where(e => appropriations.Any(a => a.Id == e.AppropriationId))
-                .Sum(e => e.Amount);
-
-            var available = line.AppropriationAmount - lineEncumbered - line.PaidAmount;
-            result.Add(line with
-            {
-                EncumberedAmount = lineEncumbered,
-                AvailableAmount = available
-            });
-        }
-
-        return result;
+        return
+        [
+            new AvailabilityBreakdownDto(
+                FundId: allocation.Budget.FundId,
+                FundCode: allocation.Budget.Fund?.FundNumber ?? "DEFAULT",
+                FundName: allocation.Budget.Fund?.FundName ?? "Default Fund",
+                ProgramId: null,
+                ProgramCode: null,
+                ProgramName: null,
+                ProjectId: null,
+                ProjectCode: null,
+                ProjectName: null,
+                BudgetItemId: allocation.BudgetItemId,
+                ItemCode: allocation.BudgetItem.ItemCode,
+                AppropriationAmount: approvedAmount,
+                EncumberedAmount: outstandingEncumbrance,
+                PaidAmount: actualExpenditure,
+                AvailableAmount: available)
+        ];
     }
 
     public bool EvaluateAllowOverrun(bool? budgetItemAllowOverrun, bool? budgetAllowOverrun, bool budgetTypeAllowOverrun)
     {
-        // Priority: BudgetItem > Budget > BudgetType
         if (budgetItemAllowOverrun.HasValue)
             return budgetItemAllowOverrun.Value;
 
@@ -221,5 +145,29 @@ public class BudgetAvailabilityService : IBudgetAvailabilityService
                 : (true, null),
             _ => (true, null)
         };
+    }
+
+    private async Task<decimal> ComputeActualExpenditureAsync(int? accountId, int fiscalYearId)
+    {
+        if (!accountId.HasValue)
+            return 0;
+
+        return await _context.JournalEntryLines
+            .Where(l => l.AccountId == accountId.Value
+                && l.JournalEntry.FiscalYearId == fiscalYearId
+                && l.JournalEntry.EntryStatus == Domain.Accounting.Enums.EntryStatus.Posted
+                && l.JournalEntry.ReversalOfId == null)
+            .SumAsync(l => l.Debit - l.Credit);
+    }
+
+    private async Task<decimal> ComputeOutstandingEncumbranceAsync(int budgetItemId)
+    {
+        return await _context.EncumbranceLines
+            .Where(l => l.BudgetItemId == budgetItemId
+                && (l.Encumbrance.Status == EncumbranceStatus.Active
+                    || l.Encumbrance.Status == EncumbranceStatus.PartiallyReleased
+                    || l.Encumbrance.Status == EncumbranceStatus.PartiallyLiquidated)
+                && l.Encumbrance.ReversalOfId == null)
+            .SumAsync(l => l.Amount - l.LiquidatedAmount - l.CancelledAmount);
     }
 }

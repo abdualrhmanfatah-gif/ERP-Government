@@ -1,10 +1,51 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
-import { Page, Button, FilterBar, FilterSelect } from '@/components/ui';
-import { JournalGrid } from '@/components/AccountingJournalGrid';
+import { Page, Button, Badge, DataGrid, FilterBar, FilterSelect } from '@/components/ui';
 import { useJournalsList } from '../../hooks/useJournalsList';
-import { JournalType } from '../../../../web-api-client';
+import { JournalType, type JournalDto } from '../../../../web-api-client';
+import { activeStatusLabels } from '@/shared/constants/labels';
+
+const journalTypeLabels: Record<string, string> = {
+  General: 'عامة',
+  Purchase: 'مشتريات',
+  Sale: 'مبيعات',
+  Cash: 'نقدية',
+  Bank: 'بنكية',
+  Adjustment: 'تسوية',
+  Closing: 'إقفال',
+};
+
+const columns = [
+  { key: 'code', header: 'الرمز', accessorKey: 'code' as const, width: 120 },
+  { key: 'name', header: 'الاسم', accessorKey: 'name' as const, width: 200 },
+  {
+    key: 'type',
+    header: 'النوع',
+    accessorKey: 'type' as const,
+    width: 120,
+    cell: (row: JournalDto) => journalTypeLabels[row.type ?? ''] ?? row.type ?? '—',
+  },
+  { key: 'sequenceId', header: 'السلسلة', accessorKey: 'sequenceId' as const, width: 100, cell: (row: JournalDto) => row.sequenceId ?? '—' },
+  {
+    key: 'requireApprovalBeforePosting',
+    header: 'اشتراط الاعتماد',
+    accessorKey: 'requireApprovalBeforePosting' as const,
+    width: 120,
+    cell: (row: JournalDto) => row.requireApprovalBeforePosting ? 'نعم' : 'لا',
+  },
+  {
+    key: 'isActive',
+    header: 'نشط',
+    accessorKey: 'isActive' as const,
+    width: 80,
+    cell: (row: JournalDto) => (
+      <Badge variant={row.isActive ? 'success' : 'default'}>
+        {row.isActive ? 'نشط' : 'غير نشط'}
+      </Badge>
+    ),
+  },
+];
 
 const journalTypeOptions = [
   { value: '', label: 'الكل' },
@@ -19,8 +60,8 @@ const journalTypeOptions = [
 
 const activeOptions = [
   { value: '', label: 'الكل' },
-  { value: 'true', label: 'نشط' },
-  { value: 'false', label: 'غير نشط' },
+  { value: 'true', label: activeStatusLabels.active },
+  { value: 'false', label: activeStatusLabels.inactive },
 ];
 
 export function JournalsListPage() {
@@ -65,15 +106,16 @@ export function JournalsListPage() {
           />
         </FilterBar>
       }
-      loading={isLoading}
-      error={error ? 'فشل تحميل البيانات' : undefined}
-      onRetry={() => refetch()}
     >
-      <JournalGrid
+      <DataGrid
+        columns={columns}
         data={journals}
         loading={isLoading}
         error={error ? 'فشل تحميل البيانات' : undefined}
         onRetry={() => refetch()}
+        emptyMessage="لا توجد دفاتر"
+        rowKey={(row) => row.id ?? 0}
+        onRowClick={(row) => navigate(`/accounting/journals/${row.id}`)}
       />
     </Page>
   );

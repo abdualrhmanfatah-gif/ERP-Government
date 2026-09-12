@@ -13,19 +13,14 @@ import {
 import { availabilitySnapshotFilterSchema } from '../shared/schemas';
 import { ReportingAvailabilitySnapshotFilters } from '@/components/ReportingAvailabilitySnapshotFilters';
 import { ReportingAvailabilitySnapshotDetail } from '@/components/ReportingAvailabilitySnapshotDetail';
-import { Page } from '@/components/ui/Page';
-import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
-import { MoneyDisplay } from '@/components/ui/MoneyDisplay';
-import { Badge } from '@/components/ui/Badge';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { ErrorState } from '@/components/ui/ErrorState';
-import { Button } from '@/components/ui/Button';
+import { Page, DataGrid, MoneyDisplay, Badge, EmptyState, ErrorState, Button, Alert } from '@/components/ui';
+import type { DataGridColumn } from '@/components/ui/DataGrid';
 
-const controlStateColors: Record<string, string> = {
-  Normal: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  Warning: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-  Critical: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-  Frozen: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+const controlStateBadgeVariant: Record<string, 'success' | 'warning' | 'danger' | 'secondary'> = {
+  Normal: 'success',
+  Warning: 'warning',
+  Critical: 'danger',
+  Frozen: 'secondary',
 };
 
 const controlStateLabels: Record<string, string> = {
@@ -71,7 +66,7 @@ export default function AvailabilitySnapshotReportPage() {
       cell: (row) => {
         const state = row.controlState ?? 'Normal';
         return (
-          <Badge className={controlStateColors[state] ?? ''}>
+          <Badge variant={controlStateBadgeVariant[state] ?? 'secondary'}>
             {controlStateLabels[state] ?? state}
           </Badge>
         );
@@ -125,12 +120,9 @@ export default function AvailabilitySnapshotReportPage() {
       }
     >
       {isPartialData && (
-        <div
-          role="status"
-          className="mb-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200"
-        >
+        <Alert variant="warning">
           بيانات جزئية — الفترة الحالية جارية وقد تتغير الأرقام
-        </div>
+        </Alert>
       )}
       {isError ? (
         <ErrorState onRetry={() => refetch()} />

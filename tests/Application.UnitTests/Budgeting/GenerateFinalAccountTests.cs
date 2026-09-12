@@ -46,7 +46,7 @@ public class GenerateFinalAccountTests
         await _dbContext.SaveChangesAsync();
     }
 
-    private async Task SeedAppropriation(int id, int budgetItemId, decimal amount, AppropriationType type, int fyId, string itemCode)
+    private async Task SeedBudgetTransactionLine(int budgetItemId, decimal amount, TransactionDirection direction, BudgetTransactionType type, int fyId, string itemCode, int budgetTransactionId)
     {
         if (!_dbContext.Budgets.Any(b => b.Id == fyId))
         {
@@ -54,7 +54,7 @@ public class GenerateFinalAccountTests
             {
                 Id = fyId, FiscalYearId = fyId, BudgetNumber = $"B-{fyId}",
                 BudgetName = "Test", BudgetTypeId = 1, FundId = 1,
-                TotalAmount = 200000m, Status = Domain.Budgeting.Enums.BudgetStatus.Active,
+                Status = Domain.Budgeting.Enums.BudgetStatus.Active,
                 EffectiveFrom = new DateOnly(2026, 1, 1)
             });
         }
@@ -65,12 +65,26 @@ public class GenerateFinalAccountTests
                 Id = budgetItemId, BudgetId = fyId, ItemCode = itemCode, ItemName = itemCode
             });
         }
-        _dbContext.Appropriations.Add(new Appropriation
+        if (!_dbContext.BudgetTransactions.Any(bt => bt.Id == budgetTransactionId))
         {
-            Id = id, BudgetItemId = budgetItemId, Amount = amount,
-            AppropriationType = type, Status = AppropriationStatus.Active,
-            BudgetId = fyId, AppropriationNumber = $"APP-{id}",
-            DocumentType = "Test", DocumentId = 1
+            _dbContext.BudgetTransactions.Add(new BudgetTransaction
+            {
+                Id = budgetTransactionId,
+                TransactionNumber = $"BTR-{budgetTransactionId}",
+                BudgetId = fyId,
+                TransactionType = type,
+                TransactionDate = new DateOnly(2026, 6, 1),
+                Status = BudgetTransactionStatus.Posted,
+                PostedAt = DateTimeOffset.UtcNow,
+                PostedBy = "1"
+            });
+        }
+        _dbContext.BudgetTransactionLines.Add(new BudgetTransactionLine
+        {
+            BudgetTransactionId = budgetTransactionId,
+            BudgetItemId = budgetItemId,
+            Direction = direction,
+            Amount = amount
         });
         await _dbContext.SaveChangesAsync();
     }
@@ -81,7 +95,14 @@ public class GenerateFinalAccountTests
     public async Task GenerateFinalAccount_ValidRequest_ShouldCreateDraftStatus()
     {
         await SeedClosedFiscalYear(1, "FY2026");
-        await SeedAppropriation(1, 100, 50000m, AppropriationType.Original, 1, "ITEM-001");
+        await SeedBudgetTransactionLine(100, 50000m, TransactionDirection.Increase, BudgetTransactionType.InitialAppropriation, 1, "ITEM-001", 1);
+        _dbContext.YearClosingRuns.Add(new YearClosingRun
+        {
+            FiscalYearId = 1, StartedAt = DateTimeOffset.UtcNow, RunById = 1,
+            RunType = YearClosingRunType.Lapse, Status = YearClosingRunStatus.Completed,
+            LapsedAppropriationTotal = 0, LapsedEncumbranceTotal = 0
+        });
+        await _dbContext.SaveChangesAsync();
 
         var handler = new GenerateFinalAccountCommandHandler(_dbContext, _userMock.Object);
         var result = await handler.Handle(new GenerateFinalAccountCommand(1), CancellationToken.None);
@@ -97,14 +118,22 @@ public class GenerateFinalAccountTests
     public async Task GenerateFinalAccount_ShouldCreateFinalAccountLines()
     {
         await SeedClosedFiscalYear(1, "FY2026");
-        await SeedAppropriation(1, 100, 50000m, AppropriationType.Original, 1, "ITEM-001");
-        await SeedAppropriation(2, 100, 10000m, AppropriationType.Supplement, 1, "ITEM-001");
+        // Both transactions on same BudgetItemId=100 → 1 line in final account
+        await SeedBudgetTransactionLine(100, 50000m, TransactionDirection.Increase, BudgetTransactionType.InitialAppropriation, 1, "ITEM-001", 1);
+        await SeedBudgetTransactionLine(100, 10000m, TransactionDirection.Increase, BudgetTransactionType.Supplement, 1, "ITEM-001", 2);
+        _dbContext.YearClosingRuns.Add(new YearClosingRun
+        {
+            FiscalYearId = 1, StartedAt = DateTimeOffset.UtcNow, RunById = 1,
+            RunType = YearClosingRunType.Lapse, Status = YearClosingRunStatus.Completed,
+            LapsedAppropriationTotal = 0, LapsedEncumbranceTotal = 0
+        });
+        await _dbContext.SaveChangesAsync();
 
         var handler = new GenerateFinalAccountCommandHandler(_dbContext, _userMock.Object);
         var result = await handler.Handle(new GenerateFinalAccountCommand(1), CancellationToken.None);
 
         result.Succeeded.ShouldBeTrue();
-        result.Value!.LineCount.ShouldBe(1); // Both appropriations share BudgetItemId=100
+        result.Value!.LineCount.ShouldBe(1);
     }
 
     // ─── T042: Creates FinalAccountLines with correct budget-vs-actual ─
@@ -113,9 +142,16 @@ public class GenerateFinalAccountTests
     public async Task GenerateFinalAccount_ShouldComputeCorrectBudgetedAmount()
     {
         await SeedClosedFiscalYear(1, "FY2026");
-        await SeedAppropriation(1, 100, 80000m, AppropriationType.Original, 1, "ITEM-A");
-        await SeedAppropriation(2, 200, 45000m, AppropriationType.Original, 1, "ITEM-B");
-        await SeedAppropriation(3, 200, 5000m, AppropriationType.Reduction, 1, "ITEM-B");
+        await SeedBudgetTransactionLine(100, 80000m, TransactionDirection.Increase, BudgetTransactionType.InitialAppropriation, 1, "ITEM-A", 1);
+        await SeedBudgetTransactionLine(200, 45000m, TransactionDirection.Increase, BudgetTransactionType.InitialAppropriation, 1, "ITEM-B", 2);
+        await SeedBudgetTransactionLine(200, 5000m, TransactionDirection.Decrease, BudgetTransactionType.Reduction, 1, "ITEM-B", 3);
+        _dbContext.YearClosingRuns.Add(new YearClosingRun
+        {
+            FiscalYearId = 1, StartedAt = DateTimeOffset.UtcNow, RunById = 1,
+            RunType = YearClosingRunType.Lapse, Status = YearClosingRunStatus.Completed,
+            LapsedAppropriationTotal = 0, LapsedEncumbranceTotal = 0
+        });
+        await _dbContext.SaveChangesAsync();
 
         var handler = new GenerateFinalAccountCommandHandler(_dbContext, _userMock.Object);
         var result = await handler.Handle(new GenerateFinalAccountCommand(1), CancellationToken.None);

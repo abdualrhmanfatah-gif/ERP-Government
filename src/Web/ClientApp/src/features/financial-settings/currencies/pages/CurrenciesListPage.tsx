@@ -7,6 +7,7 @@ import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus, Eye } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { useCurrenciesList, useActivateCurrency, useDeactivateCurrency } from '../../hooks/useCurrencies';
+import { getActiveStatusLabel } from '@/shared/constants/labels';
 
 export default function CurrenciesListPage() {
   const navigate = useNavigate();
@@ -56,8 +57,8 @@ export default function CurrenciesListPage() {
     {
       header: 'الحالة',
       cell: (row) => canCreate
-        ? <Switch checked={row.isActive} onChange={() => handleToggle(row)} label={row.isActive ? 'نشط' : 'معطل'} />
-        : <StatusBadge variant={row.isActive ? 'active' : 'closed'}>{row.isActive ? 'نشط' : 'معطل'}</StatusBadge>,
+        ? <Switch checked={row.isActive} onChange={() => handleToggle(row)} label={getActiveStatusLabel(row.isActive)} />
+        : <StatusBadge variant={row.isActive ? 'active' : 'closed'}>{getActiveStatusLabel(row.isActive)}</StatusBadge>,
     },
     {
       header: 'إجراءات',

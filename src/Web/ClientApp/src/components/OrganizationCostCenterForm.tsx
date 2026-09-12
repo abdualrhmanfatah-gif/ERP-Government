@@ -54,7 +54,7 @@ export function CostCenterForm({ initialData, isEdit, onSubmit, serverError, id 
   };
 
   return (
-    <form id={id} onSubmit={handleSubmit} className="space-y-4" noValidate>
+    <form id={id} onSubmit={handleSubmit} className="space-y-4" noValidate aria-label="نموذج مركز التكلفة">
       {serverError && (
         <div role="alert" className="p-3 bg-[var(--color-error-container)] text-[var(--color-on-error-container)] rounded-lg text-sm">{serverError}</div>
       )}

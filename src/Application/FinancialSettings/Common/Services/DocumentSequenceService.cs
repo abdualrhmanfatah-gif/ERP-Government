@@ -10,18 +10,17 @@ public class DocumentSequenceService : IDocumentSequenceService
     private static readonly Dictionary<string, string> PrefixMap = new(StringComparer.OrdinalIgnoreCase)
     {
         ["Budget"] = "BGT",
-        ["Appropriation"] = "APR",
         ["Encumbrance"] = "ENC",
         ["PaymentOrder"] = "PO",
         ["PaymentExecution"] = "PE",
         ["AdvancePayment"] = "ADV",
         ["JournalEntry"] = "JRN",
         ["PurchaseRequest"] = "PRQ",
-        ["RequestForQuotation"] = "RFQ",
         ["Quotation"] = "QT",
         ["PurchaseOrder"] = "PO",
         ["RevenueReceipt"] = "REV",
         ["GoodsReceiptNote"] = "GRN",
+        ["SupplierInvoice"] = "SINV",
         ["StockTake"] = "STK",
         ["Asset"] = "AST",
         ["AssetDisposal"] = "DSP",
@@ -31,7 +30,8 @@ public class DocumentSequenceService : IDocumentSequenceService
         ["ReceiptVoucher"] = "DSL",
         ["DepositSlip"] = "DSL",
         ["DisbursementRequest"] = "DSB",
-        ["Payment"] = "PAY"
+        ["Payment"] = "PAY",
+        ["BudgetTransaction"] = "BTR"
     };
 
     public DocumentSequenceService(IApplicationDbContext context)

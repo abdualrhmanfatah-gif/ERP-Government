@@ -8,6 +8,7 @@ import { Plus, Pencil, Eye } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
 import { fundTypeLabels, fundCategoryLabels, FundType, FundCategory } from '../../shared/types';
 import type { FundDto } from '../../shared/types';
+import { activeStatusLabels, getActiveStatusLabel } from '@/shared/constants/labels';
 import { useFundsList, useCreateFund, useUpdateFund, useToggleFundActive } from '../hooks/useFunds';
 
 const fundTypeOptions = Object.entries(fundTypeLabels).map(([value, label]) => ({
@@ -21,8 +22,8 @@ const fundCategoryOptions = Object.entries(fundCategoryLabels).map(([value, labe
 }));
 
 const isActiveOptions = [
-  { value: 'true', label: 'نشط' },
-  { value: 'false', label: 'معطل' },
+  { value: 'true', label: activeStatusLabels.active },
+  { value: 'false', label: activeStatusLabels.disabled },
 ];
 
 export default function FundsListPage() {
@@ -101,7 +102,6 @@ export default function FundsListPage() {
       fundCategory: Number(form.get('fundCategory')) as FundCategory,
       legalAuthority: form.get('legalAuthority') as string,
       description: (form.get('description') as string) || undefined,
-      fiscalYearId: form.get('fiscalYearId') ? Number(form.get('fiscalYearId')) : undefined,
       defaultRevenueDebitAccountId: form.get('defaultRevenueDebitAccountId') ? Number(form.get('defaultRevenueDebitAccountId')) : undefined,
     };
 
@@ -129,8 +129,8 @@ export default function FundsListPage() {
     {
       header: 'الحالة',
       cell: (row) => canManage
-        ? <Switch checked={row.isActive} onChange={() => handleToggle(row)} label={row.isActive ? 'نشط' : 'معطل'} />
-        : <Badge variant={row.isActive ? 'success' : 'danger'}>{row.isActive ? 'نشط' : 'معطل'}</Badge>,
+        ? <Switch checked={row.isActive} onChange={() => handleToggle(row)} label={getActiveStatusLabel(row.isActive)} />
+        : <Badge variant={row.isActive ? 'success' : 'danger'}>{getActiveStatusLabel(row.isActive)}</Badge>,
     },
     {
       header: 'إجراءات',
@@ -147,7 +147,6 @@ export default function FundsListPage() {
     <Page
       title="صناديق الميزانية"
       description="إدارة صناديق الميزانية والبحث والتصفية"
-      loading={isLoading}
       actions={
         canManage ? (
           <Button onClick={handleCreate} icon={<Plus size={16} />} className="self-start sm:self-auto cursor-pointer shadow-sm hover:shadow transition-shadow">
@@ -182,7 +181,7 @@ export default function FundsListPage() {
           </Button>
         }
       >
-        <form id="fund-form" onSubmit={handleSubmit} className="space-y-4">
+        <form id="fund-form" onSubmit={handleSubmit} className="space-y-4" aria-label="نموذج الصندوق">
           <Input id="fundNumber" name="fundNumber" type="text" required defaultValue={editItem?.fundNumber} label="رقم الصندوق" />
           <Input id="fundName" name="fundName" type="text" required defaultValue={editItem?.fundName} label="اسم الصندوق" />
           <div className="grid grid-cols-2 gap-4">

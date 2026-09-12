@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
+import { Switch } from '@/components/ui/Switch';
 import type { SecurityRoleDto, CreateRoleCommand } from '@/features/security/rbac/types';
 
 const roleLevelOptions = [
@@ -41,7 +42,7 @@ export function RoleForm({ initialData, isEdit, onSubmit, serverError, loading }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" aria-label="نموذج الدور">
       {serverError && (
         <div role="alert" className="p-3 bg-[var(--color-error-container)] text-[var(--color-on-error-container)] rounded-lg text-sm">{serverError}</div>
       )}
@@ -95,16 +96,12 @@ export function RoleForm({ initialData, isEdit, onSubmit, serverError, loading }
         dir="ltr"
       />
 
-      <div className="flex items-center gap-2">
-        <input
-          id="requiresMfa"
-          type="checkbox"
-          checked={requiresMfa}
-          onChange={(e) => setRequiresMfa(e.target.checked)}
-          className="rounded-lg border-[var(--color-border-container)]"
-        />
-        <label htmlFor="requiresMfa" className="text-sm font-medium text-[var(--color-on-surface)]">يتطلب مصادقة ثنائية</label>
-      </div>
+      <Switch
+        id="requiresMfa"
+        label="يتطلب مصادقة ثنائية"
+        checked={requiresMfa}
+        onChange={setRequiresMfa}
+      />
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="submit" variant="primary" disabled={loading} loading={loading}>

@@ -92,59 +92,59 @@ public class PdfReportExporter : IReportExporter
             column.Item().Row(row =>
             {
                 // 1. العمود الأيمن (اسم الجهة والوزارة)
-                row.RelativeItem().Column(rightCol =>
+                row.RelativeItem(1.2f).Column(rightCol =>
                 {
                     rightCol.Spacing(2);
                     rightCol.Item().AlignCenter().Text(ReportBranding.GovernmentLine)
-                        .FontSize(13).Bold().FontColor(Colors.Black);
-                    
+                        .FontSize(11).Bold().FontColor(Colors.Black);
+
                     rightCol.Item().AlignCenter().Text("وزارة الداخلية")
-                        .FontSize(13).Bold().FontColor(Colors.Black);
+                        .FontSize(11).Bold().FontColor(Colors.Black);
 
                     if (!string.IsNullOrWhiteSpace(ReportBranding.OrganizationName))
                     {
                         rightCol.Item().AlignCenter().Text(ReportBranding.OrganizationName)
-                            .FontSize(13).Bold().FontColor(Colors.Black);
+                            .FontSize(10).Bold().FontColor(Colors.Black);
                     }
 
                     if (!string.IsNullOrWhiteSpace(ReportBranding.DepartmentName))
                     {
                         rightCol.Item().AlignCenter().Text(ReportBranding.DepartmentName)
-                            .FontSize(11).Bold().FontColor(Colors.Black);
+                            .FontSize(9).Bold().FontColor(Colors.Black);
                     }
                 });
 
                 // 2. العمود الأوسط (الشعار)
-                row.ConstantItem(200).Column(centerCol =>
+                row.RelativeItem(0.8f).Column(centerCol =>
                 {
                     if (ReportBranding.LogoPath is not null)
                     {
-                        centerCol.Item().AlignCenter().PaddingTop(2).Height(70).Image(ReportBranding.LogoPath).FitArea();
+                        centerCol.Item().AlignCenter().Height(50).Image(ReportBranding.LogoPath).FitArea();
                     }
                 });
 
                 // 3. العمود الأيسر (بيانات التوثيق)
-                row.RelativeItem().Column(leftCol =>
+                row.RelativeItem(1f).Column(leftCol =>
                 {
-                    leftCol.Item().AlignLeft().Width(180).Column(info =>
+                    leftCol.Item().AlignLeft().Column(info =>
                     {
-                        info.Spacing(6);
+                        info.Spacing(4);
 
                         info.Item().Row(r =>
                         {
-                            r.AutoItem().Text("التاريخ : ").FontSize(10).Bold();
-                            r.RelativeItem().AlignRight().Text($"{DateTime.Now:yyyy/MM/dd}م").FontSize(10).Bold();
+                            r.AutoItem().Text("التاريخ : ").FontSize(9).Bold();
+                            r.RelativeItem().AlignRight().Text($"{DateTime.Now:yyyy/MM/dd}م").FontSize(9).Bold();
                         });
 
                         info.Item().Row(r =>
                         {
-                            r.AutoItem().Text("الرقم : ").FontSize(10).Bold();
+                            r.AutoItem().Text("الرقم : ").FontSize(9).Bold();
                             r.RelativeItem().AlignBottom().PaddingBottom(2).BorderBottom(1).BorderColor(Colors.Black);
                         });
 
                         info.Item().Row(r =>
                         {
-                            r.AutoItem().Text("المرجع : ").FontSize(10).Bold();
+                            r.AutoItem().Text("المرجع : ").FontSize(9).Bold();
                             r.RelativeItem().AlignBottom().PaddingBottom(2).BorderBottom(1).BorderColor(Colors.Black);
                         });
                     });
@@ -152,21 +152,21 @@ public class PdfReportExporter : IReportExporter
             });
 
             // ── خطوط الفصل المزدوجة ──
-            column.Item().PaddingTop(8).Element(e => e.BorderBottom(1.5f).BorderColor(PrimaryAccentColor));
+            column.Item().PaddingTop(6).Element(e => e.BorderBottom(1.5f).BorderColor(PrimaryAccentColor));
             column.Item().PaddingTop(2).Element(e => e.BorderBottom(0.5f).BorderColor(PrimaryAccentColor));
 
             // ── عنوان التقرير والملاحظات ──
-            column.Item().PaddingTop(8).AlignCenter().Text(reportName)
-                .FontSize(15).Bold().FontColor(Colors.Black);
+            column.Item().PaddingTop(6).AlignCenter().Text(reportName)
+                .FontSize(13).Bold().FontColor(Colors.Black);
 
             column.Item().PaddingTop(2).AlignCenter()
                 .Text($"العملة: {result.Currency}  |  تاريخ الإنشاء: {result.GeneratedAt:yyyy-MM-dd HH:mm}")
-                .FontSize(9).FontColor(Colors.Grey.Darken2);
+                .FontSize(8.5f).FontColor(Colors.Grey.Darken2);
 
             if (!string.IsNullOrEmpty(result.DataWarning))
             {
                 column.Item().PaddingTop(2).AlignCenter()
-                    .Text(result.DataWarning).FontSize(9).Bold().FontColor(Colors.Orange.Darken2);
+                    .Text(result.DataWarning).FontSize(8.5f).Bold().FontColor(Colors.Orange.Darken2);
             }
         });
     }
@@ -178,16 +178,16 @@ public class PdfReportExporter : IReportExporter
             // صادر عن (يمين)
             row.RelativeItem().AlignRight()
                 .Text($"صادر عن: {ReportBranding.OrganizationName}")
-                .FontSize(8.5f).FontColor(Colors.Grey.Darken1);
+                .FontSize(8f).FontColor(Colors.Grey.Darken1);
 
             // رقم الصفحة (وسط)
-            row.ConstantItem(120).AlignCenter()
+            row.AutoItem().PaddingHorizontal(10).AlignCenter()
                 .Text(text =>
                 {
-                    text.Span("صفحة ").FontSize(8.5f).FontColor(Colors.Grey.Darken1);
-                    text.CurrentPageNumber().FontSize(8.5f).FontColor(Colors.Grey.Darken1);
-                    text.Span(" من ").FontSize(8.5f).FontColor(Colors.Grey.Darken1);
-                    text.TotalPages().FontSize(8.5f).FontColor(Colors.Grey.Darken1);
+                    text.Span("صفحة ").FontSize(8f).FontColor(Colors.Grey.Darken1);
+                    text.CurrentPageNumber().FontSize(8f).FontColor(Colors.Grey.Darken1);
+                    text.Span(" من ").FontSize(8f).FontColor(Colors.Grey.Darken1);
+                    text.TotalPages().FontSize(8f).FontColor(Colors.Grey.Darken1);
                 });
 
             // مساحة متوازنة (يسار)

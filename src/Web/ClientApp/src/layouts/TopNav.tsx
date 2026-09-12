@@ -28,7 +28,7 @@ export function TopNav() {
   }, []);
 
   return (
-    <nav aria-label="التنقل الرئيسي" ref={navRef} className="hidden lg:flex items-center gap-1">
+    <nav aria-label="التنقل الرئيسي" ref={navRef} className="hidden lg:flex items-center gap-0.5 text-xs">
       {moduleGroups.map((group) => {
         const open = openGroup === group.label;
         const active = group.items.some((i) => location.pathname.startsWith(i.path));

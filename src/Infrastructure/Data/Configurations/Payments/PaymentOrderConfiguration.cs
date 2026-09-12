@@ -35,9 +35,6 @@ public class PaymentOrderConfiguration : IEntityTypeConfiguration<PaymentOrder>
             .HasMaxLength(200)
             .IsRequired();
 
-        builder.Property(e => e.BeneficiaryIban)
-            .HasMaxLength(50);
-
         builder.Property(e => e.BeneficiaryAccountNumber)
             .HasMaxLength(100);
 
@@ -48,16 +45,6 @@ public class PaymentOrderConfiguration : IEntityTypeConfiguration<PaymentOrder>
             .HasMaxLength(20)
             .IsRequired();
 
-        builder.Property(e => e.BudgetCheckStatus)
-            .HasMaxLength(20)
-            .IsRequired();
-
-        builder.Property(e => e.TreasuryStatus)
-            .HasMaxLength(20);
-
-        builder.Property(e => e.TreasuryReference)
-            .HasMaxLength(100);
-
         builder.Property(e => e.Notes)
             .HasMaxLength(1000);
 
@@ -67,19 +54,21 @@ public class PaymentOrderConfiguration : IEntityTypeConfiguration<PaymentOrder>
         builder.HasIndex(e => e.PaymentOrderNumber)
             .IsUnique();
 
-        builder.HasIndex(e => e.VendorId);
+        // ADR-001 D-2: DisbursementRequestId UNIQUE
+        builder.HasIndex(e => e.DisbursementRequestId)
+            .IsUnique();
 
         builder.HasIndex(e => e.FundId);
 
         builder.HasIndex(e => e.FiscalYearId);
 
-        builder.HasIndex(e => e.AppropriationId);
+        builder.HasIndex(e => e.BudgetItemAllocationId);
 
         builder.HasIndex(e => e.BudgetClassificationId);
 
         builder.HasIndex(e => e.CostCenterId);
 
-        builder.HasIndex(e => e.ProjectId);
+        builder.HasIndex(e => e.AccountId);
 
         builder.HasIndex(e => e.PurchaseOrderId);
 
@@ -90,12 +79,15 @@ public class PaymentOrderConfiguration : IEntityTypeConfiguration<PaymentOrder>
         builder.HasIndex(e => e.BankAccountId);
 
         builder.Property(e => e.PaymentMethod)
-            .HasDefaultValue(PaymentMethod.Other)
+            .HasDefaultValue(PaymentMethod.Cash)
             .HasSentinel(null);
 
         builder.HasIndex(e => e.JournalEntryId);
 
-        builder.HasIndex(e => e.AccountingEventId);
+        builder.HasOne(e => e.DisbursementRequest)
+            .WithMany()
+            .HasForeignKey(e => e.DisbursementRequestId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Ignore(e => e.DomainEvents);
     }

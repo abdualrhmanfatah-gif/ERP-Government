@@ -60,9 +60,9 @@ public class FinalAccounts : IEndpointGroup
                 l.DimensionId,
                 l.DimensionCode,
                 l.DimensionName,
-                l.BudgetedAmount,
+                l.OriginalBudgetAmount,
                 l.ActualAmount,
-                l.Variance)).ToList()));
+                l.VarianceAmount)).ToList()));
     }
 }
 
@@ -85,12 +85,12 @@ public record FinalAccountResponse(
 
 public record FinalAccountLineResponse(
     FinalAccountLineDimension Dimension,
-    int DimensionId,
+    int? DimensionId,
     string DimensionCode,
     string DimensionName,
-    decimal BudgetedAmount,
+    decimal OriginalBudgetAmount,
     decimal ActualAmount,
-    decimal Variance);
+    decimal VarianceAmount);
 
 internal static class FinalAccountMappingExtensions
 {

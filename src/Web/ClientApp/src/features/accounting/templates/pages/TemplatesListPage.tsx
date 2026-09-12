@@ -1,11 +1,40 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
-import { Page, Button, FilterBar, FilterSelect } from '@/components/ui';
-import { TemplateGrid } from '@/components/AccountingTemplateGrid';
+import { Page, Button, Badge, DataGrid, FilterBar, FilterSelect } from '@/components/ui';
 import { useTemplatesList } from '../../hooks/useTemplatesList';
 import { useJournalsList } from '../../hooks/useJournalsList';
-import { JournalEntryTemplateType } from '../../../../web-api-client';
+import { JournalEntryTemplateType, type JournalEntryTemplateDto } from '../../../../web-api-client';
+import { activeStatusLabels } from '@/shared/constants/labels';
+
+const templateTypeLabels: Record<string, string> = {
+  Standard: 'قياسية',
+  Recurring: 'دورية',
+  Adjustment: 'تسوية',
+};
+
+const columns = [
+  { key: 'templateName', header: 'اسم القالب', accessorKey: 'templateName' as const, width: 200 },
+  { key: 'journalName', header: 'الدفتر', accessorKey: 'journalName' as const, width: 150 },
+  {
+    key: 'templateType',
+    header: 'النوع',
+    accessorKey: 'templateType' as const,
+    width: 120,
+    cell: (row: JournalEntryTemplateDto) => templateTypeLabels[row.templateType ?? ''] ?? row.templateType ?? '—',
+  },
+  {
+    key: 'isActive',
+    header: 'نشط',
+    accessorKey: 'isActive' as const,
+    width: 80,
+    cell: (row: JournalEntryTemplateDto) => (
+      <Badge variant={row.isActive ? 'success' : 'default'}>
+        {row.isActive ? 'نشط' : 'غير نشط'}
+      </Badge>
+    ),
+  },
+];
 
 const templateTypeOptions = [
   { value: '', label: 'الكل' },
@@ -16,8 +45,8 @@ const templateTypeOptions = [
 
 const activeOptions = [
   { value: '', label: 'الكل' },
-  { value: 'true', label: 'نشط' },
-  { value: 'false', label: 'غير نشط' },
+  { value: 'true', label: activeStatusLabels.active },
+  { value: 'false', label: activeStatusLabels.inactive },
 ];
 
 export function TemplatesListPage() {
@@ -75,15 +104,16 @@ export function TemplatesListPage() {
           />
         </FilterBar>
       }
-      loading={isLoading}
-      error={error ? 'فشل تحميل البيانات' : undefined}
-      onRetry={() => refetch()}
     >
-      <TemplateGrid
+      <DataGrid
+        columns={columns}
         data={templates}
         loading={isLoading}
         error={error ? 'فشل تحميل البيانات' : undefined}
         onRetry={() => refetch()}
+        emptyMessage="لا توجد قوالب"
+        rowKey={(row) => row.id ?? 0}
+        onRowClick={(row) => navigate(`/accounting/templates/${row.id}`)}
       />
     </Page>
   );

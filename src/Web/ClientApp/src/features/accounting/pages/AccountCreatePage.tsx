@@ -4,7 +4,7 @@ import { AccountForm } from '@/components/AccountingAccountForm';
 import { useCreateAccount } from '../hooks/useCreateAccount';
 import { useAccountGroups } from '../hooks/useAccountGroups';
 import { useAccountsList } from '../hooks/useAccountsList';
-import { showToast } from '@/components/ui/Toast';
+import { notify } from '@/features/notifications/notify';
 
 export function AccountCreatePage() {
   const navigate = useNavigate();
@@ -15,10 +15,10 @@ export function AccountCreatePage() {
   const handleSubmit = async (data: Record<string, unknown>) => {
     try {
       await mutateAsync(data as Parameters<typeof mutateAsync>[0]);
-      showToast('success', 'تم إنشاء الحساب بنجاح');
+      notify({ type: 'success', title: 'تم إنشاء الحساب بنجاح' });
       navigate('/accounting/accounts');
     } catch {
-      showToast('error', 'فشل إنشاء الحساب');
+      notify({ type: 'error', title: 'فشل إنشاء الحساب' });
     }
   };
 

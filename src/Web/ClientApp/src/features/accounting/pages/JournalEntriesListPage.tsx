@@ -7,16 +7,8 @@ import type { JournalEntryDto } from '@/web-api-client';
 import { Button, Card, Input, Badge, Page } from '@/components/ui';
 import { Download, FileText } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
-
-const statusFilters = [
-  { key: '', label: 'الكل' },
-  { key: 'Draft', label: 'مسودة' },
-  { key: 'Submitted', label: 'مرسل للمراجعة' },
-  { key: 'Approved', label: 'موافق عليه' },
-  { key: 'Posted', label: 'مسجل' },
-  { key: 'Reversed', label: 'معكوس' },
-  { key: 'Cancelled', label: 'ملغى' },
-];
+import { statusFilters } from '../shared/types';
+import { downloadBlobExport, buildExportUrl } from '@/shared/utils/download';
 
 export function JournalEntriesListPage() {
   const navigate = useNavigate();
@@ -34,20 +26,11 @@ export function JournalEntriesListPage() {
 
   const handleExportEntry = useCallback(async (entry: JournalEntryDto, format: 'xlsx' | 'pdf') => {
     try {
-      const qs = new URLSearchParams();
-      qs.set('format', format);
-      if (entry.id) qs.set('entryId', String(entry.id));
-      const response = await fetch(`/api/JournalEntries/export?${qs.toString()}`);
-      if (!response.ok) throw new Error('Export failed');
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `JournalEntry-${entry.entryNumber ?? entry.id}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      const url = buildExportUrl('/api/JournalEntries/export', {
+        format,
+        entryId: entry.id,
+      });
+      await downloadBlobExport(url, `JournalEntry-${entry.entryNumber ?? entry.id}.${format}`);
       notify({ type: 'success', title: 'تم تصدير القيد بنجاح' });
     } catch {
       notify({ type: 'error', title: 'فشل تصدير القيد' });
@@ -57,20 +40,11 @@ export function JournalEntriesListPage() {
   const handleExportAll = useCallback(async (format: 'xlsx' | 'pdf') => {
     setExportingAll(true);
     try {
-      const qs = new URLSearchParams();
-      qs.set('format', format);
-      if (statusFilter) qs.set('status', statusFilter);
-      const response = await fetch(`/api/JournalEntries/export?${qs.toString()}`);
-      if (!response.ok) throw new Error('Export failed');
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `JournalEntries-${new Date().toISOString().slice(0, 10)}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      const url = buildExportUrl('/api/JournalEntries/export', {
+        format,
+        status: statusFilter || undefined,
+      });
+      await downloadBlobExport(url, `JournalEntries-${new Date().toISOString().slice(0, 10)}.${format}`);
       notify({ type: 'success', title: 'تم تصدير القيود بنجاح' });
     } catch {
       notify({ type: 'error', title: 'فشل تصدير القيود' });

@@ -1,3 +1,5 @@
+import { Page } from '@/components/ui';
+
 export default function PaymentSuccessPage() {
-  return <div><h1>تم التسجيل بنجاح</h1></div>;
+  return <Page title="تم التسجيل بنجاح" />;
 }

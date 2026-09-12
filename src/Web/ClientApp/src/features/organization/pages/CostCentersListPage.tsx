@@ -1,10 +1,11 @@
 import { Plus, Pencil, Trash2 } from 'lucide-react';
-import { Page, DataGrid, Button } from '@/components/ui';
+import { Page, DataGrid, Button, Dialog } from '@/components/ui';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { CostCenterDialog } from '@/components/OrganizationCostCenterDialog';
+import { CostCenterForm } from '@/components/OrganizationCostCenterForm';
 import { useCostCenters, useCostCenter, useCreateCostCenter, useUpdateCostCenter, useDeleteCostCenter } from '../hooks';
 import { useState } from 'react';
+import { getActiveStatusLabel } from '@/shared/constants/labels';
 import { notify } from '@/features/notifications/notify';
 import type { CreateCostCenterCommand } from '../types';
 
@@ -89,7 +90,7 @@ export function CostCentersListPage() {
           )},
           { key: 'isActive', header: 'الحالة', width: 100, render: (r) => (
             <StatusBadge variant={r.isActive ? 'active' : 'draft'}>
-              {r.isActive ? 'نشط' : 'غير نشط'}
+              {getActiveStatusLabel(r.isActive)}
             </StatusBadge>
           )},
           { key: 'actions', header: 'الإجراءات', width: 100, render: (r) => (
@@ -112,18 +113,33 @@ export function CostCentersListPage() {
         onRowClick={(r) => openEditDialog(r.id)}
       />
       
-      <CostCenterDialog
+      <Dialog
         open={dialogOpen}
         onClose={() => {
           setDialogOpen(false);
           setEditingId(null);
         }}
-        initialData={editingId ? editingCostCenter : undefined}
-        isEdit={!!editingId}
-        onSubmit={editingId ? handleUpdate : handleCreate}
-        serverError={createMutation.error?.message || updateMutation.error?.message}
-        loading={createMutation.isPending || updateMutation.isPending || isLoadingEdit}
-      />
+        title={editingId ? 'تعديل مركز التكلفة' : 'إضافة مركز تكلفة جديد'}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => { setDialogOpen(false); setEditingId(null); }} disabled={createMutation.isPending || updateMutation.isPending || isLoadingEdit}>
+              إلغاء
+            </Button>
+            <Button type="submit" variant="primary" loading={createMutation.isPending || updateMutation.isPending || isLoadingEdit} form="cost-center-form">
+              {editingId ? 'تحديث' : 'إنشاء'}
+            </Button>
+          </>
+        }
+      >
+        <CostCenterForm
+          id="cost-center-form"
+          initialData={editingId ? editingCostCenter : undefined}
+          isEdit={!!editingId}
+          onSubmit={editingId ? handleUpdate : handleCreate}
+          serverError={createMutation.error?.message || updateMutation.error?.message}
+          loading={createMutation.isPending || updateMutation.isPending || isLoadingEdit}
+        />
+      </Dialog>
       
       <ConfirmDialog
         open={!!deleteTarget}

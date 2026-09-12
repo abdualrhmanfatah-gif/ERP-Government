@@ -39,5 +39,6 @@ public static class DependencyInjection
         builder.Services.AddScoped<IBudgetAvailabilityService, BudgetAvailabilityService>();
         builder.Services.AddScoped<PostingRuleMatcher>();
         builder.Services.AddScoped<JournalEntryGenerator>();
+        builder.Services.AddScoped<PostingPipelineHandler>();
     }
 }

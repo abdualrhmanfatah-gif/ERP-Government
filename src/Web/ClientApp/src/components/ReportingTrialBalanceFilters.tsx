@@ -1,5 +1,5 @@
+import { FilterBar } from '@/components/ui/FilterBar';
 import { FilterSelect } from '@/components/ui/FilterSelect';
-import { Button } from '@/components/ui/Button';
 import type { FiscalYearDto, FiscalPeriodDto } from '@/web-api-client';
 import type { TrialBalanceFilters } from '@/features/reporting/trial-balance-report/shared/types';
 
@@ -29,7 +29,10 @@ export function ReportingTrialBalanceFilters({
   const hasFilters = value.fiscalPeriodId;
 
   return (
-    <div className="flex gap-2 items-center flex-wrap">
+    <FilterBar
+      hasFilters={hasFilters}
+      onClear={() => onChange({ fiscalYearId: value.fiscalYearId })}
+    >
       <FilterSelect
         value={value.fiscalYearId ? String(value.fiscalYearId) : ''}
         onChange={(v) => onChange({ ...value, fiscalYearId: v ? Number(v) : undefined })}
@@ -44,17 +47,6 @@ export function ReportingTrialBalanceFilters({
         placeholder="الفترة"
         label="الفترة"
       />
-      {hasFilters && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() =>
-            onChange({ fiscalYearId: value.fiscalYearId })
-          }
-        >
-          مسح الفلاتر
-        </Button>
-      )}
-    </div>
+    </FilterBar>
   );
 }
