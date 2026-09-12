@@ -86,13 +86,6 @@ export const PERMISSIONS = {
     Approve: 'PurchaseRequests.Approve',
     Reject: 'PurchaseRequests.Reject',
   },
-  RFQ: {
-    View: 'RFQ.View',
-    Create: 'RFQ.Create',
-    Publish: 'RFQ.Publish',
-    Complete: 'RFQ.Complete',
-    Cancel: 'RFQ.Cancel',
-  },
   Quotations: {
     View: 'Quotations.View',
     Create: 'Quotations.Create',
@@ -102,7 +95,9 @@ export const PERMISSIONS = {
     Create: 'PurchaseOrders.Create',
     Submit: 'PurchaseOrders.Submit',
     Approve: 'PurchaseOrders.Approve',
+    Issue: 'PurchaseOrders.Issue',
     Cancel: 'PurchaseOrders.Cancel',
+    Close: 'PurchaseOrders.Close',
   },
   Vendors: {
     View: 'Suppliers.View',
@@ -189,11 +184,7 @@ export const INVENTORY_PERMISSIONS = {
     Create: 'Locations.Create',
     Update: 'Locations.Update',
   },
-  GoodsReceiptNotes: {
-    View: 'GoodsReceiptNotes.View',
-    Create: 'GoodsReceiptNotes.Create',
-    Approve: 'GoodsReceiptNotes.Approve',
-  },
+
   StockTakes: {
     View: 'StockTakes.View',
     Create: 'StockTakes.Create',
@@ -282,6 +273,17 @@ export const BUDGET_PERMISSIONS = {
     Cancel: 'Encumbrances.Cancel',
     Reverse: 'Encumbrances.Reverse',
   },
+  BudgetTransactions: {
+    View: 'BudgetTransactions.View',
+    Create: 'BudgetTransactions.Create',
+    Update: 'BudgetTransactions.Update',
+    Delete: 'BudgetTransactions.Delete',
+    Submit: 'BudgetTransactions.Submit',
+    Approve: 'BudgetTransactions.Approve',
+    Post: 'BudgetTransactions.Post',
+    Cancel: 'BudgetTransactions.Cancel',
+    Reverse: 'BudgetTransactions.Reverse',
+  },
 } as const;
 
 // ─── Revenue / Treasury (TRE-01) ───────────────────────────────────
@@ -299,6 +301,37 @@ export const RECEIPT_VOUCHER_PERMISSIONS = {
 export type TreasuryPermission =
   | typeof RECEIPT_VOUCHER_PERMISSIONS.ReceiptVouchers[keyof typeof RECEIPT_VOUCHER_PERMISSIONS.ReceiptVouchers];
 
+// ─── Procurement (PROC) ─────────────────────────────────────────────
+
+export const PROCUREMENT_PERMISSIONS = {
+  PurchaseRequests: {
+    View: 'PurchaseRequests.View',
+    Create: 'PurchaseRequests.Create',
+    Update: 'PurchaseRequests.Update',
+    Submit: 'PurchaseRequests.Submit',
+    Approve: 'PurchaseRequests.Approve',
+    Cancel: 'PurchaseRequests.Cancel',
+  },
+  GoodsReceipts: {
+    View: 'GoodsReceipts.View',
+    Create: 'GoodsReceipts.Create',
+    Confirm: 'GoodsReceipts.Confirm',
+    Reject: 'GoodsReceipts.Reject',
+  },
+  SupplierInvoices: {
+    View: 'SupplierInvoices.View',
+    Create: 'SupplierInvoices.Create',
+    Submit: 'SupplierInvoices.Submit',
+    Match: 'SupplierInvoices.Match',
+    Cancel: 'SupplierInvoices.Cancel',
+  },
+} as const;
+
+export type ProcurementPermission =
+  | typeof PROCUREMENT_PERMISSIONS.PurchaseRequests[keyof typeof PROCUREMENT_PERMISSIONS.PurchaseRequests]
+  | typeof PROCUREMENT_PERMISSIONS.GoodsReceipts[keyof typeof PROCUREMENT_PERMISSIONS.GoodsReceipts]
+  | typeof PROCUREMENT_PERMISSIONS.SupplierInvoices[keyof typeof PROCUREMENT_PERMISSIONS.SupplierInvoices];
+
 export type BudgetPermission =
   | typeof BUDGET_PERMISSIONS.BudgetTypes[keyof typeof BUDGET_PERMISSIONS.BudgetTypes]
   | typeof BUDGET_PERMISSIONS.Funds[keyof typeof BUDGET_PERMISSIONS.Funds]
@@ -306,7 +339,8 @@ export type BudgetPermission =
   | typeof BUDGET_PERMISSIONS.Budgets[keyof typeof BUDGET_PERMISSIONS.Budgets]
   | typeof BUDGET_PERMISSIONS.BudgetItems[keyof typeof BUDGET_PERMISSIONS.BudgetItems]
   | typeof BUDGET_PERMISSIONS.Appropriations[keyof typeof BUDGET_PERMISSIONS.Appropriations]
-  | typeof BUDGET_PERMISSIONS.Encumbrances[keyof typeof BUDGET_PERMISSIONS.Encumbrances];
+  | typeof BUDGET_PERMISSIONS.Encumbrances[keyof typeof BUDGET_PERMISSIONS.Encumbrances]
+  | typeof BUDGET_PERMISSIONS.BudgetTransactions[keyof typeof BUDGET_PERMISSIONS.BudgetTransactions];
 
 export type InventoryPermission =
   | typeof INVENTORY_PERMISSIONS.Items[keyof typeof INVENTORY_PERMISSIONS.Items]
@@ -314,6 +348,5 @@ export type InventoryPermission =
   | typeof INVENTORY_PERMISSIONS.Units[keyof typeof INVENTORY_PERMISSIONS.Units]
   | typeof INVENTORY_PERMISSIONS.Warehouses[keyof typeof INVENTORY_PERMISSIONS.Warehouses]
   | typeof INVENTORY_PERMISSIONS.Locations[keyof typeof INVENTORY_PERMISSIONS.Locations]
-  | typeof INVENTORY_PERMISSIONS.GoodsReceiptNotes[keyof typeof INVENTORY_PERMISSIONS.GoodsReceiptNotes]
   | typeof INVENTORY_PERMISSIONS.StockTakes[keyof typeof INVENTORY_PERMISSIONS.StockTakes]
   | typeof INVENTORY_PERMISSIONS.StockTransactions[keyof typeof INVENTORY_PERMISSIONS.StockTransactions];

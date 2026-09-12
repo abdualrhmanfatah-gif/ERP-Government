@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Home } from '../components/Home';
+import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
 import { LoginPage } from '../features/auth/LoginPage';
 import { RegisterPage } from '../features/auth/RegisterPage';
 import { AccountsListPage } from '../features/accounting/pages/AccountsListPage';
@@ -49,6 +49,14 @@ import ExchangeRateCreatePage from '../features/financial-settings/exchange-rate
 import ClosingEntriesListPage from '../features/financial-settings/closing-entries/pages/ClosingEntriesListPage';
 import ClosingEntryDetailPage from '../features/financial-settings/closing-entries/pages/ClosingEntryDetailPage';
 
+import ItemsListPage from '../features/inventory/items/pages/ItemsListPage';
+import ItemCreatePage from '../features/inventory/items/pages/ItemCreatePage';
+import ItemDetailPage from '../features/inventory/items/pages/ItemDetailPage';
+import ItemEditPage from '../features/inventory/items/pages/ItemEditPage';
+import ItemCategoriesListPage from '../features/inventory/item-categories/pages/ItemCategoriesListPage';
+import UnitsListPage from '../features/inventory/units/pages/UnitsListPage';
+import WarehousesListPage from '../features/inventory/warehouses/pages/WarehousesListPage';
+
 import BudgetTypesListPage from '../features/budgeting/budget-types/pages/BudgetTypesListPage';
 import FundsListPage from '../features/budgeting/funds/pages/FundsListPage';
 import FundDetailPage from '../features/budgeting/funds/pages/FundDetailPage';
@@ -60,9 +68,7 @@ import BudgetsListPage from '../features/budgeting/budgets/pages/BudgetsListPage
 import { ReceiptVouchersListPage, CreateReceiptVoucherPage, ReceiptVoucherDetailPage, DepositSlipsListPage, CreateDepositSlipPage, DepositSlipDetailPage, MonthlyStatementPage } from '../features/treasury';
 import ChecksListPage from '../features/treasury/checks/pages/ChecksListPage';import BudgetDetailPage from '../features/budgeting/budgets/pages/BudgetDetailPage';
 import BudgetCreatePage from '../features/budgeting/budgets/pages/BudgetCreatePage';
-import AppropriationsListPage from '../features/budgeting/appropriations/pages/AppropriationsListPage';
-import AppropriationCreatePage from '../features/budgeting/appropriations/pages/AppropriationCreatePage';
-import AppropriationDetailPage from '../features/budgeting/appropriations/pages/AppropriationDetailPage';
+
 import EncumbrancesListPage from '../features/budgeting/encumbrances/pages/EncumbrancesListPage';
 import EncumbranceCreatePage from '../features/budgeting/encumbrances/pages/EncumbranceCreatePage';
 import { RecurringEntriesListPage } from '../features/accounting/recurring-entries';
@@ -88,6 +94,26 @@ import IncomeStatementReportPage from '../features/reporting/financial-statement
 import CashFlowStatementReportPage from '../features/reporting/financial-statements/pages/CashFlowStatementReportPage';
 import GeneralLedgerReportPage from '../features/reporting/financial-statements/pages/GeneralLedgerReportPage';
 
+import ProcurementDashboardPage from '../features/procurement/pages/ProcurementDashboardPage';
+import PurchaseRequestsListPage from '../features/procurement/purchase-requests/pages/PurchaseRequestsListPage';
+import PurchaseRequestDetailPage from '../features/procurement/purchase-requests/pages/PurchaseRequestDetailPage';
+import PurchaseRequestCreatePage from '../features/procurement/purchase-requests/pages/PurchaseRequestCreatePage';
+import PurchaseRequestEditPage from '../features/procurement/purchase-requests/pages/PurchaseRequestEditPage';
+import QuotationsListPage from '../features/procurement/quotations/pages/QuotationsListPage';
+import QuotationCreatePage from '../features/procurement/quotations/pages/QuotationCreatePage';
+import QuotationDetailPage from '../features/procurement/quotations/pages/QuotationDetailPage';
+import QuotationEditPage from '../features/procurement/quotations/pages/QuotationEditPage';
+import PurchaseOrdersListPage from '../features/procurement/purchase-orders/pages/PurchaseOrdersListPage';
+import PurchaseOrderCreatePage from '../features/procurement/purchase-orders/pages/PurchaseOrderCreatePage';
+import PurchaseOrderDetailPage from '../features/procurement/purchase-orders/pages/PurchaseOrderDetailPage';
+import PurchaseOrderEditPage from '../features/procurement/purchase-orders/pages/PurchaseOrderEditPage';
+import GRNsListPage from '../features/procurement/goods-receipt-notes/pages/GRNsListPage';
+import GRNCreatePage from '../features/procurement/goods-receipt-notes/pages/GRNCreatePage';
+import GRNDetailPage from '../features/procurement/goods-receipt-notes/pages/GRNDetailPage';
+import SupplierInvoicesListPage from '../features/procurement/supplier-invoices/pages/SupplierInvoicesListPage';
+import SupplierInvoiceCreatePage from '../features/procurement/supplier-invoices/pages/SupplierInvoiceCreatePage';
+import SupplierInvoiceDetailPage from '../features/procurement/supplier-invoices/pages/SupplierInvoiceDetailPage';
+
 export interface RouteConfig {
   path: string;
   element: ReactNode;
@@ -100,7 +126,7 @@ export interface RouteConfig {
 export const AppRoutes: RouteConfig[] = [
   {
     path: '/',
-    element: <Home />,
+    element: <DashboardPage />,
     label: 'الرئيسية',
     protected: true,
   },
@@ -323,8 +349,121 @@ export const AppRoutes: RouteConfig[] = [
     label: 'تعديل المشروع',
     protected: true,
   },
-  // Procurement — Purchase Orders
- 
+  // Procurement
+  {
+    path: '/procurement/dashboard',
+    element: <ProcurementDashboardPage />,
+    label: 'لوحة المشتريات',
+    protected: true,
+  },
+  {
+    path: '/procurement/purchase-requests',
+    element: <PurchaseRequestsListPage />,
+    label: 'طلبات الشراء',
+    protected: true,
+  },
+  {
+    path: '/procurement/purchase-requests/create',
+    element: <PurchaseRequestCreatePage />,
+    label: 'طلب شراء جديد',
+    protected: true,
+  },
+  {
+    path: '/procurement/purchase-requests/:id/edit',
+    element: <PurchaseRequestEditPage />,
+    label: 'تعديل طلب الشراء',
+    protected: true,
+  },
+  {
+    path: '/procurement/purchase-requests/:id',
+    element: <PurchaseRequestDetailPage />,
+    label: 'تفاصيل طلب الشراء',
+    protected: true,
+  },
+  {
+    path: '/procurement/quotations',
+    element: <QuotationsListPage />,
+    label: 'عروض الأسعار',
+    protected: true,
+  },
+  {
+    path: '/procurement/quotations/create',
+    element: <QuotationCreatePage />,
+    label: 'عرض سعر جديد',
+    protected: true,
+  },
+  {
+    path: '/procurement/quotations/:id',
+    element: <QuotationDetailPage />,
+    label: 'تفاصيل عرض السعر',
+    protected: true,
+  },
+  {
+    path: '/procurement/quotations/:id/edit',
+    element: <QuotationEditPage />,
+    label: 'تعديل عرض السعر',
+    protected: true,
+  },
+  {
+    path: '/procurement/purchase-orders',
+    element: <PurchaseOrdersListPage />,
+    label: 'أوامر الشراء',
+    protected: true,
+  },
+  {
+    path: '/procurement/purchase-orders/create',
+    element: <PurchaseOrderCreatePage />,
+    label: 'أمر شراء جديد',
+    protected: true,
+  },
+  {
+    path: '/procurement/purchase-orders/:id',
+    element: <PurchaseOrderDetailPage />,
+    label: 'تفاصيل أمر الشراء',
+    protected: true,
+  },
+  {
+    path: '/procurement/purchase-orders/:id/edit',
+    element: <PurchaseOrderEditPage />,
+    label: 'تعديل أمر الشراء',
+    protected: true,
+  },
+  {
+    path: '/procurement/goods-receipt-notes',
+    element: <GRNsListPage />,
+    label: 'سندات استلام البضاعة',
+    protected: true,
+  },
+  {
+    path: '/procurement/goods-receipt-notes/create',
+    element: <GRNCreatePage />,
+    label: 'إنشاء باردة استلام',
+    protected: true,
+  },
+  {
+    path: '/procurement/goods-receipt-notes/:id',
+    element: <GRNDetailPage />,
+    label: 'تفاصيل باردة الاستلام',
+    protected: true,
+  },
+  {
+    path: '/procurement/supplier-invoices',
+    element: <SupplierInvoicesListPage />,
+    label: 'فواتير الموردين',
+    protected: true,
+  },
+  {
+    path: '/procurement/supplier-invoices/create',
+    element: <SupplierInvoiceCreatePage />,
+    label: 'فاتورة مورد جديدة',
+    protected: true,
+  },
+  {
+    path: '/procurement/supplier-invoices/:id',
+    element: <SupplierInvoiceDetailPage />,
+    label: 'تفاصيل فاتورة المورد',
+    protected: true,
+  },
 
   // Assets — Asset Register
   // Account Groups (US1-US5)
@@ -384,25 +523,7 @@ export const AppRoutes: RouteConfig[] = [
     label: 'تفاصيل الموازنة',
     protected: true,
   },
-  // Budgeting — Appropriations
-  {
-    path: '/budgeting/appropriations',
-    element: <AppropriationsListPage />,
-    label: 'التخصيصات',
-    protected: true,
-  },
-  {
-    path: '/budgeting/appropriations/create',
-    element: <AppropriationCreatePage />,
-    label: 'تخصيص جديد',
-    protected: true,
-  },
-  {
-    path: '/budgeting/appropriations/:id',
-    element: <AppropriationDetailPage />,
-    label: 'تفاصيل التخصيص',
-    protected: true,
-  },
+
   // Budgeting — Encumbrances
   {
     path: '/budgeting/encumbrances',
@@ -692,5 +813,54 @@ export const AppRoutes: RouteConfig[] = [
     label: 'تفاصيل الحساب البنكي',
     protected: true,
     requiredPermission: 'BankAccounts.View',
+  },
+  {
+    path: '/inventory/items',
+    element: <ItemsListPage />,
+    label: 'الأصناف',
+    protected: true,
+    requiredPermission: 'Items.View',
+  },
+  {
+    path: '/inventory/items/create',
+    element: <ItemCreatePage />,
+    label: 'صنف جديد',
+    protected: true,
+    requiredPermission: 'Items.Create',
+  },
+  {
+    path: '/inventory/items/:id',
+    element: <ItemDetailPage />,
+    label: 'تفاصيل الصنف',
+    protected: true,
+    requiredPermission: 'Items.View',
+  },
+  {
+    path: '/inventory/items/:id/edit',
+    element: <ItemEditPage />,
+    label: 'تعديل الصنف',
+    protected: true,
+    requiredPermission: 'Items.Update',
+  },
+  {
+    path: '/inventory/item-categories',
+    element: <ItemCategoriesListPage />,
+    label: 'تصنيفات الأصناف',
+    protected: true,
+    requiredPermission: 'ItemCategories.View',
+  },
+  {
+    path: '/inventory/units',
+    element: <UnitsListPage />,
+    label: 'الوحدات',
+    protected: true,
+    requiredPermission: 'Units.View',
+  },
+  {
+    path: '/inventory/warehouses',
+    element: <WarehousesListPage />,
+    label: 'المستودعات',
+    protected: true,
+    requiredPermission: 'Warehouses.View',
   },
 ];
