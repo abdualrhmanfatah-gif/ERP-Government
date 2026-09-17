@@ -33,7 +33,7 @@ export function MoneyDisplay({
   return (
     <span
       className={cn(
-        'tabular-nums text-end font-mono',
+        'money-display text-end',
         className
       )}
     >

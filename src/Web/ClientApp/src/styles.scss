@@ -114,6 +114,12 @@
   font-variant-numeric: tabular-nums;
 }
 
+.money-display {
+  font-family: var(--font-family-money);
+  font-size: var(--font-size-money);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── RTL arrow mirror ────────────────────────────────────────────────────────── */
 [dir="rtl"] .icon-mirror {
   transform: scaleX(-1);
