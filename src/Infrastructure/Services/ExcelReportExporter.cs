@@ -11,19 +11,7 @@ public class ExcelReportExporter : IReportExporter
         var worksheet = workbook.Worksheets.Add(reportName);
         worksheet.RightToLeft = true;
 
-        // Header
-        worksheet.Cell(1, 1).Value = reportName;
-        worksheet.Cell(2, 1).Value = $"العملة: {result.Currency}";
-        worksheet.Cell(3, 1).Value = $"تاريخ الإنشاء: {result.GeneratedAt:yyyy-MM-dd HH:mm}";
-        if (!string.IsNullOrEmpty(result.DataWarning))
-        {
-            var warningCell = worksheet.Cell(4, 1);
-            warningCell.Value = result.DataWarning;
-            warningCell.Style.Font.FontColor = XLColor.Orange;
-            warningCell.Style.Font.Bold = true;
-        }
-
-        var row = 6;
+        var row = ExcelHeaderWriter.Compose(worksheet, result, reportName, 1);
         foreach (var section in result.Sections)
         {
             worksheet.Cell(row, 1).Value = section.Title;
