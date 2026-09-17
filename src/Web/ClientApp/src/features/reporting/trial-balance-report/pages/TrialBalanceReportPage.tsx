@@ -15,7 +15,7 @@ import {
 import { trialBalanceFilterSchema } from '../shared/schemas';
 import { ReportingTrialBalanceFilters } from '@/components/ReportingTrialBalanceFilters';
 import { ReportingTrialBalanceDetail } from '@/components/ReportingTrialBalanceDetail';
-import { Page, DataGrid, MoneyDisplay, EmptyState, ErrorState, Button, Alert, Badge } from '@/components/ui';
+import { Page, DataGrid, MoneyDisplay, EmptyState, ErrorState, Button, Badge } from '@/components/ui';
 import type { DataGridColumn } from '@/components/ui/DataGrid';
 
 const accountTypeLabels: Record<string, string> = {
@@ -67,8 +67,6 @@ export default function TrialBalanceReportPage() {
     { header: 'الرصيد الختامي', align: 'right', cell: (row) => <MoneyDisplay value={row.closingBalance ?? 0} /> },
   ];
 
-  const isPartialData = defaultYear?.status === 'Open' && validFilters !== null;
-
   const [exporting, setExporting] = useState(false);
 
   async function handleExport(format: 'xlsx' | 'pdf') {
@@ -109,11 +107,7 @@ export default function TrialBalanceReportPage() {
         />
       }
     >
-      {isPartialData && (
-        <Alert variant="warning">
-          أرقام قابلة للتغير — الفترة غير مغلقة
-        </Alert>
-      )}
+
       {totals && (
         <div className="mb-3 flex items-center gap-2">
           {isBalanced ? (
