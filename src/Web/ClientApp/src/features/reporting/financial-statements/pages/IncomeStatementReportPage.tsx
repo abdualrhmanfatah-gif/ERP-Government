@@ -11,7 +11,7 @@ import {
   type FinancialStatementFilters,
 } from '../shared/types';
 import { incomeStatementFilterSchema } from '../shared/schemas';
-import { FilterSelect, FilterDate, Page, MoneyDisplay, EmptyState, ErrorState, Button, Alert } from '@/components/ui';
+import { FilterSelect, FilterDate, Page, MoneyDisplay, EmptyState, ErrorState, Button } from '@/components/ui';
 
 export default function IncomeStatementReportPage() {
   const { data: fiscalYears, isLoading: yearsLoading } = useFinancialStatementFiscalYears();
@@ -38,8 +38,6 @@ export default function IncomeStatementReportPage() {
   const validFilters = parsed.success ? (parsed.data as FinancialStatementFilters) : null;
 
   const { data: report, isLoading, isError, refetch } = useIncomeStatement(validFilters);
-
-  const isPartialData = defaultYear?.status === 'Open' && validFilters !== null;
 
   const [exporting, setExporting] = useState(false);
 
@@ -136,11 +134,6 @@ export default function IncomeStatementReportPage() {
         </div>
       }
     >
-      {isPartialData && (
-        <Alert variant="warning">
-          بيانات جزئية — الفترة الحالية جارية وقد تتغير الأرقام
-        </Alert>
-      )}
       {isError ? (
         <ErrorState onRetry={() => refetch()} />
       ) : !validFilters || (isLoading && !report) ? null : !report ? (

@@ -13,7 +13,7 @@ import {
   type GeneralLedgerLine,
 } from '../shared/types';
 import { generalLedgerFilterSchema } from '../shared/schemas';
-import { Page, DataGrid, MoneyDisplay, EmptyState, ErrorState, Button, Alert, Pagination, FilterSelect } from '@/components/ui';
+import { Page, DataGrid, MoneyDisplay, EmptyState, ErrorState, Button, Pagination, FilterSelect } from '@/components/ui';
 import type { DataGridColumn } from '@/components/ui/DataGrid';
 
 export default function GeneralLedgerReportPage() {
@@ -46,8 +46,6 @@ export default function GeneralLedgerReportPage() {
   const pageSize = report?.pageSize ?? 25;
   const totalLines = report?.totalLines ?? 0;
   const totalPages = Math.ceil(totalLines / pageSize);
-
-  const isPartialData = defaultYear?.status === 'Open' && validFilters !== null;
 
   const [exporting, setExporting] = useState(false);
 
@@ -122,11 +120,6 @@ export default function GeneralLedgerReportPage() {
         </div>
       }
     >
-      {isPartialData && (
-        <Alert variant="warning">
-          بيانات جزئية — الفترة الحالية جارية وقد تتغير الأرقام
-        </Alert>
-      )}
       {isError ? (
         <ErrorState onRetry={() => refetch()} />
       ) : !validFilters || (isLoading && !report) ? null : lines.length === 0 ? (

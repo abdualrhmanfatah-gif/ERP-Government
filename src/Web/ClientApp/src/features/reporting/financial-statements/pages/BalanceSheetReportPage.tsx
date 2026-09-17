@@ -236,8 +236,6 @@ export default function BalanceSheetReportPage() {
     return fiscalYears?.find((year) => year.id === validFilters.fiscalYearId);
   }, [fiscalYears, validFilters?.fiscalYearId]);
 
-  const isPartialData = selectedFiscalYear?.status === 'Open' && validFilters !== null;
-
   const assetsTotal =
     report?.assets?.total ?? groupTotal(report?.currentAssets) + groupTotal(report?.nonCurrentAssets);
 
@@ -353,12 +351,6 @@ export default function BalanceSheetReportPage() {
       }
     >
       <div className="space-y-5">
-        {isPartialData && (
-          <Alert variant="warning">
-            بيانات السنة المالية الحالية ما زالت جارية، وقد تتغير أرصدة التقرير عند ترحيل قيود جديدة.
-          </Alert>
-        )}
-
         {isError ? (
           <ErrorState onRetry={() => refetch()} />
         ) : !validFilters || (isLoading && !report) ? null : !report || !hasReportDetails ? (

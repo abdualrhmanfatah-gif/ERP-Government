@@ -39,8 +39,6 @@ export default function CashFlowStatementReportPage() {
 
   const { data: report, isLoading, isError, refetch } = useCashFlowStatement(validFilters);
 
-  const isPartialData = defaultYear?.status === 'Open' && validFilters !== null;
-
   const [exporting, setExporting] = useState(false);
 
   async function handleExport(format: 'xlsx' | 'pdf') {
@@ -120,11 +118,6 @@ export default function CashFlowStatementReportPage() {
         </div>
       }
     >
-      {isPartialData && (
-        <Alert variant="warning">
-          بيانات جزئية — الفترة الحالية جارية وقد تتغير الأرقام
-        </Alert>
-      )}
       {isError ? (
         <ErrorState onRetry={() => refetch()} />
       ) : !validFilters || (isLoading && !report) ? null : !report ? (
