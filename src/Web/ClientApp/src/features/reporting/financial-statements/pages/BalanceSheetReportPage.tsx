@@ -111,6 +111,15 @@ function StatementGroup({
     return null;
   }
 
+  const visibleSections = group.sections?.filter(
+    (section) =>
+      (section.lines?.length ?? 0) > 0 || (section.total ?? 0) !== 0
+  );
+
+  if (!visibleSections?.length) {
+    return null;
+  }
+
   return (
     <section className="overflow-hidden rounded-lg border bg-[var(--color-surface)]">
       <div className="flex items-center justify-between gap-4 border-b bg-muted/30 px-4 py-3">
@@ -122,7 +131,7 @@ function StatementGroup({
       </div>
 
       <div>
-        {group.sections?.map((section, sectionIndex) => (
+        {visibleSections.map((section, sectionIndex) => (
           <div key={`${section.title ?? 'section'}-${sectionIndex}`} className="border-b last:border-b-0">
             <div className="flex items-center justify-between gap-4 bg-muted/10 px-4 py-2.5">
               <h3 className="text-sm font-semibold">{section.title ?? 'غير مصنف'}</h3>
