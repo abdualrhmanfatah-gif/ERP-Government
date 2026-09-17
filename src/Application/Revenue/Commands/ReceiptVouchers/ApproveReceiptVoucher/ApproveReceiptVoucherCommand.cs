@@ -1,8 +1,9 @@
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Application.Revenue.Common.Services;
+using ERP_Government.Domain.Events.Revenue;
 using ERP_Government.Domain.Revenue.Entities;
 using ERP_Government.Domain.Revenue.Enums;
 using ERP_Government.Domain.Security.Entities;
-using ERP_Government.Domain.Security.Enums;
 
 namespace ERP_Government.Application.Revenue.Commands.ReceiptVouchers.ApproveReceiptVoucher;
 
@@ -23,56 +24,101 @@ public class ApproveReceiptVoucherCommandHandler(
         CancellationToken cancellationToken)
     {
         if (user.Id is not int userId)
-            return Result.Failure(new[] { "User identity is required for this operation." });
+            return Result.Failure(["User identity is required."]);
 
-        var voucher = await context.ReceiptVouchers.FindAsync(request.Id, cancellationToken);
+        var voucher = await context.ReceiptVouchers
+            .Include(v => v.Lines)
+            .Include(v => v.Checks)
+            .Include(v => v.CollectionOrder)
+                .ThenInclude(o => o.RevenueClaim)
+            .FirstOrDefaultAsync(v => v.Id == request.Id, cancellationToken);
+
         if (voucher is null)
-            return Result.Failure(new[] { "Receipt voucher not found."});
+            return Result.Failure(["Receipt voucher not found."]);
 
-        if (voucher.Status != ReceiptVoucherStatus.PendingReview)
-            return Result.Failure(new[] { "Only Pending Review vouchers can be approved."});
-
-        // No separation-of-duties restriction: submitter may approve their own voucher
-        // (TRE-01 clarification session 2026-09-07). Decision still recorded in history.
+        if (voucher.Status != ReceiptVoucherStatus.Draft)
+            return Result.Failure(["Only Draft receipt vouchers can be approved."]);
 
         voucher.Status = ReceiptVoucherStatus.Approved;
-        voucher.ReviewedById = userId;
-        voucher.ReviewedAt = DateTimeOffset.UtcNow;
+        voucher.ApprovedById = userId;
+        voucher.ApprovedAt = DateTimeOffset.UtcNow;
         voucher.RowVersion = request.RowVersion;
+        voucher.LastModified = DateTimeOffset.UtcNow;
+        voucher.LastModifiedBy = userId.ToString();
 
-        context.ApprovalHistory.Add(new ApprovalHistory
+        var totalAmount = voucher.Lines.Sum(l => l.Amount);
+
+        if (voucher.PaymentMethod == PaymentMethod.Cash)
         {
-            DocumentType = nameof(ReceiptVoucher),
-            DocumentId = voucher.Id,
-            ApprovalStep = 1,
-            Action = ApprovalAction.Approve,
-            ApproverUserId = userId,
-            RequiredRole = "AccountsReviewer",
-            Decision = "Approved",
-            DecisionAt = DateTimeOffset.UtcNow,
-            Reason = request.Reason
-        });
+            voucher.AddDomainEvent(new CashReceiptApprovedEvent
+            {
+                SourceEntityId = voucher.Id,
+                OccurredAt = DateTimeOffset.UtcNow,
+                VoucherNumber = voucher.VoucherNumber,
+                ReceivedFrom = voucher.ReceivedFrom,
+                TotalAmount = totalAmount,
+                Lines = voucher.Lines.Select(l => new CashReceiptLineDetail(l.RevenueAccountId, l.Amount, l.Description)).ToList()
+            });
+        }
+        else if (voucher.PaymentMethod == PaymentMethod.Check)
+        {
+            voucher.AddDomainEvent(new CheckReceiptApprovedEvent
+            {
+                SourceEntityId = voucher.Id,
+                OccurredAt = DateTimeOffset.UtcNow,
+                VoucherNumber = voucher.VoucherNumber,
+                ReceivedFrom = voucher.ReceivedFrom,
+                TotalAmount = totalAmount
+            });
+        }
+
+        // Recalculate order & claim statuses
+        var order = voucher.CollectionOrder;
+        if (order is not null)
+        {
+            var orderVouchers = await context.ReceiptVouchers
+                .Where(v => v.CollectionOrderId == order.Id)
+                .Include(v => v.Lines)
+                .Include(v => v.Checks)
+                .ToListAsync(cancellationToken);
+
+            var (orderCollected, _, orderOutstanding, _) = RevenueMetricsCalculator.CalculateOrderMetrics(order.AuthorizedAmount, orderVouchers);
+            if (orderOutstanding <= 0)
+                order.Status = CollectionOrderStatus.Collected;
+            else if (orderCollected > 0)
+                order.Status = CollectionOrderStatus.PartiallyCollected;
+
+            var claim = order.RevenueClaim;
+            if (claim is not null)
+            {
+                var claimOrders = await context.CollectionOrders
+                    .Where(o => o.RevenueClaimId == claim.Id)
+                    .Include(o => o.ReceiptVouchers)
+                        .ThenInclude(v => v.Lines)
+                    .Include(o => o.ReceiptVouchers)
+                        .ThenInclude(v => v.Checks)
+                    .ToListAsync(cancellationToken);
+
+                var (claimCollected, _, claimOutstanding, _) = RevenueMetricsCalculator.CalculateClaimMetrics(claim.TotalAmount, claimOrders);
+                if (claimOutstanding <= 0)
+                    claim.Status = ClaimStatus.Settled;
+                else if (claimCollected > 0)
+                    claim.Status = ClaimStatus.PartiallySettled;
+            }
+        }
 
         context.DocumentStatusLogs.Add(new DocumentStatusLog
         {
             EntityName = nameof(ReceiptVoucher),
             DocumentId = voucher.Id,
-            FromStatus = ReceiptVoucherStatus.PendingReview.ToString(),
+            FromStatus = ReceiptVoucherStatus.Draft.ToString(),
             ToStatus = ReceiptVoucherStatus.Approved.ToString(),
             ChangedById = userId,
             ChangedAt = DateTimeOffset.UtcNow,
             Reason = request.Reason
         });
 
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            return Result.Failure(new[] { "Voucher was modified by another user. Please refresh and try again."});
-        }
-
+        await context.SaveChangesAsync(cancellationToken);
         return Result.Success();
     }
 }
@@ -81,10 +127,7 @@ public class ApproveReceiptVoucherCommandValidator : AbstractValidator<ApproveRe
 {
     public ApproveReceiptVoucherCommandValidator()
     {
-        RuleFor(x => x.Id)
-            .GreaterThan(0).WithMessage("Voucher ID is required.");
-
-        RuleFor(x => x.RowVersion)
-            .NotEmpty().WithMessage("Row version is required for concurrency control.");
+        RuleFor(x => x.Id).GreaterThan(0).WithMessage("Voucher ID is required.");
+        RuleFor(x => x.RowVersion).NotEmpty().WithMessage("Row version is required for concurrency control.");
     }
 }

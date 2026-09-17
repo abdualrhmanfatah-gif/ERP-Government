@@ -10,27 +10,26 @@ public class ReceiptVoucherLineConfiguration : IEntityTypeConfiguration<ReceiptV
     {
         builder.ToTable("ReceiptVoucherLines");
 
-        builder.HasKey(e => e.Id);
+        builder.HasKey(l => l.Id);
 
-        builder.Property(e => e.Amount)
-            .HasColumnType("decimal(23,2)")
+        builder.Property(l => l.Amount)
+            .HasPrecision(23, 2)
             .IsRequired();
 
-        builder.Property(e => e.Description)
+        builder.Property(l => l.Description)
             .HasMaxLength(200);
 
-        builder.Property(e => e.RowVersion)
+        builder.Property(l => l.RowVersion)
             .IsRowVersion();
 
-        builder.HasIndex(e => e.ReceiptVoucherId);
-
-        builder.HasIndex(e => e.RevenueAccountId);
-
-        builder.HasOne(e => e.ReceiptVoucher)
+        builder.HasOne(l => l.ReceiptVoucher)
             .WithMany(v => v.Lines)
-            .HasForeignKey(e => e.ReceiptVoucherId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .HasForeignKey(l => l.ReceiptVoucherId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Ignore(e => e.DomainEvents);
+        builder.HasOne(l => l.RevenueAccount)
+            .WithMany()
+            .HasForeignKey(l => l.RevenueAccountId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

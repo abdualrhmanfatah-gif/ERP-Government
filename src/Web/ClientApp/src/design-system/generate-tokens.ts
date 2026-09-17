@@ -39,6 +39,7 @@ import {
   borders,
   sizing,
   typography,
+  density,
 } from './tokens';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -48,6 +49,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 function cssVar(name: string, value: string): string {
   // CSS custom properties can't contain dots — replace with dashes
   const safeName = name.replace(/\./g, '-');
+  if (value === undefined || value === null || String(value).trim() === '') {
+    throw new Error(`Token generation failed: empty value for --${safeName}`);
+  }
   return `  --${safeName}: ${value};`;
 }
 
@@ -194,6 +198,15 @@ function generateCssScss(): string {
   for (const [key, val] of Object.entries(layout)) {
     const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
     lines.push(cssVar(cssKey, val));
+  }
+  lines.push('');
+
+  // Density roles (mode-independent)
+  for (const [level, roles] of Object.entries(density)) {
+    for (const [role, val] of Object.entries(roles)) {
+      const cssKey = role.replace(/([A-Z])/g, '-$1').toLowerCase();
+      lines.push(cssVar(`density-${level}-${cssKey}`, val));
+    }
   }
   lines.push('');
 
@@ -369,18 +382,21 @@ function generateTailwindJson(): string {
         'active-fg': 'var(--status-active-fg)',
         'closed-bg': 'var(--status-closed-bg)',
         'closed-fg': 'var(--status-closed-fg)',
-        'posted-bg': 'var(--status-posted-bg)',
-        'posted-fg': 'var(--status-posted-fg)',
-        'reversed-bg': 'var(--status-reversed-bg)',
-        'reversed-fg': 'var(--status-reversed-fg)',
-        'cancelled-bg': 'var(--status-cancelled-bg)',
-        'cancelled-fg': 'var(--status-cancelled-fg)',
-        'locked-bg': 'var(--status-locked-bg)',
-        'locked-fg': 'var(--status-locked-fg)',
-        'overBudget-bg': 'var(--status-overBudget-bg)',
-        'overBudget-fg': 'var(--status-overBudget-fg)',
-        'unbalanced-border': 'var(--status-unbalanced-border)',
-        'unbalanced-fg': 'var(--status-unbalanced-fg)',
+        // Aliases resolve to their base role pair (contracts/status-semantics.md §2)
+        'posted-bg': 'var(--status-closed-bg)',
+        'posted-fg': 'var(--status-closed-fg)',
+        'reversed-bg': 'var(--status-closed-bg)',
+        'reversed-fg': 'var(--status-closed-fg)',
+        'cancelled-bg': 'var(--status-closed-bg)',
+        'cancelled-fg': 'var(--status-closed-fg)',
+        'locked-bg': 'var(--status-closed-bg)',
+        'locked-fg': 'var(--status-closed-fg)',
+        'overBudget-bg': 'var(--status-pending-bg)',
+        'overBudget-fg': 'var(--status-pending-fg)',
+        'unbalanced-border': 'var(--status-pending-fg)',
+        'unbalanced-fg': 'var(--status-pending-fg)',
+        'inactive-bg': 'var(--status-inactive-bg)',
+        'inactive-fg': 'var(--status-inactive-fg)',
       },
       link: 'var(--color-link)',
       tertiary: {

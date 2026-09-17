@@ -84,7 +84,9 @@ public class Encumbrances : IEndpointGroup
         int id)
     {
         var result = await sender.Send(new GetEncumbranceByIdQuery(id));
-        return result is not null ? Results.Ok(result) : Results.NotFound();
+        return result.Succeeded
+            ? Results.Ok(result.Value!)
+            : result.ToProblemDetails();
     }
 
     public static async Task<IResult> CreateEncumbrance(
@@ -97,7 +99,7 @@ public class Encumbrances : IEndpointGroup
             body.Lines.Select(l => new ERP_Government.Application.Budgeting.Commands.Encumbrances.EncumbranceLineRequest(
                 l.BudgetItemId, l.Amount, l.Description)).ToList()));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Created($"/api/Encumbrances/{result.Value}", result.Value);
     }
 
@@ -109,7 +111,7 @@ public class Encumbrances : IEndpointGroup
         var result = await sender.Send(new UpdateEncumbranceCommand(
             id, body.Description, body.EncumbranceDate, body.PurchaseOrderId, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -120,7 +122,7 @@ public class Encumbrances : IEndpointGroup
     {
         var result = await sender.Send(new DeleteEncumbranceCommand(id, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -131,7 +133,7 @@ public class Encumbrances : IEndpointGroup
     {
         var result = await sender.Send(new SubmitEncumbranceCommand(id, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -142,7 +144,7 @@ public class Encumbrances : IEndpointGroup
     {
         var result = await sender.Send(new ApproveEncumbranceCommand(id, body.RowVersion, body.Reason));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -153,7 +155,7 @@ public class Encumbrances : IEndpointGroup
     {
         var result = await sender.Send(new ActivateEncumbranceCommand(id, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -164,7 +166,7 @@ public class Encumbrances : IEndpointGroup
     {
         var result = await sender.Send(new SuspendEncumbranceCommand(id, body.RowVersion, body.Reason));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -175,7 +177,7 @@ public class Encumbrances : IEndpointGroup
     {
         var result = await sender.Send(new CloseEncumbranceCommand(id, body.RowVersion, body.Reason));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -186,7 +188,7 @@ public class Encumbrances : IEndpointGroup
     {
         var result = await sender.Send(new CancelEncumbranceCommand(id, body.RowVersion, body.Reason));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -197,7 +199,7 @@ public class Encumbrances : IEndpointGroup
     {
         var result = await sender.Send(new ReverseEncumbranceCommand(id, body.RowVersion, body.Reason));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

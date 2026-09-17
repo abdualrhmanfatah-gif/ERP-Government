@@ -39,11 +39,12 @@ public class Journals : IEndpointGroup
     }
 
     [EndpointSummary("Get journal by ID")]
-    public static async Task<JournalDto?> GetJournalById(
+    public static async Task<IResult> GetJournalById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetJournalByIdQuery { Id = id });
+        var result = await sender.Send(new GetJournalByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new journal")]
@@ -53,7 +54,7 @@ public class Journals : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Ok();
     }
 
@@ -64,7 +65,11 @@ public class Journals : IEndpointGroup
         [FromBody] UpdateJournalCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         await sender.Send(command);
         return Results.NoContent();

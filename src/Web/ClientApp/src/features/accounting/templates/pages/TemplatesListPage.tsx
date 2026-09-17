@@ -6,6 +6,7 @@ import { useTemplatesList } from '../../hooks/useTemplatesList';
 import { useJournalsList } from '../../hooks/useJournalsList';
 import { JournalEntryTemplateType, type JournalEntryTemplateDto } from '../../../../web-api-client';
 import { activeStatusLabels } from '@/shared/constants/labels';
+import { getQueryErrorMessage } from '@/shared/api/query-error';
 
 const templateTypeLabels: Record<string, string> = {
   Standard: 'قياسية',
@@ -109,7 +110,7 @@ export function TemplatesListPage() {
         columns={columns}
         data={templates}
         loading={isLoading}
-        error={error ? 'فشل تحميل البيانات' : undefined}
+        error={error ? getQueryErrorMessage(error) : undefined}
         onRetry={() => refetch()}
         emptyMessage="لا توجد قوالب"
         rowKey={(row) => row.id ?? 0}

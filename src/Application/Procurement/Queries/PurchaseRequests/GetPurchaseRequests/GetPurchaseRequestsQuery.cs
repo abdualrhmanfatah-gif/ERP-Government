@@ -1,7 +1,9 @@
 using ERP_Government.Domain.Procurement.Enums;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Procurement.Queries.PurchaseRequests.GetPurchaseRequests;
 
+[Authorize(Policy = PermissionCodes.PurchaseRequestsView)]
 public record GetPurchaseRequestsQuery(
     PurchaseRequestStatus? Status = null,
     PurchaseRequestPriority? Priority = null,

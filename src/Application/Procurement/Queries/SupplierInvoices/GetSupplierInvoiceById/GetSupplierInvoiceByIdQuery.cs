@@ -1,7 +1,9 @@
 using ERP_Government.Domain.Procurement.Enums;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Procurement.Queries.SupplierInvoices.GetSupplierInvoiceById;
 
+[Authorize(Policy = PermissionCodes.SupplierInvoicesView)]
 public record GetSupplierInvoiceByIdQuery(int Id) : IRequest<Result<SupplierInvoiceDetailResponse>>;
 
 public record SupplierInvoiceDetailResponse(

@@ -1,19 +1,21 @@
+using ERP_Government.Application.Common.Errors;
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Domain.Payments.Enums;
 
 namespace ERP_Government.Application.Payments.Queries.GetPaymentOrderTotals;
 
 [Authorize(Policy = PermissionCodes.PaymentOrdersView)]
-public class GetPaymentOrderTotalsQuery : IRequest<PaymentOrderTotalsDto?>
+public class GetPaymentOrderTotalsQuery : IRequest<Result<PaymentOrderTotalsDto>>
 {
     public int Id { get; init; }
 }
 
 public class GetPaymentOrderTotalsQueryHandler(
-    IApplicationDbContext context) : IRequestHandler<GetPaymentOrderTotalsQuery, PaymentOrderTotalsDto?>
+    IApplicationDbContext context) : IRequestHandler<GetPaymentOrderTotalsQuery, Result<PaymentOrderTotalsDto>>
 {
-    public async Task<PaymentOrderTotalsDto?> Handle(
+    public async Task<Result<PaymentOrderTotalsDto>> Handle(
         GetPaymentOrderTotalsQuery request,
         CancellationToken cancellationToken)
     {
@@ -21,7 +23,7 @@ public class GetPaymentOrderTotalsQueryHandler(
             .FindAsync(request.Id, cancellationToken);
 
         if (paymentOrder is null)
-            return null;
+            return Result<PaymentOrderTotalsDto>.Failure(ErrorCodes.Payments.PaymentOrderTotalsNotFound, ErrorCategory.NotFound, $"Payment order with ID {request.Id} not found.");
 
         var deductions = await context.PaymentOrderDeductions
             .Where(d => d.PaymentOrderId == request.Id)
@@ -36,7 +38,7 @@ public class GetPaymentOrderTotalsQueryHandler(
 
         var remainingAmount = netAmount - paidAmount;
 
-        return new PaymentOrderTotalsDto
+        return Result<PaymentOrderTotalsDto>.Success(new PaymentOrderTotalsDto
         {
             Id = paymentOrder.Id,
             AmountGross = paymentOrder.AmountGross,
@@ -46,7 +48,7 @@ public class GetPaymentOrderTotalsQueryHandler(
             RemainingAmount = remainingAmount,
             IsFullyPaid = remainingAmount <= 0m,
             Status = paymentOrder.Status
-        };
+        });
     }
 }
 

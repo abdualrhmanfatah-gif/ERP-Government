@@ -1,16 +1,18 @@
 using ERP_Government.Application.Budgeting.Common;
+using ERP_Government.Application.Common.Errors;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Budgeting.Queries.BudgetItemAllocations;
 
 [Authorize(Policy = PermissionCodes.BudgetItemAllocationsView)]
-public record GetBudgetItemAllocationByIdQuery(int Id) : IRequest<BudgetItemAllocationDetailDto?>;
+public record GetBudgetItemAllocationByIdQuery(int Id) : IRequest<Result<BudgetItemAllocationDetailDto>>;
 
 public class GetBudgetItemAllocationByIdQueryHandler(
     IApplicationDbContext context,
-    IBudgetAvailabilityService availabilityService) : IRequestHandler<GetBudgetItemAllocationByIdQuery, BudgetItemAllocationDetailDto?>
+    IBudgetAvailabilityService availabilityService) : IRequestHandler<GetBudgetItemAllocationByIdQuery, Result<BudgetItemAllocationDetailDto>>
 {
-    public async Task<BudgetItemAllocationDetailDto?> Handle(
+    public async Task<Result<BudgetItemAllocationDetailDto>> Handle(
         GetBudgetItemAllocationByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -20,11 +22,11 @@ public class GetBudgetItemAllocationByIdQueryHandler(
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (entity is null)
-            return null;
+            return Result<BudgetItemAllocationDetailDto>.Failure(ErrorCodes.Budgets.AllocationNotFound, ErrorCategory.NotFound, $"Budget item allocation with ID {request.Id} not found.");
 
         var summary = await availabilityService.GetAvailabilitySummaryAsync(entity.BudgetItemId);
 
-        return new BudgetItemAllocationDetailDto
+        return Result<BudgetItemAllocationDetailDto>.Success(new BudgetItemAllocationDetailDto
         {
             Id = entity.Id,
             BudgetId = entity.BudgetId,
@@ -40,6 +42,6 @@ public class GetBudgetItemAllocationByIdQueryHandler(
             AvailableAmount = entity.ApprovedAmount.HasValue ? entity.ApprovedAmount.Value - summary.ActualExpenditure - summary.OutstandingEncumbrance : null,
             Status = entity.Budget.Status.ToString(),
             RowVersion = entity.RowVersion,
-        };
+        });
     }
 }

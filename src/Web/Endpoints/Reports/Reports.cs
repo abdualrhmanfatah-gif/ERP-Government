@@ -103,14 +103,17 @@ public class Reports : IEndpointGroup
         {
             case "balance-sheet":
                 reportName = "Balance Sheet";
-                var bsResult = await sender.Send(new GetBalanceSheetQuery { AsOfDate = (asOfDate ?? DateOnly.FromDateTime(DateTime.Today)).ToString("yyyy-MM-dd") });
+                var bsResult = await sender.Send(new GetBalanceSheetQuery
+                {
+                    AsOfDate = (asOfDate ?? DateOnly.FromDateTime(DateTime.Today)).ToString("yyyy-MM-dd"),
+                    FiscalPeriodId = fiscalPeriodId
+                });
                 var bsSections = new List<ReportSection>();
-                if (bsResult.Assets?.Sections?.Count > 0)
-                    bsSections.Add(new ReportSection { Title = "الأصول", TitleEn = "Assets", Lines = bsResult.Assets.Sections.SelectMany(s => s.Lines ?? []).Select(l => new ReportLine { AccountCode = l.AccountCode ?? "", AccountName = l.AccountName ?? "", Debit = l.Debit, Credit = l.Credit, Balance = l.Balance }).ToList(), Total = bsResult.Assets.Total });
-                if (bsResult.Liabilities?.Sections?.Count > 0)
-                    bsSections.Add(new ReportSection { Title = "الخصوم", TitleEn = "Liabilities", Lines = bsResult.Liabilities.Sections.SelectMany(s => s.Lines ?? []).Select(l => new ReportLine { AccountCode = l.AccountCode ?? "", AccountName = l.AccountName ?? "", Debit = l.Debit, Credit = l.Credit, Balance = l.Balance }).ToList(), Total = bsResult.Liabilities.Total });
-                if (bsResult.Equity?.Sections?.Count > 0)
-                    bsSections.Add(new ReportSection { Title = "حقوق الملكية", TitleEn = "Equity", Lines = bsResult.Equity.Sections.SelectMany(s => s.Lines ?? []).Select(l => new ReportLine { AccountCode = l.AccountCode ?? "", AccountName = l.AccountName ?? "", Debit = l.Debit, Credit = l.Credit, Balance = l.Balance }).ToList(), Total = bsResult.Equity.Total });
+                AddBalanceSheetSection(bsSections, "الأصول المتداولة", "Current Assets", bsResult.CurrentAssets);
+                AddBalanceSheetSection(bsSections, "الأصول غير المتداولة", "Non-current Assets", bsResult.NonCurrentAssets);
+                AddBalanceSheetSection(bsSections, "الخصوم المتداولة", "Current Liabilities", bsResult.CurrentLiabilities);
+                AddBalanceSheetSection(bsSections, "الخصوم غير المتداولة", "Non-current Liabilities", bsResult.NonCurrentLiabilities);
+                AddBalanceSheetSection(bsSections, "حقوق الملكية / صافي الأصول", "Equity / Net Assets", bsResult.Equity);
                 reportResult = new ReportResult { Currency = bsResult.Currency, GeneratedAt = bsResult.GeneratedAt, Sections = bsSections, PaperSize = pageSize, IsLandscape = isLandscape ?? true };
                 break;
             case "income-statement":
@@ -165,4 +168,32 @@ public class Reports : IEndpointGroup
         var extension = format?.ToLower() == "pdf" ? "pdf" : "xlsx";
         return Results.File(stream, contentType, $"{reportName}-{DateTime.Now:yyyyMMdd}.{extension}");
     }
+
+    private static void AddBalanceSheetSection(
+        List<ReportSection> sections,
+        string title,
+        string titleEn,
+        BalanceSheetGroup group)
+    {
+        foreach (var section in group.Sections.Where(section => section.Lines.Count > 0 || section.Total != 0))
+        {
+            sections.Add(new ReportSection
+            {
+                Title = $"{title} - {section.Title}",
+                TitleEn = $"{titleEn} - {section.TitleEn}",
+                Lines = section.Lines
+                    .Select(line => new ReportLine
+                    {
+                        AccountCode = line.AccountCode ?? "",
+                        AccountName = line.AccountName ?? "",
+                        Debit = line.Debit,
+                        Credit = line.Credit,
+                        Balance = line.Balance
+                    })
+                    .ToList(),
+                Total = section.Total
+            });
+        }
+    }
+
 }

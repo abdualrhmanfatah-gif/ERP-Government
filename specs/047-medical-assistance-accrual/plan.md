@@ -1,5 +1,7 @@
 # PLAN-047: خطوات التنفيذ التفصيلية
 
+> **DEP-027 أثر**: `PostingRuleLineSeedData`/`PostingRuleMatcher`/`JournalEntryGenerator`/`PaymentOrderExecuted` المذكورة أدناه أُزيلت نهائيًّا. سجّل الهدف النهائي كما هو؛ استبدل كل خطوة تستند إلى تلك الملفات بمسار الترحيب الأصلي المباشر (RecordPayment ينشئ القيد بنفسه؛ لا «PostingRule عادي» متبقٍ).
+
 ## نظرة عامة
 
 هذا الملف يحتوي الخطوات التفصيلية لكل مرحلة تنفيذ.
@@ -531,7 +533,7 @@ if (entity.DisbursementRequestId.HasValue)
 
 **الملف**: `src/Application/Payments/Commands/Payments/RecordPayment/RecordPaymentCommand.cs`
 
-**التغيير الرئيسي**: استبدال `PostingRuleMatcher` + `JournalEntryGenerator` بـ logika ديناميكية.
+**التغيير الرئيسي**: `RecordPayment` يبني قيد السداد أصليًّا (مدين=حساب الالتزام/المصروف، دائن=حساب البنك/النقدية) دون محرك قواعد. `PostingRuleMatcher`/`JournalEntryGenerator` أُزيلا (DEP-027) — لا استبدال لهما، بل مسار مباشر.
 
 **الكود الحالي** (السطور 62-89):
 ```csharp
@@ -564,12 +566,8 @@ if (paymentOrder.DisbursementRequestId.HasValue)
 }
 else
 {
-    // أمر صرف مستقل — يستخدم PostingRule العادي
-    var rules = await postingRuleMatcher.MatchAsync(eventTypeStr, cancellationToken);
-    if (rules.Count == 0)
-        return Result<PaymentDto>.Failure(["لا توجد قواعد ترحيل محاسبي معرّفة لأوامر الدفع."]);
-
-    // ... الكود الحالي بدون تغيير
+    // أمر صرف مستقل — حساب الالتزام من أمر الصرف/الطلب مباشرة (لا قاعدة ترحيل)
+    liabilityAccountId = paymentOrder.AccountId ?? 2511;
 }
 
 // إنشاء قيد السداد: مدين الخصم / دائن البنك
@@ -732,13 +730,11 @@ AccrualEntryStatus = accrualEntry.EntryStatus.ToString(),
 
 ## المرحلة 9: Seed Data
 
-### 9.1 PostingRuleLineSeedData.cs
+### 9.1 PostingRuleLineSeedData.cs — مُلغى
 
-**الملف**: `src/Infrastructure/Data/Seeds/PostingRuleLineSeedData.cs`
+**الملف**: أُزيل نهائيًّا مع محرك PostingRules (DEP-027, migration `RemovePostingRules`).
 
-**ملاحظة**: لا نغير `PaymentOrderExecuted` لأننا نريد قيد سداد ديناميكي. لكن يجب التأكد من أن القيد القديم لا يتعارض.
-
-**قرار**: نترك `PaymentOrderExecuted` كما هو. إذا كان هناك أمر صرف مستقل (بدون طلب صرف)، يستخدم PostingRule القديم.
+**قرار**: لا توجد قواعد ترحيل تُترك؛ كل الترحيل أصلي ومباشر (`CreateAccrualEntry` للاستحقاق، `RecordPayment` للسداد). لا تعديل ولا فحص تعارض مع `PaymentOrderExecuted`.
 
 ---
 

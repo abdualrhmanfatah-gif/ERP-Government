@@ -5,6 +5,7 @@ using FluentValidation;
 
 namespace ERP_Government.Application.Security.Queries.GetNotifications;
 
+[Authorize(Policy = PermissionCodes.NotificationsView)]
 public class GetNotificationsQuery : IRequest<PaginatedResult<NotificationDto>>
 {
     public int Page { get; init; } = 1;

@@ -1,4 +1,4 @@
-
+﻿
 using ERP_Government.Application.Accounting.Reports.Common;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -47,6 +47,20 @@ public class PdfReportExporter : IReportExporter
                 page.Size(pageSize);
                 page.MarginHorizontal(15);
                 page.MarginVertical(15);
+                page.PageColor("#F5F5F5");
+                page.Background().Layers(layers =>
+                {
+                    layers.PrimaryLayer().Padding(5, Unit.Millimetre)
+                        .Border(0.5f, Unit.Millimetre)
+                        .BorderColor(Colors.Black);
+
+                    if (ReportBranding.LogoPath is not null)
+                    {
+                        var watermark = WatermarkHelper.LoadWithTransparency(ReportBranding.LogoPath, 0.08f);
+                        layers.Layer().AlignCenter().AlignMiddle()
+                            .Height(150).Image(watermark).FitArea();
+                    }
+                });
                 page.ContentFromRightToLeft();
                 page.DefaultTextStyle(style => style.FontFamily("Calibri").FontSize(10));
 
@@ -62,7 +76,7 @@ public class PdfReportExporter : IReportExporter
                     foreach (var section in result.Sections)
                     {
                         content.Item().PaddingBottom(6).Text(section.Title)
-                            .Bold().FontSize(12).FontColor(OfficialPdfTemplate.PrimaryAccentColor);
+                            .Bold().FontSize(12).FontColor(Colors.Black);
 
                         if (!string.IsNullOrWhiteSpace(section.Description))
                         {
@@ -152,6 +166,7 @@ public class PdfReportExporter : IReportExporter
                 columns.RelativeColumn(3.5f);
                 columns.RelativeColumn(2f);
                 columns.RelativeColumn(2f);
+                columns.RelativeColumn(2f);
             });
 
             table.Header(header =>
@@ -160,6 +175,7 @@ public class PdfReportExporter : IReportExporter
                 header.Cell().Element(OfficialPdfTemplate.HeaderCellStyle).Text("اسم الحساب").Bold();
                 header.Cell().Element(OfficialPdfTemplate.HeaderCellStyle).Text("مدين").Bold();
                 header.Cell().Element(OfficialPdfTemplate.HeaderCellStyle).Text("دائن").Bold();
+                header.Cell().Element(OfficialPdfTemplate.HeaderCellStyle).Text("الرصيد").Bold();
             });
 
             foreach (var line in section.Lines)
@@ -168,16 +184,19 @@ public class PdfReportExporter : IReportExporter
                 table.Cell().Element(OfficialPdfTemplate.CellStyle).Text(line.AccountName);
                 table.Cell().Element(OfficialPdfTemplate.NumberCellStyle).Text(line.Debit.ToString("N2"));
                 table.Cell().Element(OfficialPdfTemplate.NumberCellStyle).Text(line.Credit.ToString("N2"));
+                table.Cell().Element(OfficialPdfTemplate.NumberCellStyle).Text(line.Balance.ToString("N2"));
             }
 
             var totalDebit = section.Lines.Sum(l => l.Debit);
             var totalCredit = section.Lines.Sum(l => l.Credit);
+            var totalBalance = section.Lines.Sum(l => l.Balance);
 
             table.Footer(footer =>
             {
                 footer.Cell().ColumnSpan(2).Element(OfficialPdfTemplate.FooterCellStyle).Text("الإجمالي").Bold();
                 footer.Cell().Element(OfficialPdfTemplate.FooterCellStyle).Text(totalDebit.ToString("N2")).Bold();
                 footer.Cell().Element(OfficialPdfTemplate.FooterCellStyle).Text(totalCredit.ToString("N2")).Bold();
+                footer.Cell().Element(OfficialPdfTemplate.FooterCellStyle).Text(totalBalance.ToString("N2")).Bold();
             });
         });
     }

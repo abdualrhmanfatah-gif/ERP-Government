@@ -1,3 +1,5 @@
+using ERP_Government.Application.Common.Errors;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.FinancialSettings.Common.Services;
 using ERP_Government.Domain.Parties.Entities;
@@ -33,7 +35,7 @@ public class CreatePartyCommandHandler(
         }
         catch (DocumentSequenceException ex)
         {
-            return Result<int>.Failure([ex.Message]);
+            return Result<int>.Failure(ErrorCodes.Parties.DuplicateCode, ErrorCategory.Internal, ex.Message);
         }
 
         var entity = new Party

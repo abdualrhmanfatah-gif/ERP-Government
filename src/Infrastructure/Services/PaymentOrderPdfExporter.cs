@@ -29,6 +29,20 @@ public class PaymentOrderPdfExporter
                 page.Size(PageSizes.A4.Portrait());
                 page.MarginHorizontal(28);
                 page.MarginVertical(20);
+                page.PageColor("#F5F5F5");
+                page.Background().Layers(layers =>
+                {
+                    layers.PrimaryLayer().Padding(5, Unit.Millimetre)
+                        .Border(0.5f, Unit.Millimetre)
+                        .BorderColor(Colors.Black);
+
+                    if (ReportBranding.LogoPath is not null)
+                    {
+                        var watermark = WatermarkHelper.LoadWithTransparency(ReportBranding.LogoPath, 0.08f);
+                        layers.Layer().AlignCenter().AlignMiddle()
+                            .Height(150).Image(watermark).FitArea();
+                    }
+                });
                 page.ContentFromRightToLeft();
                 page.DefaultTextStyle(style => style
                     .FontFamily("Calibri")
@@ -84,7 +98,7 @@ public class PaymentOrderPdfExporter
 
             column.Item()
                 .Border(1.2f)
-                .BorderColor(Colors.Blue.Darken3)
+                .BorderColor(Colors.Black)
                 .PaddingVertical(4)
                 .PaddingHorizontal(4)
                 .AlignCenter()
@@ -95,7 +109,7 @@ public class PaymentOrderPdfExporter
 
             column.Item()
                 .Border(1.2f)
-                .BorderColor(Colors.Blue.Darken3)
+                .BorderColor(Colors.Black)
                 .PaddingVertical(5)
                 .PaddingHorizontal(4)
                 .AlignCenter()

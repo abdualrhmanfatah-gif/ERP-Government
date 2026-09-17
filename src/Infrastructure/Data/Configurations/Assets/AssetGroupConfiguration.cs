@@ -21,7 +21,7 @@ public class AssetGroupConfiguration : IEntityTypeConfiguration<AssetGroup>
             .IsRequired();
 
         builder.Property(e => e.Description)
-            .HasMaxLength(500);
+            .HasMaxLength(1000);
 
         builder.Property(e => e.DepreciationMethod)
             .HasMaxLength(50)
@@ -32,7 +32,7 @@ public class AssetGroupConfiguration : IEntityTypeConfiguration<AssetGroup>
             .IsRequired();
 
         builder.Property(e => e.DepreciationRate)
-            .HasPrecision(18, 4);
+            .HasPrecision(18, 6);
 
         builder.Property(e => e.ResidualValuePercentage)
             .HasColumnType("decimal(5,2)");
@@ -47,5 +47,30 @@ public class AssetGroupConfiguration : IEntityTypeConfiguration<AssetGroup>
             .WithMany()
             .HasForeignKey(e => e.ParentAssetGroupId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.AssetAccount)
+            .WithMany()
+            .HasForeignKey(e => e.AssetAccountId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.AccumulatedDepreciationAccount)
+            .WithMany()
+            .HasForeignKey(e => e.AccumulatedDepreciationAccountId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.DepreciationExpenseAccount)
+            .WithMany()
+            .HasForeignKey(e => e.DepreciationExpenseAccountId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.DisposalAccount)
+            .WithMany()
+            .HasForeignKey(e => e.DisposalAccountId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(e => e.AssetAccountId);
+        builder.HasIndex(e => e.AccumulatedDepreciationAccountId);
+        builder.HasIndex(e => e.DepreciationExpenseAccountId);
+        builder.HasIndex(e => e.DisposalAccountId);
     }
 }

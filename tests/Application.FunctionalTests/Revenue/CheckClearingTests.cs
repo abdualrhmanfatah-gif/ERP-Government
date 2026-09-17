@@ -1,10 +1,7 @@
 using ERP_Government.Application.Revenue.Commands.ReceiptVouchers.CreateReceiptVoucher;
-using ERP_Government.Application.Revenue.Commands.ReceiptVouchers.SubmitReceiptVoucher;
 using ERP_Government.Application.Revenue.Commands.ReceiptVouchers.ApproveReceiptVoucher;
 using ERP_Government.Application.Revenue.Commands.Checks.ClearCheck;
 using ERP_Government.Application.Revenue.Commands.Checks.BounceCheck;
-using ERP_Government.Application.Revenue.Queries.Checks.GetChecks;
-using ERP_Government.Application.Revenue.Queries.Checks.GetCheckById;
 using ERP_Government.Application.Revenue.Queries.ReceiptVouchers.GetReceiptVoucherById;
 using ERP_Government.Application.Revenue.Common.DTOs;
 using ERP_Government.Domain.Revenue.Enums;
@@ -53,13 +50,6 @@ public class CheckClearingTests : TestBase
         var voucherId = createResult.Value!.Id;
 
         var voucher = await TestApp.SendAsync(new GetReceiptVoucherByIdQuery { Id = voucherId });
-        await TestApp.SendAsync(new SubmitReceiptVoucherCommand
-        {
-            Id = voucherId,
-            RowVersion = voucher.Value!.RowVersion
-        });
-
-        voucher = await TestApp.SendAsync(new GetReceiptVoucherByIdQuery { Id = voucherId });
         await TestApp.SendAsync(new ApproveReceiptVoucherCommand
         {
             Id = voucherId,
@@ -67,12 +57,8 @@ public class CheckClearingTests : TestBase
             RowVersion = voucher.Value!.RowVersion
         });
 
-        var listResult = await TestApp.SendAsync(new GetChecksQuery
-        {
-            From = DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
-            To = DateOnly.FromDateTime(DateTime.Today.AddDays(1))
-        });
-        var checkId = listResult.Value!.First(c => c.CheckNumber == checkNumber).Id;
+        voucher = await TestApp.SendAsync(new GetReceiptVoucherByIdQuery { Id = voucherId });
+        var checkId = voucher.Value!.Checks.First(c => c.CheckNumber == checkNumber).Id;
 
         return (voucherId, checkId);
     }
@@ -93,10 +79,9 @@ public class CheckClearingTests : TestBase
 
         result.Succeeded.ShouldBeTrue();
 
-        var checkResult = await TestApp.SendAsync(new GetCheckByIdQuery { Id = checkId });
-        checkResult.Succeeded.ShouldBeTrue();
-        checkResult.Value!.Status.ShouldBe(CheckStatus.Cleared);
-        checkResult.Value!.ClearedAt.ShouldNotBeNull();
+        var check = (await TestApp.FindAsync<ERP_Government.Domain.Revenue.Entities.Check>(checkId))!;
+        check.Status.ShouldBe(CheckStatus.Cleared);
+        check.ClearedAt.ShouldNotBeNull();
     }
 
     [Test]

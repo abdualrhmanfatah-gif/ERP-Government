@@ -1,3 +1,5 @@
+using ERP_Government.Application.Common.Errors;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.FinancialSettings.Common.Services;
 using ERP_Government.Application.Parties.Common;
@@ -5,6 +7,7 @@ using ERP_Government.Domain.Accounting.Entities;
 using ERP_Government.Domain.Accounting.Enums;
 using ERP_Government.Domain.Payments.Entities;
 using ERP_Government.Domain.Payments.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace ERP_Government.Application.Payments.Commands.Payments.RecordPayment;
 
@@ -21,36 +24,37 @@ public class RecordPaymentCommandHandler(
     IApplicationDbContext context,
     IDocumentStatusLogger statusLogger,
     IDocumentSequenceService sequenceService,
-    IUser user) : IRequestHandler<RecordPaymentCommand, Result<Common.DTOs.PaymentDto>>
+    IUser user,
+    ILogger<RecordPaymentCommandHandler> logger) : IRequestHandler<RecordPaymentCommand, Result<Common.DTOs.PaymentDto>>
 {
     public async Task<Result<Common.DTOs.PaymentDto>> Handle(
         RecordPaymentCommand request,
         CancellationToken cancellationToken)
     {
         if (user.Id is not int userId)
-            return Result<Common.DTOs.PaymentDto>.Failure(["User identity is required for this operation."]);
+            return Result<Common.DTOs.PaymentDto>.Failure(ErrorCodes.Request.Unauthorized, ErrorCategory.Authorization, "هوية المستخدم مطلوبة لهذه العملية.");
 
         var paymentOrder = await context.PaymentOrders
             .FindAsync(request.PaymentOrderId, cancellationToken);
 
         if (paymentOrder is null)
-            return Result<Common.DTOs.PaymentDto>.Failure(["Payment order not found."]);
+            return Result<Common.DTOs.PaymentDto>.Failure(ErrorCodes.Payments.PaymentNotFound, ErrorCategory.NotFound, "أمر الدفع غير موجود.");
 
         if (paymentOrder.Status != PaymentOrderStatus.Approved && paymentOrder.Status != PaymentOrderStatus.SentToTreasury)
-            return Result<Common.DTOs.PaymentDto>.Failure(["Payment order must be approved before payment execution."]);
+            return Result<Common.DTOs.PaymentDto>.Failure(ErrorCodes.Payments.ApprovalRequired, ErrorCategory.BusinessRule, "يجب أن يكون أمر الدفع معتمداً قبل تنفيذ الدفع.");
 
         // ADR-001 D-6: one payment per order
         var existingPayment = await context.Payments
             .FirstOrDefaultAsync(p => p.PaymentOrderId == request.PaymentOrderId && p.Status == PaymentStatus.Completed, cancellationToken);
 
         if (existingPayment is not null)
-            return Result<Common.DTOs.PaymentDto>.Failure(["A payment has already been recorded for this payment order."]);
+            return Result<Common.DTOs.PaymentDto>.Failure(ErrorCodes.Payments.PaymentNotFound, ErrorCategory.Conflict, "تم تسجيل دفع مسبقاً لهذا أمر الدفع.");
 
         var sequence = await context.DocumentSequences
             .FirstOrDefaultAsync(s => s.DocumentType == "Payment", cancellationToken);
 
         if (sequence is null)
-            return Result<Common.DTOs.PaymentDto>.Failure(["Payment sequence not configured."]);
+            return Result<Common.DTOs.PaymentDto>.Failure(ErrorCodes.FinancialSettings.SequenceNotFound, ErrorCategory.Internal, "تسلسل الدفع غير مُعد.");
 
         var netTotal = paymentOrder.AmountGross - paymentOrder.DeductionAmount;
 
@@ -58,29 +62,29 @@ public class RecordPaymentCommandHandler(
         string paidByName = userEntity?.Login ?? "Unknown";
 
         if (!paymentOrder.AccrualJournalEntryId.HasValue)
-            return Result<Common.DTOs.PaymentDto>.Failure(["Payment order must be linked to an accrual journal entry before payment execution."]);
+            return Result<Common.DTOs.PaymentDto>.Failure(ErrorCodes.Payments.ApprovalRequired, ErrorCategory.BusinessRule, "يجب ربط أمر الدفع بقيد احتسابي قبل تنفيذ الدفع.");
 
         var accrualEntry = await context.JournalEntries
             .FirstOrDefaultAsync(j => j.Id == paymentOrder.AccrualJournalEntryId.Value, cancellationToken);
         if (accrualEntry is null || accrualEntry.EntryType != MoveEntryType.Accrual)
-            return Result<Common.DTOs.PaymentDto>.Failure(["Payment order is not linked to a valid accrual journal entry."]);
+            return Result<Common.DTOs.PaymentDto>.Failure(ErrorCodes.Accounting.EntryNotBalanced, ErrorCategory.NotFound, "أمر الدفع غير مرتبط بقيد احتسابي صالح.");
 
         var accrualCreditLines = await context.JournalEntryLines
             .Where(l => l.JournalEntryId == accrualEntry.Id && l.Credit > 0)
             .ToListAsync(cancellationToken);
         if (accrualCreditLines.Count != 1)
-            return Result<Common.DTOs.PaymentDto>.Failure(["Accrual journal entry must contain exactly one liability credit line."]);
+            return Result<Common.DTOs.PaymentDto>.Failure(ErrorCodes.Accounting.EntryNotBalanced, ErrorCategory.BusinessRule, "يجب أن يحتوي القيد الاحتسابي على سطر دائن للالتزام واحد فقط.");
 
         if (!paymentOrder.BankAccountId.HasValue)
-            return Result<Common.DTOs.PaymentDto>.Failure(["Bank account is required for payment."]);
+            return Result<Common.DTOs.PaymentDto>.Failure(ErrorCodes.Payments.InvalidAccount, ErrorCategory.Validation, "الحساب البنكي مطلوب للدفع.");
 
         var bankAccount = await context.BankAccounts
             .FindAsync(paymentOrder.BankAccountId.Value, cancellationToken);
         if (bankAccount is null || !bankAccount.IsActive)
-            return Result<Common.DTOs.PaymentDto>.Failure(["Invalid or inactive bank account."]);
+            return Result<Common.DTOs.PaymentDto>.Failure(ErrorCodes.Payments.InvalidAccount, ErrorCategory.NotFound, "الحساب البنكي غير صالح أو غير نشط.");
 
         if (!bankAccount.GlAccountId.HasValue)
-            return Result<Common.DTOs.PaymentDto>.Failure(["Bank account must be linked to a GL account before payment execution."]);
+            return Result<Common.DTOs.PaymentDto>.Failure(ErrorCodes.Payments.InvalidAccount, ErrorCategory.BusinessRule, "يجب ربط الحساب البنكي بحساب دفتر عام قبل تنفيذ الدفع.");
 
         var linkedDisbursementRequest = await context.DisbursementRequests
             .FirstOrDefaultAsync(d => d.AccrualJournalEntryId == accrualEntry.Id, cancellationToken);
@@ -171,13 +175,14 @@ public class RecordPaymentCommandHandler(
             catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
             {
                 await transaction.RollbackAsync(ct);
-                var innerMsg = ex.InnerException?.Message ?? ex.Message;
-                return Result<Common.DTOs.PaymentDto>.Failure([$"فشل الحفظ: {innerMsg}"]);
+                logger.LogError(ex, "Database update failure recording payment for order {PaymentOrderId}", request.PaymentOrderId);
+                return Result<Common.DTOs.PaymentDto>.Failure(ErrorCodes.Request.InternalError, ErrorCategory.Internal, "فشل الحفظ بسبب خطأ في قاعدة البيانات.");
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync(ct);
-                return Result<Common.DTOs.PaymentDto>.Failure([$"خطأ غير متوقع: {ex.Message}"]);
+                logger.LogError(ex, "Unexpected error recording payment for order {PaymentOrderId}", request.PaymentOrderId);
+                return Result<Common.DTOs.PaymentDto>.Failure(ErrorCodes.Request.InternalError, ErrorCategory.Internal, "خطأ غير متوقع أثناء تسجيل الدفع.");
             }
         }, cancellationToken);
     }

@@ -292,6 +292,7 @@ export const RECEIPT_VOUCHER_PERMISSIONS = {
   ReceiptVouchers: {
     View: 'ReceiptVouchers.View',
     Create: 'ReceiptVouchers.Create',
+    Update: 'ReceiptVouchers.Update',
     Submit: 'ReceiptVouchers.Submit',
     Approve: 'ReceiptVouchers.Approve',
     Cancel: 'ReceiptVouchers.Cancel',

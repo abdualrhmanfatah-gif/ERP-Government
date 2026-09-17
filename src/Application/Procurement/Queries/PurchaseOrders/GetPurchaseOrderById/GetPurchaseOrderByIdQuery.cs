@@ -1,7 +1,9 @@
 using ERP_Government.Domain.Procurement.Enums;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Procurement.Queries.PurchaseOrders.GetPurchaseOrderById;
 
+[Authorize(Policy = PermissionCodes.PurchaseOrdersView)]
 public record GetPurchaseOrderByIdQuery(int Id) : IRequest<Result<PurchaseOrderDetailResponse>>;
 
 public record PurchaseOrderDetailResponse(

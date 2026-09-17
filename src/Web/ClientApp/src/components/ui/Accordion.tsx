@@ -39,7 +39,7 @@ function AccordionItem({
   return (
     <div
       className={cn(
-        'border-b border-[var(--color-border-container)]',
+        'border-b border-[var(--color-container-border)]',
         disabled && 'opacity-50 pointer-events-none'
       )}
     >
@@ -111,7 +111,7 @@ function Accordion({
     <AccordionContext.Provider value={{ openItems, toggle }}>
       <div
         className={cn(
-          'border border-[var(--color-border-container)] rounded-lg overflow-hidden bg-[var(--color-surface)]',
+          'border border-[var(--color-container-border)] rounded-lg overflow-hidden bg-[var(--color-surface)]',
           className
         )}
         role="presentation"

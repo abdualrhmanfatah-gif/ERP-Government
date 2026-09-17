@@ -1,16 +1,18 @@
 using ERP_Government.Application.Budgeting.Common;
+using ERP_Government.Application.Common.Errors;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Budgeting.Queries.Encumbrances;
 
 [Authorize(Policy = PermissionCodes.EncumbrancesView)]
-public record GetEncumbranceByIdQuery(int Id) : IRequest<EncumbranceDetailDto?>;
+public record GetEncumbranceByIdQuery(int Id) : IRequest<Result<EncumbranceDetailDto>>;
 
 public class GetEncumbranceByIdQueryHandler(
     IApplicationDbContext context,
-    IMapper mapper) : IRequestHandler<GetEncumbranceByIdQuery, EncumbranceDetailDto?>
+    IMapper mapper) : IRequestHandler<GetEncumbranceByIdQuery, Result<EncumbranceDetailDto>>
 {
-    public async Task<EncumbranceDetailDto?> Handle(
+    public async Task<Result<EncumbranceDetailDto>> Handle(
         GetEncumbranceByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -18,7 +20,7 @@ public class GetEncumbranceByIdQueryHandler(
             .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
 
         if (entity is null)
-            return null;
+            return Result<EncumbranceDetailDto>.Failure(ErrorCodes.Budgets.EncumbranceNotFound, ErrorCategory.NotFound, $"Encumbrance with ID {request.Id} not found.");
 
         var dto = mapper.Map<EncumbranceDetailDto>(entity);
 
@@ -33,6 +35,6 @@ public class GetEncumbranceByIdQueryHandler(
 
         dto.Lines = lines;
 
-        return dto;
+        return Result<EncumbranceDetailDto>.Success(dto);
     }
 }

@@ -1,5 +1,4 @@
 using ERP_Government.Application.Revenue.Commands.ReceiptVouchers.CreateReceiptVoucher;
-using ERP_Government.Application.Revenue.Commands.ReceiptVouchers.SubmitReceiptVoucher;
 using ERP_Government.Application.Revenue.Commands.ReceiptVouchers.ApproveReceiptVoucher;
 using ERP_Government.Application.Revenue.Commands.ReceiptVouchers.CancelReceiptVoucher;
 using ERP_Government.Application.Revenue.Queries.ReceiptVouchers.GetReceiptVouchers;
@@ -317,7 +316,7 @@ public class ReceiptVoucherTests : TestBase
     }
 
     [Test]
-    public async Task SubmitVoucher_FromDraft_ShouldTransitionToPendingReview()
+    public async Task ApproveVoucher_FromDraft_ShouldTransitionToApproved()
     {
         await TestApp.RunAsAdministratorAsync();
 
@@ -341,49 +340,6 @@ public class ReceiptVoucherTests : TestBase
         var voucherId = createResult.Value!.Id;
 
         var voucherResult = await TestApp.SendAsync(new GetReceiptVoucherByIdQuery { Id = voucherId });
-        var submitResult = await TestApp.SendAsync(new SubmitReceiptVoucherCommand
-        {
-            Id = voucherId,
-            RowVersion = voucherResult.Value!.RowVersion
-        });
-        submitResult.Succeeded.ShouldBeTrue();
-
-        voucherResult = await TestApp.SendAsync(new GetReceiptVoucherByIdQuery { Id = voucherId });
-        voucherResult.Value!.Status.ShouldBe(ReceiptVoucherStatus.PendingReview);
-    }
-
-    [Test]
-    public async Task ApproveVoucher_FromPendingReview_ShouldTransitionToApproved()
-    {
-        await TestApp.RunAsAdministratorAsync();
-
-        var createResult = await TestApp.SendAsync(new CreateReceiptVoucherCommand
-        {
-            VoucherDate = DateOnly.FromDateTime(DateTime.Today),
-            PartyId = 1,
-            PaymentMethod = PaymentMethod.Cash,
-            ReceivedFrom = "Test Party",
-            Lines =
-            [
-                new Application.Revenue.Common.DTOs.CreateReceiptVoucherLineDto
-                {
-                    RevenueAccountId = 1,
-                    Amount = 1000.00m
-                }
-            ],
-            Checks = []
-        });
-        createResult.Succeeded.ShouldBeTrue();
-        var voucherId = createResult.Value!.Id;
-
-        var voucherResult = await TestApp.SendAsync(new GetReceiptVoucherByIdQuery { Id = voucherId });
-        await TestApp.SendAsync(new SubmitReceiptVoucherCommand
-        {
-            Id = voucherId,
-            RowVersion = voucherResult.Value!.RowVersion
-        });
-
-        voucherResult = await TestApp.SendAsync(new GetReceiptVoucherByIdQuery { Id = voucherId });
         var approveResult = await TestApp.SendAsync(new ApproveReceiptVoucherCommand
         {
             Id = voucherId,
@@ -394,11 +350,11 @@ public class ReceiptVoucherTests : TestBase
 
         voucherResult = await TestApp.SendAsync(new GetReceiptVoucherByIdQuery { Id = voucherId });
         voucherResult.Value!.Status.ShouldBe(ReceiptVoucherStatus.Approved);
-        voucherResult.Value!.ReviewedAt.ShouldNotBeNull();
+        voucherResult.Value!.ApprovedAt.ShouldNotBeNull();
     }
 
     [Test]
-    public async Task ApproveVoucher_FromDraft_ShouldReject()
+    public async Task ApproveVoucher_AlreadyApproved_ShouldReject()
     {
         await TestApp.RunAsAdministratorAsync();
 
@@ -422,14 +378,22 @@ public class ReceiptVoucherTests : TestBase
         var voucherId = createResult.Value!.Id;
 
         var voucherResult = await TestApp.SendAsync(new GetReceiptVoucherByIdQuery { Id = voucherId });
+        await TestApp.SendAsync(new ApproveReceiptVoucherCommand
+        {
+            Id = voucherId,
+            Reason = "First approval",
+            RowVersion = voucherResult.Value!.RowVersion
+        });
+
+        voucherResult = await TestApp.SendAsync(new GetReceiptVoucherByIdQuery { Id = voucherId });
         var approveResult = await TestApp.SendAsync(new ApproveReceiptVoucherCommand
         {
             Id = voucherId,
-            Reason = "Direct approval attempt",
+            Reason = "Second approval attempt",
             RowVersion = voucherResult.Value!.RowVersion
         });
         approveResult.Succeeded.ShouldBeFalse();
-        approveResult.Errors.ShouldContain(e => e.Contains("Only Pending Review vouchers can be approved"));
+        approveResult.Errors.ShouldContain(e => e.Contains("Only Draft receipt vouchers can be approved"));
     }
 
     [Test]
@@ -497,12 +461,9 @@ public class ReceiptVoucherTests : TestBase
 
         var result = await TestApp.SendAsync(new GetReceiptVouchersQuery
         {
-            Page = 1,
-            PageSize = 10
+            PartyId = 1
         });
 
-        result.Succeeded.ShouldBeTrue();
-        result.Value.ShouldNotBeNull();
-        result.Value!.Count.ShouldBeGreaterThanOrEqualTo(3);
+        result.Count.ShouldBeGreaterThanOrEqualTo(3);
     }
 }

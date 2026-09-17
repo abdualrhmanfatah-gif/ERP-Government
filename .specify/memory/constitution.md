@@ -1,13 +1,17 @@
 <!--
 Sync Impact Report
-- Version change: 1.3.0 -> 1.3.1 (PATCH: registered feature-scoped TDD exception)
-- Modified principles: none
-- Added sections: Registered Exception #6 — Spec 045 TDD exception
+- Version change: 1.3.1 -> 1.4.0 (MINOR: uniform error handling and recovery obligations)
+- Modified principles: III (central validation boundary clarified), IX (delegates error semantics to XIII)
+- Added sections: XIII — Error Handling, Diagnostics, and Recovery
 - Removed sections: none
 - Feature registry: no change
-- Decision record: DEP-027
-- Follow-up TODOs: capture Spec 045 manual quickstart evidence and run existing five-project regression gate before merge
-- Previous version: 1.3.0 (last amended 2026-09-06)
+- Decision record: DEP-029
+- Synced: AGENTS.md, docs/error-handling.md, docs/database-schema.md, .specify/templates/plan-template.md
+- Templates reviewed: spec/tasks templates derive feature requirements; constitution template is generic
+- Registered exceptions: #1-#6 unchanged; no new waiver. Existing remediation remains open and is not certified complete.
+- Follow-up TODOs: implement and verify the migration in docs/error-handling.md; preserve DEP-027 verification gates
+- Existing governance conflict: Principle XI frontend tests vs AGENTS.md frontend override remains outside this amendment
+- Previous version: 1.3.1 (last amended 2026-09-09)
 -->
 
 # ERP-Government Constitution
@@ -50,8 +54,9 @@ direct references; the outbox and accounting-event retry machinery are establish
 
 - Every business rule MUST be enforced server-side, in use cases or domain services. Frontend
   validation, database defaults, and documentation are not enforcement.
-- Expected business-rule failures MUST return explicit result failures; exceptions are reserved
-  for infrastructure-level conditions mapped to the error contract.
+- Expected business-rule failures MUST return explicit, structured result failures. Central
+  validation and authorization pipelines MAY use recognized exceptions mapped at the delivery
+  boundary; unexpected faults MUST remain distinguishable from expected rejection (Principle XIII).
 - Document state transitions MUST be guarded: a document may only advance along its declared
   lifecycle (for example, only an approved entry may post; only a submitted budget may be
   approved).
@@ -135,9 +140,8 @@ direct references; the outbox and accounting-event retry machinery are establish
 - The backend-generated OpenAPI document is the single source of truth for the HTTP contract.
   Frontend code MUST conform to it — through generated typed clients or contract-conformant
   modules — and MUST NOT assume undocumented endpoint shapes.
-- Error responses MUST use the uniform problem-details contract with fixed status semantics:
-  400 validation, 401 unauthenticated, 403 forbidden, 404 not found. Concurrency conflicts
-  MUST be surfaced distinctly.
+- Error responses MUST follow Principle XIII and its maintained contract in
+  `docs/error-handling.md`; error schemas MUST be described in OpenAPI alongside success schemas.
 - Every endpoint MUST expose a stable, named operation identity usable for client generation.
 - Removing, renaming, or reshaping an endpoint or payload field is a breaking change and
   requires a decision record before implementation.
@@ -190,6 +194,43 @@ direct references; the outbox and accounting-event retry machinery are establish
   MUST be justified in the plan's violation tracking or escalated to a decision record.
 - When implementation and this Constitution conflict, the conflict MUST be resolved by fixing
   the code or by amending the Constitution — never by silent divergence.
+
+### XIII. Error Handling, Diagnostics, and Recovery
+
+- Expected application failures MUST carry a stable machine-readable code, semantic category,
+  safe Arabic message, and field target when applicable. Classification MUST NOT depend on
+  matching message text. Domain and Application MUST remain independent of HTTP types.
+- API failure responses MUST use one problem-details contract containing a stable error code
+  and trace identifier, with field errors when applicable. Web owns the shared conversion of
+  application failures and recognized exceptions. Responses produced without exceptions MUST
+  follow the same contract, including binding, authentication, authorization, and API routing
+  failures. Already-started or aborted responses MUST NOT be rewritten to fabricate this contract.
+- HTTP semantics MUST distinguish invalid requests (400), missing/expired authentication (401),
+  denied permission (403), missing resources (404), state/concurrency conflicts (409), rate
+  limits (429), unexpected faults (500), and known temporary unavailability (503). Only recognized
+  causes MAY be mapped to expected rejection; an arbitrary database exception is not a conflict.
+- Every caught failure MUST lead to a documented recovery, recognized translation, or propagation
+  after cleanup. Failure MUST NOT become success or disappear through an empty callback. Success
+  responses, including empty bodies, MUST retain their documented meaning throughout the client.
+- Unexpected faults MUST have an accountable diagnostic logging owner and a trace identifier
+  connecting the response to internal diagnostics. Duplicate primary exception logs MUST be
+  avoided. Logs MUST exclude credentials, tokens, and sensitive payloads; public messages MUST
+  exclude stack traces, SQL, and internal exception details. Expected rejection and caller
+  cancellation MUST be distinguished from server faults.
+- All frontend transports MUST normalize failures into one shared error representation before
+  presentation, preserving HTTP status, code, trace identifier, and field paths. Network failure,
+  cancellation, and malformed responses MUST remain distinguishable from HTTP rejection.
+- Error presentation MUST preserve user input, bind field errors to their full target paths,
+  provide a visible form-level fallback, and distinguish failed queries from empty data or a
+  missing resource. Each failed action MUST have one notification owner. Session expiry and
+  rendering failures MUST have explicit recovery paths; permission denial is not session expiry.
+- Retries MUST be bounded and justified by transient failure. Writes and financial operations
+  MUST NOT be retried automatically without proven duplicate-effect protection. Durable background
+  work MUST expose failed/stalled states and recover abandoned processing without repeating
+  financial effects, consistent with Principles II and IV.
+- Changes MUST provide evidence for affected failure paths, success compatibility, safe messages,
+  diagnostic correlation, and recovery under the applicable verification governance. The maintained
+  implementation guide is `docs/error-handling.md`; known gaps remain defects until verified closed.
 
 ## Binding Architectural Constraints
 
@@ -288,4 +329,4 @@ This Constitution governs every phase of the Spec-Driven Development workflow
   with owner, rationale, scope, and remediation path, kept in the repository's decision log.
   Unregistered deviation from any principle is treated as a defect in review.
 
-**Version**: 1.3.1 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-09-09
+**Version**: 1.4.0 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-09-14

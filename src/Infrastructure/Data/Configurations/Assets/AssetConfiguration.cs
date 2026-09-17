@@ -21,7 +21,7 @@ public class AssetConfiguration : IEntityTypeConfiguration<Asset>
             .IsRequired();
 
         builder.Property(e => e.Description)
-            .HasMaxLength(500);
+            .HasMaxLength(2000);
 
         builder.Property(e => e.Status)
             .HasMaxLength(50)
@@ -31,38 +31,26 @@ public class AssetConfiguration : IEntityTypeConfiguration<Asset>
             .HasMaxLength(50)
             .IsRequired();
 
-        builder.Property(e => e.CurrencyCode)
-            .HasMaxLength(10);
-
         builder.Property(e => e.OriginalValue)
             .HasColumnType("decimal(23,2)");
 
         builder.Property(e => e.AcquisitionCost)
             .HasColumnType("decimal(23,2)");
 
-        builder.Property(e => e.ResidualValue)
-            .HasColumnType("decimal(23,2)");
-
-        builder.Property(e => e.RelinquishmentValue)
-            .HasColumnType("decimal(23,2)");
-
         builder.Property(e => e.AccumulatedDepreciation)
-            .HasColumnType("decimal(23,2)");
+            .HasPrecision(23, 6);
 
         builder.Property(e => e.CurrentValue)
-            .HasColumnType("decimal(23,2)");
+            .HasPrecision(23, 6);
 
         builder.Property(e => e.AssetTag)
-            .HasMaxLength(50);
+            .HasMaxLength(100);
 
         builder.Property(e => e.Barcode)
             .HasMaxLength(100);
 
         builder.Property(e => e.SerialNumber)
             .HasMaxLength(100);
-
-        builder.Property(e => e.ImageUrl)
-            .HasColumnType("nvarchar(max)");
 
         builder.Property(e => e.Notes)
             .HasMaxLength(2000);
@@ -78,11 +66,31 @@ public class AssetConfiguration : IEntityTypeConfiguration<Asset>
             .HasForeignKey(e => e.AssetGroupId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(e => e.Location)
+            .WithMany()
+            .HasForeignKey(e => e.LocationId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.Employee)
+            .WithMany()
+            .HasForeignKey(e => e.EmployeeId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.Currency)
+            .WithMany()
+            .HasForeignKey(e => e.CurrencyId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.ExchangeRate)
+            .WithMany()
+            .HasForeignKey(e => e.ExchangeRateId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasIndex(e => e.AssetGroupId);
         builder.HasIndex(e => e.LocationId);
-        builder.HasIndex(e => e.FundId);
-        builder.HasIndex(e => e.CostCenterId);
-        builder.HasIndex(e => e.CustodianId);
+        builder.HasIndex(e => e.EmployeeId);
+        builder.HasIndex(e => e.CurrencyId);
+        builder.HasIndex(e => e.ExchangeRateId);
         builder.HasIndex(e => e.Status);
     }
 }

@@ -5,10 +5,12 @@ using ERP_Government.Domain.Security.Enums;
 using MediatR;
 
 using Microsoft.EntityFrameworkCore;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Security.Queries.Users;
 
 // T010 — GetUsersQuery
+[Authorize(Policy = PermissionCodes.UsersView)]
 public class GetUsersQuery : IRequest<List<UserDto>>
 {
     public bool? IsActive { get; init; }

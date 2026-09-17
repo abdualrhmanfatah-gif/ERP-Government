@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, type KeyboardEvent } from 'react';
+import { useState, useRef, useEffect, useCallback, useId, type KeyboardEvent } from 'react';
 import { Search, Check, ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -141,8 +141,9 @@ export function Combobox({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const inputId = label ? `combobox-${label.replace(/\s+/g, '-').toLowerCase()}` : undefined;
-  const errorId = inputId ? `${inputId}-error` : undefined;
+  const autoId = useId();
+  const inputId = autoId;
+  const errorId = `${inputId}-error`;
 
   return (
     <div className={cn('flex flex-col gap-1', className)} ref={containerRef}>
@@ -155,12 +156,14 @@ export function Combobox({
         <button
           type="button"
           ref={buttonRef}
+          id={inputId}
           role="combobox"
           aria-expanded={open}
           aria-haspopup="listbox"
           aria-invalid={!!error || undefined}
           aria-describedby={error ? errorId : undefined}
           disabled={disabled}
+          onKeyDown={handleKeyDown}
           onClick={() => {
             if (!disabled) {
               if (open) {
@@ -171,12 +174,12 @@ export function Combobox({
             }
           }}
           className={cn(
-            'flex items-center justify-between w-full h-10 px-3 py-2 text-sm rounded-lg border bg-[var(--color-surface-container-lowest)] text-[var(--color-on-surface)] cursor-pointer transition-colors duration-150',
+            'flex items-center justify-between w-full h-[var(--density-comfortable-control-height)] px-3 py-2 text-sm rounded-lg border bg-[var(--color-surface-container-lowest)] text-[var(--color-on-surface)] cursor-pointer transition-colors duration-150',
             'focus:outline-2 focus:outline-[var(--color-focus-ring)] focus:outline-offset-2 focus:shadow-[0_0_0_4px_var(--color-focus-halo)]',
             'disabled:bg-[var(--color-disabled-bg)] disabled:text-[var(--color-disabled-fg)] disabled:cursor-not-allowed',
             error
               ? 'border-[var(--color-error)] focus:outline-[var(--color-error)] focus:shadow-[0_0_0_4px_var(--color-error-container)]'
-              : 'border-[var(--color-border-input)]'
+              : 'border-[var(--color-input-border)]'
           )}
         >
           <span className={cn(!selectedOption && 'text-[var(--color-outline)]')}>
@@ -193,9 +196,9 @@ export function Combobox({
         </button>
 
         {open && (
-          <div className={`absolute z-[300] w-full ${openUp ? 'bottom-full mb-1' : 'top-full mt-1'} bg-[var(--color-surface-container-lowest)] rounded-lg border border-[var(--color-border-container)] shadow-lg overflow-hidden`}>
+          <div className={`absolute z-[300] w-full ${openUp ? 'bottom-full mb-1' : 'top-full mt-1'} bg-[var(--color-surface-container-lowest)] rounded-lg border border-[var(--color-container-border)] shadow-lg overflow-hidden`}>
             {/* Search input */}
-            <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--color-border-container)]">
+            <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--color-container-border)]">
               <Search size={16} className="text-[var(--color-on-surface-variant)] shrink-0" aria-hidden="true" />
               <input
                 ref={inputRef}

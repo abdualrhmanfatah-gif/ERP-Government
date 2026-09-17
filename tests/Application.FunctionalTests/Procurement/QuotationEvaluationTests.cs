@@ -1,7 +1,4 @@
 using ERP_Government.Application.Procurement.Commands.PurchaseRequests.CreatePurchaseRequest;
-using ERP_Government.Application.Procurement.Commands.RequestForQuotations.CreateRFQ;
-using ERP_Government.Application.Procurement.Commands.RequestForQuotations.PublishRFQ;
-using ERP_Government.Application.Procurement.Commands.RequestForQuotations.CloseRFQCollection;
 using ERP_Government.Application.Procurement.Commands.Quotations.CreateQuotation;
 using ERP_Government.Application.Procurement.Commands.Quotations.SubmitQuotation;
 using ERP_Government.Application.Procurement.Commands.Quotations.StartEvaluation;
@@ -28,7 +25,6 @@ public class QuotationEvaluationTests : TestBase
     private int _supplierId2;
     private int _prId;
     private int _prDetailId;
-    private int _rfqId;
 
     [SetUp]
     public async Task SeedTestData()
@@ -79,20 +75,13 @@ public class QuotationEvaluationTests : TestBase
         var prDetail = await TestApp.SendAsync(new ERP_Government.Application.Procurement.Queries.PurchaseRequests.GetPurchaseRequestById.GetPurchaseRequestByIdQuery(_prId));
         _prDetailId = prDetail.Details.First().Id;
 
-        var rfqResult = await TestApp.SendAsync(new CreateRFQCommand(
-            _prId, null, null, null, null, [_supplierId1, _supplierId2]));
-        rfqResult.Succeeded.ShouldBeTrue();
-        _rfqId = rfqResult.Value;
-
-        await TestApp.SendAsync(new PublishRFQCommand(_rfqId));
-        await TestApp.SendAsync(new CloseRFQCollectionCommand(_rfqId));
     }
 
     private async Task<int> CreateAndSubmitQuotation(
-        int supplierId, int rfqSupplierId, decimal unitPrice, List<QuotationLineDto>? lines = null)
+        int supplierId, decimal unitPrice, List<QuotationLineDto>? lines = null)
     {
         var result = await TestApp.SendAsync(new CreateQuotationCommand(
-            _rfqId, rfqSupplierId, supplierId, DateTime.UtcNow, null, null, null, null, null,
+            supplierId, DateTime.UtcNow, null, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null,
             lines ?? [new QuotationLineDto(_prDetailId, _itemId, _unitId, 10, unitPrice, null, null, null)]));
         result.Succeeded.ShouldBeTrue();
@@ -103,8 +92,8 @@ public class QuotationEvaluationTests : TestBase
     [Test]
     public async Task FullEvaluationCycle_ShouldComplete()
     {
-        var q1 = await CreateAndSubmitQuotation(_supplierId1, 1, 100m);
-        var q2 = await CreateAndSubmitQuotation(_supplierId2, 2, 120m);
+        var q1 = await CreateAndSubmitQuotation(_supplierId1, 100m);
+        var q2 = await CreateAndSubmitQuotation(_supplierId2, 120m);
 
         await TestApp.SendAsync(new StartEvaluationCommand(q1));
         var q = await TestApp.SendAsync(new GetQuotationByIdQuery(q1));
@@ -125,7 +114,7 @@ public class QuotationEvaluationTests : TestBase
     [Test]
     public async Task StartEvaluation_ShouldCreateAuditRecord()
     {
-        var q1 = await CreateAndSubmitQuotation(_supplierId1, 1, 100m);
+        var q1 = await CreateAndSubmitQuotation(_supplierId1, 100m);
 
         await TestApp.SendAsync(new StartEvaluationCommand(q1));
 
@@ -136,8 +125,8 @@ public class QuotationEvaluationTests : TestBase
     [Test]
     public async Task GetQuotations_ShouldFilterBySupplier()
     {
-        var q1 = await CreateAndSubmitQuotation(_supplierId1, 1, 100m);
-        await CreateAndSubmitQuotation(_supplierId2, 2, 120m);
+        var q1 = await CreateAndSubmitQuotation(_supplierId1, 100m);
+        await CreateAndSubmitQuotation(_supplierId2, 120m);
 
         var filtered = await TestApp.SendAsync(new GetQuotationsQuery(SupplierPartyId: _supplierId1));
         filtered.Value.Items.Count.ShouldBe(1);

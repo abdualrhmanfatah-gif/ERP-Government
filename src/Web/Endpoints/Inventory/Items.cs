@@ -61,9 +61,10 @@ public class Items : IEndpointGroup
         int id)
     {
         var item = await sender.Send(new GetItemByIdQuery(id));
-        if (item is null) return Results.NotFound();
+        if (!item.Succeeded)
+            return item.ToProblemDetails();
 
-        var response = item.ToDetailResponse();
+        var response = item.Value!.ToDetailResponse();
         var itemUnits = await sender.Send(new GetItemUnitsByItemIdQuery(id));
         response = response with { ItemUnits = itemUnits.Select(iu => iu.ToResponse()).ToList() };
 
@@ -77,7 +78,7 @@ public class Items : IEndpointGroup
         var result = await sender.Send(request.ToCommand());
         return result.Succeeded
             ? Results.Created($"/api/Items/{result.Value}", result.Value)
-            : Results.BadRequest(result.Errors);
+            : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleUpdate(
@@ -86,7 +87,7 @@ public class Items : IEndpointGroup
         UpdateItemRequest request)
     {
         var result = await sender.Send(request.ToCommand(id));
-        return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok() : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleToggleActive(
@@ -94,7 +95,7 @@ public class Items : IEndpointGroup
         int id)
     {
         var result = await sender.Send(new ToggleItemActiveCommand(id));
-        return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok() : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleGetItemUnits(

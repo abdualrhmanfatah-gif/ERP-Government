@@ -8,6 +8,7 @@ using ERP_Government.Application.Parties.Queries.GetPartyById;
 using ERP_Government.Domain.Parties.Enums;
 using ERP_Government.Web.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Web.Endpoints.Parties;
 
@@ -16,18 +17,25 @@ public class Parties : IEndpointGroup
     public static void Map(RouteGroupBuilder group)
     {
         group.MapGet("/", HandleGetAll)
+            .RequireAuthorization(PermissionCodes.PartiesView)
             .Produces<IReadOnlyList<PartyResponse>>();
         group.MapGet("/{id:int}", HandleGetById)
+            .RequireAuthorization(PermissionCodes.PartiesView)
             .Produces<PartyResponse?>();
         group.MapPost("/", HandleCreate)
+            .RequireAuthorization(PermissionCodes.PartiesCreate)
             .Produces<int>();
         group.MapPut("/{id:int}", HandleUpdate)
+            .RequireAuthorization(PermissionCodes.PartiesUpdate)
             .Produces<Result>();
         group.MapPatch("/{id:int}/toggle-active", HandleToggleActive)
+            .RequireAuthorization(PermissionCodes.PartiesUpdate)
             .Produces<Result>();
         group.MapGet("/{id:int}/documents", HandleGetDocuments)
+            .RequireAuthorization(PermissionCodes.PartiesView)
             .Produces<IReadOnlyList<PartyDocumentResponse>>();
         group.MapGet("/check-tax-number", HandleCheckTaxNumber)
+            .RequireAuthorization(PermissionCodes.PartiesView)
             .Produces<TaxNumberCheckResponse>();
     }
 
@@ -54,7 +62,7 @@ public class Parties : IEndpointGroup
         CreatePartyRequest request)
     {
         var result = await sender.Send(request.ToCommand());
-        return result.Succeeded ? Results.Created($"/api/Parties/{result.Value}", result.Value) : Results.BadRequest(result.Errors);
+        return result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleUpdate(
@@ -63,7 +71,7 @@ public class Parties : IEndpointGroup
         UpdatePartyRequest request)
     {
         var result = await sender.Send(request.ToCommand(id));
-        return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+        return result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleToggleActive(
@@ -71,7 +79,7 @@ public class Parties : IEndpointGroup
         int id)
     {
         var result = await sender.Send(new TogglePartyActiveCommand(id));
-        return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+        return result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleGetDocuments(

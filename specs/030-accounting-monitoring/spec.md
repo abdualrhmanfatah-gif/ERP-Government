@@ -1,6 +1,8 @@
 # Feature Specification: ACC-05 — مراقبة المحاسبة (Accounting Monitoring)
 
 > **RETIRED (DEP-026, spec 041)**: AccountBalance entity/endpoints removed. Balances computed live from JournalEntryLines. Remaining sections below document PostingRules/AccountingEvents as they stood; AccountingEvents retired separately (spec 042).
+>
+> **RETIRED (DEP-027)**: PostingRules engine, entities, endpoints, pipeline handlers (PostingPipelineHandler/PostingRuleMatcher/MoveGenerator), permissions, and frontend (accounting-monitoring) removed entirely. Posting is native per-business handlers only. US4 / FR-005 / PostingRules API contracts below are historical only — do not implement.
 
 **Feature Branch**: `030-accounting-monitoring`
 

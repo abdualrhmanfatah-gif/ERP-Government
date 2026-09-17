@@ -22,8 +22,8 @@ export function useCreateClassification() {
 export function useUpdateClassification() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...data }: { id: number; rowVersion: string; code: string; name: string; parentId?: number }) =>
-      budgetClassificationsClient.update(id, { id, ...data }),
+    mutationFn: ({ id, rowVersion, code, name, parentId }: { id: number; rowVersion: string; code: string; name: string; parentId?: number }) =>
+      budgetClassificationsClient.update(id, { id, rowVersion, code, name, parentId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: budgetingKeys.budgetClassifications.all });
     },

@@ -1,15 +1,17 @@
+using ERP_Government.Application.Common.Errors;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Domain.Budgeting.Enums;
 
 namespace ERP_Government.Application.Budgeting.Queries.BudgetTransactions.GetBudgetTransactionById;
 
 [Authorize(Policy = PermissionCodes.BudgetTransactionsView)]
-public record GetBudgetTransactionByIdQuery(int Id) : IRequest<BudgetTransactionDetailDto?>;
+public record GetBudgetTransactionByIdQuery(int Id) : IRequest<Result<BudgetTransactionDetailDto>>;
 
 public class GetBudgetTransactionByIdQueryHandler(
-    IApplicationDbContext context) : IRequestHandler<GetBudgetTransactionByIdQuery, BudgetTransactionDetailDto?>
+    IApplicationDbContext context) : IRequestHandler<GetBudgetTransactionByIdQuery, Result<BudgetTransactionDetailDto>>
 {
-    public async Task<BudgetTransactionDetailDto?> Handle(
+    public async Task<Result<BudgetTransactionDetailDto>> Handle(
         GetBudgetTransactionByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -18,9 +20,9 @@ public class GetBudgetTransactionByIdQueryHandler(
             .FirstOrDefaultAsync(t => t.Id == request.Id, cancellationToken);
 
         if (entity is null)
-            return null;
+            return Result<BudgetTransactionDetailDto>.Failure(ErrorCodes.Budgets.TransactionNotFound, ErrorCategory.NotFound, $"Budget transaction with ID {request.Id} not found.");
 
-        return new BudgetTransactionDetailDto
+        return Result<BudgetTransactionDetailDto>.Success(new BudgetTransactionDetailDto
         {
             Id = entity.Id,
             TransactionNumber = entity.TransactionNumber,
@@ -41,6 +43,6 @@ public class GetBudgetTransactionByIdQueryHandler(
             ReversalReason = entity.ReversalReason,
             RowVersion = entity.RowVersion,
             Created = entity.Created
-        };
+        });
     }
 }

@@ -47,7 +47,9 @@ public class BudgetItemAllocations : IEndpointGroup
         int id)
     {
         var result = await sender.Send(new GetBudgetItemAllocationByIdQuery(id));
-        return result is not null ? Results.Ok(result) : Results.NotFound();
+        return result.Succeeded
+            ? Results.Ok(result.Value!)
+            : result.ToProblemDetails();
     }
 
     public static async Task<IResult> CreateBudgetItemAllocation(
@@ -57,7 +59,7 @@ public class BudgetItemAllocations : IEndpointGroup
         var result = await sender.Send(new CreateBudgetItemAllocationCommand(
             body.BudgetId, body.BudgetItemId, body.ProposedAmount, body.Remarks));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Created($"/api/BudgetItemAllocations/{result.Value}", result.Value);
     }
 
@@ -69,7 +71,7 @@ public class BudgetItemAllocations : IEndpointGroup
         var result = await sender.Send(new UpdateBudgetItemAllocationCommand(
             id, body.ProposedAmount, body.Remarks, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -79,7 +81,7 @@ public class BudgetItemAllocations : IEndpointGroup
     {
         var result = await sender.Send(new DeleteBudgetItemAllocationCommand(id));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

@@ -6,20 +6,23 @@ interface Tab {
   label: string;
   content: ReactNode;
   icon?: ReactNode;
+  testId?: string;
 }
 
 interface TabsProps {
   tabs: Tab[];
   defaultKey?: string;
+  value?: string;
   onChange?: (key: string) => void;
 }
 
-export function Tabs({ tabs, defaultKey, onChange }: TabsProps) {
-  const [activeKey, setActiveKey] = useState(defaultKey || tabs[0]?.key || '');
+export function Tabs({ tabs, defaultKey, value, onChange }: TabsProps) {
+  const [internalKey, setInternalKey] = useState(defaultKey || tabs[0]?.key || '');
+  const activeKey = value ?? internalKey;
   const tabRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   const handleChange = (key: string) => {
-    setActiveKey(key);
+    if (value === undefined) setInternalKey(key);
     onChange?.(key);
   };
 
@@ -57,7 +60,7 @@ export function Tabs({ tabs, defaultKey, onChange }: TabsProps) {
     <div className="flex flex-col">
       <div
         role="tablist"
-        className="flex border-b border-[var(--color-border-container)]"
+        className="flex border-b border-[var(--color-container-border)]"
       >
         {tabs.map((tab) => {
           const isActive = tab.key === activeKey;
@@ -70,6 +73,7 @@ export function Tabs({ tabs, defaultKey, onChange }: TabsProps) {
               type="button"
               role="tab"
               id={`tab-${tab.key}`}
+              data-testid={tab.testId}
               aria-selected={isActive}
               aria-controls={`tabpanel-${tab.key}`}
               tabIndex={isActive ? 0 : -1}

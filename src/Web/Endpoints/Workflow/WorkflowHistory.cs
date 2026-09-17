@@ -1,6 +1,7 @@
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Workflow.Queries.GetWorkflowHistory;
 using ERP_Government.Shared.Workflow;
+using ERP_Government.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,10 +17,11 @@ public class WorkflowHistory : IEndpointGroup
     }
 
     [EndpointSummary("Get workflow history for an instance")]
-    public static async Task<List<WorkflowHistoryDto>> GetWorkflowHistory(
+    public static async Task<IResult> GetWorkflowHistory(
         [FromServices] ISender sender,
         int instanceId)
     {
-        return await sender.Send(new GetWorkflowHistoryQuery { InstanceId = instanceId });
+        var result = await sender.Send(new GetWorkflowHistoryQuery { InstanceId = instanceId });
+        return result.ToProblemDetails();
     }
 }

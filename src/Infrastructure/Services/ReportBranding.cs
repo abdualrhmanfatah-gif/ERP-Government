@@ -6,16 +6,22 @@ public static class ReportBranding
     public static string OrganizationName { get; private set; } = string.Empty;
     public static string? DepartmentName { get; private set; }
     public static string? LogoPath { get; private set; }
+    public static string? RepublicHeaderPath { get; private set; }
+    public static string? MinistryHeaderPath { get; private set; }
 
     public static void Configure(
         string governmentLine,
         string organizationName,
         string? departmentName,
-        string? logoPath)
+        string? logoPath,
+        string? republicHeaderPath,
+        string? ministryHeaderPath)
     {
         GovernmentLine = governmentLine;
         OrganizationName = organizationName;
         DepartmentName = departmentName;
         LogoPath = logoPath;
+        RepublicHeaderPath = republicHeaderPath;
+        MinistryHeaderPath = ministryHeaderPath;
     }
 }

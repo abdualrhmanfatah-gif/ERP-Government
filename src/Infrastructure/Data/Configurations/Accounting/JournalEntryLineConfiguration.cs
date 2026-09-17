@@ -42,6 +42,8 @@ public class JournalEntryLineConfiguration : IEntityTypeConfiguration<JournalEnt
 
         builder.HasIndex(e => e.PaymentOrderId);
 
+        builder.HasIndex(e => e.AssetDepreciationRunId);
+
         // Performance index for General Ledger report (running balance computation)
         builder.HasIndex(e => new { e.AccountId, e.JournalEntryId })
             .HasDatabaseName("IX_JournalEntryLines_AccountId_JournalEntryId");
@@ -60,6 +62,18 @@ public class JournalEntryLineConfiguration : IEntityTypeConfiguration<JournalEnt
         builder.HasOne(e => e.CostCenter)
             .WithMany()
             .HasForeignKey(e => e.CostCenterId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.AssetDepreciationRun)
+            .WithMany()
+            .HasForeignKey(e => e.AssetDepreciationRunId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(e => e.DepreciationScheduleLineId);
+
+        builder.HasOne(e => e.DepreciationScheduleLine)
+            .WithMany()
+            .HasForeignKey(e => e.DepreciationScheduleLineId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Ignore(e => e.DomainEvents);

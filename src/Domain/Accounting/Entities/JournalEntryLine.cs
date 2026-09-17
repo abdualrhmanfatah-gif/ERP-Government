@@ -1,3 +1,4 @@
+using ERP_Government.Domain.Assets.Entities;
 using ERP_Government.Domain.Common;
 using ERP_Government.Domain.Organization.Entities;
 
@@ -15,6 +16,8 @@ public class JournalEntryLine : BaseLongAuditableEntity
     public decimal Credit { get; set; }
     public int? CostCenterId { get; set; }
     public int? PaymentOrderId { get; set; }
+    public int? AssetDepreciationRunId { get; set; }
+    public int? DepreciationScheduleLineId { get; set; }
     public byte[] RowVersion { get; set; } = [];
 
     // Same-module FKs
@@ -23,4 +26,6 @@ public class JournalEntryLine : BaseLongAuditableEntity
 
     // Cross-module FKs
     public CostCenter? CostCenter { get; set; }
+    public AssetDepreciationRun? AssetDepreciationRun { get; set; }
+    public DepreciationScheduleLine? DepreciationScheduleLine { get; set; }
 }

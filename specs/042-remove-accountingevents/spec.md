@@ -5,6 +5,8 @@
 **Decision Record**: DEP-026
 **Blast radius**: largest of DEP-026 program
 
+> **SUPERSEDED (DEP-027)**: Items FR-4/FR-5 below (PostingPipelineHandler, JournalEntryGenerator/MoveGenerator) were later removed entirely with the PostingRules engine (DEP-027, migration `RemovePostingRules`). Posting is now native per-business handlers only; this spec is historical for what 042 itself shipped.
+
 ## Context
 
 `AccountingEvents` is a staging entity between domain events and JournalEntries: DomainEventHandler creates a row per event; PostingPipelineHandler consumes it (auditor status transitions), matches PostingRules, generates JournalEntry shells. RetryPolicy + manual retry commands + events queue page support manual recovery. Staging hop adds schema, queries, guards, and a UI queue with no transform benefit — pipeline writes JournalEntries directly (outbox shape retained via OutboxMessages).

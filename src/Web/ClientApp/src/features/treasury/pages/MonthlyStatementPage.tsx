@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button, MoneyDisplay, Loading, EmptyState, Input, Select, Page } from '@/components/ui';
 import { DepositSlipsClient, FundsClient } from '../../../web-api-client';
+import { formatDate } from '@/shared/utils/formatters';
+import { getQueryErrorMessage } from '@/shared/api/query-error';
 
 const slipClient = new DepositSlipsClient();
 const fundsClient = new FundsClient();
@@ -18,7 +20,7 @@ export default function MonthlyStatementPage() {
     queryFn: () => fundsClient.fundsAll(),
   });
 
-  const { data: statement, isLoading, isError: isStatementError, refetch: refetchStatement } = useQuery({
+  const { data: statement, isLoading, isError: isStatementError, error: statementError, refetch: refetchStatement } = useQuery({
     queryKey: ['monthly-statement', year, month, fundId],
     queryFn: () => slipClient.monthlyStatement(year, month, fundId!),
     enabled: fundId != null,
@@ -62,9 +64,9 @@ export default function MonthlyStatementPage() {
       ) : isLoading ? (
         <Loading />
       ) : isStatementError ? (
-        <div className="p-4 text-center">
-          <p className="text-sm text-[var(--color-error)]">فشل تحميل البيانات</p>
-          <Button variant="outline" size="sm" className="mt-2" onClick={() => refetchStatement()}>إعادة المحاولة</Button>
+        <div className="p-4 text-center flex flex-col items-center gap-2">
+          <p className="text-sm text-[var(--color-error)]">{getQueryErrorMessage(statementError)}</p>
+          <Button variant="outline" size="sm" onClick={() => refetchStatement()}>إعادة المحاولة</Button>
         </div>
       ) : !hasData ? (
         <EmptyState message="لا توجد بيانات لهذا الشهر" />
@@ -113,7 +115,7 @@ export default function MonthlyStatementPage() {
                 {statement!.vouchers?.map((v: any) => (
                   <div key={v.id} className="flex gap-4 px-4 py-3 text-sm">
                     <span className="w-24 font-medium tabular-nums">{v.voucherNumber}</span>
-                    <span className="w-32">{new Date(v.receivedDate).toLocaleDateString('ar-YE')}</span>
+                    <span className="w-32">{formatDate(v.receivedDate)}</span>
                     <span className="flex-1">{v.receivedFrom}</span>
                     <span className="w-20">{v.paymentMethodLabel}</span>
                     <span className="w-24 text-end">
@@ -140,7 +142,7 @@ export default function MonthlyStatementPage() {
                   <div key={i} className="flex gap-4 px-4 py-3 text-sm">
                     <span className="w-24 tabular-nums">{c.checkNumber}</span>
                     <span className="w-32">{c.bankName}</span>
-                    <span className="flex-1">{c.clearedAt ? new Date(c.clearedAt).toLocaleDateString('ar-YE') : '—'}</span>
+                    <span className="flex-1">{formatDate(c.clearedAt)}</span>
                     <span className="w-24 text-end">
                       <MoneyDisplay value={c.amount ?? 0} />
                     </span>

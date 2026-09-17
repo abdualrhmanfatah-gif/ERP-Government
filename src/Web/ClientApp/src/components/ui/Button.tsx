@@ -8,6 +8,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        /** @deprecated Use 'primary' instead. This alias exists for backward compatibility only. */
         default:
           "bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-container)] hover:text-[var(--color-on-primary)] active:bg-[var(--color-primary-container)] disabled:bg-[var(--color-disabled-bg)] disabled:text-[var(--color-disabled-fg)] disabled:opacity-100",
         primary:
@@ -21,11 +22,11 @@ const buttonVariants = cva(
         destructive:
           "bg-[var(--color-error)] text-[var(--color-on-error)] hover:bg-[var(--color-error-container)] hover:text-[var(--color-on-error-container)] active:bg-[var(--color-error)] disabled:bg-[var(--color-disabled-bg)] disabled:text-[var(--color-disabled-fg)] disabled:opacity-100 focus-visible:border-[color-mix(in_srgb,var(--color-error)_40%,transparent)] focus-visible:ring-[color-mix(in_srgb,var(--color-error)_20%,transparent)] dark:bg-[var(--color-error)] dark:hover:bg-[var(--color-error-container)] dark:focus-visible:ring-[color-mix(in_srgb,var(--color-error)_40%,transparent)]",
         success:
-          "bg-[var(--color-success,#16a34a)] text-white hover:bg-[var(--color-success-hover,#15803d)] active:bg-[var(--color-success,#16a34a)] disabled:bg-[var(--color-disabled-bg)] disabled:text-[var(--color-disabled-fg)] disabled:opacity-100",
+          "bg-[var(--color-success)] text-[var(--color-on-success)] hover:bg-[var(--color-success-hover)] active:bg-[var(--color-success)] disabled:bg-[var(--color-disabled-bg)] disabled:text-[var(--color-disabled-fg)] disabled:opacity-100",
         info:
-          "bg-[var(--color-info,#2563eb)] text-white hover:bg-[var(--color-info-hover,#1d4ed8)] active:bg-[var(--color-info,#2563eb)] disabled:bg-[var(--color-disabled-bg)] disabled:text-[var(--color-disabled-fg)] disabled:opacity-100",
+          "bg-[var(--color-info)] text-[var(--color-on-info)] hover:bg-[var(--color-info-hover)] active:bg-[var(--color-info)] disabled:bg-[var(--color-disabled-bg)] disabled:text-[var(--color-disabled-fg)] disabled:opacity-100",
         link: "text-[var(--color-link)] underline-offset-4 hover:underline disabled:text-[var(--color-disabled-fg)] disabled:no-underline",
-        header: "bg-transparent text-white/70 hover:bg-white/10 hover:text-white active:bg-white/15 disabled:text-white/30 disabled:bg-transparent",
+        header: "bg-transparent text-[var(--color-on-primary)] hover:bg-[color-mix(in_srgb,var(--color-on-primary)_10%,transparent)] hover:text-[var(--color-on-primary)] active:bg-[color-mix(in_srgb,var(--color-on-primary)_15%,transparent)] disabled:text-[color-mix(in_srgb,var(--color-on-primary)_30%,transparent)] disabled:bg-transparent",
       },
       size: {
         default:

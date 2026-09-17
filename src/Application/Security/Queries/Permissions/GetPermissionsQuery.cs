@@ -4,6 +4,7 @@ using ERP_Government.Application.Security.Common.DTOs;
 namespace ERP_Government.Application.Security.Queries.Permissions;
 
 // Q-S003 — GetPermissionsQuery
+[Authorize(Policy = PermissionCodes.PermissionsView)]
 public class GetPermissionsQuery : IRequest<List<SecurityPermissionDto>>
 {
     public string? Module { get; init; }

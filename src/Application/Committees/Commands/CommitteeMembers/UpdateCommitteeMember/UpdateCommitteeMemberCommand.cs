@@ -1,7 +1,9 @@
 using ERP_Government.Domain.Committees.Enums;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Committees.Commands.CommitteeMembers.UpdateCommitteeMember;
 
+[Authorize(Policy = PermissionCodes.CommitteeMembersAdd)]
 public class UpdateCommitteeMemberCommand : IRequest<Result>
 {
     public int Id { get; init; }

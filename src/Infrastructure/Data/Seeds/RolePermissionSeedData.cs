@@ -159,9 +159,10 @@ public static class RolePermissionSeedData
         var asstMgr = roles.First(r => r.Code == "ASST_MGR");
         foreach (var p in allPerms.Where(p =>
             p.Code.StartsWith("Assets.") || p.Code.StartsWith("AssetGroups.") ||
-            p.Code.StartsWith("AssetMovements.") || p.Code.StartsWith("AssetDisposals.") ||
+            p.Code.StartsWith("AssetTransfers.") || p.Code.StartsWith("AssetDisposals.") ||
             p.Code.StartsWith("AssetRevaluations.") || p.Code.StartsWith("AssetImpairments.") ||
-            p.Code.StartsWith("Depreciation.") || p.Code.StartsWith("Reports.")))
+            p.Code.StartsWith("AssetDepreciation.") || p.Code.StartsWith("AssetCounts.") ||
+            p.Code.StartsWith("Reports.")))
             rolePerms.Add(new RolePermission { RoleId = asstMgr.Id, PermissionId = p.Id });
 
         // INV_MGR — مدير المخزون
@@ -177,7 +178,8 @@ public static class RolePermissionSeedData
         // REV_MGR — مدير الإيرادات
         var revMgr = roles.First(r => r.Code == "REV_MGR");
         foreach (var p in allPerms.Where(p =>
-            p.Code.StartsWith("RevenueReceipts.") || p.Code.StartsWith("Reports.")))
+            p.Code.StartsWith("RevenueClaims.") || p.Code.StartsWith("CollectionOrders.") ||
+            p.Code.StartsWith("ReceiptVouchers.") || p.Code.StartsWith("DepositSlips.") || p.Code.StartsWith("Checks.") || p.Code.StartsWith("Reports.") || p.Code.StartsWith("Reporting.")))
             rolePerms.Add(new RolePermission { RoleId = revMgr.Id, PermissionId = p.Id });
 
         // VIEWER — مستعرض: قراءة فقط
@@ -208,7 +210,6 @@ public static class RolePermissionSeedData
             Make("Accounting.JournalEntries.Read"), Make("Accounting.JournalEntries.Create"), Make("Accounting.JournalEntries.Submit"),
             Make("Accounting.JournalEntries.Approve"), Make("Accounting.JournalEntries.Post"), Make("Accounting.JournalEntries.Reverse"),
             Make("Accounting.JournalEntries.UpdateLines"), Make("Accounting.JournalEntries.Cancel"),
-            Make("Accounting.PostingRules.Read"), Make("Accounting.PostingRules.Create"), Make("Accounting.PostingRules.Edit"), Make("Accounting.PostingRules.Delete"),
             Make("Accounting.Templates.Read"), Make("Accounting.Templates.Create"), Make("Accounting.Templates.Update"),
             Make("Accounting.RecurringEntries.Read"), Make("Accounting.RecurringEntries.Create"), Make("Accounting.RecurringEntries.Pause"),
             Make("Accounting.RecurringEntries.Resume"), Make("Accounting.RecurringEntries.Cancel"),
@@ -253,11 +254,12 @@ public static class RolePermissionSeedData
             Make("CommitteeMembers.View"), Make("CommitteeMembers.Add"), Make("CommitteeMembers.Remove"),
             Make("CommitteeAssignments.View"), Make("CommitteeAssignments.Create"), Make("CommitteeAssignments.Complete"),
 
-            // Revenue
-            Make("RevenueReceipts.View"), Make("RevenueReceipts.Create"), Make("RevenueReceipts.Approve"), Make("RevenueReceipts.Post"), Make("RevenueReceipts.Cancel"),
+            // RevenueClaims & CollectionOrders
+            Make("RevenueClaims.View"), Make("RevenueClaims.Create"), Make("RevenueClaims.Approve"), Make("RevenueClaims.WriteOff"),
+            Make("CollectionOrders.View"), Make("CollectionOrders.Create"), Make("CollectionOrders.Approve"),
 
             // ReceiptVouchers
-            Make("ReceiptVouchers.View"), Make("ReceiptVouchers.Create"), Make("ReceiptVouchers.Submit"), Make("ReceiptVouchers.Approve"), Make("ReceiptVouchers.Cancel"),
+            Make("ReceiptVouchers.View"), Make("ReceiptVouchers.Create"), Make("ReceiptVouchers.Update"), Make("ReceiptVouchers.Submit"), Make("ReceiptVouchers.Approve"), Make("ReceiptVouchers.Cancel"),
 
             // DepositSlips
             Make("DepositSlips.View"), Make("DepositSlips.Create"), Make("DepositSlips.Update"), Make("DepositSlips.Approve"),
@@ -268,11 +270,12 @@ public static class RolePermissionSeedData
             // Assets
             Make("Assets.View"), Make("Assets.Create"), Make("Assets.Update"),
             Make("AssetGroups.View"), Make("AssetGroups.Create"), Make("AssetGroups.Update"),
-            Make("AssetMovements.View"), Make("AssetMovements.Create"), Make("AssetMovements.Approve"),
+            Make("AssetTransfers.View"), Make("AssetTransfers.Create"), Make("AssetTransfers.Execute"),
             Make("AssetDisposals.View"), Make("AssetDisposals.Create"), Make("AssetDisposals.Approve"), Make("AssetDisposals.Post"),
             Make("AssetRevaluations.View"), Make("AssetRevaluations.Create"), Make("AssetRevaluations.Approve"), Make("AssetRevaluations.Post"),
             Make("AssetImpairments.View"), Make("AssetImpairments.Create"), Make("AssetImpairments.Approve"), Make("AssetImpairments.Post"),
-            Make("Depreciation.View"), Make("Depreciation.Post"), Make("Depreciation.Reverse"),
+            Make("AssetDepreciation.View"), Make("AssetDepreciation.Run"), Make("AssetDepreciation.Post"),
+            Make("AssetCounts.View"), Make("AssetCounts.Create"), Make("AssetCounts.Execute"), Make("AssetCounts.Review"),
 
             // Inventory
             Make("Items.View"), Make("Items.Create"), Make("Items.Update"),
@@ -320,7 +323,6 @@ public static class RolePermissionSeedData
             Make("Reporting.ViewBudgetExecution"), Make("Reporting.ExportReports"),
             Make("Reporting.ViewRevenueCollections"),
             Make("Reporting.ViewDisbursementRegister"),
-            Make("Reporting.ViewAvailabilitySnapshot"),
             Make("Reporting.ViewTrialBalanceReport"),
             Make("Reporting.ViewFinancialStatements"),
 

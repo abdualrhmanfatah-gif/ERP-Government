@@ -57,11 +57,12 @@ public class BankReconciliations : IEndpointGroup
     }
 
     [EndpointSummary("Get bank reconciliation by ID")]
-    public static async Task<BankReconciliationDto?> GetBankReconciliationById(
+    public static async Task<IResult> GetBankReconciliationById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetBankReconciliationByIdQuery { Id = id });
+        var result = await sender.Send(new GetBankReconciliationByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new bank reconciliation")]
@@ -71,7 +72,7 @@ public class BankReconciliations : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -82,7 +83,7 @@ public class BankReconciliations : IEndpointGroup
     {
         var result = await sender.Send(new ApproveBankReconciliationCommand { Id = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -93,7 +94,7 @@ public class BankReconciliations : IEndpointGroup
     {
         var result = await sender.Send(new CompleteBankReconciliationCommand { Id = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -109,7 +110,7 @@ public class BankReconciliations : IEndpointGroup
             Reason = command.Reason
         });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -137,7 +138,7 @@ public class BankReconciliations : IEndpointGroup
             Description = command.Description
         });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

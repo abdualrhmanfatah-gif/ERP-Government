@@ -1,8 +1,10 @@
 using ERP_Government.Application.Documents.Common;
 using ERP_Government.Domain.Security.Entities;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Documents.Commands.UploadAttachment;
 
+[Authorize]
 public record UploadAttachmentCommand(
     string DocumentType,
     int DocumentId,

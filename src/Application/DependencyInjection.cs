@@ -1,7 +1,6 @@
-﻿using System.Reflection;
+using System.Reflection;
 using ERP_Government.Application.Accounting.Common.Interfaces;
 using ERP_Government.Application.Accounting.Common.Services;
-using ERP_Government.Application.Accounting.EventHandlers;
 
 using ERP_Government.Application.Common.Behaviours;
 using ERP_Government.Application.Budgeting.Common;
@@ -37,8 +36,6 @@ public static class DependencyInjection
         builder.Services.AddScoped<IExchangeRateResolver, ExchangeRateResolver>();
         builder.Services.AddScoped<ICurrencyConversionService, CurrencyConversionService>();
         builder.Services.AddScoped<IBudgetAvailabilityService, BudgetAvailabilityService>();
-        builder.Services.AddScoped<PostingRuleMatcher>();
-        builder.Services.AddScoped<JournalEntryGenerator>();
-        builder.Services.AddScoped<PostingPipelineHandler>();
+        builder.Services.AddScoped<ERP_Government.Application.Revenue.Common.Services.RevenueJournalEntryService>();
     }
 }

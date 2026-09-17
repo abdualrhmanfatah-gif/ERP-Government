@@ -42,7 +42,9 @@ public class BudgetItems : IEndpointGroup
         int id)
     {
         var result = await sender.Send(new GetBudgetItemAvailabilityQuery(id));
-        return result is not null ? Results.Ok(result) : Results.NotFound();
+        return result.Succeeded
+            ? Results.Ok(result.Value!)
+            : result.ToProblemDetails();
     }
 
     public static async Task<List<MonthlyPlanDto>> GetMonthlyPlan(
@@ -59,7 +61,7 @@ public class BudgetItems : IEndpointGroup
     {
         var result = await sender.Send(new SaveBudgetItemMonthlyPlanCommand(id, body.Entries));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

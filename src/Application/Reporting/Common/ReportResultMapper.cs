@@ -1,7 +1,6 @@
 using ERP_Government.Application.Reporting.BudgetExecution.GetBudgetExecutionReport;
 using ERP_Government.Application.Reporting.DisbursementRegister.GetDisbursementRegisterQuery;
 using ERP_Government.Application.Reporting.RevenueCollections.GetRevenueCollectionsReport;
-using ERP_Government.Application.Reporting.AvailabilitySnapshot.GetAvailabilitySnapshotQuery;
 using ERP_Government.Application.Reporting.TrialBalance.GetTrialBalanceReport;
 using ERP_Government.Application.Accounting.Reports.Common;
 
@@ -98,29 +97,6 @@ public static class ReportResultMapper
                         Balance = l.Amount
                     }).ToList(),
                     Total = report.Totals.TotalAmount
-                }
-            ]
-        };
-
-    public static ReportResult ToReportResult(this AvailabilitySnapshotDto report, string? currencyCode) =>
-        new()
-        {
-            Currency = currencyCode ?? string.Empty,
-            GeneratedAt = DateTimeOffset.UtcNow,
-            Sections =
-            [
-                new ReportSection
-                {
-                    Title = "Availability Snapshot",
-                    Lines = report.Breakdown.Select(l => new ReportLine
-                    {
-                        AccountCode = report.ItemCode,
-                        AccountName = $"{report.ItemName} - {l.FundCode}",
-                        Debit = l.PaidAmount,
-                        Credit = 0,
-                        Balance = l.AvailableAmount
-                    }).ToList(),
-                    Total = report.Totals.AvailableAmount
                 }
             ]
         };

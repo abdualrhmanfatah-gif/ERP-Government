@@ -104,14 +104,15 @@ export function formatNegative(value: number, decimals = 2): string {
 }
 
 /**
- * Percentage formatting.
+ * Percentage formatting from a ratio — financial tables use Western digits and the ASCII percent sign.
+ * 0.04 → "4%" · 0.366667 → "36.6667%"
  */
-export function formatPercent(value: number, decimals = 1): string {
-  return new Intl.NumberFormat('ar-YE', {
-    style: 'percent',
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  }).format(value / 100);
+export function formatPercent(value: number, maxDecimals = 4): string {
+  const percent = new Intl.NumberFormat('ar-YE', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: maxDecimals,
+  }).format(value * 100);
+  return `${percent}%`;
 }
 
 /**

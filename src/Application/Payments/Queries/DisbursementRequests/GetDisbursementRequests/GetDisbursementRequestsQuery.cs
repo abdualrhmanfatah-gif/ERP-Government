@@ -3,9 +3,11 @@ using ERP_Government.Application.Payments.Common.DTOs;
 using ERP_Government.Domain.Payments.Enums;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Payments.Queries.DisbursementRequests.GetDisbursementRequests;
 
+[Authorize(Policy = PermissionCodes.DisbursementRequestsView)]
 public record GetDisbursementRequestsQuery(
     DisbursementRequestStatus? Status = null,
     int? RequestedById = null) : IRequest<List<DisbursementRequestDto>>;

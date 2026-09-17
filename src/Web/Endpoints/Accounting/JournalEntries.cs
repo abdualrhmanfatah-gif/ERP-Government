@@ -94,11 +94,12 @@ public class JournalEntries : IEndpointGroup
     }
 
     [EndpointSummary("Get journal entry by ID")]
-    public static async Task<JournalEntryDto?> GetJournalEntryById(
+    public static async Task<IResult> GetJournalEntryById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetJournalEntryByIdQuery { Id = id });
+        var result = await sender.Send(new GetJournalEntryByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new journal entry")]
@@ -108,7 +109,7 @@ public class JournalEntries : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Ok(new { id = result.Value });
     }
 
@@ -119,11 +120,15 @@ public class JournalEntries : IEndpointGroup
         [FromBody] UpdateJournalEntryCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -134,11 +139,15 @@ public class JournalEntries : IEndpointGroup
         [FromBody] CancelJournalEntryCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -149,11 +158,15 @@ public class JournalEntries : IEndpointGroup
         [FromBody] SubmitJournalEntryCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -164,11 +177,15 @@ public class JournalEntries : IEndpointGroup
         [FromBody] ApproveJournalEntryCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -179,11 +196,15 @@ public class JournalEntries : IEndpointGroup
         [FromBody] PostJournalEntryCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -194,11 +215,15 @@ public class JournalEntries : IEndpointGroup
         [FromBody] ReverseJournalEntryCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Ok(new { reversalId = result.Value });
     }
 
@@ -213,7 +238,7 @@ public class JournalEntries : IEndpointGroup
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Ok(new { lineId = result.Value });
     }
 
@@ -225,11 +250,15 @@ public class JournalEntries : IEndpointGroup
         [FromBody] UpdateJournalEntryLineCommand command)
     {
         if (id != command.JournalEntryId || lineId != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -242,7 +271,7 @@ public class JournalEntries : IEndpointGroup
         var command = new RemoveJournalEntryLineCommand { Id = lineId, JournalEntryId = id };
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 

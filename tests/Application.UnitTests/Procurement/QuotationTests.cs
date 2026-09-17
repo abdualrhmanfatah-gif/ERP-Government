@@ -3,9 +3,8 @@ using ERP_Government.Application.FinancialSettings.Common.Services;
 using ERP_Government.Application.Procurement.Commands.PurchaseRequests.CreatePurchaseRequest;
 using ERP_Government.Application.Procurement.Commands.PurchaseRequests.SubmitPurchaseRequest;
 using ERP_Government.Application.Procurement.Commands.PurchaseRequests.ApprovePurchaseRequest;
-using ERP_Government.Application.Procurement.Commands.RequestForQuotations.CreateRFQ;
-using ERP_Government.Application.Procurement.Commands.RequestForQuotations.PublishRFQ;
 using ERP_Government.Application.Procurement.Commands.Quotations.CreateQuotation;
+using ERP_Government.Application.Procurement.Commands.Quotations.SubmitQuotation;
 using ERP_Government.Application.Procurement.Commands.Quotations.StartEvaluation;
 using ERP_Government.Application.Procurement.Commands.Quotations.CompleteEvaluation;
 using ERP_Government.Application.Procurement.Commands.Quotations.SelectQuotation;
@@ -25,9 +24,7 @@ public class QuotationTests
 {
     private ApplicationDbContext _dbContext = null!;
     private Mock<IDocumentSequenceService> _prSeqMock = null!;
-    private Mock<IDocumentSequenceService> _rfqSeqMock = null!;
     private Mock<IDocumentSequenceService> _quotSeqMock = null!;
-    private int _rfqId;
 
     [SetUp]
     public async Task Setup()
@@ -38,10 +35,8 @@ public class QuotationTests
         _dbContext = new ApplicationDbContext(options);
 
         _prSeqMock = new Mock<IDocumentSequenceService>();
-        _rfqSeqMock = new Mock<IDocumentSequenceService>();
         _quotSeqMock = new Mock<IDocumentSequenceService>();
         _prSeqMock.Setup(s => s.GenerateNextNumberAsync("PurchaseRequest", It.IsAny<CancellationToken>())).ReturnsAsync("PR-000001");
-        _rfqSeqMock.Setup(s => s.GenerateNextNumberAsync("RequestForQuotation", It.IsAny<CancellationToken>())).ReturnsAsync("RFQ-000001");
         _quotSeqMock.Setup(s => s.GenerateNextNumberAsync("Quotation", It.IsAny<CancellationToken>())).ReturnsAsync("QT-000001");
 
         _dbContext.Users.Add(new Domain.Security.Entities.User { Id = 1, Login = "test", IsActive = true });
@@ -64,6 +59,7 @@ public class QuotationTests
                 RequiredDate: null,
                 DepartmentId: null,
                 CostCenterId: null,
+                RequesterName: "Test User",
                 Priority: PurchaseRequestPriority.Normal,
                 Notes: null,
                 Lines: new List<PurchaseRequestLineDto>
@@ -75,31 +71,15 @@ public class QuotationTests
             .Handle(new SubmitPurchaseRequestCommand(prResult.Value!), CancellationToken.None);
         await new ApprovePurchaseRequestCommandHandler(_dbContext)
             .Handle(new ApprovePurchaseRequestCommand(prResult.Value!), CancellationToken.None);
-
-        var rfqResult = await new CreateRFQCommandHandler(_dbContext, _rfqSeqMock.Object)
-            .Handle(new CreateRFQCommand(
-                PurchaseRequestId: prResult.Value!,
-                DeadlineDate: DateTime.UtcNow.AddDays(10),
-                CurrencyCode: null,
-                TermsAndConditions: null,
-                Notes: null,
-                SupplierPartyIds: new List<int> { 1, 2 }), CancellationToken.None);
-        _rfqId = rfqResult.Value!;
-
-        await new PublishRFQCommandHandler(_dbContext)
-            .Handle(new PublishRFQCommand(_rfqId), CancellationToken.None);
     }
 
     [TearDown]
     public void TearDown() => _dbContext?.Dispose();
 
-    [Test]
-    public async Task CreateQuotation_ValidCommand_ShouldReturnDraftStatus()
+    private async Task<int> CreateQuotation()
     {
         var result = await new CreateQuotationCommandHandler(_dbContext, _quotSeqMock.Object)
             .Handle(new CreateQuotationCommand(
-                RFQId: _rfqId,
-                RFQSupplierId: 1,
                 SupplierPartyId: 1,
                 QuotationDate: DateTime.UtcNow,
                 ValidUntil: null,
@@ -116,75 +96,46 @@ public class QuotationTests
                 {
                     new(PurchaseRequestDetailId: 1, ItemId: 1, UnitId: 1, Quantity: 10, UnitPrice: 950m, DiscountPercent: null, TaxPercent: null, Notes: null)
                 }), CancellationToken.None);
-
         result.Succeeded.ShouldBeTrue();
-        var quotation = await _dbContext.Quotations.FindAsync(result.Value);
+        return result.Value!;
+    }
+
+    [Test]
+    public async Task CreateQuotation_ValidCommand_ShouldReturnDraftStatus()
+    {
+        var quotId = await CreateQuotation();
+        var quotation = await _dbContext.Quotations.FindAsync(quotId);
         quotation.ShouldNotBeNull();
         quotation.Status.ShouldBe(QuotationStatus.Draft);
     }
 
     [Test]
-    public async Task StartEvaluation_WithQuotations_ShouldTransitionToCollectingResponses()
+    public async Task StartEvaluation_WithQuotation_ShouldTransitionToUnderEvaluation()
     {
-        await new CreateQuotationCommandHandler(_dbContext, _quotSeqMock.Object)
-            .Handle(new CreateQuotationCommand(
-                RFQId: _rfqId,
-                RFQSupplierId: 1,
-                SupplierPartyId: 1,
-                QuotationDate: DateTime.UtcNow,
-                ValidUntil: null,
-                CurrencyCode: null,
-                ExchangeRate: null,
-                ShippingCost: null,
-                OtherCharges: null,
-                PaymentTerms: null,
-                DeliveryTerms: null,
-                LeadTimeDays: null,
-                WarrantyPeriodMonths: null,
-                Notes: null,
-                Lines: new List<QuotationLineDto>
-                {
-                    new(PurchaseRequestDetailId: 1, ItemId: 1, UnitId: 1, Quantity: 10, UnitPrice: 950m, DiscountPercent: null, TaxPercent: null, Notes: null)
-                }), CancellationToken.None);
+        var quotId = await CreateQuotation();
+        await new SubmitQuotationCommandHandler(_dbContext)
+            .Handle(new SubmitQuotationCommand(quotId), CancellationToken.None);
 
         var evalResult = await new StartEvaluationCommandHandler(_dbContext)
-            .Handle(new StartEvaluationCommand(_rfqId), CancellationToken.None);
+            .Handle(new StartEvaluationCommand(quotId), CancellationToken.None);
 
         evalResult.Succeeded.ShouldBeTrue();
-        var rfq = await _dbContext.RequestForQuotations.FindAsync(_rfqId);
-        rfq!.Status.ShouldBe(RFQStatus.CollectingResponses);
+        var quotation = await _dbContext.Quotations.FindAsync(quotId);
+        quotation!.Status.ShouldBe(QuotationStatus.UnderEvaluation);
     }
 
     [Test]
     public async Task CompleteEvaluation_InProgress_ShouldTransitionToEvaluated()
     {
-        await new CreateQuotationCommandHandler(_dbContext, _quotSeqMock.Object)
-            .Handle(new CreateQuotationCommand(
-                RFQId: _rfqId,
-                RFQSupplierId: 1,
-                SupplierPartyId: 1,
-                QuotationDate: DateTime.UtcNow,
-                ValidUntil: null,
-                CurrencyCode: null,
-                ExchangeRate: null,
-                ShippingCost: null,
-                OtherCharges: null,
-                PaymentTerms: null,
-                DeliveryTerms: null,
-                LeadTimeDays: null,
-                WarrantyPeriodMonths: null,
-                Notes: null,
-                Lines: new List<QuotationLineDto>
-                {
-                    new(PurchaseRequestDetailId: 1, ItemId: 1, UnitId: 1, Quantity: 10, UnitPrice: 950m, DiscountPercent: null, TaxPercent: null, Notes: null)
-                }), CancellationToken.None);
+        var quotId = await CreateQuotation();
+        await new SubmitQuotationCommandHandler(_dbContext)
+            .Handle(new SubmitQuotationCommand(quotId), CancellationToken.None);
 
         await new StartEvaluationCommandHandler(_dbContext)
-            .Handle(new StartEvaluationCommand(_rfqId), CancellationToken.None);
+            .Handle(new StartEvaluationCommand(quotId), CancellationToken.None);
 
-        var quot = await _dbContext.Quotations.FirstAsync(q => q.RFQId == _rfqId);
         var result = await new CompleteEvaluationCommandHandler(_dbContext)
-            .Handle(new CompleteEvaluationCommand(quot.Id, 85m, 90m, null), CancellationToken.None);
+            .Handle(new CompleteEvaluationCommand(quotId, 85m, 90m, null), CancellationToken.None);
 
         result.Succeeded.ShouldBeTrue();
     }
@@ -192,38 +143,20 @@ public class QuotationTests
     [Test]
     public async Task SelectQuotation_Evaluated_ShouldMarkSelected()
     {
-        await new CreateQuotationCommandHandler(_dbContext, _quotSeqMock.Object)
-            .Handle(new CreateQuotationCommand(
-                RFQId: _rfqId,
-                RFQSupplierId: 1,
-                SupplierPartyId: 1,
-                QuotationDate: DateTime.UtcNow,
-                ValidUntil: null,
-                CurrencyCode: null,
-                ExchangeRate: null,
-                ShippingCost: null,
-                OtherCharges: null,
-                PaymentTerms: null,
-                DeliveryTerms: null,
-                LeadTimeDays: null,
-                WarrantyPeriodMonths: null,
-                Notes: null,
-                Lines: new List<QuotationLineDto>
-                {
-                    new(PurchaseRequestDetailId: 1, ItemId: 1, UnitId: 1, Quantity: 10, UnitPrice: 950m, DiscountPercent: null, TaxPercent: null, Notes: null)
-                }), CancellationToken.None);
+        var quotId = await CreateQuotation();
+        await new SubmitQuotationCommandHandler(_dbContext)
+            .Handle(new SubmitQuotationCommand(quotId), CancellationToken.None);
 
         await new StartEvaluationCommandHandler(_dbContext)
-            .Handle(new StartEvaluationCommand(_rfqId), CancellationToken.None);
-        var quot = await _dbContext.Quotations.FirstAsync(q => q.RFQId == _rfqId);
+            .Handle(new StartEvaluationCommand(quotId), CancellationToken.None);
         await new CompleteEvaluationCommandHandler(_dbContext)
-            .Handle(new CompleteEvaluationCommand(quot.Id, 85m, 90m, null), CancellationToken.None);
+            .Handle(new CompleteEvaluationCommand(quotId, 85m, 90m, null), CancellationToken.None);
 
         var result = await new SelectQuotationCommandHandler(_dbContext)
-            .Handle(new SelectQuotationCommand(quot.Id, "Best value"), CancellationToken.None);
+            .Handle(new SelectQuotationCommand(quotId, "Best value"), CancellationToken.None);
 
         result.Succeeded.ShouldBeTrue();
-        var updated = await _dbContext.Quotations.FindAsync(quot.Id);
+        var updated = await _dbContext.Quotations.FindAsync(quotId);
         updated!.Status.ShouldBe(QuotationStatus.Selected);
     }
 }

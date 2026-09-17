@@ -2,9 +2,11 @@ using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.Security.Common;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Security.ApprovalRules.Queries.GetApprovalRules;
 
+[Authorize(Policy = PermissionCodes.ApprovalRulesView)]
 public class GetApprovalRulesQuery : IRequest<List<ApprovalRuleDto>>
 {
     public string? DocumentType { get; init; }

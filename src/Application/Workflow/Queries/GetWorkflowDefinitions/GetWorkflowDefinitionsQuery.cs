@@ -2,9 +2,11 @@ using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Shared.Workflow;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Workflow.Queries.GetWorkflowDefinitions;
 
+[Authorize(Policy = PermissionCodes.WorkflowDefinitionsView)]
 public class GetWorkflowDefinitionsQuery : IRequest<List<WorkflowDefinitionDto>>
 {
     public string? EntityName { get; init; }

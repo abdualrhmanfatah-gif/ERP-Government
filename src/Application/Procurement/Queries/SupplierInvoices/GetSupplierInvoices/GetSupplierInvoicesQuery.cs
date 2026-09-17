@@ -1,7 +1,9 @@
 using ERP_Government.Domain.Procurement.Enums;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Procurement.Queries.SupplierInvoices.GetSupplierInvoices;
 
+[Authorize(Policy = PermissionCodes.SupplierInvoicesView)]
 public record GetSupplierInvoicesQuery(
     int? PurchaseOrderId = null,
     SupplierInvoiceStatus? Status = null,

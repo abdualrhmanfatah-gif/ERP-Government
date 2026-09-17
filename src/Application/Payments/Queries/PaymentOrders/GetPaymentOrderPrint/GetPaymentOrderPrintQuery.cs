@@ -1,3 +1,4 @@
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Payments.Common.DTOs;
 using MediatR;
@@ -5,7 +6,7 @@ using MediatR;
 namespace ERP_Government.Application.Payments.Queries.PaymentOrders.GetPaymentOrderPrint;
 
 [Authorize(Policy = PermissionCodes.PaymentOrdersView)]
-public record GetPaymentOrderPrintQuery : IRequest<PaymentOrderPrintDto?>
+public record GetPaymentOrderPrintQuery : IRequest<Result<PaymentOrderPrintDto>>
 {
     public int Id { get; init; }
 }

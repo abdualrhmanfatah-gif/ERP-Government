@@ -1,7 +1,9 @@
 using ERP_Government.Domain.Security.Entities;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Documents.Queries.GetDocumentApprovals;
 
+[Authorize]
 public record GetDocumentApprovalsQuery(
     string DocumentType,
     int DocumentId) : IRequest<IReadOnlyList<ApprovalHistory>>;

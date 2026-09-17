@@ -34,3 +34,5 @@ export { StatusBadge } from './StatusBadge';
 export { Switch } from './Switch';
 export { Tabs } from './Tabs';
 export { Textarea } from './Textarea';
+export * from './dropdown-menu';
+

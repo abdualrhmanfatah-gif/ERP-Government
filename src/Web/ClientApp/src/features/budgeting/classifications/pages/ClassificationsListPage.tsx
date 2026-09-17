@@ -5,8 +5,8 @@ import { getExcludedDescendantIds } from '../utils/classification-utils';
 import { usePermission } from '../../../../shared/hooks/usePermission';
 import { BUDGET_PERMISSIONS } from '../../../../shared/constants/permissions';
 import { ChevronRight, ChevronLeft, Plus, Pencil } from 'lucide-react';
-import { Page, FilterBar, FilterSearch, FilterSelect, Dialog, Switch, ConfirmDialog, Button, Input, Select, Badge } from '../../../../components/ui';
-import { getDisabledStatusLabel, activeStatusLabels } from '../../../../shared/constants/labels';
+import { Page, FilterBar, FilterSearch, FilterSelect, Dialog, Switch, ConfirmDialog, Button, Input, Select, EmptyState } from '../../../../components/ui';
+import { getActiveStatusLabel, activeStatusLabels } from '../../../../shared/constants/labels';
 import { notify } from '@/features/notifications/notify';
 
 export function normalizeTree(
@@ -96,7 +96,7 @@ function TreeItem({
   depth: number;
 }) {
   const isExpanded = expanded.has(node.id);
-  const hasChildren = node.children?.length ? node.children.length > 0 : false;
+  const hasChildren = (node.children?.length ?? 0) > 0;
   const itemRef = useRef<HTMLDivElement>(null);
 
   const handleKeyDown = useCallback(
@@ -115,6 +115,17 @@ function TreeItem({
         e.preventDefault();
         const prev = itemRef.current?.parentElement?.previousElementSibling?.querySelector('[role="treeitem"]') as HTMLElement;
         prev?.focus();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        const tree = itemRef.current?.closest('[role="tree"]');
+        const first = tree?.querySelector('[role="treeitem"]') as HTMLElement;
+        first?.focus();
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        const tree = itemRef.current?.closest('[role="tree"]');
+        const items = tree?.querySelectorAll('[role="treeitem"]');
+        const last = items?.[items.length - 1] as HTMLElement;
+        last?.focus();
       }
     },
     [hasChildren, isExpanded, node.id, onToggle],
@@ -129,40 +140,55 @@ function TreeItem({
       onKeyDown={handleKeyDown}
     >
       <div
-        className="flex items-center gap-2 py-1 px-2 hover:bg-[var(--color-surface-container)] rounded cursor-pointer"
-        style={{ paddingInlineStart: `${depth * 1.5}rem` }}
+        className={`group flex items-center border-b border-[var(--color-outline-variant)]/30 hover:bg-[var(--color-surface-container-low)] transition-colors duration-100 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-focus-ring)] ${
+          hasChildren ? 'cursor-pointer' : ''
+        }`}
+        style={{ paddingInlineStart: `${depth * 1.25 + 0.75}rem` }}
         onClick={() => hasChildren && onToggle(node.id)}
       >
-        {hasChildren ? (
-          <span className="text-[var(--color-on-surface-variant)]">
-            {isExpanded ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+        <div className="w-8 shrink-0 flex items-center justify-center py-2.5">
+          {hasChildren ? (
+            <span className="text-[var(--color-on-surface-variant)] transition-transform duration-150">
+              {isExpanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+            </span>
+          ) : (
+            <span className="w-3.5" aria-hidden="true" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0 py-2.5 pe-3">
+          <div className="flex items-baseline gap-2">
+            <span className="font-bold text-sm text-[var(--color-on-surface)] shrink-0 tabular-nums">{node.code}</span>
+            <span className="text-sm text-[var(--color-on-surface-variant)] truncate">{node.name}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 shrink-0 ps-3">
+          <span className="text-xs text-[var(--color-outline)] tabular-nums">
+            مستوى {node.level}
           </span>
-        ) : (
-          <span className="w-4" />
-        )}
-        <span className="font-medium text-[var(--color-on-surface)]">{node.code}</span>
-        <span className="text-[var(--color-on-surface-variant)]">{node.name}</span>
-        <Badge variant="primary">
-          مستوى {node.level}
-        </Badge>
-        {canUpdate && (
-          <Switch
-            checked={node.isActive}
-            onChange={() => onToggleActive(node)}
-            label={getDisabledStatusLabel(node.isActive)}
-          />
-        )}
-        {canEdit && (
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            onClick={(e) => { e.stopPropagation(); onEdit(node); }}
-            className="ms-auto"
-            aria-label="تعديل"
-          >
-            <Pencil size={14} />
-          </Button>
-        )}
+          {canUpdate && (
+            <div className="flex items-center gap-1.5">
+              <Switch
+                checked={node.isActive}
+                onChange={() => onToggleActive(node)}
+                size="sm"
+              />
+              <span className={`text-xs font-medium ${node.isActive ? 'text-[var(--color-success)]' : 'text-[var(--color-on-surface-variant)]'}`}>
+                {getActiveStatusLabel(node.isActive)}
+              </span>
+            </div>
+          )}
+          {canEdit && (
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={(e) => { e.stopPropagation(); onEdit(node); }}
+              className="shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity duration-100"
+              aria-label="تعديل"
+            >
+              <Pencil size={14} />
+            </Button>
+          )}
+        </div>
       </div>
       {isExpanded && hasChildren && (
         <div role="group">
@@ -199,19 +225,17 @@ export default function ClassificationsListPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editItem, setEditItem] = useState<BudgetClassificationTreeDto | null>(null);
   const [selectedParentId, setSelectedParentId] = useState<number | undefined>(undefined);
-  const [formIsActive, setFormIsActive] = useState(true);
-  const [parentIdError, setParentIdError] = useState('');
   const [toggleItem, setToggleItem] = useState<BudgetClassificationTreeDto | null>(null);
-  const [initialized, setInitialized] = useState(false);
+  const prevTreeRef = useRef<BudgetClassificationTreeDto[] | undefined>(undefined);
 
   const tree = useMemo(() => (rawTree ? normalizeTree(rawTree) : []), [rawTree]);
 
   useEffect(() => {
-    if (rawTree && !initialized) {
+    if (rawTree && rawTree !== prevTreeRef.current) {
       setExpanded(getInitialExpanded(rawTree));
-      setInitialized(true);
+      prevTreeRef.current = rawTree;
     }
-  }, [rawTree, initialized]);
+  }, [rawTree]);
 
   const matchesSearch = useCallback(
     (node: BudgetClassificationTreeDto): boolean => {
@@ -285,7 +309,7 @@ export default function ClassificationsListPage() {
 
   const canEditNode = useCallback(
     (node: BudgetClassificationTreeDto) => {
-      return canUpdate || node.id === 0;
+      return canUpdate || node.parentId === undefined;
     },
     [canUpdate],
   );
@@ -318,8 +342,6 @@ export default function ClassificationsListPage() {
   const handleOpenCreate = useCallback(() => {
     setEditItem(null);
     setSelectedParentId(undefined);
-    setFormIsActive(true);
-    setParentIdError('');
     setDialogOpen(true);
   }, []);
 
@@ -327,8 +349,6 @@ export default function ClassificationsListPage() {
     (node: BudgetClassificationTreeDto) => {
       setEditItem(node);
       setSelectedParentId(node.parentId);
-      setFormIsActive(node.isActive);
-      setParentIdError('');
       setDialogOpen(true);
     },
     [],
@@ -337,7 +357,6 @@ export default function ClassificationsListPage() {
   const handleCloseDialog = useCallback(() => {
     setDialogOpen(false);
     setEditItem(null);
-    setParentIdError('');
   }, []);
 
   const handleOpenToggle = useCallback((node: BudgetClassificationTreeDto) => {
@@ -347,7 +366,7 @@ export default function ClassificationsListPage() {
   const handleConfirmToggle = useCallback(() => {
     if (!toggleItem) return;
     toggleMutation.mutate(
-      { id: toggleItem.id, data: { id: toggleItem.id, rowVersion: toggleItem.rowVersion, isActive: !toggleItem.isActive } },
+      { id: toggleItem.id, rowVersion: toggleItem.rowVersion, isActive: !toggleItem.isActive },
       {
         onSuccess: () => {
           notify({ type: 'success', title: 'تم تحديث الحالة بنجاح' });
@@ -380,17 +399,17 @@ export default function ClassificationsListPage() {
 
       if (editItem) {
         updateMutation.mutate(
-          { id: editItem.id, data: { id: editItem.id, rowVersion: editItem.rowVersion, code, name, parentId: selectedParentId, isActive: formIsActive } },
+          { id: editItem.id, rowVersion: editItem.rowVersion, code, name, parentId: selectedParentId },
           { onSuccess: () => handleCloseDialog() },
         );
       } else {
         createMutation.mutate(
-          { code, name, parentId: selectedParentId, isActive: formIsActive },
+          { code, name, parentId: selectedParentId },
           { onSuccess: () => handleCloseDialog() },
         );
       }
     },
-    [editItem, selectedParentId, formIsActive, createMutation, updateMutation, handleCloseDialog],
+    [editItem, selectedParentId, createMutation, updateMutation, handleCloseDialog],
   );
 
   return (
@@ -417,35 +436,54 @@ export default function ClassificationsListPage() {
               { value: 'active', label: activeStatusLabels.active },
               { value: 'inactive', label: activeStatusLabels.disabled },
             ]}
-            placeholder="الحالة"
+            placeholder="فلتر حسب الحالة"
             label="الحالة"
           />
         </FilterBar>
       }
     >
       {tree.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-[var(--color-on-surface-variant)]">لا توجد تصنيفات بعد</p>
-          <Button variant="link" className="mt-2">
-            إضافة تصنيف رئيسي
-          </Button>
-        </div>
+        <EmptyState
+          message="لا توجد تصنيفات بعد"
+          action={
+            canCreate ? (
+              <Button variant="link" onClick={handleOpenCreate}>
+                إضافة تصنيف رئيسي
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
-        <div className="border border-[var(--color-outline-variant)] rounded-lg overflow-hidden" role="tree">
-          {filteredTree.map((node) => (
-            <TreeItem
-              key={node.id}
-              node={node}
-              expanded={effectiveExpanded}
-              onToggle={handleToggle}
-              onEdit={handleOpenEdit}
-              onToggleActive={handleOpenToggle}
-              canEdit={canEditNode(node)}
-              canUpdate={canUpdate}
-              depth={0}
-            />
-          ))}
-        </div>
+        <>
+          <div className="flex items-center justify-between text-xs text-[var(--color-on-surface-variant)] mb-2 px-1">
+            <span>{filteredTree.length} تصنيف</span>
+            {search && <span>نتائج البحث</span>}
+          </div>
+          <div className="border border-[var(--color-outline-variant)] rounded-lg overflow-hidden" role="tree">
+            <div className="flex items-center bg-[var(--color-surface-container-low)] border-b border-[var(--color-outline-variant)] text-xs font-semibold text-[var(--color-on-surface-variant)]">
+              <div className="w-8 shrink-0" />
+              <div className="flex-1 min-w-0 py-2 pe-3">التصنيف</div>
+              <div className="flex items-center gap-3 shrink-0 ps-3">
+                <span className="w-16 text-center">المستوى</span>
+                <span className="w-24 text-center">الحالة</span>
+                <span className="w-8" />
+              </div>
+            </div>
+            {filteredTree.map((node) => (
+              <TreeItem
+                key={node.id}
+                node={node}
+                expanded={effectiveExpanded}
+                onToggle={handleToggle}
+                onEdit={handleOpenEdit}
+                onToggleActive={handleOpenToggle}
+                canEdit={canEditNode(node)}
+                canUpdate={canUpdate}
+                depth={0}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       <Dialog
@@ -482,15 +520,8 @@ export default function ClassificationsListPage() {
             onChange={(e) => {
               const val = e.target.value;
               setSelectedParentId(val ? Number(val) : undefined);
-              setParentIdError('');
             }}
             options={parentOptions.map((opt) => ({ value: opt.value, label: opt.label, disabled: opt.disabled }))}
-          />
-          {parentIdError && <p className="text-xs text-[var(--color-error)] mt-1">{parentIdError}</p>}
-          <Switch
-            checked={formIsActive}
-            onChange={setFormIsActive}
-            label={activeStatusLabels.active}
           />
         </form>
       </Dialog>
@@ -499,6 +530,7 @@ export default function ClassificationsListPage() {
         open={!!toggleItem}
         onClose={handleCancelToggle}
         onConfirm={handleConfirmToggle}
+        destructive={toggleItem?.isActive === true}
         message={toggleItem?.isActive ? 'هل تريد تعطيل هذا التصنيف؟' : 'هل تريد تفعيل هذا التصنيف؟'}
         title="تأكيد تغيير الحالة"
         loading={toggleMutation.isPending}

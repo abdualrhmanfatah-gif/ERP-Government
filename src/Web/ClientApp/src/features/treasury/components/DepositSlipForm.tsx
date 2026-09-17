@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react';
 import { Button, MoneyDisplay, EmptyState, Input, Select, Label } from '@/components/ui';
 import { useEligibleVouchers } from '../hooks/useEligibleVouchers';
 import { depositSlipFormTypeLabels } from '../shared/types';
-import { FormType } from '../../../web-api-client';
+import { formatDate } from '@/shared/utils/formatters';
+
+type FormType = 'Form47' | 'Form48';
 
 interface DepositSlipFormProps {
   onSubmit: (data: { slipDate: string; formType: FormType; voucherIds: number[] }) => void;
@@ -25,12 +27,12 @@ export function DepositSlipForm({
   initialData,
   onEdit,
 }: DepositSlipFormProps) {
-  const [formType, setFormType] = useState<FormType>(initialData?.formType ?? FormType.Form47);
+  const [formType, setFormType] = useState<FormType>(initialData?.formType ?? 'Form47');
   const [slipDate, setSlipDate] = useState(initialData?.slipDate ?? new Date().toISOString().slice(0, 10));
   const [selectedIds, setSelectedIds] = useState<number[]>(initialData?.voucherIds ?? []);
 
   const { eligible, isLoading } = useEligibleVouchers(
-    formType === FormType.Form47 ? 'Form47' : 'Form48',
+    formType === 'Form47' ? 'Form47' : 'Form48',
   );
 
   const total = useMemo(
@@ -62,7 +64,7 @@ export function DepositSlipForm({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
               <span className="text-[var(--color-on-surface-variant)]">التاريخ:</span>{' '}
-              <span>{new Date(initialData.slipDate).toLocaleDateString('ar-YE')}</span>
+              <span>{formatDate(initialData.slipDate)}</span>
             </div>
             <div>
               <span className="text-[var(--color-on-surface-variant)]">النوع:</span>{' '}

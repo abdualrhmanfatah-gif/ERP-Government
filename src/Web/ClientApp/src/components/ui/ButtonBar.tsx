@@ -33,7 +33,7 @@ export function ButtonBar({ actions }: ButtonBarProps) {
           const button = (
             <Button
               key={action.key}
-              variant={action.variant}
+              variant={action.variant ?? 'outline'}
               disabled={action.disabled}
               onClick={action.onClick}
               aria-label={action.label}

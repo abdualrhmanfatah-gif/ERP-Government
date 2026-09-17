@@ -57,11 +57,12 @@ public class BankStatements : IEndpointGroup
     }
 
     [EndpointSummary("Get bank statement by ID")]
-    public static async Task<BankStatementDto?> GetBankStatementById(
+    public static async Task<IResult> GetBankStatementById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetBankStatementByIdQuery { Id = id });
+        var result = await sender.Send(new GetBankStatementByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new bank statement")]
@@ -71,7 +72,7 @@ public class BankStatements : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -82,7 +83,7 @@ public class BankStatements : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -93,7 +94,7 @@ public class BankStatements : IEndpointGroup
     {
         var result = await sender.Send(new ReconcileBankStatementCommand { Id = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -104,7 +105,7 @@ public class BankStatements : IEndpointGroup
     {
         var result = await sender.Send(new CancelBankStatementCommand { Id = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -133,7 +134,7 @@ public class BankStatements : IEndpointGroup
             Reference = command.Reference
         });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

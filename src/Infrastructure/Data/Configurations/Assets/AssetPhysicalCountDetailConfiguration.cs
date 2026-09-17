@@ -24,6 +24,9 @@ public class AssetPhysicalCountDetailConfiguration : IEntityTypeConfiguration<As
         builder.Property(e => e.RowVersion)
             .IsRowVersion();
 
+        builder.HasIndex(e => new { e.AssetPhysicalCountId, e.AssetId })
+            .IsUnique();
+
         builder.HasOne(e => e.AssetPhysicalCount)
             .WithMany()
             .HasForeignKey(e => e.AssetPhysicalCountId)
@@ -34,7 +37,31 @@ public class AssetPhysicalCountDetailConfiguration : IEntityTypeConfiguration<As
             .HasForeignKey(e => e.AssetId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(e => e.SystemLocation)
+            .WithMany()
+            .HasForeignKey(e => e.SystemLocationId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.PhysicalLocation)
+            .WithMany()
+            .HasForeignKey(e => e.PhysicalLocationId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.SystemEmployee)
+            .WithMany()
+            .HasForeignKey(e => e.SystemEmployeeId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.PhysicalEmployee)
+            .WithMany()
+            .HasForeignKey(e => e.PhysicalEmployeeId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasIndex(e => e.AssetPhysicalCountId);
         builder.HasIndex(e => e.AssetId);
+        builder.HasIndex(e => e.SystemLocationId);
+        builder.HasIndex(e => e.PhysicalLocationId);
+        builder.HasIndex(e => e.SystemEmployeeId);
+        builder.HasIndex(e => e.PhysicalEmployeeId);
     }
 }

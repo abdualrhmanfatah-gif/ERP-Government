@@ -1,5 +1,7 @@
 # تحليل متطلبات الاستحقاق قبل صرف المساعدة المرضية
 
+> **DEP-027 أثر**: الملفات المحللـة في جدول «نتائج الفحص» (PostingRuleSeedData، MoveGenerator، PostingRule/CreatePostingRule، EventType) أُزيلت نهائيًّا مع محرك PostingRules. الخلاصات المتعلقة بمولدات القواعد والاستحقاق عبر المحرك أصبحت مرجعية تاريخية؛ المسار المعتمد للاستحقاق هو المعالجات الأصلية (CreateAccrualEntry / RecordPayment → event → outbox → قيد).
+
 ## بيانات الوثيقة
 
 - التاريخ: 2026-09-11.
@@ -47,7 +49,7 @@
 | `src/Application/Payments/Commands/Payments/RecordPayment/RecordPaymentCommand.cs:40` | يقبل Approved أو SentToTreasury | المسار المطلوب يفرض SentToTreasury |
 | `src/Application/Payments/Commands/Payments/RecordPayment/RecordPaymentCommand.cs:56` | يستخدم صافي الأمر وحده لتوليد القيود، ثم يضع الأمر Paid والطلب Disbursed | قيد الدفع يجب أن يسوي الالتزام؛ معالجة الإجمالي والاستقطاعات إذا دخلت النطاق |
 | `src/Application/Accounting/EventHandlers/MoveGenerator.cs:52` | القيد الناتج Draft | لا يجوز عرض «مرحّل» أو «تمت التسوية المحاسبية» لمجرد نجاح التوليد |
-| `src/Infrastructure/Data/Seeds/PostingRuleLineSeedData.cs:23` | حسابان بمعرفات ثابتة 14 و89؛ التعليقات تسميهما البنك 1821 والمصروف 32299 | يلزم حل الحسابات الصحيحة من البيانات؛ لا اعتماد التعليقات أو IDs على أنها أكواد الدليل |
+| `src/Infrastructure/Data/Seeds/PostingRuleLineSeedData.cs:23` | حسابان بمعرفات ثابتة 14 و89؛ التعليقات تسميهما البنك 1821 والمصروف 32299 | يلزم حل الحسابات الصحيحة من البيانات؛ لا اعتماد التعليقات أو IDs على أنها أكواد الدليل (الحذف التام، DEP-027) |
 | `src/Application/Accounting/EventHandlers/MoveGenerator.cs:71` | يستخرج BankAccountId لكنه لا يحوّله إلى GlAccountId؛ يستخدم FixedAccountId أو AccountId | اختيار بنك في الأمر لا يكفي لتوجيه القيد للبنك المختار |
 | `src/Domain/Payments/Entities/BankAccount.cs:17` | `GlAccountId` موجود واختياري | يمكن إعادة استخدام الربط، مع اشتراط صحته عند الدفع البنكي |
 | `src/Application/Accounting/EventHandlers/MoveGenerator.cs:79` | يتجاوز سطرًا عند تعذر حل حسابه؛ يمكن إنشاء قيد دون أسطر كافية | فشل واضح عند حساب مفقود أو قاعدة ناقصة؛ منع إتمام التسوية بقيد ناقص |
@@ -131,7 +133,7 @@
 2. **دورة القيد:** Create/Submit/Approve/Post/ReverseJournalEntry. هي نقطة مراجعة وترحيل القيد؛ لا يلزم افتراض بناء نظام قيود جديد.
 3. **المستندات:** AttachmentGateService وAttachmentsPanel. يحتاجان تمييز متطلبات المساعدة عن الطلب التجاري؛ شكل التصنيف يحدده التصميم لاحقًا.
 4. **الدليل والبنك:** Account.IsPostable/IsActive وBankAccount.GlAccountId. الفصل بين Code المعروض وId الداخلي إلزامي.
-5. **التكامل:** PostingRules، DomainEvents، Outbox. الاستفادة مشروطة بإصلاح حفظ نتيجة المعالجة، الربط بالمصدر، ومنع تكرارها.
+5. **التكامل:** DomainEvents، Outbox (محرك PostingRules منتهٍ، DEP-027). التكامل عبر المعالجات الأصلية Accrual/Payment؛ لا اعتماد على قواعد ترحيل مهيأة.
 
 ## نقاط تعديل متوقعة
 

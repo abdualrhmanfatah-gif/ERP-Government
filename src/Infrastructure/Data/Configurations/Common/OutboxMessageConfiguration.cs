@@ -38,6 +38,9 @@ public class OutboxMessageConfiguration : IEntityTypeConfiguration<OutboxMessage
         builder.Property(e => e.ErrorMessage)
             .HasMaxLength(int.MaxValue); // nvarchar(max)
 
+        builder.Property(e => e.LeaseExpiry)
+            .IsRequired(false);
+
         // Indexes for polling query performance
         builder.HasIndex(e => new { e.Status, e.CreatedAt })
             .HasDatabaseName("IX_OutboxMessages_Status_CreatedAt");

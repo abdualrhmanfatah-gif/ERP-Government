@@ -21,7 +21,7 @@ internal class GetRevenueCollectionsReportQueryHandler(IApplicationDbContext dbC
             .Include(rv => rv.Lines)
             .Include(rv => rv.Checks)
             .Include(rv => rv.Party)
-            .Include(rv => rv.DepositSlip)
+            .Include(rv => rv.DepositSlip47)
             .Where(rv => rv.Status != ReceiptVoucherStatus.Cancelled);
 
         if (request.RevenueAccountId.HasValue)
@@ -54,7 +54,7 @@ internal class GetRevenueCollectionsReportQueryHandler(IApplicationDbContext dbC
             {
                 var account = accounts.GetValueOrDefault(x.l.RevenueAccountId);
                 var checkStatus = GetCheckClearingStatus(x.rv);
-                var slipStatus = x.rv.DepositSlip?.Status.ToString();
+                var slipStatus = x.rv.DepositSlip47?.ApprovedAt.HasValue == true ? "Approved" : "Draft";
 
                 return new RevenueCollectionsLineDto
                 {
@@ -68,8 +68,8 @@ internal class GetRevenueCollectionsReportQueryHandler(IApplicationDbContext dbC
                     PartyName = x.rv.Party?.NameAr ?? string.Empty,
                     Amount = x.l.Amount,
                     PaymentMethod = x.rv.PaymentMethod.ToString(),
-                    DepositSlipId = x.rv.DepositSlipId,
-                    DepositSlipNumber = x.rv.DepositSlip?.SlipNumber,
+                    DepositSlipId = x.rv.DepositSlip47Id,
+                    DepositSlipNumber = x.rv.DepositSlip47?.SlipNumber,
                     DepositSlipStatus = slipStatus,
                     CheckClearingStatus = checkStatus
                 };
@@ -90,7 +90,7 @@ internal class GetRevenueCollectionsReportQueryHandler(IApplicationDbContext dbC
                 TotalAmount = lines.Sum(l => l.Amount),
                 TotalCash = lines.Where(l => l.PaymentMethod == nameof(PaymentMethod.Cash)).Sum(l => l.Amount),
                 TotalChecks = lines.Where(l => l.PaymentMethod == nameof(PaymentMethod.Check)).Sum(l => l.Amount),
-                PendingDeposits = vouchers.Count(rv => rv.DepositSlipId == null),
+                PendingDeposits = vouchers.Count(rv => rv.DepositSlip47Id == null),
                 ClearedChecks = allChecks.Count(c => c.Status == CheckStatus.Cleared),
                 BouncedChecks = allChecks.Count(c => c.Status == CheckStatus.Bounced)
             }

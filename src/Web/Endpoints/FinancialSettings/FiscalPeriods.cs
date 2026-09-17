@@ -3,6 +3,7 @@ using ERP_Government.Application.FinancialSettings.Commands.FiscalPeriods;
 using ERP_Government.Application.FinancialSettings.Queries.FiscalPeriods;
 using ERP_Government.Application.Common.Security;
 using MediatR;
+using ERP_Government.Web.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ERP_Government.Web.Endpoint.FinancialSettings;
@@ -54,11 +55,12 @@ public class FiscalPeriods : IEndpointGroup
     }
 
     [EndpointSummary("Get fiscal period by ID")]
-    public static async Task<FiscalPeriodDto?> GetFiscalPeriodById(
+    public static async Task<IResult> GetFiscalPeriodById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetFiscalPeriodByIdQuery { Id = id });
+        var result = await sender.Send(new GetFiscalPeriodByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new fiscal period")]
@@ -68,7 +70,7 @@ public class FiscalPeriods : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -79,7 +81,7 @@ public class FiscalPeriods : IEndpointGroup
     {
         var result = await sender.Send(new LockFiscalPeriodCommand { Id = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -90,7 +92,7 @@ public class FiscalPeriods : IEndpointGroup
     {
         var result = await sender.Send(new UnlockFiscalPeriodCommand { Id = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -108,7 +110,7 @@ public class FiscalPeriods : IEndpointGroup
             EndDate = command.EndDate
         });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -119,7 +121,7 @@ public class FiscalPeriods : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

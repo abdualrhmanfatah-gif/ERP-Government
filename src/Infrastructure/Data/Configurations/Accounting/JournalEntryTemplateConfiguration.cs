@@ -19,6 +19,13 @@ public class JournalEntryTemplateConfiguration : IEntityTypeConfiguration<Journa
         builder.Property(e => e.Description)
             .HasMaxLength(500);
 
+        builder.Property(e => e.SystemKey)
+            .HasMaxLength(100);
+
+        builder.HasIndex(e => e.SystemKey)
+            .IsUnique()
+            .HasFilter("[SystemKey] IS NOT NULL");
+
         builder.Property(e => e.RowVersion)
             .IsRowVersion();
 

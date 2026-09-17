@@ -1,11 +1,15 @@
+using ERP_Government.Application.Common.Errors;
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.Common.Models;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Security.ApprovalRules.Commands.CreateApprovalRule;
 
-public class CreateApprovalRuleCommand : IRequest<int>
+[Authorize(Policy = PermissionCodes.ApprovalRulesManage)]
+public class CreateApprovalRuleCommand : IRequest<Result<int>>
 {
     public string DocumentType { get; init; } = string.Empty;
     public int? FundId { get; init; }
@@ -33,9 +37,9 @@ public class CreateApprovalRuleCommandValidator : AbstractValidator<CreateApprov
 }
 
 public class CreateApprovalRuleCommandHandler(
-    IApplicationDbContext context) : IRequestHandler<CreateApprovalRuleCommand, int>
+    IApplicationDbContext context) : IRequestHandler<CreateApprovalRuleCommand, Result<int>>
 {
-    public async Task<int> Handle(
+    public async Task<Result<int>> Handle(
         CreateApprovalRuleCommand request,
         CancellationToken cancellationToken)
     {
@@ -44,7 +48,7 @@ public class CreateApprovalRuleCommandHandler(
             .AnyAsync(r => r.Code == request.ApproverRole, cancellationToken);
 
         if (!roleExists)
-            throw new InvalidOperationException($"Security role with code '{request.ApproverRole}' does not exist.");
+            return Result<int>.Failure(ErrorCodes.SecurityApprovalRules.RoleNotFound, ErrorCategory.NotFound, $"Security role with code '{request.ApproverRole}' does not exist.");
 
         // Validate unique constraint (DocumentType, FundId, Sequence)
         var duplicateExists = await context.ApprovalRules
@@ -54,7 +58,7 @@ public class CreateApprovalRuleCommandHandler(
                 cancellationToken);
 
         if (duplicateExists)
-            throw new InvalidOperationException(
+            return Result<int>.Failure(ErrorCodes.SecurityApprovalRules.DuplicateRule, ErrorCategory.Conflict,
                 $"An approval rule with sequence {request.Sequence} already exists for document type '{request.DocumentType}' and the same fund.");
 
         var entity = new Domain.Security.Entities.ApprovalRule
@@ -73,6 +77,6 @@ public class CreateApprovalRuleCommandHandler(
         context.ApprovalRules.Add(entity);
         await context.SaveChangesAsync(cancellationToken);
 
-        return entity.Id;
+        return Result<int>.Success(entity.Id);
     }
 }

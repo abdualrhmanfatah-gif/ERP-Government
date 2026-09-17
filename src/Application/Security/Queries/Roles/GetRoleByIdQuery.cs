@@ -1,19 +1,22 @@
+using ERP_Government.Application.Common.Errors;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Security.Common.DTOs;
 
 namespace ERP_Government.Application.Security.Queries.Roles;
 
 // Q-S002 — GetRoleByIdQuery
-public class GetRoleByIdQuery : IRequest<SecurityRoleDto?>
+[Authorize(Policy = PermissionCodes.RolesView)]
+public class GetRoleByIdQuery : IRequest<Result<SecurityRoleDto>>
 {
     public int Id { get; init; }
 }
 
 public class GetRoleByIdQueryHandler(
     IApplicationDbContext context,
-    IMapper mapper) : IRequestHandler<GetRoleByIdQuery, SecurityRoleDto?>
+    IMapper mapper) : IRequestHandler<GetRoleByIdQuery, Result<SecurityRoleDto>>
 {
-    public async Task<SecurityRoleDto?> Handle(
+    public async Task<Result<SecurityRoleDto>> Handle(
         GetRoleByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -21,8 +24,8 @@ public class GetRoleByIdQueryHandler(
             .FindAsync(request.Id, cancellationToken);
 
         if (entity is null)
-            return null;
+            return Result<SecurityRoleDto>.Failure(ErrorCodes.Security.RoleNotFound, ErrorCategory.NotFound, $"Security role with ID {request.Id} not found.");
 
-        return mapper.Map<SecurityRoleDto>(entity);
+        return Result<SecurityRoleDto>.Success(mapper.Map<SecurityRoleDto>(entity));
     }
 }

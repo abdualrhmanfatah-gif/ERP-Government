@@ -59,15 +59,13 @@ public class PurchaseOrders : IEndpointGroup
             expectedDeliveryDateTo,
             page,
             pageSize));
-        return result.Succeeded ? Results.Ok(result.Value) : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok(result.Value) : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleGetById(ISender sender, int id)
     {
         var result = await sender.Send(new GetPurchaseOrderByIdQuery(id));
-        return result.Succeeded
-            ? Results.Ok(result.Value)
-            : Results.NotFound(result.Errors);
+        return result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleCreate(ISender sender, CreatePurchaseOrderCommand command)
@@ -75,42 +73,42 @@ public class PurchaseOrders : IEndpointGroup
         var result = await sender.Send(command);
         return result.Succeeded
             ? Results.Created($"/api/PurchaseOrders/{result.Value}", result.Value)
-            : Results.BadRequest(result.Errors);
+            : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleUpdate(ISender sender, int id, UpdatePurchaseOrderCommand command)
     {
         var result = await sender.Send(command with { Id = id });
-        return result.Succeeded ? Results.Ok(result) : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok(result) : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleSubmit(ISender sender, int id)
     {
         var result = await sender.Send(new SubmitPurchaseOrderCommand(id));
-        return result.Succeeded ? Results.Ok(result) : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok(result) : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleApprove(ISender sender, int id)
     {
         var result = await sender.Send(new ApprovePurchaseOrderCommand(id));
-        return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok() : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleIssue(ISender sender, int id)
     {
         var result = await sender.Send(new IssuePurchaseOrderCommand(id));
-        return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok() : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleCancel(ISender sender, int id, CancelPurchaseOrderCommand command)
     {
         var result = await sender.Send(command with { Id = id });
-        return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok() : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleClose(ISender sender, int id, ClosePurchaseOrderCommand command)
     {
         var result = await sender.Send(command with { Id = id });
-        return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok() : result.ToProblemDetails();
     }
 }

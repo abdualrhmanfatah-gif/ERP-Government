@@ -1,7 +1,9 @@
 using ERP_Government.Domain.Inventory.Entities;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Inventory.Warehouses.Queries.GetWarehouses;
 
+[Authorize(Policy = PermissionCodes.WarehousesView)]
 public record GetWarehousesQuery(
     string? Search = null,
     bool? IsActive = null) : IRequest<IReadOnlyList<Warehouse>>;

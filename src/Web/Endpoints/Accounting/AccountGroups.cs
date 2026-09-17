@@ -49,11 +49,12 @@ public class AccountGroups : IEndpointGroup
     }
 
     [EndpointSummary("Get account group by ID")]
-    public static async Task<AccountGroupDto?> GetAccountGroupById(
+    public static async Task<IResult> GetAccountGroupById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetAccountGroupByIdQuery { Id = id });
+        var result = await sender.Send(new GetAccountGroupByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new account group")]
@@ -63,7 +64,7 @@ public class AccountGroups : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Ok(new { id = result.Value });
     }
 
@@ -74,11 +75,15 @@ public class AccountGroups : IEndpointGroup
         [FromBody] UpdateAccountGroupCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -88,8 +93,9 @@ public class AccountGroups : IEndpointGroup
         int id)
     {
         var result = await sender.Send(new GetAccountGroupDetailQuery { Id = id });
-        if (result == null) return Results.NotFound();
-        return Results.Ok(result);
+        return result.Succeeded
+            ? Results.Ok(result.Value!)
+            : result.ToProblemDetails();
     }
 
     [EndpointSummary("Toggle account group active")]
@@ -99,10 +105,14 @@ public class AccountGroups : IEndpointGroup
         [FromBody] ToggleAccountGroupActiveCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

@@ -1,5 +1,6 @@
 using ERP_Government.Application.Common.Security;
-using ERP_Government.Application.Revenue.Common;
+using ERP_Government.Application.Revenue.Common.Services;
+using ERP_Government.Domain.Events.Revenue;
 using ERP_Government.Domain.Revenue.Entities;
 using ERP_Government.Domain.Revenue.Enums;
 using ERP_Government.Domain.Security.Entities;
@@ -23,40 +24,77 @@ public class ClearCheckCommandHandler(
         CancellationToken cancellationToken)
     {
         if (user.Id is not int userId)
-            return Result.Failure(new[] { "User identity is required for this operation." });
+            return Result.Failure(["User identity is required."]);
 
         var check = await context.Checks
             .Include(c => c.ReceiptVoucher)
+                .ThenInclude(v => v.Lines)
+            .Include(c => c.ReceiptVoucher)
+                .ThenInclude(v => v.CollectionOrder)
+                    .ThenInclude(o => o.RevenueClaim)
             .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
+
         if (check is null)
-            return Result.Failure(new[] { "Check not found." });
+            return Result.Failure(["Check not found."]);
 
         if (check.Status != CheckStatus.UnderCollection)
-            return Result.Failure(new[] { "Only Under-Collection checks can be cleared." });
-
-        if (check.ReceiptVoucher is null)
-            return Result.Failure(new[] { "Source voucher not found." });
-
-        if (check.ReceiptVoucher.Status == ReceiptVoucherStatus.Cancelled)
-            return Result.Failure(new[] { "Cannot clear a check whose source voucher is cancelled." });
-
-        var (dateValid, dateError) = CheckDateValidator.ValidateClearedAt(check.CheckDate, request.ClearedAt);
-        if (!dateValid)
-            return Result.Failure(new[] { dateError! });
+            return Result.Failure(["Only checks in UnderCollection status can be cleared."]);
 
         check.Status = CheckStatus.Cleared;
         check.ClearedAt = request.ClearedAt;
         check.RowVersion = request.RowVersion;
+        check.LastModified = DateTimeOffset.UtcNow;
+        check.LastModifiedBy = userId.ToString();
 
-        check.AddDomainEvent(new Domain.Events.Revenue.CheckCleared
+        var voucher = check.ReceiptVoucher;
+        var revenueLines = voucher?.Lines
+            .Select(l => new CheckClearedRevenueLineDetail(l.RevenueAccountId, l.Amount, l.Description))
+            .ToList() ?? [];
+
+        check.AddDomainEvent(new CheckClearedEvent
         {
             SourceEntityId = check.Id,
             OccurredAt = request.ClearedAt,
             BankName = check.BankName,
             CheckNumber = check.CheckNumber,
             Amount = check.Amount,
-            CurrencyId = 1
+            RevenueLines = revenueLines
         });
+
+        // Recalculate order & claim statuses
+        if (voucher?.CollectionOrder is not null)
+        {
+            var order = voucher.CollectionOrder;
+            var orderVouchers = await context.ReceiptVouchers
+                .Where(v => v.CollectionOrderId == order.Id)
+                .Include(v => v.Lines)
+                .Include(v => v.Checks)
+                .ToListAsync(cancellationToken);
+
+            var (orderCollected, _, orderOutstanding, _) = RevenueMetricsCalculator.CalculateOrderMetrics(order.AuthorizedAmount, orderVouchers);
+            if (orderOutstanding <= 0)
+                order.Status = CollectionOrderStatus.Collected;
+            else if (orderCollected > 0)
+                order.Status = CollectionOrderStatus.PartiallyCollected;
+
+            if (order.RevenueClaim is not null)
+            {
+                var claim = order.RevenueClaim;
+                var claimOrders = await context.CollectionOrders
+                    .Where(o => o.RevenueClaimId == claim.Id)
+                    .Include(o => o.ReceiptVouchers)
+                        .ThenInclude(v => v.Lines)
+                    .Include(o => o.ReceiptVouchers)
+                        .ThenInclude(v => v.Checks)
+                    .ToListAsync(cancellationToken);
+
+                var (claimCollected, _, claimOutstanding, _) = RevenueMetricsCalculator.CalculateClaimMetrics(claim.TotalAmount, claimOrders);
+                if (claimOutstanding <= 0)
+                    claim.Status = ClaimStatus.Settled;
+                else if (claimCollected > 0)
+                    claim.Status = ClaimStatus.PartiallySettled;
+            }
+        }
 
         context.DocumentStatusLogs.Add(new DocumentStatusLog
         {
@@ -68,15 +106,7 @@ public class ClearCheckCommandHandler(
             ChangedAt = DateTimeOffset.UtcNow
         });
 
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            return Result.Failure(new[] { "Check was modified by another user. Please refresh and try again." });
-        }
-
+        await context.SaveChangesAsync(cancellationToken);
         return Result.Success();
     }
 }
@@ -85,13 +115,8 @@ public class ClearCheckCommandValidator : AbstractValidator<ClearCheckCommand>
 {
     public ClearCheckCommandValidator()
     {
-        RuleFor(x => x.Id)
-            .GreaterThan(0).WithMessage("Check ID is required.");
-
-        RuleFor(x => x.ClearedAt)
-            .NotEmpty().WithMessage("Clearing date is required.");
-
-        RuleFor(x => x.RowVersion)
-            .NotEmpty().WithMessage("Row version is required for concurrency control.");
+        RuleFor(x => x.Id).GreaterThan(0).WithMessage("Check ID is required.");
+        RuleFor(x => x.ClearedAt).NotEmpty().WithMessage("Clearing date is required.");
+        RuleFor(x => x.RowVersion).NotEmpty().WithMessage("Row version is required for concurrency control.");
     }
 }

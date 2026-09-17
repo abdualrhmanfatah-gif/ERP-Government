@@ -15,7 +15,6 @@ import { JournalEditPage } from '../features/accounting/journals/pages/JournalEd
 import { TemplatesListPage } from '../features/accounting/templates/pages/TemplatesListPage';
 import { TemplateCreatePage } from '../features/accounting/templates/pages/TemplateCreatePage';
 import { TemplateEditPage } from '../features/accounting/templates/pages/TemplateEditPage';
-import { PostingRulesListPage } from '../features/accounting-monitoring/pages/PostingRulesListPage';
 
 import { RolesListPage } from '../features/security/rbac/pages/RolesListPage';
 import { RoleCreatePage } from '../features/security/rbac/pages/RoleCreatePage';
@@ -37,6 +36,33 @@ import { ProjectEditPage } from '../features/organization/pages/ProjectCreatePag
 
 import { AccountGroupsListPage } from '../features/accounting/account-groups/pages/AccountGroupsListPage';
 import { AccountGroupDetailPage } from '../features/accounting/account-groups/pages/AccountGroupDetailPage';
+import AssetGroupsListPage from '../features/assets/asset-groups/pages/AssetGroupsListPage';
+import AssetGroupCreatePage from '../features/assets/asset-groups/pages/AssetGroupCreatePage';
+import AssetGroupDetailPage from '../features/assets/asset-groups/pages/AssetGroupDetailPage';
+import AssetGroupEditPage from '../features/assets/asset-groups/pages/AssetGroupEditPage';
+import AssetAttributesListPage from '../features/assets/asset-attributes/pages/AssetAttributesListPage';
+import AssetAttributeCreatePage from '../features/assets/asset-attributes/pages/AssetAttributeCreatePage';
+import AssetAttributeEditPage from '../features/assets/asset-attributes/pages/AssetAttributeEditPage';
+import { AssetsListPage } from '../features/assets/assets/pages/AssetsListPage';
+import { AssetCreatePage } from '../features/assets/assets/pages/AssetCreatePage';
+import { AssetDetailPage } from '../features/assets/assets/pages/AssetDetailPage';
+import { AssetEditPage } from '../features/assets/assets/pages/AssetEditPage';
+
+import { TransfersListPage } from '../features/assets/asset-transactions/transfers/pages/TransfersListPage';
+import { TransferDetailPage } from '../features/assets/asset-transactions/transfers/pages/TransferDetailPage';
+import { TransferCreatePage } from '../features/assets/asset-transactions/transfers/pages/TransferCreatePage';
+import { TransferEditPage } from '../features/assets/asset-transactions/transfers/pages/TransferEditPage';
+import { DisposalsListPage } from '../features/assets/asset-transactions/disposals/pages/DisposalsListPage';
+import { DisposalDetailPage } from '../features/assets/asset-transactions/disposals/pages/DisposalDetailPage';
+import { RevaluationsListPage } from '../features/assets/asset-transactions/revaluations/pages/RevaluationsListPage';
+import { RevaluationDetailPage } from '../features/assets/asset-transactions/revaluations/pages/RevaluationDetailPage';
+import { ImpairmentsListPage } from '../features/assets/asset-transactions/impairments/pages/ImpairmentsListPage';
+import { ImpairmentDetailPage } from '../features/assets/asset-transactions/impairments/pages/ImpairmentDetailPage';
+import { DepreciationListPage } from '../features/assets/asset-depreciation/pages/DepreciationListPage';
+import { DepreciationRunPage } from '../features/assets/asset-depreciation/pages/DepreciationRunPage';
+import { DepreciationDetailPage } from '../features/assets/asset-depreciation/pages/DepreciationDetailPage';
+import { CountsListPage } from '../features/assets/asset-counts/pages/CountsListPage';
+import { CountDetailPage } from '../features/assets/asset-counts/pages/CountDetailPage';
 import FiscalYearsListPage from '../features/financial-settings/fiscal-years/pages/FiscalYearsListPage';
 import FiscalYearDetailPage from '../features/financial-settings/fiscal-years/pages/FiscalYearDetailPage';
 import FiscalYearCreatePage from '../features/financial-settings/fiscal-years/pages/FiscalYearCreatePage';
@@ -56,6 +82,8 @@ import ItemEditPage from '../features/inventory/items/pages/ItemEditPage';
 import ItemCategoriesListPage from '../features/inventory/item-categories/pages/ItemCategoriesListPage';
 import UnitsListPage from '../features/inventory/units/pages/UnitsListPage';
 import WarehousesListPage from '../features/inventory/warehouses/pages/WarehousesListPage';
+import LocationsListPage from '../features/inventory/locations/pages/LocationsListPage';
+import { ComponentGallery } from '../components/ui/__gallery__/ComponentGallery';
 
 import BudgetTypesListPage from '../features/budgeting/budget-types/pages/BudgetTypesListPage';
 import FundsListPage from '../features/budgeting/funds/pages/FundsListPage';
@@ -65,7 +93,7 @@ import PartiesListPage from '../features/parties/pages/PartiesListPage';
 import PartyCreatePage from '../features/parties/pages/PartyCreatePage';
 import PartyDetailPage from '../features/parties/pages/PartyDetailPage';
 import BudgetsListPage from '../features/budgeting/budgets/pages/BudgetsListPage';
-import { ReceiptVouchersListPage, CreateReceiptVoucherPage, ReceiptVoucherDetailPage, DepositSlipsListPage, CreateDepositSlipPage, DepositSlipDetailPage, MonthlyStatementPage } from '../features/treasury';
+import { ReceiptVouchersListPage, CreateReceiptVoucherPage, ReceiptVoucherDetailPage, DepositSlipsListPage, CreateDepositSlipPage, CreateDepositSlip47Page, CreateDepositSlip48Page, DepositSlipDetailPage, MonthlyStatementPage, RevenueClaimsListPage, CreateRevenueClaimPage, RevenueClaimDetailPage, CollectionOrdersListPage, CreateCollectionOrderPage, CollectionOrderDetailPage } from '../features/treasury';
 import ChecksListPage from '../features/treasury/checks/pages/ChecksListPage';import BudgetDetailPage from '../features/budgeting/budgets/pages/BudgetDetailPage';
 import BudgetCreatePage from '../features/budgeting/budgets/pages/BudgetCreatePage';
 
@@ -87,7 +115,6 @@ import BankAccountDetailPage from '../features/payments/bank-accounts/pages/Bank
 import BudgetExecutionReportPage from '../features/reporting/budget-execution-report/pages/BudgetExecutionReportPage';
 import RevenueCollectionsReportPage from '../features/reporting/revenue-collections-report/pages/RevenueCollectionsReportPage';
 import DisbursementRegisterReportPage from '../features/reporting/disbursement-register-report/pages/DisbursementRegisterReportPage';
-import AvailabilitySnapshotReportPage from '../features/reporting/availability-snapshot-report/pages/AvailabilitySnapshotReportPage';
 import TrialBalanceReportPage from '../features/reporting/trial-balance-report/pages/TrialBalanceReportPage';
 import BalanceSheetReportPage from '../features/reporting/financial-statements/pages/BalanceSheetReportPage';
 import IncomeStatementReportPage from '../features/reporting/financial-statements/pages/IncomeStatementReportPage';
@@ -240,13 +267,6 @@ export const AppRoutes: RouteConfig[] = [
     path: '/accounting/recurring-entries/:id',
     element: <RecurringEntryDetailPage />,
     label: 'تفاصيل الجدول الدوري',
-    protected: true,
-  },
-  // Accounting — Monitoring (ACC-05)
-  {
-    path: '/accounting/posting-rules',
-    element: <PostingRulesListPage />,
-    label: 'قواعد الترحيل',
     protected: true,
   },
   {
@@ -465,7 +485,225 @@ export const AppRoutes: RouteConfig[] = [
     protected: true,
   },
 
-  // Assets — Asset Register
+  // Assets — Asset Groups (F1)
+  {
+    path: '/assets/asset-groups',
+    element: <AssetGroupsListPage />,
+    label: 'مجموعات الأصول',
+    protected: true,
+    requiredPermission: 'AssetGroups.View',
+  },
+  {
+    path: '/assets/asset-groups/create',
+    element: <AssetGroupCreatePage />,
+    label: 'إضافة مجموعة أصول',
+    protected: true,
+    requiredPermission: 'AssetGroups.Create',
+  },
+  {
+    path: '/assets/asset-groups/:id',
+    element: <AssetGroupDetailPage />,
+    label: 'تفاصيل المجموعة',
+    protected: true,
+    requiredPermission: 'AssetGroups.View',
+  },
+  {
+    path: '/assets/asset-groups/:id/edit',
+    element: <AssetGroupEditPage />,
+    label: 'تعديل المجموعة',
+    protected: true,
+    requiredPermission: 'AssetGroups.Update',
+  },
+  // Assets — Attribute Definitions
+  {
+    path: '/assets/attributes',
+    element: <AssetAttributesListPage />,
+    label: 'تعريفات المواصفات',
+    protected: true,
+    requiredPermission: 'AssetGroups.View',
+  },
+  {
+    path: '/assets/attributes/create',
+    element: <AssetAttributeCreatePage />,
+    label: 'تعريف مواصفة جديدة',
+    protected: true,
+    requiredPermission: 'AssetGroups.Create',
+  },
+  {
+    path: '/assets/attributes/:id/edit',
+    element: <AssetAttributeEditPage />,
+    label: 'تعديل المواصفة',
+    protected: true,
+    requiredPermission: 'AssetGroups.Update',
+  },
+  // Assets — Asset Register (F2)
+  {
+    path: '/assets',
+    element: <AssetsListPage />,
+    label: 'سجل الأصول',
+    protected: true,
+    requiredPermission: 'Assets.View',
+  },
+  {
+    path: '/assets/create',
+    element: <AssetCreatePage />,
+    label: 'إضافة أصل جديد',
+    protected: true,
+    requiredPermission: 'Assets.Create',
+  },
+  {
+    path: '/assets/:id',
+    element: <AssetDetailPage />,
+    label: 'تفاصيل الأصل',
+    protected: true,
+    requiredPermission: 'Assets.View',
+  },
+  {
+    path: '/assets/:id/edit',
+    element: <AssetEditPage />,
+    label: 'تعديل الأصل',
+    protected: true,
+    requiredPermission: 'Assets.Update',
+  },
+  // Assets — Transfers (US3)
+  {
+    path: '/assets/transfers',
+    element: <TransfersListPage />,
+    label: 'نقل الأصول',
+    protected: true,
+    requiredPermission: 'AssetTransfers.View',
+  },
+  {
+    path: '/assets/transfers/create',
+    element: <TransferCreatePage />,
+    label: 'نقل جديد',
+    protected: true,
+    requiredPermission: 'AssetTransfers.Create',
+  },
+  {
+    path: '/assets/transfers/:id',
+    element: <TransferDetailPage />,
+    label: 'تفاصيل النقل',
+    protected: true,
+    requiredPermission: 'AssetTransfers.View',
+  },
+  {
+    path: '/assets/transfers/:id/edit',
+    element: <TransferEditPage />,
+    label: 'تعديل النقل',
+    protected: true,
+    requiredPermission: 'AssetTransfers.Create',
+  },
+  // Assets — Depreciation (US4)
+  {
+    path: '/assets/depreciation',
+    element: <DepreciationListPage />,
+    label: 'الإهلاك',
+    protected: true,
+    requiredPermission: 'AssetDepreciation.View',
+  },
+  {
+    path: '/assets/depreciation/run',
+    element: <DepreciationRunPage />,
+    label: 'تشغيل الإهلاك',
+    protected: true,
+    requiredPermission: 'AssetDepreciation.Run',
+  },
+  {
+    path: '/assets/depreciation/:id',
+    element: <DepreciationDetailPage />,
+    label: 'تفاصيل الإهلاك',
+    protected: true,
+    requiredPermission: 'AssetDepreciation.View',
+  },
+  // Assets — Disposals (US5)
+  {
+    path: '/assets/disposals',
+    element: <DisposalsListPage />,
+    label: 'التخلص',
+    protected: true,
+    requiredPermission: 'AssetDisposals.View',
+  },
+  {
+    path: '/assets/disposals/create',
+    element: <DisposalDetailPage />,
+    label: 'تخلص جديد',
+    protected: true,
+    requiredPermission: 'AssetDisposals.Create',
+  },
+  {
+    path: '/assets/disposals/:id',
+    element: <DisposalDetailPage />,
+    label: 'تفاصيل التخلص',
+    protected: true,
+    requiredPermission: 'AssetDisposals.View',
+  },
+  // Assets — Revaluations (US6)
+  {
+    path: '/assets/revaluations',
+    element: <RevaluationsListPage />,
+    label: 'التقييمات',
+    protected: true,
+    requiredPermission: 'AssetRevaluations.View',
+  },
+  {
+    path: '/assets/revaluations/create',
+    element: <RevaluationDetailPage />,
+    label: 'تقييم جديد',
+    protected: true,
+    requiredPermission: 'AssetRevaluations.Create',
+  },
+  {
+    path: '/assets/revaluations/:id',
+    element: <RevaluationDetailPage />,
+    label: 'تفاصيل التقييم',
+    protected: true,
+    requiredPermission: 'AssetRevaluations.View',
+  },
+  // Assets — Impairments (US7)
+  {
+    path: '/assets/impairments',
+    element: <ImpairmentsListPage />,
+    label: 'الإنخفاض',
+    protected: true,
+    requiredPermission: 'AssetImpairments.View',
+  },
+  {
+    path: '/assets/impairments/create',
+    element: <ImpairmentDetailPage />,
+    label: 'إنخفاض جديد',
+    protected: true,
+    requiredPermission: 'AssetImpairments.Create',
+  },
+  {
+    path: '/assets/impairments/:id',
+    element: <ImpairmentDetailPage />,
+    label: 'تفاصيل الإنخفاض',
+    protected: true,
+    requiredPermission: 'AssetImpairments.View',
+  },
+  // Assets — Counts (US8)
+  {
+    path: '/assets/counts',
+    element: <CountsListPage />,
+    label: 'الجرد',
+    protected: true,
+    requiredPermission: 'AssetCounts.View',
+  },
+  {
+    path: '/assets/counts/create',
+    element: <CountDetailPage />,
+    label: 'جرد جديد',
+    protected: true,
+    requiredPermission: 'AssetCounts.Create',
+  },
+  {
+    path: '/assets/counts/:id',
+    element: <CountDetailPage />,
+    label: 'تفاصيل الجرد',
+    protected: true,
+    requiredPermission: 'AssetCounts.View',
+  },
   // Account Groups (US1-US5)
   {
     path: '/accounting/account-groups',
@@ -623,6 +861,44 @@ export const AppRoutes: RouteConfig[] = [
     label: 'تفاصيل قيد الإغلاق',
     protected: true,
   },
+  // Treasury — Revenue Claims (TRE-00)
+  {
+    path: '/treasury/revenue-claims',
+    element: <RevenueClaimsListPage />,
+    label: 'المطالبات الإيرادية',
+    protected: true,
+  },
+  {
+    path: '/treasury/revenue-claims/create',
+    element: <CreateRevenueClaimPage />,
+    label: 'مطالبة إيرادية جديدة',
+    protected: true,
+  },
+  {
+    path: '/treasury/revenue-claims/:id',
+    element: <RevenueClaimDetailPage />,
+    label: 'تفاصيل المطالبة',
+    protected: true,
+  },
+  // Treasury — Collection Orders (TRE-00b)
+  {
+    path: '/treasury/collection-orders',
+    element: <CollectionOrdersListPage />,
+    label: 'أوامر التحصيل',
+    protected: true,
+  },
+  {
+    path: '/treasury/collection-orders/create',
+    element: <CreateCollectionOrderPage />,
+    label: 'أمر تحصيل جديد',
+    protected: true,
+  },
+  {
+    path: '/treasury/collection-orders/:id',
+    element: <CollectionOrderDetailPage />,
+    label: 'تفاصيل أمر التحصيل',
+    protected: true,
+  },
   // Treasury — Receipt Vouchers (TRE-01)
   {
     path: '/treasury/receipt-vouchers',
@@ -653,6 +929,18 @@ export const AppRoutes: RouteConfig[] = [
     path: '/treasury/deposit-slips/create',
     element: <CreateDepositSlipPage />,
     label: 'إنشاء بطاقة إيداع',
+    protected: true,
+  },
+  {
+    path: '/treasury/deposit-slips/47/create',
+    element: <CreateDepositSlip47Page />,
+    label: 'إنشاء حافظة توريد النقد',
+    protected: true,
+  },
+  {
+    path: '/treasury/deposit-slips/48/create',
+    element: <CreateDepositSlip48Page />,
+    label: 'إنشاء حافظة إرسال الشيكات',
     protected: true,
   },
   {
@@ -698,14 +986,6 @@ export const AppRoutes: RouteConfig[] = [
     protected: true,
     requiredPermission: 'Reporting.ViewDisbursementRegister',
   },
-  // Reporting — Availability Snapshot (RPT-04)
-  {
-    path: '/reporting/availability-snapshot',
-    element: <AvailabilitySnapshotReportPage />,
-    label: 'لقطة التوفر',
-    protected: true,
-    requiredPermission: 'Reporting.ViewAvailabilitySnapshot',
-  },
   // Reporting — Trial Balance (RPT-05)
   {
     path: '/reporting/trial-balance',
@@ -720,28 +1000,28 @@ export const AppRoutes: RouteConfig[] = [
     element: <BalanceSheetReportPage />,
     label: 'الميزانية العمومية',
     protected: true,
-    requiredPermission: 'Reporting.ViewFinancialStatements',
+    requiredPermission: 'Accounting.Reports.BalanceSheet',
   },
   {
     path: '/reporting/financial-statements/income-statement',
     element: <IncomeStatementReportPage />,
     label: 'قائمة الدخل',
     protected: true,
-    requiredPermission: 'Reporting.ViewFinancialStatements',
+    requiredPermission: 'Accounting.Reports.IncomeStatement',
   },
   {
     path: '/reporting/financial-statements/cash-flow',
     element: <CashFlowStatementReportPage />,
     label: 'قائمة التدفقات النقدية',
     protected: true,
-    requiredPermission: 'Reporting.ViewFinancialStatements',
+    requiredPermission: 'Accounting.Reports.CashFlow',
   },
   {
     path: '/reporting/financial-statements/general-ledger',
     element: <GeneralLedgerReportPage />,
     label: 'دفتر الأستاذ العام',
     protected: true,
-    requiredPermission: 'Reporting.ViewFinancialStatements',
+    requiredPermission: 'Accounting.Reports.GeneralLedger',
   },
   // ─── Payments ──────────────────────────────────────────────────
   {
@@ -863,4 +1143,20 @@ export const AppRoutes: RouteConfig[] = [
     protected: true,
     requiredPermission: 'Warehouses.View',
   },
+  {
+    path: '/inventory/locations',
+    element: <LocationsListPage />,
+    label: 'المواقع',
+    protected: true,
+    requiredPermission: 'Locations.View',
+  },
+  // Dev-only: component gallery for visual review
+  ...(import.meta.env.DEV
+    ? [{
+        path: '/__gallery__',
+        element: <ComponentGallery />,
+        label: 'مكتبة المكونات',
+        protected: false,
+      }]
+    : []),
 ];

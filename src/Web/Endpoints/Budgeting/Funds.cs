@@ -2,6 +2,7 @@ using ERP_Government.Application.Budgeting.Commands.Funds;
 using ERP_Government.Application.Budgeting.Common;
 using ERP_Government.Application.Budgeting.Queries.Funds;
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,11 +45,12 @@ public class Funds : IEndpointGroup
     }
 
     [EndpointSummary("Get fund by ID")]
-    public static async Task<FundDto> GetFundById(
+    public static async Task<IResult> GetFundById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetFundByIdQuery(id));
+        var result = await sender.Send(new GetFundByIdQuery(id));
+        return result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new fund")]
@@ -61,7 +63,7 @@ public class Funds : IEndpointGroup
             body.LegalAuthority, body.Description,
             body.DefaultRevenueAccountId, body.CurrencyId));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Created($"/api/Funds/{result.Value}", result.Value);
     }
 
@@ -76,7 +78,7 @@ public class Funds : IEndpointGroup
             body.LegalAuthority, body.Description,
             body.DefaultRevenueAccountId, body.CurrencyId, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -88,7 +90,7 @@ public class Funds : IEndpointGroup
     {
         var result = await sender.Send(new ToggleFundActiveCommand(id, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

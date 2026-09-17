@@ -1,37 +1,29 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import type { AccountDto, AccountGroupDto } from '@/features/accounting/types';
+import { accountSchema, type AccountFormData } from '@/features/accounting/shared/schemas';
+import { handleApiError } from '@/shared/api/result-to-ui';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Switch } from '@/components/ui/Switch';
 import { Button } from '@/components/ui/Button';
-
-const schema = z.object({
-  code: z.string().min(1, 'الرمز مطلوب'),
-  name: z.string().min(1, 'الاسم مطلوب'),
-  description: z.string().optional(),
-  accountGroupId: z.coerce.number().min(1, 'المجموعة مطلوبة'),
-  parentId: z.coerce.number().optional().nullable(),
-  normalBalance: z.coerce.number().min(0, 'نوع الحساب  مطلوب'),
-  isPostable: z.boolean(),
-  isReconcilable: z.boolean(),
-  currencyId: z.coerce.number().optional().nullable(),
-});
-
-type FormData = z.infer<typeof schema>;
+import { Alert } from '@/components/ui/Alert';
 
 interface AccountFormProps {
   initialData?: AccountDto;
   accountGroups: AccountGroupDto[];
   parentAccounts: AccountDto[];
-  onSubmit: (data: FormData) => void;
+  onSubmit: (data: AccountFormData) => Promise<unknown>;
+  onSuccess?: () => void;
+  onCancel?: () => void;
   loading?: boolean;
 }
 
-export function AccountForm({ initialData, accountGroups, parentAccounts, onSubmit, loading }: AccountFormProps) {
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
-    resolver: zodResolver(schema),
+export function AccountForm({ initialData, accountGroups, parentAccounts, onSubmit, onSuccess, onCancel, loading }: AccountFormProps) {
+  const [submitting, setSubmitting] = useState(false);
+  const { register, handleSubmit, watch, setValue, setError, formState: { errors } } = useForm<AccountFormData>({
+    resolver: zodResolver(accountSchema),
     values: initialData ? {
       code: initialData.code ?? '',
       name: initialData.name ?? '',
@@ -59,35 +51,66 @@ export function AccountForm({ initialData, accountGroups, parentAccounts, onSubm
   const isPostable = watch('isPostable');
   const isReconcilable = watch('isReconcilable');
 
+  const handleFormSubmit = async (data: AccountFormData) => {
+    setSubmitting(true);
+    try {
+      await onSubmit(data);
+      onSuccess?.();
+    } catch (err) {
+      handleApiError(err, setError);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl" aria-label="نموذج الحساب">
-      <Input label="الرمز" {...register('code')} error={errors.code?.message} required disabled={!!initialData} />
-      <Input label="الاسم" {...register('name')} error={errors.name?.message} required />
-      <Input label="الوصف" {...register('description')} />
-      <Select
-        label="المجموعة"
-        {...register('accountGroupId')}
-        options={accountGroups.map((g) => ({ value: String(g.id), label: g.name ?? '' }))}
-        error={errors.accountGroupId?.message}
-      />
-      <Select
-        label="الحساب الأب"
-        {...register('parentId')}
-        options={[
-          { value: '', label: '— بدون —' },
-          ...parentAccounts.map((a) => ({ value: String(a.id), label: `${a.code} - ${a.name}` })),
-        ]}
-      />
-      <Select
-        label="نوع الحساب "
-        {...register('normalBalance')}
-        options={[
-          { value: '0', label: 'مدين' },
-          { value: '1', label: 'دائن' },
-        ]}
-        error={errors.normalBalance?.message}
-      />
-      <fieldset className="border border-[var(--color-border-container)] rounded-lg p-4 mb-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="max-w-2xl" aria-label="نموذج الحساب">
+      {errors.root && (
+        <Alert variant="error" role="alert">{errors.root.message}</Alert>
+      )}
+
+      {/* Basic info */}
+      <fieldset className="border border-[var(--color-container-border)] rounded-lg p-4 mb-4">
+        <legend className="text-sm font-medium text-[var(--color-on-surface)] px-1">البيانات الأساسية</legend>
+        <div className="grid gap-4 mt-2">
+          <Input label="الرمز" {...register('code')} error={errors.code?.message} required disabled={!!initialData} />
+          <Input label="الاسم" {...register('name')} error={errors.name?.message} required />
+          <Input label="الوصف" {...register('description')} />
+        </div>
+      </fieldset>
+
+      {/* Classification */}
+      <fieldset className="border border-[var(--color-container-border)] rounded-lg p-4 mb-4">
+        <legend className="text-sm font-medium text-[var(--color-on-surface)] px-1">التصنيف</legend>
+        <div className="grid gap-4 mt-2">
+          <Select
+            label="المجموعة"
+            {...register('accountGroupId')}
+            options={accountGroups.map((g) => ({ value: String(g.id), label: g.name ?? '' }))}
+            error={errors.accountGroupId?.message}
+          />
+          <Select
+            label="الحساب الأب"
+            {...register('parentId')}
+            options={[
+              { value: '', label: '— بدون —' },
+              ...parentAccounts.map((a) => ({ value: String(a.id), label: `${a.code} - ${a.name}` })),
+            ]}
+          />
+          <Select
+            label="نوع الحساب"
+            {...register('normalBalance')}
+            options={[
+              { value: '0', label: 'مدين' },
+              { value: '1', label: 'دائن' },
+            ]}
+            error={errors.normalBalance?.message}
+          />
+        </div>
+      </fieldset>
+
+      {/* Options */}
+      <fieldset className="border border-[var(--color-container-border)] rounded-lg p-4 mb-4">
         <legend className="text-sm font-medium text-[var(--color-on-surface)] px-1">خيارات إضافية</legend>
         <div className="flex flex-col gap-3 mt-2">
           <Switch
@@ -102,9 +125,15 @@ export function AccountForm({ initialData, accountGroups, parentAccounts, onSubm
           />
         </div>
       </fieldset>
-      <Button type="submit" variant="primary" loading={loading}>
-        {initialData ? 'حفظ التعديلات' : 'إنشاء الحساب'}
-      </Button>
+
+      <div className="flex justify-end gap-2">
+        {onCancel && (
+          <Button type="button" variant="ghost" onClick={onCancel}>إلغاء</Button>
+        )}
+        <Button type="submit" variant="primary" loading={loading || submitting}>
+          {initialData ? 'حفظ التعديلات' : 'إنشاء الحساب'}
+        </Button>
+      </div>
     </form>
   );
 }

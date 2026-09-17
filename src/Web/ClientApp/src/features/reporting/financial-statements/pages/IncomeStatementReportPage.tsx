@@ -60,7 +60,7 @@ export default function IncomeStatementReportPage() {
     }
   }
 
-  function renderGroup(label: string, group?: { sections?: Array<{ title?: string; lines?: Array<{ label?: string; amount?: number }>; total?: number }>; total?: number }) {
+  function renderGroup(label: string, group?: { sections?: Array<{ title?: string; lines?: Array<{ accountCode?: string; accountName?: string; balance?: number }>; total?: number }>; total?: number }) {
     if (!group) return null;
     return (
       <div className="mb-6">
@@ -69,11 +69,19 @@ export default function IncomeStatementReportPage() {
           <div key={si} className="mb-3">
             <h4 className="text-muted-foreground mb-1 text-sm font-semibold">{section.title}</h4>
             <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b">
+                  <th className="py-1 text-start">رقم الحساب</th>
+                  <th className="py-1 text-start">اسم الحساب</th>
+                  <th className="py-1 text-end">المبلغ</th>
+                </tr>
+              </thead>
               <tbody>
                 {section.lines?.map((line, li) => (
                   <tr key={li} className="border-b">
-                    <td className="py-1 text-sm">{line.label ?? '—'}</td>
-                    <td className="py-1 text-end"><MoneyDisplay value={line.amount ?? 0} /></td>
+                    <td className="py-1 font-mono text-sm" dir="ltr">{line.accountCode ?? '—'}</td>
+                    <td className="py-1 text-sm">{line.accountName ?? '—'}</td>
+                    <td className="py-1 text-end"><MoneyDisplay value={line.balance ?? 0} /></td>
                   </tr>
                 ))}
               </tbody>

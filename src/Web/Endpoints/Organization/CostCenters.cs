@@ -2,6 +2,7 @@ using ERP_Government.Application.Organization.Common.DTOs;
 using ERP_Government.Application.Organization.Commands.CostCenters;
 using ERP_Government.Application.Organization.Queries.CostCenters;
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,11 +45,12 @@ public class CostCenters : IEndpointGroup
     }
 
     [EndpointSummary("Get cost center by ID")]
-    public static async Task<CostCenterDto> GetCostCenterById(
+    public static async Task<IResult> GetCostCenterById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetCostCenterByIdQuery { Id = id });
+        var result = await sender.Send(new GetCostCenterByIdQuery { Id = id });
+        return result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new cost center")]
@@ -58,7 +60,7 @@ public class CostCenters : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -78,7 +80,7 @@ public class CostCenters : IEndpointGroup
             IsActive = body.IsActive
         });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -89,7 +91,7 @@ public class CostCenters : IEndpointGroup
     {
         var result = await sender.Send(new DeleteCostCenterCommand { Id = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

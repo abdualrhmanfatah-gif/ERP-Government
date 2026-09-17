@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
+import { TriangleAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type BadgeVariant = 'draft' | 'pending' | 'approved' | 'active' | 'closed' | 'posted' | 'reversed' | 'cancelled' | 'locked' | 'overBudget' | 'unbalanced' | 'submitted' | 'sentToTreasury' | 'paid' | 'partiallyPaid' | 'rejected' | 'voided' | 'disbursed' | 'failed' | 'warning' | 'overridden' | 'passed';
+export type BadgeVariant = 'draft' | 'pending' | 'approved' | 'active' | 'closed' | 'inactive' | 'posted' | 'reversed' | 'cancelled' | 'locked' | 'overBudget' | 'unbalanced' | 'submitted' | 'sentToTreasury' | 'paid' | 'partiallyPaid' | 'rejected' | 'voided' | 'disbursed' | 'failed' | 'warning' | 'overridden' | 'passed';
 type BadgeSize = 'sm' | 'md';
 
 interface StatusBadgeProps {
@@ -18,6 +19,7 @@ const variantClasses: Record<BadgeVariant, string> = {
   approved: 'bg-status-approved-bg text-status-approved-fg',
   active: 'bg-status-active-bg text-status-active-fg',
   closed: 'bg-status-closed-bg text-status-closed-fg',
+  inactive: 'bg-status-inactive-bg text-status-inactive-fg',
   posted: 'bg-status-posted-bg text-status-posted-fg',
   reversed: 'bg-status-reversed-bg text-status-reversed-fg',
   cancelled: 'bg-status-closed-bg text-status-closed-fg',
@@ -42,12 +44,22 @@ const sizeClasses: Record<BadgeSize, string> = {
   md: 'px-3 py-0.5 text-xs',
 };
 
+// Validation-type aliases share a base color pair with lifecycle states, so they
+// carry a non-color cue by default (contracts/status-semantics.md §2, FR-003).
+const defaultIcons: Partial<Record<BadgeVariant, ReactNode>> = {
+  warning: <TriangleAlert className="size-3.5" aria-hidden="true" />,
+  overBudget: <TriangleAlert className="size-3.5" aria-hidden="true" />,
+  overridden: <TriangleAlert className="size-3.5" aria-hidden="true" />,
+  unbalanced: <TriangleAlert className="size-3.5" aria-hidden="true" />,
+};
+
 const statusLabels: Record<BadgeVariant, string> = {
   draft: 'مسودة',
   pending: 'قيد المراجعة',
   approved: 'موافق',
   active: 'نشط',
   closed: 'مغلق',
+  inactive: 'غير نشط',
   posted: 'مرحل',
   reversed: 'معكوس',
   cancelled: 'ملغى',
@@ -74,6 +86,8 @@ export function StatusBadge({
   children,
   className,
 }: StatusBadgeProps) {
+  const cue = icon ?? defaultIcons[variant];
+
   return (
     <span
       role="status"
@@ -85,7 +99,7 @@ export function StatusBadge({
         className
       )}
     >
-      {icon ? <span aria-hidden="true">{icon}</span> : null}
+      {cue ? <span aria-hidden="true">{cue}</span> : null}
       {children}
     </span>
   );

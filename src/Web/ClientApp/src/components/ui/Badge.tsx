@@ -15,7 +15,7 @@ const variantClasses: Record<BadgeVariant, string> = {
   secondary: 'bg-[var(--color-secondary)] text-[var(--color-on-secondary)]',
   success: 'bg-status-approved-bg text-status-approved-fg',
   warning: 'bg-status-pending-bg text-status-pending-fg',
-  danger: 'bg-status-cancelled-bg text-status-cancelled-fg',
+  danger: 'bg-[var(--color-error-container)] text-[var(--color-on-error-container)]',
   error: 'bg-[var(--color-error)] text-[var(--color-on-error)]',
   outline: 'border border-[var(--color-outline)] text-[var(--color-on-surface)]',
 };

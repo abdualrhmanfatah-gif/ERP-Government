@@ -8,6 +8,7 @@ import { AuthProvider } from './shared/hooks/useAuth';
 import { ThemeProvider } from './components/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
 import { NotificationProvider } from './features/notifications/store';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,16 +24,18 @@ const baseUrl = document.getElementsByTagName('base')[0].getAttribute('href');
 const root = createRoot(document.getElementById('root')!);
 
 root.render(
-  <BrowserRouter basename={baseUrl ?? '/'}>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <NotificationProvider>
-          <AuthProvider>
-            <ToastProvider />
-            <App />
-          </AuthProvider>
-        </NotificationProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
-  </BrowserRouter>
+  <ErrorBoundary>
+    <BrowserRouter basename={baseUrl ?? '/'}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <NotificationProvider>
+            <AuthProvider>
+              <ToastProvider />
+              <App />
+            </AuthProvider>
+          </NotificationProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
+  </ErrorBoundary>
 );

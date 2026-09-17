@@ -39,14 +39,14 @@ export function FilterSelect({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className={cn(
-          'w-full h-11 px-3 py-2.5 text-sm font-normal leading-normal',
-          'border-2 rounded-lg bg-[var(--color-surface-container-lowest)] text-[var(--color-on-surface)]',
+          'w-full h-[var(--density-compact-control-height)] px-3 py-1.5 text-sm font-normal leading-normal',
+          'border rounded-lg bg-[var(--color-surface-container-lowest)] text-[var(--color-on-surface)]',
           'focus:outline-2 focus:outline-[var(--color-focus-ring)] focus:outline-offset-2 focus:ring-0 focus:shadow-[0_0_0_4px_var(--color-focus-halo)]',
           'disabled:opacity-50 disabled:cursor-not-allowed',
           'transition-colors duration-150',
           'appearance-none bg-no-repeat',
           'bg-[length:1rem] bg-[position:End_0.75rem_center]',
-          'border-[var(--color-border-input)]'
+          'border-[var(--color-input-border)]'
         )}
         style={{
           backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='var(--color-on-surface-variant)' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,

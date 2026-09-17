@@ -1,6 +1,7 @@
 import type { AccountGroupDto } from '@/features/accounting/account-groups/types';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/Button';
+import { getActiveStatusLabel } from '@/shared/constants/labels';
 import { Eye, Power, PowerOff, Pencil, ChevronRight } from 'lucide-react';
 
 type Props = {
@@ -27,7 +28,7 @@ export function GroupTree({ groups, onSelect, onToggle, onEdit, canEdit }: Props
           {g.level > 1 && (
             <ChevronRight className="h-4 w-4 text-[var(--color-on-surface-variant)] flex-shrink-0" />
           )}
-          <span className="font-mono text-sm text-[var(--color-primary)] min-w-[60px]">
+          <span className="font-mono text-sm text-[var(--color-primary)] min-w-[60px]" dir="ltr">
             {g.code}
           </span>
           <span className="flex-1 text-sm text-[var(--color-on-surface)]">
@@ -36,8 +37,8 @@ export function GroupTree({ groups, onSelect, onToggle, onEdit, canEdit }: Props
           <span className="text-xs text-[var(--color-on-surface-variant)] hidden sm:inline">
             {g.type} / {g.normalBalance}
           </span>
-          <StatusBadge variant={g.isActive ? 'active' : 'closed'}>
-            {g.isActive ? 'نشط' : 'معطل'}
+          <StatusBadge variant={g.isActive ? 'active' : 'inactive'}>
+            {getActiveStatusLabel(g.isActive)}
           </StatusBadge>
           <span className="text-xs text-[var(--color-on-surface-variant)] hidden md:inline">
             مستوى {g.level}

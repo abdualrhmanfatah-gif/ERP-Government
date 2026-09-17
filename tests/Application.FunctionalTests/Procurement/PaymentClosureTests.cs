@@ -1,7 +1,4 @@
 using ERP_Government.Application.Procurement.Commands.PurchaseRequests.CreatePurchaseRequest;
-using ERP_Government.Application.Procurement.Commands.RequestForQuotations.CreateRFQ;
-using ERP_Government.Application.Procurement.Commands.RequestForQuotations.PublishRFQ;
-using ERP_Government.Application.Procurement.Commands.RequestForQuotations.CloseRFQCollection;
 using ERP_Government.Application.Procurement.Commands.Quotations.CreateQuotation;
 using ERP_Government.Application.Procurement.Commands.Quotations.SubmitQuotation;
 using ERP_Government.Application.Procurement.Commands.Quotations.StartEvaluation;
@@ -70,14 +67,8 @@ public class PaymentClosureTests : TestBase
         var prDetail = await TestApp.SendAsync(new ERP_Government.Application.Procurement.Queries.PurchaseRequests.GetPurchaseRequestById.GetPurchaseRequestByIdQuery(prResult.Value));
         _prDetailId = prDetail.Details.First().Id;
 
-        var rfqResult = await TestApp.SendAsync(new CreateRFQCommand(
-            prResult.Value, null, null, null, null, [_supplierId]));
-        rfqResult.Succeeded.ShouldBeTrue();
-        await TestApp.SendAsync(new PublishRFQCommand(rfqResult.Value));
-        await TestApp.SendAsync(new CloseRFQCollectionCommand(rfqResult.Value));
-
         var qResult = await TestApp.SendAsync(new CreateQuotationCommand(
-            rfqResult.Value, 1, _supplierId, DateTime.UtcNow, null, null, null, null, null,
+            _supplierId, DateTime.UtcNow, null, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null,
             [new QuotationLineDto(_prDetailId, _itemId, _unitId, 10, 100m, null, null, null)]));
         qResult.Succeeded.ShouldBeTrue();

@@ -10,42 +10,36 @@ public class CheckConfiguration : IEntityTypeConfiguration<Check>
     {
         builder.ToTable("Checks");
 
-        builder.HasKey(e => e.Id);
+        builder.HasKey(c => c.Id);
 
-        builder.Property(e => e.BankName)
+        builder.Property(c => c.BankName)
             .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(e => e.CheckNumber)
+        builder.Property(c => c.CheckNumber)
             .HasMaxLength(50)
             .IsRequired();
 
-        builder.Property(e => e.Amount)
-            .HasColumnType("decimal(23,2)")
+        builder.Property(c => c.Amount)
+            .HasPrecision(23, 2)
             .IsRequired();
 
-        builder.Property(e => e.Status)
-            .IsRequired();
-
-        builder.Property(e => e.RowVersion)
+        builder.Property(c => c.RowVersion)
             .IsRowVersion();
 
-        builder.HasIndex(e => e.ReceiptVoucherId);
-
-        builder.HasIndex(e => e.Status);
-
-        builder.HasIndex(e => e.ReplacementVoucherId);
-
-        builder.HasOne(e => e.ReceiptVoucher)
+        builder.HasOne(c => c.ReceiptVoucher)
             .WithMany(v => v.Checks)
-            .HasForeignKey(e => e.ReceiptVoucherId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .HasForeignKey(c => c.ReceiptVoucherId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(e => e.ReplacementVoucher)
+        builder.HasOne(c => c.DepositSlip48)
+            .WithMany(s => s.Checks)
+            .HasForeignKey(c => c.DepositSlip48Id)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(c => c.ReplacementVoucher)
             .WithMany()
-            .HasForeignKey(e => e.ReplacementVoucherId)
+            .HasForeignKey(c => c.ReplacementVoucherId)
             .OnDelete(DeleteBehavior.Restrict);
-
-        builder.Ignore(e => e.DomainEvents);
     }
 }

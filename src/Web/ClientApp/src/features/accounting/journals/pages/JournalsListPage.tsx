@@ -5,6 +5,7 @@ import { Page, Button, Badge, DataGrid, FilterBar, FilterSelect } from '@/compon
 import { useJournalsList } from '../../hooks/useJournalsList';
 import { JournalType, type JournalDto } from '../../../../web-api-client';
 import { activeStatusLabels } from '@/shared/constants/labels';
+import { getQueryErrorMessage } from '@/shared/api/query-error';
 
 const journalTypeLabels: Record<string, string> = {
   General: 'عامة',
@@ -111,7 +112,7 @@ export function JournalsListPage() {
         columns={columns}
         data={journals}
         loading={isLoading}
-        error={error ? 'فشل تحميل البيانات' : undefined}
+        error={error ? getQueryErrorMessage(error) : undefined}
         onRetry={() => refetch()}
         emptyMessage="لا توجد دفاتر"
         rowKey={(row) => row.id ?? 0}

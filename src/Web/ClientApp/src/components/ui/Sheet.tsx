@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type KeyboardEvent, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -38,10 +38,11 @@ export function Sheet({
   className,
 }: SheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
-  const titleId = `sheet-title-${title.replace(/\s+/g, '-').toLowerCase()}`;
+  const previouslyFocused = useRef<HTMLElement | null>(null);
+  const titleId = useId();
 
   useEffect(() => {
-    function handleEscape(e: KeyboardEvent) {
+    function handleEscape(e: globalThis.KeyboardEvent) {
       if (e.key === 'Escape' && open) {
         onClose();
       }
@@ -49,6 +50,34 @@ export function Sheet({
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [open, onClose]);
+
+  useEffect(() => {
+    if (!open) return;
+    previouslyFocused.current = document.activeElement as HTMLElement | null;
+    sheetRef.current?.focus();
+    return () => {
+      previouslyFocused.current?.focus?.();
+    };
+  }, [open]);
+
+  function handleKeyDown(e: KeyboardEvent<HTMLDivElement>) {
+    if (e.key !== 'Tab') return;
+    const panel = sheetRef.current;
+    if (!panel) return;
+    const focusables = panel.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
 
   useEffect(() => {
     if (open) {
@@ -67,7 +96,7 @@ export function Sheet({
     <div className="fixed inset-0 z-[1040]">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+        className="absolute inset-0 bg-[var(--color-overlay)] backdrop-blur-sm animate-in fade-in duration-200"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -78,6 +107,8 @@ export function Sheet({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        tabIndex={-1}
+        onKeyDown={handleKeyDown}
         className={cn(
           'absolute flex flex-col bg-[var(--color-surface-container-lowest)] shadow-xl',
           'transition-transform duration-300 ease-out',
@@ -90,7 +121,7 @@ export function Sheet({
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border-container)] shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-container-border)] shrink-0">
           <h2
             id={titleId}
             className="text-base font-semibold leading-normal m-0 text-[var(--color-on-surface)]"
@@ -112,7 +143,7 @@ export function Sheet({
 
         {/* Footer */}
         {footer ? (
-          <div className="flex justify-end items-center gap-2 px-6 py-3 border-t border-[var(--color-border-container)] shrink-0">
+          <div className="flex justify-end items-center gap-2 px-6 py-3 border-t border-[var(--color-container-border)] shrink-0">
             {footer}
           </div>
         ) : null}

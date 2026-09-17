@@ -1,50 +1,36 @@
 import { notify } from '@/components/ui/Toast';
 import type { UseFormSetError, FieldValues, Path } from 'react-hook-form';
-
-interface ProblemErrors {
-  [field: string]: string[];
-}
-
-interface ProblemDetails {
-  status?: number;
-  title?: string;
-  detail?: string;
-  errors?: ProblemErrors;
-}
-
-function parseApiError(err: unknown): ProblemDetails {
-  if (err instanceof Error) {
-    try {
-      const parsed = JSON.parse(err.message);
-      if (Array.isArray(parsed)) {
-        return { errors: { '': parsed.map(String) } };
-      }
-      return parsed as ProblemDetails;
-    } catch {
-      return { detail: err.message };
-    }
-  }
-  return { detail: 'حدث خطأ غير متوقع' };
-}
+import { normalizeError } from './query-error';
 
 export function handleApiError<T extends FieldValues>(
   err: unknown,
   setError: UseFormSetError<T>,
 ): void {
-  const problem = parseApiError(err);
+  const normalized = normalizeError(err);
 
-  if (problem.status && problem.status >= 500) {
+  if (normalized.kind === 'cancelled') return;
+
+  if (normalized.kind === 'network') {
     notify({
       type: 'error',
-      title: 'خطأ في الخادم',
-      message: problem.detail ?? 'حدث خطأ في الخادم. يرجى المحاولة لاحقاً.',
+      title: 'خطأ في الاتصال',
+      message: normalized.message,
     });
     return;
   }
 
-  if (problem.errors && Object.keys(problem.errors).length > 0) {
-    for (const [field, messages] of Object.entries(problem.errors)) {
-      const formField = field.split('.').pop() as Path<T>;
+  if (normalized.status && normalized.status >= 500) {
+    notify({
+      type: 'error',
+      title: 'خطأ في الخادم',
+      message: normalized.message || 'حدث خطأ في الخادم. يرجى المحاولة لاحقاً.',
+    });
+    return;
+  }
+
+  if (normalized.errors && Object.keys(normalized.errors).length > 0) {
+    for (const [field, messages] of Object.entries(normalized.errors)) {
+      const formField = field as Path<T>;
       setError(formField, {
         message: messages.join(', '),
       });
@@ -52,8 +38,8 @@ export function handleApiError<T extends FieldValues>(
     return;
   }
 
-  if (problem.detail) {
-    setError('root' as Path<T>, { message: problem.detail });
+  if (normalized.message) {
+    setError('root' as Path<T>, { message: normalized.message });
     return;
   }
 
@@ -61,20 +47,31 @@ export function handleApiError<T extends FieldValues>(
 }
 
 export function handleLifecycleError(err: unknown): void {
-  const problem = parseApiError(err);
+  const normalized = normalizeError(err);
 
-  if (problem.status && problem.status >= 500) {
+  if (normalized.kind === 'cancelled') return;
+
+  if (normalized.kind === 'network') {
     notify({
       type: 'error',
-      title: 'خطأ في الخادم',
-      message: problem.detail ?? 'حدث خطأ في الخادم. يرجى المحاولة لاحقاً.',
+      title: 'خطأ في الاتصال',
+      message: normalized.message,
     });
     return;
   }
 
-  const messages = problem.errors
-    ? Object.values(problem.errors).flat()
-    : [problem.detail ?? 'حدث خطأ غير متوقع'];
+  if (normalized.status && normalized.status >= 500) {
+    notify({
+      type: 'error',
+      title: 'خطأ في الخادم',
+      message: normalized.message || 'حدث خطأ في الخادم. يرجى المحاولة لاحقاً.',
+    });
+    return;
+  }
+
+  const messages = normalized.errors
+    ? Object.values(normalized.errors).flat()
+    : [normalized.message || 'حدث خطأ غير متوقع'];
 
   notify({
     type: 'error',

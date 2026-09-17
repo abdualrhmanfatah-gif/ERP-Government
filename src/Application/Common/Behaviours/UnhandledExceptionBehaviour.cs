@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using ERP_Government.Application.Common.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace ERP_Government.Application.Common.Behaviours;
 
@@ -18,12 +19,31 @@ public class UnhandledExceptionBehaviour<TRequest, TResponse> : IPipelineBehavio
         {
             return await next();
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogDebug("Request cancelled for {RequestType}", typeof(TRequest).Name);
+            throw;
+        }
+        catch (ERP_Government.Application.Common.Exceptions.NotFoundException)
+        {
+            throw;
+        }
+        catch (ERP_Government.Application.Common.Exceptions.ValidationException)
+        {
+            throw;
+        }
+        catch (ForbiddenAccessException)
+        {
+            throw;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             var requestName = typeof(TRequest).Name;
-
-            _logger.LogError(ex, "ERP_Government Request: Unhandled Exception for Request {Name} {@Request}", requestName, request);
-
+            _logger.LogError(ex, "Unhandled exception for request {RequestName} {@Request}", requestName, request);
             throw;
         }
     }

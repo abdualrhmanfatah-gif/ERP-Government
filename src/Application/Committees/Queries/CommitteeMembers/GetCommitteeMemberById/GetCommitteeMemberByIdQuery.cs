@@ -1,22 +1,24 @@
+using ERP_Government.Application.Common.Errors;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Committees.Common.DTOs;
 
 namespace ERP_Government.Application.Committees.Queries.CommitteeMembers.GetCommitteeMemberById;
 
 [Authorize(Policy = PermissionCodes.CommitteeMembersView)]
-public class GetCommitteeMemberByIdQuery : IRequest<CommitteeMemberDto?>
+public class GetCommitteeMemberByIdQuery : IRequest<Result<CommitteeMemberDto>>
 {
     public int Id { get; init; }
 }
 
 public class GetCommitteeMemberByIdQueryHandler(
-    IApplicationDbContext context) : IRequestHandler<GetCommitteeMemberByIdQuery, CommitteeMemberDto?>
+    IApplicationDbContext context) : IRequestHandler<GetCommitteeMemberByIdQuery, Result<CommitteeMemberDto>>
 {
-    public async Task<CommitteeMemberDto?> Handle(
+    public async Task<Result<CommitteeMemberDto>> Handle(
         GetCommitteeMemberByIdQuery request,
         CancellationToken cancellationToken)
     {
-        return await context.CommitteeMembers
+        var dto = await context.CommitteeMembers
             .Where(x => x.Id == request.Id)
             .Select(x => new CommitteeMemberDto
             {
@@ -32,5 +34,10 @@ public class GetCommitteeMemberByIdQueryHandler(
                 CreatedBy = x.CreatedBy
             })
             .FirstOrDefaultAsync(cancellationToken);
+
+        if (dto is null)
+            return Result<CommitteeMemberDto>.Failure(ErrorCodes.Committees.MemberNotFound, ErrorCategory.NotFound, $"Committee member with ID {request.Id} not found.");
+
+        return Result<CommitteeMemberDto>.Success(dto);
     }
 }

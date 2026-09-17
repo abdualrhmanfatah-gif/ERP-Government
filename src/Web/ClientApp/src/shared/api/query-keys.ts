@@ -17,11 +17,6 @@ export const reportingKeys = {
   disbursementRegisterDetail: (paymentOrderId: number) =>
     ['reporting', 'disbursement-register-detail', paymentOrderId] as const,
 
-  // RPT-04 — Availability Snapshot
-  availabilitySnapshot: (filters: unknown) => ['reporting', 'availability-snapshot', filters] as const,
-  availabilitySnapshotDetail: (budgetItemId: number) =>
-    ['reporting', 'availability-snapshot-detail', budgetItemId] as const,
-
   // RPT-05 — Trial Balance
   trialBalance: (filters: unknown) => ['reporting', 'trial-balance', filters] as const,
   ledgerMovement: (accountId: number, fiscalYearId: number) =>

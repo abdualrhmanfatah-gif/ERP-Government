@@ -2,6 +2,7 @@ using ERP_Government.Application.Organization.Common.DTOs;
 using ERP_Government.Application.Organization.Commands.Employees;
 using ERP_Government.Application.Organization.Queries.Employees;
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,11 +45,12 @@ public class Employees : IEndpointGroup
     }
 
     [EndpointSummary("Get employee by ID")]
-    public static async Task<EmployeeDto> GetEmployeeById(
+    public static async Task<IResult> GetEmployeeById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetEmployeeByIdQuery { Id = id });
+        var result = await sender.Send(new GetEmployeeByIdQuery { Id = id });
+        return result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new employee")]
@@ -58,7 +60,7 @@ public class Employees : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -81,7 +83,7 @@ public class Employees : IEndpointGroup
             IsActive = body.IsActive
         });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -92,7 +94,7 @@ public class Employees : IEndpointGroup
     {
         var result = await sender.Send(new DeleteEmployeeCommand { Id = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

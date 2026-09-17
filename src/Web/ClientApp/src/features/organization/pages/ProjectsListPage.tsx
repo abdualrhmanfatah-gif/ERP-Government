@@ -6,6 +6,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useProjects, useDeleteProject } from '../hooks';
 import { projectStatusLabels } from '../types';
 import { useState } from 'react';
+import { getQueryErrorMessage } from '@/shared/api/query-error';
 
 export function ProjectsListPage() {
   const navigate = useNavigate();
@@ -70,7 +71,7 @@ export function ProjectsListPage() {
         ]}
         data={projects}
         loading={isLoading}
-        error={error ? 'فشل تحميل البيانات' : undefined}
+        error={error ? getQueryErrorMessage(error) : undefined}
         onRetry={() => refetch()}
         rowKey={(r) => String(r.id)}
         emptyMessage="لا توجد مشاريع"

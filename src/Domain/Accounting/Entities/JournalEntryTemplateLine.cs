@@ -1,3 +1,4 @@
+using ERP_Government.Domain.Assets.Enums;
 using ERP_Government.Domain.Common;
 using ERP_Government.Domain.Organization.Entities;
 
@@ -17,6 +18,7 @@ public class JournalEntryTemplateLine : BaseAuditableEntity
     public decimal Debit { get; set; }
     public decimal Credit { get; set; }
     public int? CostCenterId { get; set; }
+    public TemplateLineRole? LineRole { get; set; }
     public byte[] RowVersion { get; set; } = [];
 
     public JournalEntryTemplate Template { get; set; } = null!;

@@ -18,17 +18,11 @@ export default function PartyCreatePage() {
     );
   }
 
-  function onSubmit(data: CreatePartyCommand) {
-    createParty.mutate(data, {
-      onSuccess: (id) => navigate(`/parties/${id}`),
-      onError: () => {},
-    });
-  }
-
   return (
-    <Page title="مورد جديد">
+    <Page title="طرف جديد" maxWidth="md">
       <PartyForm
-        onSubmit={onSubmit}
+        onSubmit={(data: CreatePartyCommand) => createParty.mutateAsync(data)}
+        onSuccess={(id) => navigate(`/parties/${Number(id)}`)}
         onCancel={() => navigate('/parties')}
         isPending={createParty.isPending}
       />

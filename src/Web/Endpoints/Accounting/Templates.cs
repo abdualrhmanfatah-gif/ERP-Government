@@ -78,7 +78,7 @@ public class Templates : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Ok();
     }
 
@@ -89,7 +89,11 @@ public class Templates : IEndpointGroup
         [FromBody] UpdateTemplateCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         await sender.Send(command);
         return Results.NoContent();
@@ -114,7 +118,7 @@ public class Templates : IEndpointGroup
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Ok(new { lineId = result.Value });
     }
 
@@ -126,11 +130,15 @@ public class Templates : IEndpointGroup
         [FromBody] UpdateTemplateLineCommand command)
     {
         if (id != command.TemplateId || lineId != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -143,7 +151,7 @@ public class Templates : IEndpointGroup
         var command = new RemoveTemplateLineCommand { Id = lineId, TemplateId = id };
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

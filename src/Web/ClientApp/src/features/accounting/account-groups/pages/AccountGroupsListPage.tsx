@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Power, PowerOff, Eye, Pencil } from 'lucide-react';
 import { notify } from '@/features/notifications/notify';
-import { Page, DataGrid, Button, ConfirmDialog, Input, FilterBar, FilterSelect, StatusBadge, Pagination } from '@/components/ui';
+import { Page, DataGrid, Button, ConfirmDialog, FilterBar, FilterSearch, FilterSelect, StatusBadge, Pagination } from '@/components/ui';
 import { GroupTree } from '@/components/AccountingGroupTree';
 import { AccountGroupForm } from '@/components/AccountingAccountGroupForm';
 import { useAccountGroupsList } from '../hooks/useAccountGroupsList';
@@ -13,6 +13,7 @@ import type { AccountGroupDto } from '../types';
 import { usePermission } from '@/shared/hooks/usePermission';
 import { PERMISSIONS } from '@/shared/constants/permissions';
 import { activeStatusLabels, getActiveStatusLabel } from '@/shared/constants/labels';
+import { getQueryErrorMessage } from '@/shared/api/query-error';
 
 export function AccountGroupsListPage() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export function AccountGroupsListPage() {
   const { hasPermission: canCreate } = usePermission(PERMISSIONS.Accounting.ChartOfAccounts.Create);
   const { hasPermission: canEdit } = usePermission(PERMISSIONS.Accounting.ChartOfAccounts.Edit);
 
-  const { data, isLoading, error } = useAccountGroupsList({
+  const { data, isLoading, error, refetch } = useAccountGroupsList({
     search: search || undefined,
     type: filterType !== 'All' ? filterType : undefined,
     isActive: filterActive === 'All' ? undefined : filterActive === 'active',
@@ -81,18 +82,23 @@ export function AccountGroupsListPage() {
     <Page
       title="مجموعات الحسابات"
       description="إدارة هرمية لتصنيف دليل الحسابات (5 مستويات كحد أقصى)"
-      actions={canCreate && <Button onClick={()=>setShowCreate(true)}><Plus className="h-4 w-4" />إنشاء مجموعة</Button>}
+      actions={canCreate && <Button variant="primary" size="sm" icon={<Plus size={16} />} onClick={()=>setShowCreate(true)}>إنشاء مجموعة</Button>}
       toolbar={
         <FilterBar>
-          <Input placeholder="بحث بالكود أو الاسم..." value={search} onChange={(e)=>{setSearch(e.target.value); setPage(1);}} className="max-w-sm" />
+          <FilterSearch
+            value={search}
+            onChange={(v) => { setSearch(v); setPage(1); }}
+            placeholder="بحث بالكود أو الاسم..."
+            className="flex-1 min-w-48"
+          />
           <FilterSelect label="النوع" value={filterType} onChange={(v: string)=>{setFilterType(v); setPage(1);}} options={[{value:'All',label:'الكل'},{value:'Asset',label:'أصل'},{value:'Liability',label:'التزام'},{value:'Equity',label:'حقوق ملكية'},{value:'Revenue',label:'إيراد'},{value:'Expense',label:'مصروف'}]} />
           <FilterSelect label="الحالة" value={filterActive} onChange={(v: string)=>{setFilterActive(v); setPage(1);}} options={[{value:'All',label:'الكل'},{value:'active',label:activeStatusLabels.active},{value:'inactive',label:activeStatusLabels.disabled}]} />
         </FilterBar>
       }
       loading={isLoading}
+      error={error ? getQueryErrorMessage(error) : undefined}
+      onRetry={error ? () => refetch() : undefined}
     >
-      {error && <p className="text-sm text-[var(--color-error)]">خطأ في التحميل</p>}
-
       {isTreeMode ? (
         <GroupTree
           groups={items as never}
@@ -106,13 +112,13 @@ export function AccountGroupsListPage() {
           data={items}
           rowKey={(row: (typeof items)[number]) => row.id}
           columns={[
-            { id:'code', accessorKey:'code', header:'الكود' },
+            { id:'code', accessorKey:'code', header:'الكود', cell: (row)=> <span dir="ltr" className="tabular-nums">{row.code}</span> },
             { id:'name', accessorKey:'name', header:'الاسم' },
             { id:'type', accessorKey:'type', header:'النوع' },
             { id:'normalBalance', accessorKey:'normalBalance', header:'الرصيد' },
             { id:'level', accessorKey:'level', header:'المستوى' },
-            { id:'isActive', accessorKey:'isActive', header:'الحالة', cell: (row)=> <StatusBadge variant={row.isActive?'active':'closed'}>{getActiveStatusLabel(row.isActive ?? false)}</StatusBadge> },
-            { id:'ancestorPath', accessorKey:'ancestorPath', header:'المسار', cell: (row)=> <span className="text-xs">{(row.ancestorPath ?? []).map((a)=>a.code).join(' / ')}</span> },
+            { id:'isActive', accessorKey:'isActive', header:'الحالة', cell: (row)=> <StatusBadge variant={row.isActive?'active':'inactive'}>{getActiveStatusLabel(row.isActive ?? false)}</StatusBadge> },
+            { id:'ancestorPath', accessorKey:'ancestorPath', header:'المسار', cell: (row)=> <span dir="ltr" className="text-xs tabular-nums">{(row.ancestorPath ?? []).map((a)=>a.code).join(' / ')}</span> },
             { id:'actions', header:'إجراءات', cell: (row)=> {
               return <div className="flex gap-1">
                 <Button variant="ghost" size="icon" aria-label="عرض" onClick={()=>navigate(`/accounting/account-groups/${row.id}`)}><Eye className="h-4 w-4"/></Button>

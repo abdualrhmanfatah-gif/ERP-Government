@@ -1,22 +1,26 @@
+using ERP_Government.Application.Common.Errors;
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Security.Common.DTOs;
 
 using MediatR;
 
 using Microsoft.EntityFrameworkCore;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Security.Queries.Users;
 
 // T011 — GetUserByIdQuery
-public class GetUserByIdQuery : IRequest<UserDetailDto?>
+[Authorize(Policy = PermissionCodes.UsersView)]
+public class GetUserByIdQuery : IRequest<Result<UserDetailDto>>
 {
     public int Id { get; init; }
 }
 
 public class GetUserByIdQueryHandler(
-    IApplicationDbContext context) : IRequestHandler<GetUserByIdQuery, UserDetailDto?>
+    IApplicationDbContext context) : IRequestHandler<GetUserByIdQuery, Result<UserDetailDto>>
 {
-    public async Task<UserDetailDto?> Handle(
+    public async Task<Result<UserDetailDto>> Handle(
         GetUserByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -24,7 +28,7 @@ public class GetUserByIdQueryHandler(
             .FirstOrDefaultAsync(u => u.Id == request.Id, cancellationToken);
 
         if (user is null)
-            return null;
+            return Result<UserDetailDto>.Failure(ErrorCodes.Security.UserNotFound, ErrorCategory.NotFound, $"User with ID {request.Id} not found.");
 
         var activeSessionCount = await context.UserSessions
             .CountAsync(s => s.UserId == user.Id && !s.IsRevoked, cancellationToken);
@@ -39,7 +43,7 @@ public class GetUserByIdQueryHandler(
             })
             .FirstOrDefaultAsync(cancellationToken);
 
-        return new UserDetailDto
+        return Result<UserDetailDto>.Success(new UserDetailDto
         {
             Id = user.Id,
             Login = user.Login,
@@ -60,6 +64,6 @@ public class GetUserByIdQueryHandler(
             CreatedBy = user.CreatedBy,
             UpdatedAt = user.LastModified,
             UpdatedBy = user.LastModifiedBy
-        };
+        });
     }
 }

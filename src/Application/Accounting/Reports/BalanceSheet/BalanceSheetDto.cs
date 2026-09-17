@@ -10,7 +10,17 @@ public class BalanceSheetDto
 
     public BalanceSheetGroup Assets { get; init; } = new();
 
+    public BalanceSheetGroup FixedAssets { get; init; } = new();
+
+    public BalanceSheetGroup CurrentAssets { get; init; } = new();
+
+    public BalanceSheetGroup NonCurrentAssets { get; init; } = new();
+
     public BalanceSheetGroup Liabilities { get; init; } = new();
+
+    public BalanceSheetGroup CurrentLiabilities { get; init; } = new();
+
+    public BalanceSheetGroup NonCurrentLiabilities { get; init; } = new();
 
     public BalanceSheetGroup Equity { get; init; } = new();
 

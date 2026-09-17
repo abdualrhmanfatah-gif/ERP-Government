@@ -1,164 +1,103 @@
-using ERP_Government.Application.Revenue.Common.DTOs;
-using ERP_Government.Application.Revenue.Commands.ReceiptVouchers.CreateReceiptVoucher;
-using ERP_Government.Application.Revenue.Commands.ReceiptVouchers.SubmitReceiptVoucher;
+using ERP_Government.Application.Common.Models;
+using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Revenue.Commands.ReceiptVouchers.ApproveReceiptVoucher;
 using ERP_Government.Application.Revenue.Commands.ReceiptVouchers.CancelReceiptVoucher;
-using ERP_Government.Application.Revenue.Queries.ReceiptVouchers.GetReceiptVouchers;
+using ERP_Government.Application.Revenue.Commands.ReceiptVouchers.CreateReceiptVoucher;
+using ERP_Government.Application.Revenue.Commands.ReceiptVouchers.UpdateReceiptVoucher;
+using ERP_Government.Application.Revenue.Common.DTOs;
 using ERP_Government.Application.Revenue.Queries.ReceiptVouchers.GetReceiptVoucherById;
-using ERP_Government.Application.Revenue.Queries.ReceiptVouchers.GetReceiptVouchersByParty;
-using ERP_Government.Application.Revenue.Queries.ReceiptVouchers.GetReceiptVouchersByPeriod;
-using ERP_Government.Application.Common.Security;
+using ERP_Government.Application.Revenue.Queries.ReceiptVouchers.GetReceiptVouchers;
+using ERP_Government.Domain.Revenue.Enums;
+using ERP_Government.Web.Infrastructure;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ERP_Government.Web.Endpoints.Revenue;
 
 public class ReceiptVouchers : IEndpointGroup
 {
-    public static string? RoutePrefix => "/api/Revenue/ReceiptVouchers";
-
-    public static void Map(RouteGroupBuilder groupBuilder)
+    public static void Map(RouteGroupBuilder group)
     {
-        groupBuilder.MapGet("/", GetReceiptVouchers)
-            .Produces<List<ReceiptVoucherDto>>()
-            .RequireAuthorization(PermissionCodes.ReceiptVouchersView);
-
-        groupBuilder.MapGet("/{id:int}", GetReceiptVoucherById)
-            .Produces<ReceiptVoucherDto?>()
-            .RequireAuthorization(PermissionCodes.ReceiptVouchersView);
-
-        groupBuilder.MapGet("/by-party/{partyId:int}", GetReceiptVouchersByParty)
-            .Produces<List<ReceiptVoucherDto>>()
-            .RequireAuthorization(PermissionCodes.ReceiptVouchersView);
-
-        groupBuilder.MapGet("/by-period", GetReceiptVouchersByPeriod)
-            .Produces<List<ReceiptVoucherDto>>()
-            .RequireAuthorization(PermissionCodes.ReceiptVouchersView);
-
-        groupBuilder.MapPost("/", CreateReceiptVoucher)
-            .Produces<ReceiptVoucherDto>(StatusCodes.Status201Created)
-            .Produces(StatusCodes.Status400BadRequest)
-            .RequireAuthorization(PermissionCodes.ReceiptVouchersCreate);
-
-        groupBuilder.MapPost("/{id:int}/submit", SubmitReceiptVoucher)
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status400BadRequest)
-            .RequireAuthorization(PermissionCodes.ReceiptVouchersSubmit);
-
-        groupBuilder.MapPost("/{id:int}/approve", ApproveReceiptVoucher)
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status400BadRequest)
-            .RequireAuthorization(PermissionCodes.ReceiptVouchersApprove);
-
-        groupBuilder.MapPost("/{id:int}/cancel", CancelReceiptVoucher)
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status400BadRequest)
-            .RequireAuthorization(PermissionCodes.ReceiptVouchersCancel);
+        group.MapGet("/", HandleGetAll)
+            .RequireAuthorization(PermissionCodes.ReceiptVouchersView)
+            .Produces<List<ReceiptVoucherDto>>();
+        group.MapGet("/{id:int}", HandleGetById)
+            .RequireAuthorization(PermissionCodes.ReceiptVouchersView)
+            .Produces<ReceiptVoucherDto>();
+        group.MapPost("/", HandleCreate)
+            .RequireAuthorization(PermissionCodes.ReceiptVouchersCreate)
+            .Produces<Result<ReceiptVoucherDto>>();
+        group.MapPut("/{id:int}", HandleUpdate)
+            .RequireAuthorization(PermissionCodes.ReceiptVouchersUpdate)
+            .Produces<Result<ReceiptVoucherDto>>();
+        group.MapPost("/{id:int}/approve", HandleApprove)
+            .RequireAuthorization(PermissionCodes.ReceiptVouchersApprove)
+            .Produces<Result>();
+        group.MapPost("/{id:int}/cancel", HandleCancel)
+            .RequireAuthorization(PermissionCodes.ReceiptVouchersCancel)
+            .Produces<Result>();
     }
 
-    [EndpointSummary("Get all receipt vouchers")]
-    public static async Task<IResult> GetReceiptVouchers(
-        [FromServices] ISender sender,
-        [AsParameters] GetReceiptVouchersQuery query)
+    private static async Task<IResult> HandleGetAll(
+        ISender sender,
+        int? collectionOrderId = null,
+        int? partyId = null,
+        ReceiptVoucherStatus? status = null)
     {
-        var result = await sender.Send(query);
-        if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
-        return Results.Ok(result.Value);
+        var result = await sender.Send(new GetReceiptVouchersQuery { CollectionOrderId = collectionOrderId, PartyId = partyId, Status = status });
+        return Results.Ok(result);
     }
 
-    [EndpointSummary("Get receipt voucher by ID")]
-    public static async Task<IResult> GetReceiptVoucherById(
-        [FromServices] ISender sender,
+    private static async Task<IResult> HandleGetById(
+        ISender sender,
         int id)
     {
         var result = await sender.Send(new GetReceiptVoucherByIdQuery { Id = id });
-        if (!result.Succeeded)
-            return Results.NotFound();
-        return Results.Ok(result.Value);
+        return result.Succeeded
+            ? Results.Ok(result.Value!)
+            : result.ToProblemDetails();
     }
 
-    [EndpointSummary("Get receipt vouchers by party")]
-    public static async Task<IResult> GetReceiptVouchersByParty(
-        [FromServices] ISender sender,
-        int partyId,
-        [AsParameters] GetReceiptVouchersByPartyQuery query)
-    {
-        var result = await sender.Send(new GetReceiptVouchersByPartyQuery
-        {
-            PartyId = partyId,
-            Page = query.Page,
-            PageSize = query.PageSize
-        });
-        if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
-        return Results.Ok(result.Value);
-    }
-
-    [EndpointSummary("Get receipt vouchers by date period")]
-    public static async Task<IResult> GetReceiptVouchersByPeriod(
-        [FromServices] ISender sender,
-        [AsParameters] GetReceiptVouchersByPeriodQuery query)
-    {
-        var result = await sender.Send(query);
-        if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
-        return Results.Ok(result.Value);
-    }
-
-    [EndpointSummary("Create a new receipt voucher")]
-    public static async Task<IResult> CreateReceiptVoucher(
-        [FromServices] ISender sender,
-        [FromBody] CreateReceiptVoucherCommand command)
+    private static async Task<IResult> HandleCreate(
+        ISender sender,
+        CreateReceiptVoucherCommand command)
     {
         var result = await sender.Send(command);
-        if (!result.Succeeded || result.Value is null)
-            return Results.BadRequest(result.Errors);
-        return Results.Created($"/api/Revenue/ReceiptVouchers/{result.Value.Id}", result.Value);
+        return result.Succeeded ? Results.Ok(result) : Results.BadRequest(result);
     }
 
-    [EndpointSummary("Submit receipt voucher for review")]
-    public static async Task<IResult> SubmitReceiptVoucher(
-        [FromServices] ISender sender,
+    private static async Task<IResult> HandleUpdate(
+        ISender sender,
         int id,
-        [FromBody] SubmitReceiptVoucherCommand command)
+        UpdateReceiptVoucherCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.BadRequest(Result.Failure(["Route ID does not match command ID."]));
 
         var result = await sender.Send(command);
-        if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
-        return Results.NoContent();
+        return result.Succeeded ? Results.Ok(result) : Results.BadRequest(result);
     }
 
-    [EndpointSummary("Approve receipt voucher (reviewer gate)")]
-    public static async Task<IResult> ApproveReceiptVoucher(
-        [FromServices] ISender sender,
+    private static async Task<IResult> HandleApprove(
+        ISender sender,
         int id,
-        [FromBody] ApproveReceiptVoucherCommand command)
+        ApproveReceiptVoucherCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.BadRequest(Result.Failure(["Route ID does not match command ID."]));
 
         var result = await sender.Send(command);
-        if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
-        return Results.NoContent();
+        return result.Succeeded ? Results.Ok(result) : Results.BadRequest(result);
     }
 
-    [EndpointSummary("Cancel receipt voucher")]
-    public static async Task<IResult> CancelReceiptVoucher(
-        [FromServices] ISender sender,
+    private static async Task<IResult> HandleCancel(
+        ISender sender,
         int id,
-        [FromBody] CancelReceiptVoucherCommand command)
+        CancelReceiptVoucherCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.BadRequest(Result.Failure(["Route ID does not match command ID."]));
 
         var result = await sender.Send(command);
-        if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
-        return Results.NoContent();
+        return result.Succeeded ? Results.Ok(result) : Results.BadRequest(result);
     }
 }

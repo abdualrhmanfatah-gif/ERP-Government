@@ -2,9 +2,11 @@ using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.Security.Common;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Security.PendingApprovals.Queries.GetPendingApprovals;
 
+[Authorize(Policy = PermissionCodes.PurchaseOrdersView)]
 public class GetPendingApprovalsQuery : IRequest<List<PendingApprovalDto>>
 {
     public string? DocumentType { get; init; }

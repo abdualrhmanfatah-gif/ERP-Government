@@ -41,7 +41,9 @@ public class UpdatePurchaseOrderCommandHandler(
         var linesToRemove = existingLines.Keys.Where(id => !requestLineIds.Contains(id)).ToList();
         foreach (var lineId in linesToRemove)
         {
-            entity.Details.Remove(existingLines[lineId]);
+            var line = existingLines[lineId];
+            entity.Details.Remove(line);
+            context.PurchaseOrderDetails.Remove(line);
         }
 
         foreach (var line in request.Lines)

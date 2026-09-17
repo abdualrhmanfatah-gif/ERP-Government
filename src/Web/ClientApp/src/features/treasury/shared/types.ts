@@ -1,5 +1,4 @@
 // Treasury shared — re-exports generated contract types + label maps.
-// Contract source: specs/031-receipt-vouchers/contracts/api.md (binding, literal).
 
 export type {
   ReceiptVoucherDto,
@@ -14,18 +13,42 @@ export type {
   ICreateReceiptVoucherCommand,
   CreateReceiptVoucherLineDto,
   ICreateReceiptVoucherLineDto,
-  SubmitReceiptVoucherCommand,
-  ISubmitReceiptVoucherCommand,
   ApproveReceiptVoucherCommand,
   IApproveReceiptVoucherCommand,
   CancelReceiptVoucherCommand,
   ICancelReceiptVoucherCommand,
+  RevenueClaimDto,
+  IRevenueClaimDto,
+  CreateRevenueClaimCommand,
+  ICreateRevenueClaimCommand,
+  ApproveRevenueClaimCommand,
+  IApproveRevenueClaimCommand,
+  CollectionOrderDto,
+  ICollectionOrderDto,
+  CreateCollectionOrderCommand,
+  ICreateCollectionOrderCommand,
+  ApproveCollectionOrderCommand,
+  IApproveCollectionOrderCommand,
+  DepositSlip47Dto,
+  IDepositSlip47Dto,
+  DepositSlip48Dto,
+  IDepositSlip48Dto,
+  CreateDepositSlip47Command,
+  ICreateDepositSlip47Command,
+  CreateDepositSlip48Command,
+  ICreateDepositSlip48Command,
+  ApproveDepositSlip47Command,
+  IApproveDepositSlip47Command,
+  ApproveDepositSlip48Command,
+  IApproveDepositSlip48Command,
 } from '../../../web-api-client';
 
 export {
   PaymentMethod,
   ReceiptVoucherStatus,
   CheckStatus,
+  ClaimStatus,
+  CollectionOrderStatus,
 } from '../../../web-api-client';
 
 export const paymentMethodLabels: Record<string, string> = {
@@ -44,6 +67,46 @@ export const voucherStatusBadgeVariant: Record<string, 'secondary' | 'warning' |
   Draft: 'secondary',
   PendingReview: 'warning',
   Approved: 'success',
+  Cancelled: 'danger',
+};
+
+// ─── Revenue Claim Labels ──────────────────────────────────────────────────
+
+export const claimStatusLabels: Record<string, string> = {
+  Draft: 'مسودة',
+  PendingApproval: 'قيد الاعتماد',
+  Open: 'مفتوحة',
+  PartiallySettled: 'محصلة جزئياً',
+  Settled: 'محصلة',
+  WrittenOff: 'مخافة عن السداد',
+};
+
+export const claimStatusBadgeVariant: Record<string, 'secondary' | 'warning' | 'success' | 'danger' | 'primary'> = {
+  Draft: 'secondary',
+  PendingApproval: 'warning',
+  Open: 'primary',
+  PartiallySettled: 'warning',
+  Settled: 'success',
+  WrittenOff: 'danger',
+};
+
+// ─── Collection Order Labels ───────────────────────────────────────────────
+
+export const collectionOrderStatusLabels: Record<string, string> = {
+  Draft: 'مسودة',
+  PendingApproval: 'قيد الاعتماد',
+  Approved: 'معتمد',
+  PartiallyCollected: 'محصّل جزئياً',
+  Collected: 'محصّل',
+  Cancelled: 'ملغي',
+};
+
+export const collectionOrderStatusBadgeVariant: Record<string, 'secondary' | 'warning' | 'success' | 'danger' | 'primary'> = {
+  Draft: 'secondary',
+  PendingApproval: 'warning',
+  Approved: 'primary',
+  PartiallyCollected: 'warning',
+  Collected: 'success',
   Cancelled: 'danger',
 };
 

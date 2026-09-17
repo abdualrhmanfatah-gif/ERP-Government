@@ -4,6 +4,7 @@ using ERP_Government.Application.Security.Common.DTOs;
 
 namespace ERP_Government.Application.Security.Queries.GetUnreadCount;
 
+[Authorize(Policy = PermissionCodes.NotificationsView)]
 public class GetUnreadCountQuery : IRequest<UnreadCountDto>
 {
 }

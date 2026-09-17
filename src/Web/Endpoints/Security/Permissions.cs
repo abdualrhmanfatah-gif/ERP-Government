@@ -27,10 +27,11 @@ public class Permissions : IEndpointGroup
     }
 
     [EndpointSummary("Get permission by ID")]
-    public static async Task<SecurityPermissionDto?> GetPermissionById(
+    public static async Task<IResult> GetPermissionById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetPermissionByIdQuery { Id = id });
+        var result = await sender.Send(new GetPermissionByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 }

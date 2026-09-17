@@ -26,7 +26,7 @@ export function ErrorState({
       </span>
       <span className="text-sm text-[var(--color-error)]">{message}</span>
       {onRetry ? (
-        <Button variant="secondary" size="sm" onClick={onRetry}>
+        <Button variant="outline" size="sm" onClick={onRetry}>
           إعادة المحاولة
         </Button>
       ) : null}

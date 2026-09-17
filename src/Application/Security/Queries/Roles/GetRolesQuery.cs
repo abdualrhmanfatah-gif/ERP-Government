@@ -4,6 +4,7 @@ using ERP_Government.Application.Security.Common.DTOs;
 namespace ERP_Government.Application.Security.Queries.Roles;
 
 // Q-S001 — GetRolesQuery
+[Authorize(Policy = PermissionCodes.RolesView)]
 public class GetRolesQuery : IRequest<List<SecurityRoleDto>>
 {
     public bool? IsActive { get; init; }

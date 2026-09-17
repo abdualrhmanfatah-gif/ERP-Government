@@ -1,14 +1,18 @@
+using ERP_Government.Application.Common.Errors;
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Domain.Security.Entities;
 using ERP_Government.Shared.Workflow;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Workflow.Commands.CreateWorkflowDefinition;
 
-public class CreateWorkflowDefinitionCommand : IRequest<int>
+[Authorize(Policy = PermissionCodes.WorkflowDefinitionsManage)]
+public class CreateWorkflowDefinitionCommand : IRequest<Result<int>>
 {
     public string EntityName { get; init; } = string.Empty;
     public string? Description { get; init; }
@@ -42,14 +46,14 @@ public class CreateWorkflowDefinitionCommandValidator : AbstractValidator<Create
 
 public class CreateWorkflowDefinitionCommandHandler(
     IApplicationDbContext context,
-    IUser user) : IRequestHandler<CreateWorkflowDefinitionCommand, int>
+    IUser user) : IRequestHandler<CreateWorkflowDefinitionCommand, Result<int>>
 {
-    public async Task<int> Handle(
+    public async Task<Result<int>> Handle(
         CreateWorkflowDefinitionCommand request,
         CancellationToken cancellationToken)
     {
         if (user.Id is not int userId)
-            throw new InvalidOperationException("User identity is required for this operation.");
+            return Result<int>.Failure(ErrorCodes.Workflow.IdentityRequired, ErrorCategory.Authorization, "User identity is required for this operation.");
 
         // Get next version number for this entity
         var lastVersion = await context.WorkflowDefinitions
@@ -115,6 +119,6 @@ public class CreateWorkflowDefinitionCommandHandler(
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return definition.Id;
+        return Result<int>.Success(definition.Id);
     }
 }

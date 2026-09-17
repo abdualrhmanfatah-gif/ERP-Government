@@ -761,7 +761,7 @@ Pausing without deleting history.
 - **FR-G02**: Every sub-module endpoint MUST declare its permission code; GAP-ADD codes (PaymentOrders.* including `PaymentOrders.OverrideBudgetCheck`, DisbursementRequests.*) MUST be added to the permission registry and registered as policies.
 - **FR-G03**: Document numbering (PO-{D6}/DSB-{D6}/PAY-{D6}) MUST be allocated via the document sequence service within the same transaction (Constitution IV).
 - **FR-G04**: All approval decisions across PAY-01/02 MUST flow through ApprovalHistory + DocumentStatusLog (CC-3). Approval data (amount, issuing authority) MUST NOT be duplicated on entity columns (ADR-001 D-5).
-- **FR-G05**: Successful payments MUST raise the accounting event for posting through the existing domain-event → PostingRules pipeline (Constitution II).
+- **FR-G05**: Successful payments MUST post through a native per-business posting handler (e.g. RecordPayment → domain event → outbox → JournalEntry + lines; PostingRules engine removed, DEP-027).
 - **FR-G06**: The request-first workflow MUST produce atomic final approval + order creation. Failure MUST NOT leave an approved request without its order (RFD-006).
 - **FR-G07**: Issuing authority (officeholder name + capacity: General Manager or Finance Director) MUST be validated server-side and stored in ApprovalHistory. Selecting a title MUST NOT grant authority (RFD-003, ADR-001 D-5).
 - **FR-G08**: Each order MUST support at most one completed payment. `Payment.PaymentOrderId` MUST be UNIQUE. Concurrent payment attempts MUST be rejected (RFD-013, ADR-001 D-6).

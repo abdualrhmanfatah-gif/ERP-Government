@@ -3,36 +3,27 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { handleLifecycleError } from '@/shared/api/result-to-ui';
 import {
   ReceiptVouchersClient,
-  SubmitReceiptVoucherCommand,
   ApproveReceiptVoucherCommand,
   CancelReceiptVoucherCommand,
   CreateReceiptVoucherCommand,
-  PaymentMethod,
+  UpdateReceiptVoucherCommand,
   ReceiptVoucherStatus,
 } from '../../../web-api-client';
 
 const client = new ReceiptVouchersClient();
 
 export function useReceiptVouchers(filters?: {
+  collectionOrderId?: number;
   partyId?: number;
-  paymentMethod?: PaymentMethod;
   status?: ReceiptVoucherStatus;
-  fromDate?: Date;
-  toDate?: Date;
-  page?: number;
-  pageSize?: number;
 }) {
   return useQuery({
     queryKey: ['receipt-vouchers', 'list', filters],
     queryFn: () =>
       client.receiptVouchersAll(
+        filters?.collectionOrderId,
         filters?.partyId,
-        filters?.paymentMethod,
         filters?.status,
-        filters?.fromDate,
-        filters?.toDate,
-        filters?.page ?? 1,
-        filters?.pageSize ?? 20,
       ),
   });
 }
@@ -54,11 +45,23 @@ export function useCreateReceiptVoucher() {
   });
 }
 
+export function useUpdateReceiptVoucher() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: UpdateReceiptVoucherCommand) => client.receiptVouchersPUT(data.id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['receipt-vouchers'] }),
+    onError: handleLifecycleError,
+  });
+}
+
 export function useSubmitReceiptVoucher() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (args: { id: number; rowVersion: string }) =>
-      client.submitPOST(args.id, new SubmitReceiptVoucherCommand({ id: args.id, rowVersion: args.rowVersion })),
+      client.approvePOST7(
+        args.id,
+        new ApproveReceiptVoucherCommand({ id: args.id, rowVersion: args.rowVersion }),
+      ),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['receipt-vouchers'] }),
     onError: handleLifecycleError,
   });
@@ -68,7 +71,7 @@ export function useApproveReceiptVoucher() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (args: { id: number; rowVersion: string; reason?: string | undefined }) =>
-      client.approvePOST5(
+      client.approvePOST7(
         args.id,
         new ApproveReceiptVoucherCommand({ id: args.id, rowVersion: args.rowVersion, reason: args.reason }),
       ),

@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ERP_Government.Application.Security.Queries.RolePermissions;
 
 // FEATURE-008 — GetRolePermissionsQuery
+[Authorize(Policy = PermissionCodes.RolesView)]
 public class GetRolePermissionsQuery : IRequest<List<RolePermissionDto>>
 {
     public int RoleId { get; init; }

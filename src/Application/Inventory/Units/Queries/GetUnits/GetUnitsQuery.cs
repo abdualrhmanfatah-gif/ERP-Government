@@ -1,7 +1,9 @@
 using Unit = ERP_Government.Domain.Inventory.Entities.Unit;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Inventory.Units.Queries.GetUnits;
 
+[Authorize(Policy = PermissionCodes.UnitsView)]
 public record GetUnitsQuery(
     string? Search = null,
     bool? IsActive = null) : IRequest<IReadOnlyList<Unit>>;

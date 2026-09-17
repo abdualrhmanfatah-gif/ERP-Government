@@ -38,7 +38,7 @@ export function FilterSearch({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         autoFocus={autoFocus}
-        className="w-full h-8 ps-2 pe-8 rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface-container-lowest)] text-xs text-[var(--color-on-surface)] placeholder:text-[var(--color-outline)] focus:outline-2 focus:outline-[var(--color-focus-ring)] focus:shadow-[0_0_0_4px_var(--color-focus-halo)] transition-colors duration-150"
+        className="w-full h-[var(--density-compact-control-height)] ps-2.5 pe-8 rounded-lg border border-[var(--color-input-border)] bg-[var(--color-surface-container-lowest)] text-sm text-[var(--color-on-surface)] placeholder:text-[var(--color-outline)] focus:outline-2 focus:outline-[var(--color-focus-ring)] focus:outline-offset-2 focus:ring-0 focus:shadow-[0_0_0_4px_var(--color-focus-halo)] transition-colors duration-150"
       />
     </div>
   );

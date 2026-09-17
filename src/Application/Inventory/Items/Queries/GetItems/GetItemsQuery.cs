@@ -1,8 +1,10 @@
 using ERP_Government.Application.Inventory.Items.Enums;
 using ERP_Government.Domain.Inventory.Entities;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Inventory.Items.Queries.GetItems;
 
+[Authorize(Policy = PermissionCodes.ItemsView)]
 public record GetItemsQuery(
     string? Search = null,
     int? CategoryId = null,

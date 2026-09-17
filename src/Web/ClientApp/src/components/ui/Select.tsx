@@ -8,7 +8,7 @@ interface SelectOption {
 }
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
-  label: string;
+  label?: string;
   options: SelectOption[];
   error?: string;
   loading?: boolean;
@@ -21,6 +21,7 @@ export function Select({
   error,
   loading,
   disabled,
+  required,
   id: providedId,
   className,
   ...rest
@@ -31,19 +32,25 @@ export function Select({
 
   return (
     <div className="mb-0">
-      <label
-        htmlFor={id}
-        className="mb-1 block text-label-md text-[var(--color-on-surface)]"
-      >
-        {label}
-      </label>
+      {label && (
+        <label
+          htmlFor={id}
+          className="mb-1 block text-label-md text-[var(--color-on-surface)]"
+        >
+          {label}
+          {required && (
+            <span aria-hidden="true" className="text-[var(--color-error)] ms-1">*</span>
+          )}
+        </label>
+      )}
       <select
         id={id}
         aria-invalid={!!error || undefined}
         aria-describedby={error ? errorId : undefined}
         disabled={disabled || loading}
+        required={required}
         className={cn(
-          'w-full px-3 py-2.5 text-sm font-normal leading-normal h-11',
+          'w-full px-3 py-2.5 text-sm font-normal leading-normal h-[var(--density-comfortable-control-height)]',
           'border rounded-lg bg-[var(--color-surface-container-lowest)] text-[var(--color-on-surface)]',
           'focus:outline-2 focus:outline-[var(--color-focus-ring)] focus:outline-offset-2 focus:ring-0 focus:shadow-[0_0_0_4px_var(--color-focus-halo)]',
           'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -52,7 +59,7 @@ export function Select({
           'bg-[length:0.875rem] bg-[position:End_0.5rem_center]',
           error
             ? 'border-2 border-[var(--color-error)] focus:outline-[var(--color-error)] focus:shadow-[0_0_0_4px_var(--color-error-container)] focus:border-[var(--color-error)]'
-            : 'border-2 border-[var(--color-border-input)]',
+            : 'border-2 border-[var(--color-input-border)]',
           className
         )}
         style={{

@@ -45,7 +45,9 @@ public class Warehouses : IEndpointGroup
         int id)
     {
         var result = await sender.Send(new GetWarehouseByIdQuery(id));
-        return result is not null ? Results.Ok(result.ToResponse()) : Results.NotFound();
+        return result.Succeeded
+            ? Results.Ok(result.Value!.ToResponse())
+            : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleCreate(
@@ -55,7 +57,7 @@ public class Warehouses : IEndpointGroup
         var result = await sender.Send(request.ToCommand());
         return result.Succeeded
             ? Results.Created($"/api/Warehouses/{result.Value}", result.Value)
-            : Results.BadRequest(result.Errors);
+            : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleUpdate(
@@ -64,7 +66,7 @@ public class Warehouses : IEndpointGroup
         UpdateWarehouseRequest request)
     {
         var result = await sender.Send(request.ToCommand(id));
-        return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok() : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleToggleActive(
@@ -72,7 +74,7 @@ public class Warehouses : IEndpointGroup
         int id)
     {
         var result = await sender.Send(new ToggleWarehouseActiveCommand(id));
-        return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok() : result.ToProblemDetails();
     }
 }
 

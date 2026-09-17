@@ -12,4 +12,5 @@ public class OutboxMessage : BaseEntity
     public int RetryCount { get; set; }
     public DateTimeOffset? NextRetryAt { get; set; }
     public string? ErrorMessage { get; set; }
+    public DateTimeOffset? LeaseExpiry { get; set; }
 }

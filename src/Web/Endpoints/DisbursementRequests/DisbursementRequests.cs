@@ -65,7 +65,9 @@ public class DisbursementRequests : IEndpointGroup
         int id)
     {
         var result = await sender.Send(new GetDisbursementRequestByIdQuery(id));
-        return result is not null ? Results.Ok(result) : Results.NotFound();
+        return result.Succeeded
+            ? Results.Ok(result.Value!)
+            : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleCreate(
@@ -75,7 +77,7 @@ public class DisbursementRequests : IEndpointGroup
         var result = await sender.Send(request.ToCommand());
         return result.Succeeded
             ? Results.Created($"/api/DisbursementRequests/{result.Value!.Id}", result.Value)
-            : Results.BadRequest(result.Errors);
+            : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleUpdate(
@@ -84,7 +86,7 @@ public class DisbursementRequests : IEndpointGroup
         UpdateDisbursementRequestRequest request)
     {
         var result = await sender.Send(request.ToCommand(id));
-        return result.Succeeded ? Results.Ok(result) : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok(result) : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleSubmit(
@@ -92,7 +94,7 @@ public class DisbursementRequests : IEndpointGroup
         int id)
     {
         var result = await sender.Send(new SubmitDisbursementRequestCommand { Id = id });
-        return result.Succeeded ? Results.Ok(result) : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok(result) : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleApprove(
@@ -101,7 +103,7 @@ public class DisbursementRequests : IEndpointGroup
         ApproveDisbursementRequestRequest request)
     {
         var result = await sender.Send(request.ToCommand(id));
-        return result.Succeeded ? Results.Ok(result) : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok(result) : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleReject(
@@ -110,7 +112,7 @@ public class DisbursementRequests : IEndpointGroup
         RejectDisbursementRequestRequest request)
     {
         var result = await sender.Send(request.ToCommand(id));
-        return result.Succeeded ? Results.Ok(result) : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok(result) : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleCancel(
@@ -119,7 +121,7 @@ public class DisbursementRequests : IEndpointGroup
         CancelDisbursementRequestRequest request)
     {
         var result = await sender.Send(request.ToCommand(id));
-        return result.Succeeded ? Results.Ok(result) : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok(result) : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleCreateAccrualEntry(
@@ -128,7 +130,7 @@ public class DisbursementRequests : IEndpointGroup
         CreateAccrualEntryRequest request)
     {
         var result = await sender.Send(request.ToCommand(id));
-        return result.Succeeded ? Results.Ok(result) : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok(result) : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleGetAccrualEntry(
@@ -136,7 +138,9 @@ public class DisbursementRequests : IEndpointGroup
         int id)
     {
         var result = await sender.Send(new GetDisbursementRequestAccrualQuery(id));
-        return result is not null ? Results.Ok(result) : Results.NotFound();
+        return result.Succeeded
+            ? Results.Ok(result.Value!)
+            : result.ToProblemDetails();
     }
 }
 

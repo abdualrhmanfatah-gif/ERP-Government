@@ -213,58 +213,6 @@ public class JournalEntryLineDto
     }
 }
 
-// T007 — PostingRuleDto
-public class PostingRuleDto
-{
-    public int Id { get; init; }
-    public string Name { get; init; } = string.Empty;
-    public string EventType { get; init; } = string.Empty;
-    public int JournalId { get; init; }
-    public string JournalName { get; init; } = string.Empty;
-    public int Priority { get; init; }
-    public bool IsActive { get; init; }
-    public List<PostingRuleLineDto> Lines { get; init; } = [];
-
-    private class Mapping : Profile
-    {
-        public Mapping()
-        {
-            CreateMap<PostingRule, PostingRuleDto>()
-                .ForMember(d => d.JournalName, opt => opt.MapFrom(s => s.Journal.Name))
-                .ForMember(d => d.Lines, opt => opt.MapFrom(s => s.Lines));
-        }
-    }
-}
-
-// T076 — PostingRuleLineDto
-public class PostingRuleLineDto
-{
-    public int Id { get; init; }
-    public int PostingRuleId { get; init; }
-    public int Sequence { get; init; }
-    public string AccountSource { get; init; } = string.Empty;
-    public int? FixedAccountId { get; init; }
-    public string? FixedAccountCode { get; init; }
-    public string DebitOrCredit { get; init; } = string.Empty;
-    public string AmountSource { get; init; } = string.Empty;
-    public bool FundDimensionRequired { get; init; }
-    public bool CostCenterDimensionRequired { get; init; }
-    public bool ProjectDimensionRequired { get; init; }
-    public bool IsActive { get; init; }
-
-    private class Mapping : Profile
-    {
-        public Mapping()
-        {
-            CreateMap<PostingRuleLine, PostingRuleLineDto>()
-                .ForMember(d => d.FixedAccountCode, opt => opt.MapFrom(s => s.FixedAccount != null ? s.FixedAccount.Code : null))
-                .ForMember(d => d.DebitOrCredit, opt => opt.MapFrom(s => s.DebitOrCredit.ToString()))
-                .ForMember(d => d.AccountSource, opt => opt.MapFrom(s => s.AccountSource.ToString()))
-                .ForMember(d => d.AmountSource, opt => opt.MapFrom(s => s.AmountSource.ToString()));
-        }
-    }
-}
-
 // T008 — JournalEntryTemplateDto (US4: lines + totals, computed never stored)
 public class JournalEntryTemplateDto
 {

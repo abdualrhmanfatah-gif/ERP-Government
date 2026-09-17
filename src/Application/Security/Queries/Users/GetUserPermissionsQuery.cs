@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ERP_Government.Application.Security.Queries.Users;
 
 // T023 — GetUserPermissionsQuery (effective permissions)
+[Authorize(Policy = PermissionCodes.UsersView)]
 public class GetUserPermissionsQuery : IRequest<List<EffectivePermissionDto>>
 {
     public int UserId { get; init; }

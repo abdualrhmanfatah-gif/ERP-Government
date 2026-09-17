@@ -20,13 +20,10 @@ export function useTheme(): ThemeContextValue {
   return useContext(ThemeContext);
 }
 
-function applyTheme(theme: Theme): void {
+function applyTheme(theme: Theme, systemPrefersDark: boolean): void {
   const root = document.documentElement;
-  if (theme === 'dark') {
-    root.classList.add('dark');
-  } else {
-    root.classList.remove('dark');
-  }
+  const isDark = theme === 'dark' || (theme === 'auto' && systemPrefersDark);
+  root.classList.toggle('dark', isDark);
   root.removeAttribute('data-theme');
 }
 
@@ -36,8 +33,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    applyTheme(theme);
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const apply = () => applyTheme(theme, media.matches);
+
+    apply();
     localStorage.setItem(STORAGE_KEY, theme);
+
+    if (theme !== 'auto') return;
+    media.addEventListener('change', apply);
+    return () => media.removeEventListener('change', apply);
   }, [theme]);
 
   const cycle = useCallback(() => {

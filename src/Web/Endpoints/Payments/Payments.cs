@@ -51,7 +51,7 @@ public class Payments : IEndpointGroup
         var result = await sender.Send(request.ToCommand());
         return result.Succeeded
             ? Results.Ok(result.Value)
-            : Results.BadRequest(result.Errors);
+            : result.ToProblemDetails();
     }
 }
 

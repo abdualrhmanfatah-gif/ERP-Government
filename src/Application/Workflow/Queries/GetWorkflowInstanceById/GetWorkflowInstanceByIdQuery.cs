@@ -1,23 +1,27 @@
+using ERP_Government.Application.Common.Errors;
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Shared.Workflow;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Workflow.Queries.GetWorkflowInstanceById;
 
-public class GetWorkflowInstanceByIdQuery : IRequest<WorkflowInstanceDto?>
+[Authorize(Policy = PermissionCodes.WorkflowInstancesView)]
+public class GetWorkflowInstanceByIdQuery : IRequest<Result<WorkflowInstanceDto>>
 {
     public int Id { get; init; }
 }
 
 public class GetWorkflowInstanceByIdQueryHandler(
-    IApplicationDbContext context) : IRequestHandler<GetWorkflowInstanceByIdQuery, WorkflowInstanceDto?>
+    IApplicationDbContext context) : IRequestHandler<GetWorkflowInstanceByIdQuery, Result<WorkflowInstanceDto>>
 {
-    public async Task<WorkflowInstanceDto?> Handle(
+    public async Task<Result<WorkflowInstanceDto>> Handle(
         GetWorkflowInstanceByIdQuery request,
         CancellationToken cancellationToken)
     {
-        return await context.WorkflowInstances
+        var dto = await context.WorkflowInstances
             .Include(i => i.History)
             .Where(i => i.Id == request.Id)
             .Select(i => new WorkflowInstanceDto
@@ -47,5 +51,10 @@ public class GetWorkflowInstanceByIdQueryHandler(
                 }).ToList()
             })
             .FirstOrDefaultAsync(cancellationToken);
+
+        if (dto is null)
+            return Result<WorkflowInstanceDto>.Failure(ErrorCodes.Workflow.InstanceNotFound, ErrorCategory.NotFound, $"Workflow instance with ID {request.Id} not found.");
+
+        return Result<WorkflowInstanceDto>.Success(dto);
     }
 }

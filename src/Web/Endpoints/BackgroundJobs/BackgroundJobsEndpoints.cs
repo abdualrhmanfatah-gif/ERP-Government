@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Domain.BackgroundJobs.Enums;
 using ERP_Government.Web.Infrastructure;
@@ -80,7 +81,11 @@ public class BackgroundJobsEndpoints : IEndpointGroup
             .FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
 
         if (definition == null)
-            return Results.NotFound($"Background job definition with ID {id} not found");
+            return Results.Problem(
+                detail: $"Background job definition with ID {id} not found",
+                statusCode: StatusCodes.Status404NotFound,
+                title: "Not Found",
+                type: "about:blank");
 
         var limit = 50;
         var offset = 0;
@@ -142,10 +147,18 @@ public class BackgroundJobsEndpoints : IEndpointGroup
             .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
 
         if (instance == null)
-            return Results.NotFound($"Background job instance with ID {id} not found");
+            return Results.Problem(
+                detail: $"Background job instance with ID {id} not found",
+                statusCode: StatusCodes.Status404NotFound,
+                title: "Not Found",
+                type: "about:blank");
 
         if (instance.Status is BackgroundJobStatus.Completed or BackgroundJobStatus.Failed or BackgroundJobStatus.Cancelled)
-            return Results.Conflict($"Instance {id} is already in terminal state: {instance.Status}");
+            return Results.Problem(
+                detail: $"Instance {id} is already in terminal state: {instance.Status}",
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Conflict",
+                type: "about:blank");
 
         instance.Status = BackgroundJobStatus.Cancelled;
         instance.CompletedAt = DateTimeOffset.UtcNow;

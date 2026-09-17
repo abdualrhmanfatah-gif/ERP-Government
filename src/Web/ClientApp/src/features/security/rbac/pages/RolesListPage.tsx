@@ -4,6 +4,7 @@ import { Page, DataGrid, Button } from '@/components/ui';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useRoles } from '../hooks';
 import { getActiveStatusLabel } from '@/shared/constants/labels';
+import { getQueryErrorMessage } from '@/shared/api/query-error';
 
 export function RolesListPage() {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ export function RolesListPage() {
         ]}
         data={roles}
         loading={isLoading}
-        error={error ? 'فشل تحميل البيانات' : undefined}
+        error={error ? getQueryErrorMessage(error) : undefined}
         onRetry={() => refetch()}
         rowKey={(r) => String(r.id)}
         emptyMessage="لا توجد أدوار"

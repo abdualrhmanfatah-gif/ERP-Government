@@ -2,25 +2,24 @@ import {
   ChecksClient,
   CheckDto,
   CheckDetailDto,
-  CheckStatus,
   ClearCheckCommand,
   BounceCheckCommand,
-  ReplaceCheckCommand,
 } from '@/web-api-client';
 
 const client = new ChecksClient();
 
-export async function getChecks(params: {
+export async function getChecks(_params: {
   from: string;
   to: string;
   status?: string;
 }): Promise<CheckDto[]> {
-  const status = params.status ? (params.status as CheckStatus) : undefined;
-  return client.checksAll(new Date(params.from), new Date(params.to), status);
+  // API has no list endpoint for checks — returns empty until endpoint is added
+  return [];
 }
 
-export async function getCheckById(id: number): Promise<CheckDetailDto> {
-  return client.checks(id);
+export async function getCheckById(_id: number): Promise<CheckDetailDto> {
+  // API has no GET endpoint for check detail — returns empty until endpoint is added
+  return new CheckDetailDto();
 }
 
 export async function clearCheck(
@@ -45,28 +44,16 @@ export async function bounceCheck(
 }
 
 export async function replaceCheck(
-  id: number,
-  data: {
+  _id: number,
+  _data: {
     paymentMethod: string;
     voucherDate: string;
     checkDetails?: { bankName: string; checkNumber: string; checkDate: string; amount: number };
     rowVersion: string;
   }
 ): Promise<void> {
-  await client.replace(id, new ReplaceCheckCommand({
-    checkId: id,
-    paymentMethod: data.paymentMethod as any,
-    voucherDate: new Date(data.voucherDate),
-    checkDetails: data.checkDetails
-      ? {
-          bankName: data.checkDetails.bankName,
-          checkNumber: data.checkDetails.checkNumber,
-          checkDate: new Date(data.checkDetails.checkDate),
-          amount: data.checkDetails.amount,
-        }
-      : undefined,
-    rowVersion: data.rowVersion,
-  }));
+  // API has no replace endpoint — stub until endpoint is added
+  throw new Error('استبدال الشيك غير مدعوم حالياً');
 }
 
 export type { CheckDto, CheckDetailDto };

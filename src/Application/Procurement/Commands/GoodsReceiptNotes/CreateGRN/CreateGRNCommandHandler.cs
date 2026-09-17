@@ -18,7 +18,7 @@ public class CreateGRNCommandHandler(
         if (po.Status != PurchaseOrderStatus.Issued && po.Status != PurchaseOrderStatus.PartiallyReceived)
             return Result<int>.Failure(["Purchase order must be Issued or Partially Received."]);
 
-        var grnNumber = await documentSequenceService.GenerateNextNumberAsync("GRN", cancellationToken);
+        var grnNumber = await documentSequenceService.GenerateNextNumberAsync("GoodsReceiptNote", cancellationToken);
 
         var entity = new GoodsReceiptNote
         {

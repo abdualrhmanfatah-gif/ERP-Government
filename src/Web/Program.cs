@@ -28,11 +28,23 @@ var brandingLogoAbsolute = string.IsNullOrWhiteSpace(brandingLogoPath)
     ? null
     : Path.Combine(builder.Environment.ContentRootPath, brandingLogoPath);
 
+var republicHeaderPath = brandingSection["RepublicHeaderPath"];
+var republicHeaderAbsolute = string.IsNullOrWhiteSpace(republicHeaderPath)
+    ? null
+    : Path.Combine(builder.Environment.ContentRootPath, republicHeaderPath);
+
+var ministryHeaderPath = brandingSection["MinistryHeaderPath"];
+var ministryHeaderAbsolute = string.IsNullOrWhiteSpace(ministryHeaderPath)
+    ? null
+    : Path.Combine(builder.Environment.ContentRootPath, ministryHeaderPath);
+
 ERP_Government.Infrastructure.Services.ReportBranding.Configure(
     brandingSection["GovernmentLine"] ?? "الجمهورية اليمنية",
     brandingSection["OrganizationName"] ?? string.Empty,
     brandingSection["DepartmentName"],
-    brandingLogoAbsolute);
+    brandingLogoAbsolute,
+    republicHeaderAbsolute,
+    ministryHeaderAbsolute);
 
 // Register authorization startup validator
 builder.Services.AddSingleton<AuthorizationStartupValidator>();
@@ -56,6 +68,8 @@ app.UseCors(static builder =>
         .AllowAnyHeader()
         .AllowAnyOrigin());
 
+app.UseExceptionHandler(options => { });
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -65,8 +79,6 @@ app.UseFileServer();
 
 app.MapOpenApi();
 app.MapScalarApiReference();
-
-app.UseExceptionHandler(options => { });
 
 
 app.MapDefaultEndpoints();

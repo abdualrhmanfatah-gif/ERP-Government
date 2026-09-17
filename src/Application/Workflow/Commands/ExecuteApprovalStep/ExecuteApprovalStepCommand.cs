@@ -1,4 +1,6 @@
+using ERP_Government.Application.Common.Errors;
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Security.Common;
 using ERP_Government.Domain.Security.Entities;
 using ERP_Government.Domain.Workflow.Entities;
@@ -10,7 +12,7 @@ using System.Text.Json;
 
 namespace ERP_Government.Application.Workflow.Commands.ExecuteApprovalStep;
 
-public class ExecuteApprovalStepCommand : IRequest<Unit>
+public class ExecuteApprovalStepCommand : IRequest<Result>
 {
     public int InstanceId { get; init; }
     public int StepId { get; init; }
@@ -36,14 +38,14 @@ public class ExecuteApprovalStepCommandValidator : AbstractValidator<ExecuteAppr
 public class ExecuteApprovalStepCommandHandler(
     IApplicationDbContext context,
     IApprovalRuleEvaluationService evaluationService,
-    IUser user) : IRequestHandler<ExecuteApprovalStepCommand, Unit>
+    IUser user) : IRequestHandler<ExecuteApprovalStepCommand, Result>
 {
-    public async Task<Unit> Handle(
+    public async Task<Result> Handle(
         ExecuteApprovalStepCommand request,
         CancellationToken cancellationToken)
     {
         if (user.Id is not int userId)
-            throw new InvalidOperationException("User identity is required for this operation.");
+            return Result.Failure(ErrorCodes.Workflow.IdentityRequired, ErrorCategory.Authorization, "User identity is required for this operation.");
 
         var instance = await context.WorkflowInstances
             .Include(i => i.Definition)
@@ -51,17 +53,17 @@ public class ExecuteApprovalStepCommandHandler(
             .FirstOrDefaultAsync(i => i.Id == request.InstanceId, cancellationToken);
 
         if (instance?.Definition == null)
-            throw new InvalidOperationException($"Workflow instance with ID {request.InstanceId} not found.");
+            return Result.Failure(ErrorCodes.Workflow.InstanceNotFound, ErrorCategory.NotFound, $"Workflow instance with ID {request.InstanceId} not found.");
 
         if (instance.Status != WorkflowInstanceStatus.InProgress.ToString())
-            throw new InvalidOperationException($"Workflow instance is not in progress. Current status: {instance.Status}.");
+            return Result.Failure(ErrorCodes.Workflow.InstanceNotInProgress, ErrorCategory.BusinessRule, $"Workflow instance is not in progress. Current status: {instance.Status}.");
 
         var currentStep = instance.Definition.Steps.FirstOrDefault(s => s.Id == instance.CurrentStepId);
         if (currentStep == null || currentStep.Id != request.StepId)
-            throw new InvalidOperationException($"Step {request.StepId} is not the current step of this workflow instance.");
+            return Result.Failure(ErrorCodes.Workflow.StepNotFound, ErrorCategory.BusinessRule, $"Step {request.StepId} is not the current step of this workflow instance.");
 
         if (!currentStep.UseApprovalRules)
-            throw new InvalidOperationException("This step does not use approval rules. Use AdvanceWorkflowInstance instead.");
+            return Result.Failure(ErrorCodes.Workflow.StepNotApproval, ErrorCategory.BusinessRule, "This step does not use approval rules. Use AdvanceWorkflowInstance instead.");
 
         // Evaluate approval rules
         var evaluationResults = await evaluationService.EvaluateAsync(
@@ -72,7 +74,7 @@ public class ExecuteApprovalStepCommandHandler(
             cancellationToken);
 
         if (evaluationResults.Count == 0)
-            throw new InvalidOperationException("No approval rules defined for this entity type.");
+            return Result.Failure(ErrorCodes.Workflow.NoApprovalRules, ErrorCategory.BusinessRule, "No approval rules defined for this entity type.");
 
         // Check if user has required role
         var hasRequiredRole = false;
@@ -94,7 +96,7 @@ public class ExecuteApprovalStepCommandHandler(
         if (!hasRequiredRole)
         {
             var requiredRoles = evaluationResults.Select(r => r.RequiredRole).Where(r => !string.IsNullOrEmpty(r));
-            throw new InvalidOperationException($"User does not have any required approval role ({string.Join(", ", requiredRoles)}).");
+            return Result.Failure(ErrorCodes.Workflow.UserMissingRequiredRole, ErrorCategory.Authorization, $"User does not have any required approval role ({string.Join(", ", requiredRoles)}).");
         }
 
         // Record evaluation snapshot
@@ -181,6 +183,6 @@ public class ExecuteApprovalStepCommandHandler(
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return Unit.Value;
+        return Result.Success();
     }
 }

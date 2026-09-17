@@ -8,11 +8,15 @@ import {
   CreateCheckDto,
   CreateReceiptVoucherLineDto,
   PaymentMethod,
+  CollectionOrdersClient,
+  CollectionOrderStatus,
 } from '../../../web-api-client';
 import { VoucherLinesEditor } from '@/components/TreasuryVoucherLinesEditor';
 import { ChecksSection } from '@/components/TreasuryChecksSection';
 import { paymentMethodLabels } from '../shared/types';
 import type { LineFormRow, CheckFormRow } from '../shared/types';
+
+const collectionOrdersClient = new CollectionOrdersClient();
 
 interface ReceiptVoucherFormProps {
   onSubmit: (dto: CreateReceiptVoucherCommand) => void;
@@ -20,6 +24,7 @@ interface ReceiptVoucherFormProps {
   isPending?: boolean;
   readOnly?: boolean;
   initialData?: {
+    collectionOrderId?: number;
     voucherDate: string;
     partyId: number;
     paymentMethod: number;
@@ -45,6 +50,7 @@ export function ReceiptVoucherForm({
   });
   const { data: accounts = [] } = useAccountsList({ isActive: true, isPostable: true });
 
+  const [collectionOrderId, setCollectionOrderId] = useState<number>(initialData?.collectionOrderId ?? 0);
   const [voucherDate, setVoucherDate] = useState(initialData?.voucherDate ?? new Date().toISOString().slice(0, 10));
   const [partyId, setPartyId] = useState(initialData?.partyId ?? 0);
   const [paymentMethod, setPaymentMethod] = useState<string>(String(initialData?.paymentMethod ?? ''));
@@ -54,11 +60,43 @@ export function ReceiptVoucherForm({
   const [checks, setChecks] = useState<CheckFormRow[]>(initialData?.checks ?? []);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const { data: eligibleOrders = [] } = useQuery({
+    queryKey: ['collection-orders', 'eligible-for-voucher'],
+    queryFn: () =>
+      collectionOrdersClient.collectionOrdersAll(
+        undefined,
+        CollectionOrderStatus.Approved,
+      ).then((all) => [
+        ...all,
+        ...all.length === 0 ? [] : [],
+      ]),
+  });
+
+  const { data: partialOrders = [] } = useQuery({
+    queryKey: ['collection-orders', 'eligible-partial'],
+    queryFn: () =>
+      collectionOrdersClient.collectionOrdersAll(
+        undefined,
+        CollectionOrderStatus.PartiallyCollected,
+      ),
+  });
+
+  const availableOrders = useMemo(() => {
+    const merged = [...eligibleOrders, ...partialOrders];
+    const seen = new Set<number>();
+    return merged.filter((o) => {
+      if (seen.has(o.id ?? 0)) return false;
+      seen.add(o.id ?? 0);
+      return true;
+    });
+  }, [eligibleOrders, partialOrders]);
+
   const isCheck = paymentMethod === '2';
   const totalAmount = useMemo(() => lines.reduce((sum, l) => sum + (l.amount || 0), 0), [lines]);
 
   function validate(): boolean {
     const e: Record<string, string> = {};
+    if (!collectionOrderId) e.collectionOrderId = 'أمر التحصيل مطلوب';
     if (!voucherDate) e.voucherDate = 'تاريخ السند مطلوب';
     if (!partyId) e.partyId = 'الجهة مطلوبة';
     if (!paymentMethod) e.paymentMethod = 'طريقة الدفع مطلوبة';
@@ -81,6 +119,7 @@ export function ReceiptVoucherForm({
     if (!validate()) return;
     onSubmit(
       new CreateReceiptVoucherCommand({
+        collectionOrderId: collectionOrderId || undefined,
         voucherDate: new Date(voucherDate),
         partyId,
         paymentMethod: Number(paymentMethod) as PaymentMethod,
@@ -122,6 +161,12 @@ export function ReceiptVoucherForm({
             )}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            {initialData.collectionOrderId && (
+              <div>
+                <span className="text-[var(--color-on-surface-variant)]">أمر التحصيل:</span>{' '}
+                <span>#{initialData.collectionOrderId}</span>
+              </div>
+            )}
             <div>
               <span className="text-[var(--color-on-surface-variant)]">التاريخ:</span>{' '}
               <span>{initialData.voucherDate}</span>
@@ -207,6 +252,29 @@ export function ReceiptVoucherForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6" aria-label="سند قبض">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <Select
+            label="أمر التحصيل *"
+            value={String(collectionOrderId)}
+            onChange={(e) => {
+              const orderId = Number(e.target.value);
+              setCollectionOrderId(orderId);
+              const selected = availableOrders.find((o) => o.id === orderId);
+              if (selected) {
+                setPartyId(selected.revenueClaimId ?? 0);
+              }
+            }}
+            options={[
+              { value: '0', label: 'اختر أمر التحصيل...' },
+              ...availableOrders.map((o) => ({
+                value: String(o.id),
+                label: `${o.orderNumber} — ${o.availableAmount?.toLocaleString('ar-YE') ?? 0} ريال`,
+              })),
+            ]}
+          />
+          {errors.collectionOrderId && <p className="text-xs text-[var(--color-error)] mt-1">{errors.collectionOrderId}</p>}
+        </div>
+
         <div>
           <DatePicker
             label="تاريخ السند *"

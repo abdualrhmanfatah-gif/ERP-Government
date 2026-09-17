@@ -21,7 +21,7 @@ export function Pagination({ page, total, pageSize, onChange }: PaginationProps)
         disabled={page <= 1}
         onClick={() => onChange(page - 1)}
         className={cn(
-          'inline-flex items-center justify-center w-11 h-11 border border-[var(--color-border-input)] rounded-lg bg-transparent p-0 focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]',
+          'inline-flex items-center justify-center w-[var(--density-compact-control-height)] h-[var(--density-compact-control-height)] border border-[var(--color-input-border)] rounded-lg bg-transparent p-0 focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]',
           page <= 1
             ? 'text-[var(--color-disabled-fg)] cursor-not-allowed bg-[var(--color-disabled-bg)]'
             : 'text-[var(--color-primary)] cursor-pointer hover:bg-[var(--color-surface-container-low)]'
@@ -48,7 +48,7 @@ export function Pagination({ page, total, pageSize, onChange }: PaginationProps)
               aria-current={item === page ? 'page' : undefined}
               onClick={() => onChange(item as number)}
               className={cn(
-                'inline-flex items-center justify-center min-w-11 h-11 rounded-lg px-2 text-[0.8125rem] cursor-pointer transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]',
+                'inline-flex items-center justify-center min-w-[var(--density-compact-control-height)] h-[var(--density-compact-control-height)] rounded-lg px-2 text-[0.8125rem] cursor-pointer transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]',
                 item === page
                   ? 'border border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-on-primary)] font-semibold'
                   : 'border border-transparent text-[var(--color-primary)] hover:bg-[var(--color-surface-container-low)]'
@@ -65,7 +65,7 @@ export function Pagination({ page, total, pageSize, onChange }: PaginationProps)
         disabled={page >= totalPages}
         onClick={() => onChange(page + 1)}
         className={cn(
-          'inline-flex items-center justify-center w-11 h-11 border border-[var(--color-border-input)] rounded-lg bg-transparent p-0 focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]',
+          'inline-flex items-center justify-center w-[var(--density-compact-control-height)] h-[var(--density-compact-control-height)] border border-[var(--color-input-border)] rounded-lg bg-transparent p-0 focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]',
           page >= totalPages
             ? 'text-[var(--color-disabled-fg)] cursor-not-allowed bg-[var(--color-disabled-bg)]'
             : 'text-[var(--color-primary)] cursor-pointer hover:bg-[var(--color-surface-container-low)]'

@@ -13,7 +13,7 @@ public static class BudgetTypeSeedData
         new()
         {
             Code = "OPEX",
-            Name = "Operational Expenditure",
+            Name = "النفقات التشغيلية",
             ControlMethod = BudgetControlMethod.Warning,
             AllowOverrun = false,
             IsActive = true
@@ -21,7 +21,7 @@ public static class BudgetTypeSeedData
         new()
         {
             Code = "CAPEX",
-            Name = "Capital Expenditure",
+            Name = "النفقات الرأسمالية",
             ControlMethod = BudgetControlMethod.Blocking,
             AllowOverrun = false,
             IsActive = true
@@ -29,7 +29,7 @@ public static class BudgetTypeSeedData
         new()
         {
             Code = "TRANSFER",
-            Name = "Transfer Budget",
+            Name = "ميزانية التحويلات",
             ControlMethod = BudgetControlMethod.None,
             AllowOverrun = true,
             IsActive = true

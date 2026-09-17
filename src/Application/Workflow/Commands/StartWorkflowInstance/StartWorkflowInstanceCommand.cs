@@ -1,14 +1,18 @@
+using ERP_Government.Application.Common.Errors;
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Domain.Security.Entities;
 using ERP_Government.Domain.Workflow.Enums;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Workflow.Commands.StartWorkflowInstance;
 
-public class StartWorkflowInstanceCommand : IRequest<int>
+[Authorize(Policy = PermissionCodes.WorkflowInstancesExecute)]
+public class StartWorkflowInstanceCommand : IRequest<Result<int>>
 {
     public int DefinitionId { get; init; }
     public string EntityName { get; init; } = string.Empty;
@@ -33,14 +37,14 @@ public class StartWorkflowInstanceCommandValidator : AbstractValidator<StartWork
 
 public class StartWorkflowInstanceCommandHandler(
     IApplicationDbContext context,
-    IUser user) : IRequestHandler<StartWorkflowInstanceCommand, int>
+    IUser user) : IRequestHandler<StartWorkflowInstanceCommand, Result<int>>
 {
-    public async Task<int> Handle(
+    public async Task<Result<int>> Handle(
         StartWorkflowInstanceCommand request,
         CancellationToken cancellationToken)
     {
         if (user.Id is not int userId)
-            throw new InvalidOperationException("User identity is required for this operation.");
+            return Result<int>.Failure(ErrorCodes.Workflow.IdentityRequired, ErrorCategory.Authorization, "User identity is required for this operation.");
 
         // Get active definition
         var definition = await context.WorkflowDefinitions
@@ -48,7 +52,7 @@ public class StartWorkflowInstanceCommandHandler(
             .FirstOrDefaultAsync(d => d.Id == request.DefinitionId && d.IsActive, cancellationToken);
 
         if (definition == null)
-            throw new InvalidOperationException($"Active workflow definition with ID {request.DefinitionId} not found.");
+            return Result<int>.Failure(ErrorCodes.Workflow.DefinitionNotFound, ErrorCategory.NotFound, $"Active workflow definition with ID {request.DefinitionId} not found.");
 
         // Check for existing active instance for this entity
         var existingInstance = await context.WorkflowInstances
@@ -61,12 +65,12 @@ public class StartWorkflowInstanceCommandHandler(
                 cancellationToken);
 
         if (existingInstance)
-            throw new InvalidOperationException($"An active workflow instance already exists for {request.EntityName} with ID {request.EntityId}.");
+            return Result<int>.Failure(ErrorCodes.Workflow.ActiveInstanceExists, ErrorCategory.Conflict, $"An active workflow instance already exists for {request.EntityName} with ID {request.EntityId}.");
 
         // Get first step
         var firstStep = definition.Steps.OrderBy(s => s.StepOrder).FirstOrDefault();
         if (firstStep == null)
-            throw new InvalidOperationException("Workflow definition has no active steps.");
+            return Result<int>.Failure(ErrorCodes.Workflow.NoActiveSteps, ErrorCategory.BusinessRule, "Workflow definition has no active steps.");
 
         var instance = new Domain.Workflow.Entities.WorkflowInstance
         {
@@ -119,6 +123,6 @@ public class StartWorkflowInstanceCommandHandler(
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return instance.Id;
+        return Result<int>.Success(instance.Id);
     }
 }

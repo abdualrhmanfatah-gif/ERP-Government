@@ -31,7 +31,7 @@ All unknowns resolved against the codebase (verified file:line). No open NEEDS C
 
 ## R5 — Clearing posting effect (D9, FR-009)
 
-- **Decision**: Keep the existing `CheckCleared` domain event emission (already `IHasSourceEntity`, auto-mapped to `EventType.CheckCleared = 13` by `EventTypeMapper`). Add the missing seed: `PostingRule { Name: "ترحيل تحصيل الشيكات", EventType: "CheckCleared", JournalId: <revenue journal>, Priority: 1 }` in `PostingRuleSeedData` (guarded by the existing `!_context.PostingRules.Any()` idempotent seed). Verify in functional tests that clearing produces an `AccountingEvent` and, via the outbox/`PostingPipelineHandler`, a balanced `JournalEntry` linked to the event.
+- **Decision (SUPERSEDED, DEP-027)**: Clearing's posting effect is now produced by the native `CreateAccrualEntry`/treasury posting handler during voucher collection; the `CheckCleared` event stays as a domain signal but the rule-engine path (rule seed, `EventTypeMapper`, `PostingPipelineHandler`) was removed with the PostingRules engine (DEP-027). No rule seed is added. Verify in functional tests that a balanced `JournalEntry` is produced via the outbox path linked to the source event.
 - **Rationale**: SC-003 requires a visible, traceable posting effect per clearing; the pipeline is generic — only rule matching is missing. Rule-based posting keeps account configuration data-driven (constitution IV).
 - **Alternatives considered**: Direct JournalEntry write in the handler — prohibited (constitution IV/II); a dedicated event consumer — unnecessary, generic pipeline already handles it.
 

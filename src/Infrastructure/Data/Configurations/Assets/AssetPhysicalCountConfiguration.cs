@@ -16,11 +16,11 @@ public class AssetPhysicalCountConfiguration : IEntityTypeConfiguration<AssetPhy
             .HasMaxLength(50)
             .IsRequired();
 
-        builder.Property(e => e.CountType)
-            .HasMaxLength(50)
+        builder.Property(e => e.ResolvedScopeLabel)
+            .HasMaxLength(200)
             .IsRequired();
 
-        builder.Property(e => e.Status)
+        builder.Property(e => e.CountType)
             .HasMaxLength(50)
             .IsRequired();
 
@@ -33,8 +33,30 @@ public class AssetPhysicalCountConfiguration : IEntityTypeConfiguration<AssetPhy
         builder.HasIndex(e => e.CountNumber)
             .IsUnique();
 
+        builder.HasOne(e => e.Location)
+            .WithMany()
+            .HasForeignKey(e => e.LocationId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.Department)
+            .WithMany()
+            .HasForeignKey(e => e.DepartmentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.CountedBy)
+            .WithMany()
+            .HasForeignKey(e => e.CountedById)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.ReviewedBy)
+            .WithMany()
+            .HasForeignKey(e => e.ReviewedById)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasIndex(e => e.LocationId);
         builder.HasIndex(e => e.DepartmentId);
+        builder.HasIndex(e => e.CountedById);
+        builder.HasIndex(e => e.ReviewedById);
         builder.HasIndex(e => e.Status);
     }
 }

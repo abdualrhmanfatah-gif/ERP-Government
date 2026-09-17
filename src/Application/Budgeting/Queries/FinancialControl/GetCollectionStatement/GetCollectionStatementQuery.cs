@@ -1,5 +1,6 @@
 using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Domain.Revenue.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,11 +19,11 @@ public record CollectionStatementResult(
     bool IsClosed);
 
 public record CollectionStatementLineResult(
-    string FundCode,
-    string FundName,
+    string VoucherNumber,
+    string PartyName,
     DateOnly Date,
     decimal Amount,
-    string Source);
+    string PaymentMethod);
 
 public class GetCollectionStatementQueryHandler(
     IApplicationDbContext context) : IRequestHandler<GetCollectionStatementQuery, CollectionStatementResult>
@@ -35,25 +36,21 @@ public class GetCollectionStatementQueryHandler(
         if (fiscalYear is null)
             return new CollectionStatementResult(request.FiscalYearId, string.Empty, [], new(), 0m, false);
 
-        var receipts = await context.RevenueReceipts
-            .Where(r => r.ReceiptDate >= fiscalYear.StartDate
-                && r.ReceiptDate <= fiscalYear.EndDate
-                && r.Status == Domain.Revenue.Enums.RevenueReceiptStatus.Posted)
-            .Join(context.Funds,
-                r => r.FundId,
-                f => f.Id,
-                (r, f) => new { Receipt = r, Fund = f })
-            .Select(x => new CollectionStatementLineResult(
-                x.Fund.FundNumber,
-                x.Fund.FundName,
-                x.Receipt.ReceiptDate,
-                x.Receipt.AmountTotal,
-                x.Receipt.ReceiptNumber))
+        var receipts = await context.ReceiptVouchers
+            .Where(r => r.VoucherDate >= fiscalYear.StartDate
+                && r.VoucherDate <= fiscalYear.EndDate
+                && r.Status == ReceiptVoucherStatus.Approved)
+            .Select(r => new CollectionStatementLineResult(
+                r.VoucherNumber,
+                r.ReceivedFrom,
+                r.VoucherDate,
+                r.Lines.Sum(l => l.Amount),
+                r.PaymentMethod.ToString()))
             .OrderBy(c => c.Date)
             .ToListAsync(cancellationToken);
 
         var subtotals = receipts
-            .GroupBy(c => c.FundCode)
+            .GroupBy(c => c.PaymentMethod)
             .ToDictionary(g => g.Key, g => g.Sum(c => c.Amount));
 
         var grandTotal = receipts.Sum(c => c.Amount);

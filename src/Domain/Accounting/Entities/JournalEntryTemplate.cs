@@ -10,6 +10,7 @@ public class JournalEntryTemplate : BaseAuditableEntity
 {
     public string TemplateName { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public string? SystemKey { get; set; }
     public int JournalId { get; set; }
     public JournalEntryTemplateType TemplateType { get; set; }
     public bool IsSystemTemplate { get; set; }

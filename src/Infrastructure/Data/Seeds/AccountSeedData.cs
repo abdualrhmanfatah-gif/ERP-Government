@@ -22,7 +22,7 @@ namespace ERP_Government.Infrastructure.Data.Seeds;
 /// </summary>
 public static class AccountSeedData
 {
-    internal static List<Account> GetBlueprints()
+    public static List<Account> GetBlueprints()
     {
         ValidateDefinitions(Definitions);
 
@@ -66,6 +66,9 @@ public static class AccountSeedData
         D("1151", "الأثاث والمفروشات", 115, "115", NormalBalanceType.Debit),
         D("1158", "أجهزة الكمبيوتر وملحقاتها", 115, "115", NormalBalanceType.Debit),
         D("1159", "معدات مكاتب أخرى", 115, "115", NormalBalanceType.Debit),
+        D("116", "الأصول غير الملموسة", 116, null, NormalBalanceType.Debit, false),
+        D("1161", "البرمجيات", 116, "116", NormalBalanceType.Debit),
+        D("1162", "التراخيص الرقمية", 116, "116", NormalBalanceType.Debit),
 
 
         // 122: مشاريع قيد التنفيذ فقط
@@ -88,6 +91,9 @@ public static class AccountSeedData
 
 
         // 18: الأموال الجاهزة
+        D("181", "نقدية في الصندوق", 21, null, NormalBalanceType.Debit, false),
+        D("1811", "الصندوق المركزي الرئيسي", 21, "181", NormalBalanceType.Debit),
+        D("1812", "نقدية لدى أمين الصندوق", 21, "181", NormalBalanceType.Debit),
         D("182", "نقد لدى البنوك", 21, null, NormalBalanceType.Debit, false),
         D("1821", "حسابات جارية محلية", 21, "182", NormalBalanceType.Debit),
 
@@ -107,13 +113,14 @@ public static class AccountSeedData
         D("2313", "مخصص اهتلاك السيارات ووسائل النقل", 23, "231", NormalBalanceType.Credit),
         D("2314", "مخصص اهتلاك الأثاث والمفروشات", 23, "231", NormalBalanceType.Credit),
         D("2315", "مخصص حقوق العاملين الأخرى", 23, "231", NormalBalanceType.Credit),
+        D("2316", "مخصص اهتلاك الأصول غير الملموسة", 23, "231", NormalBalanceType.Credit),
 
 
         // العجز مدين، والفائض دائن
-        D("281", "حساب توزيع عجز النشاط الجاري", 24, null, NormalBalanceType.Debit, false),
-        D("2812", "عجز النشاط الجاري", 24, "281", NormalBalanceType.Debit),
-        D("282", "حساب توزيع فائض النشاط الجاري", 25, null, NormalBalanceType.Credit, false),
-        D("2822", "فائض النشاط الجاري", 25, "282", NormalBalanceType.Credit),
+        D("281", "حساب توزيع عجز النشاط الجاري", 28, null, NormalBalanceType.Debit, false),
+        D("2812", "عجز النشاط الجاري", 28, "281", NormalBalanceType.Debit),
+        D("282", "حساب توزيع فائض النشاط الجاري", 28, null, NormalBalanceType.Credit, false),
+        D("2822", "فائض النشاط الجاري", 28, "282", NormalBalanceType.Credit),
 
 
         // 25: الدائنون
@@ -243,6 +250,7 @@ public static class AccountSeedData
         D("35112", "اهتلاك الآلات والتجهيزات والمعدات", 34, "3511", NormalBalanceType.Debit),
         D("35113", "اهتلاك السيارات ووسائل النقل", 34, "3511", NormalBalanceType.Debit),
         D("35114", "اهتلاك الأثاث والمفروشات", 34, "3511", NormalBalanceType.Debit),
+        D("35115", "اهتلاك الأصول غير الملموسة", 34, "3511", NormalBalanceType.Debit),
         D("3513", "الإيجارات", 34, "351", NormalBalanceType.Debit, false),
         D("35136", "إيجارات مبانٍ في الداخل", 34, "3513", NormalBalanceType.Debit),
         D("3514", "الفوائد والعمولات", 34, "351", NormalBalanceType.Debit, false),
@@ -578,11 +586,11 @@ public static class AccountingChartSeeder
                 "الفائض المرحل وفائض الدورة"),
             G("23", "المخصصات", AccountGroupType.Equity, NormalBalanceType.Credit, "2",
                 "مخصصات الاهتلاك والحقوق"),
-            G("25", "الدائنون", AccountGroupType.Equity, NormalBalanceType.Credit, "2",
+            G("25", "الدائنون", AccountGroupType.Liability, NormalBalanceType.Credit, "2",
                 "الموردون والذمم الدائنة"),
-            G("26", "التأمينات والتوقيفات الدائنة", AccountGroupType.Equity, NormalBalanceType.Credit, "2",
+            G("26", "التأمينات والتوقيفات الدائنة", AccountGroupType.Liability, NormalBalanceType.Credit, "2",
                 "تأمينات العقود والمناقصات والتوقيفات"),
-            G("27", "الحسابات الانتقالية الدائنة", AccountGroupType.Equity, NormalBalanceType.Credit, "2",
+            G("27", "الحسابات الانتقالية الدائنة", AccountGroupType.Liability, NormalBalanceType.Credit, "2",
                 "إيرادات محصلة مقدمًا ومصاريف مستحقة"),
             G("28", "حسابات النتائج", AccountGroupType.Equity, NormalBalanceType.Credit, "2",
                 "عجز أو فائض النشاط الجاري"),
@@ -616,15 +624,18 @@ public static class AccountingChartSeeder
         };
 
 
+        var baseDefsByCode = baseDefinitions.ToDictionary(d => d.Code, StringComparer.Ordinal);
+
         var levelThreeDefinitions = accountBlueprints
             .Where(account => account.Level == 3)
-            .Select(account => G(
-                account.Code,
-                account.Name,
-                typeBySection[account.Code[0]],
-                account.NormalBalance,
-                account.Code[..2],
-                account.Name));
+            .Select(account =>
+            {
+                var parentCode = account.Code[..2];
+                var type = baseDefsByCode.TryGetValue(parentCode, out var parentDef)
+                    ? parentDef.Type
+                    : typeBySection[account.Code[0]];
+                return G(account.Code, account.Name, type, account.NormalBalance, parentCode, account.Name);
+            });
 
 
         return baseDefinitions.Concat(levelThreeDefinitions).ToArray();

@@ -98,6 +98,21 @@ public record WarehouseResponse(
     decimal? CurrentLoad,
     bool IsActive);
 
+public record LocationResponse(
+    int Id,
+    string Code,
+    string Name,
+    string? Barcode,
+    int? ParentLocationId,
+    string? ParentName,
+    int? Level,
+    string? Breadcrumb,
+    string? City,
+    string? Address,
+    decimal? Capacity,
+    bool IsActive,
+    byte[] RowVersion);
+
 public static class InventoryMappingExtensions
 {
     public static ItemResponse ToResponse(this Item item) => new(
@@ -194,4 +209,19 @@ public static class InventoryMappingExtensions
         warehouse.TotalCapacity,
         warehouse.CurrentLoad,
         warehouse.IsActive);
+
+    public static LocationResponse ToResponse(this Location location) => new(
+        location.Id,
+        location.Code,
+        location.Name,
+        location.Barcode,
+        location.ParentLocationId,
+        location.ParentLocation?.Name,
+        location.Level,
+        location.Breadcrumb,
+        location.City,
+        location.Address,
+        location.Capacity,
+        location.IsActive,
+        location.RowVersion);
 }

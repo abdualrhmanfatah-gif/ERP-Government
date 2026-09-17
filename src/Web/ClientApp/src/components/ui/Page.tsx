@@ -57,7 +57,7 @@ export function Page({
             {onBack && (
               <button
                 onClick={onBack}
-                className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-[var(--color-on-surface)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-[var(--color-surface-container-low)] text-[var(--color-on-surface)] transition-colors"
                 aria-label="رجوع"
                 type="button"
               >

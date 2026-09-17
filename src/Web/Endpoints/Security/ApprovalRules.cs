@@ -51,11 +51,12 @@ public class ApprovalRules : IEndpointGroup
     }
 
     [EndpointSummary("Get approval rule by ID")]
-    public static async Task<ApprovalRuleDto?> GetApprovalRuleById(
+    public static async Task<IResult> GetApprovalRuleById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetApprovalRuleByIdQuery { Id = id });
+        var result = await sender.Send(new GetApprovalRuleByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new approval rule")]
@@ -74,7 +75,11 @@ public class ApprovalRules : IEndpointGroup
         [FromBody] UpdateApprovalRuleCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         await sender.Send(command);
         return Results.NoContent();

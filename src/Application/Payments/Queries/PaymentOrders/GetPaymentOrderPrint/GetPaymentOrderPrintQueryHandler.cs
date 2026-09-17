@@ -1,4 +1,6 @@
+using ERP_Government.Application.Common.Errors;
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Domain.Payments.Entities;
 using ERP_Government.Domain.Payments.Enums;
 using ERP_Government.Domain.Security.Enums;
@@ -9,7 +11,7 @@ namespace ERP_Government.Application.Payments.Queries.PaymentOrders.GetPaymentOr
 
 internal class GetPaymentOrderPrintQueryHandler(
     IApplicationDbContext context)
-    : IRequestHandler<GetPaymentOrderPrintQuery, Common.DTOs.PaymentOrderPrintDto?>
+    : IRequestHandler<GetPaymentOrderPrintQuery, Result<Common.DTOs.PaymentOrderPrintDto>>
 {
     private static readonly Dictionary<PaymentOrderStatus, string> StatusLabels = new()
     {
@@ -23,13 +25,13 @@ internal class GetPaymentOrderPrintQueryHandler(
         [PaymentOrderStatus.Voided] = "ملغاة نهائياً"
     };
 
-    public async Task<Common.DTOs.PaymentOrderPrintDto?> Handle(
+    public async Task<Result<Common.DTOs.PaymentOrderPrintDto>> Handle(
         GetPaymentOrderPrintQuery request,
         CancellationToken cancellationToken)
     {
         var order = await context.PaymentOrders
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-        if (order is null) return null;
+        if (order is null) return Result<Common.DTOs.PaymentOrderPrintDto>.Failure(ErrorCodes.Payments.PaymentOrderNotFound, ErrorCategory.NotFound, $"Payment order with ID {request.Id} not found.");
 
         var deductions = await context.PaymentOrderDeductions
             .Where(d => d.PaymentOrderId == request.Id)
@@ -154,7 +156,7 @@ internal class GetPaymentOrderPrintQueryHandler(
         var isUnapproved = order.Status is not
             (PaymentOrderStatus.Approved or PaymentOrderStatus.SentToTreasury or PaymentOrderStatus.Paid);
 
-        return new Common.DTOs.PaymentOrderPrintDto
+        return Result<Common.DTOs.PaymentOrderPrintDto>.Success(new Common.DTOs.PaymentOrderPrintDto
         {
             OrderNumber = order.PaymentOrderNumber,
             OrderDate = order.PaymentOrderDate,
@@ -207,6 +209,6 @@ internal class GetPaymentOrderPrintQueryHandler(
             ApprovedAt = latestApproval?.DecisionAt,
             PaidByName = payment?.PaidByName,
             IsUnapproved = isUnapproved
-        };
+        });
     }
 }

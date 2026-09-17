@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace ERP_Government.Application.Common.Security;
 
 /// <summary>
@@ -6,6 +8,18 @@ namespace ERP_Government.Application.Common.Security;
 /// </summary>
 public static class PermissionCodes
 {
+    /// <summary>
+    /// Every declared permission code, discovered from the public string constants on this type.
+    /// Used to register one authorization policy per permission.
+    /// </summary>
+    public static IReadOnlyList<string> All { get; } = typeof(PermissionCodes)
+        .GetFields(BindingFlags.Public | BindingFlags.Static)
+        .Where(f => f.IsLiteral && f.FieldType == typeof(string))
+        .Select(f => (string)f.GetRawConstantValue()!)
+        .Distinct(StringComparer.Ordinal)
+        .OrderBy(code => code, StringComparer.Ordinal)
+        .ToArray();
+
     // ─── FinancialSettings ────────────────────────────────────────────
     public const string CurrenciesView = "Currencies.View";
     public const string CurrenciesCreate = "Currencies.Create";
@@ -58,11 +72,6 @@ public static class PermissionCodes
     public const string JournalEntriesReverse = "Accounting.JournalEntries.Reverse";
     public const string JournalEntriesUpdateLines = "Accounting.JournalEntries.UpdateLines";
     public const string JournalEntriesCancel = "Accounting.JournalEntries.Cancel";
-
-    public const string PostingRulesRead = "Accounting.PostingRules.Read";
-    public const string PostingRulesCreate = "Accounting.PostingRules.Create";
-    public const string PostingRulesEdit = "Accounting.PostingRules.Edit";
-    public const string PostingRulesDelete = "Accounting.PostingRules.Delete";
 
     public const string TemplatesRead = "Accounting.Templates.Read";
     public const string TemplatesCreate = "Accounting.Templates.Create";
@@ -224,16 +233,20 @@ public static class PermissionCodes
     public const string CommitteeAssignmentsCreate = "CommitteeAssignments.Create";
     public const string CommitteeAssignmentsComplete = "CommitteeAssignments.Complete";
 
-    // ─── Revenue ──────────────────────────────────────────────────────
-    public const string RevenueReceiptsView = "RevenueReceipts.View";
-    public const string RevenueReceiptsCreate = "RevenueReceipts.Create";
-    public const string RevenueReceiptsApprove = "RevenueReceipts.Approve";
-    public const string RevenueReceiptsPost = "RevenueReceipts.Post";
-    public const string RevenueReceiptsCancel = "RevenueReceipts.Cancel";
+    // ─── RevenueClaims & CollectionOrders ───────────────────────────
+    public const string RevenueClaimsView = "RevenueClaims.View";
+    public const string RevenueClaimsCreate = "RevenueClaims.Create";
+    public const string RevenueClaimsApprove = "RevenueClaims.Approve";
+    public const string RevenueClaimsWriteOff = "RevenueClaims.WriteOff";
+
+    public const string CollectionOrdersView = "CollectionOrders.View";
+    public const string CollectionOrdersCreate = "CollectionOrders.Create";
+    public const string CollectionOrdersApprove = "CollectionOrders.Approve";
 
     // ─── ReceiptVouchers ─────────────────────────────────────────────
     public const string ReceiptVouchersView = "ReceiptVouchers.View";
     public const string ReceiptVouchersCreate = "ReceiptVouchers.Create";
+    public const string ReceiptVouchersUpdate = "ReceiptVouchers.Update";
     public const string ReceiptVouchersSubmit = "ReceiptVouchers.Submit";
     public const string ReceiptVouchersApprove = "ReceiptVouchers.Approve";
     public const string ReceiptVouchersCancel = "ReceiptVouchers.Cancel";
@@ -258,10 +271,19 @@ public static class PermissionCodes
     public const string AssetGroupsView = "AssetGroups.View";
     public const string AssetGroupsCreate = "AssetGroups.Create";
     public const string AssetGroupsUpdate = "AssetGroups.Update";
+    public const string AssetGroupsDeactivate = "AssetGroups.Deactivate";
+    public const string AssetGroupsActivate = "AssetGroups.Activate";
 
+    [Obsolete("Retired per DEP-030: AssetMovements table dropped. Use AssetTransfers instead.")]
     public const string AssetMovementsView = "AssetMovements.View";
+    [Obsolete("Retired per DEP-030: AssetMovements table dropped. Use AssetTransfers instead.")]
     public const string AssetMovementsCreate = "AssetMovements.Create";
+    [Obsolete("Retired per DEP-030: AssetMovements table dropped. Use AssetTransfers instead.")]
     public const string AssetMovementsApprove = "AssetMovements.Approve";
+
+    public const string AssetTransfersView = "AssetTransfers.View";
+    public const string AssetTransfersCreate = "AssetTransfers.Create";
+    public const string AssetTransfersExecute = "AssetTransfers.Execute";
 
     public const string AssetDisposalsView = "AssetDisposals.View";
     public const string AssetDisposalsCreate = "AssetDisposals.Create";
@@ -278,9 +300,14 @@ public static class PermissionCodes
     public const string AssetImpairmentsApprove = "AssetImpairments.Approve";
     public const string AssetImpairmentsPost = "AssetImpairments.Post";
 
-    public const string DepreciationView = "Depreciation.View";
-    public const string DepreciationPost = "Depreciation.Post";
-    public const string DepreciationReverse = "Depreciation.Reverse";
+    public const string AssetDepreciationView = "AssetDepreciation.View";
+    public const string AssetDepreciationRun = "AssetDepreciation.Run";
+    public const string AssetDepreciationPost = "AssetDepreciation.Post";
+
+    public const string AssetCountsView = "AssetCounts.View";
+    public const string AssetCountsCreate = "AssetCounts.Create";
+    public const string AssetCountsExecute = "AssetCounts.Execute";
+    public const string AssetCountsReview = "AssetCounts.Review";
 
     // ─── Inventory ────────────────────────────────────────────────────
     public const string ItemsView = "Items.View";
@@ -403,7 +430,6 @@ public static class PermissionCodes
     public const string ReportingViewBudgetExecution = "Reporting.ViewBudgetExecution";
     public const string ReportingViewRevenueCollections = "Reporting.ViewRevenueCollections";
     public const string ReportingViewDisbursementRegister = "Reporting.ViewDisbursementRegister";
-    public const string ReportingViewAvailabilitySnapshot = "Reporting.ViewAvailabilitySnapshot";
     public const string ReportingViewTrialBalanceReport = "Reporting.ViewTrialBalanceReport";
     public const string ReportingExportReports = "Reporting.ExportReports";
 }

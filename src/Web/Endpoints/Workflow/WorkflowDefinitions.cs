@@ -46,11 +46,12 @@ public class WorkflowDefinitions : IEndpointGroup
     }
 
     [EndpointSummary("Get workflow definition by ID")]
-    public static async Task<WorkflowDefinitionDto?> GetWorkflowDefinitionById(
+    public static async Task<IResult> GetWorkflowDefinitionById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetWorkflowDefinitionByIdQuery { Id = id });
+        var result = await sender.Send(new GetWorkflowDefinitionByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new workflow definition")]
@@ -69,7 +70,11 @@ public class WorkflowDefinitions : IEndpointGroup
         [FromBody] UpdateWorkflowDefinitionCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         await sender.Send(command);
         return Results.NoContent();

@@ -19,7 +19,6 @@ export const moduleGroups: ModuleGroup[] = [
       { path: '/accounting/journals', label: 'دفاتر اليومية', permission: 'Accounting.Journals.Read' },
       { path: '/accounting/templates', label: 'قوالب القيود', permission: 'Accounting.Templates.Read' },
       { path: '/accounting/recurring-entries', label: 'القيود الدورية', permission: 'Accounting.RecurringEntries.Read' },
-      { path: '/accounting/posting-rules', label: 'قواعد الترحيل', permission: 'Accounting.PostingRules.Read' },
     ],
   },
 
@@ -31,13 +30,15 @@ export const moduleGroups: ModuleGroup[] = [
       { path: '/budgeting/budget-classifications', label: 'التصنيفات المالية', permission: 'BudgetClassifications.View' },
       { path: '/budgeting/budgets', label: 'الموازنات', permission: 'Budgets.View' },
 
-      { path: '/budgeting/transactions', label: 'المعاملات المالية', permission: 'BudgetTransactions.View' },
+
       { path: '/budgeting/encumbrances', label: 'الالتزامات', permission: 'Encumbrances.View' },
     ],
   },
   {
     label: 'الخزينة',
     items: [
+      { path: '/treasury/revenue-claims', label: 'المطالبات الإيرادية', permission: 'RevenueClaims.View' },
+      { path: '/treasury/collection-orders', label: 'أوامر التحصيل', permission: 'CollectionOrders.View' },
       { path: '/treasury/receipt-vouchers', label: 'سندات القبض', permission: 'ReceiptVouchers.View' },
       { path: '/treasury/deposit-slips', label: 'بطاقات الإيداع', permission: 'DepositSlips.View' },
       { path: '/treasury/checks', label: 'الشيكات', permission: 'Checks.View' },
@@ -50,12 +51,11 @@ export const moduleGroups: ModuleGroup[] = [
       { path: '/reporting/budget-execution', label: 'تقرير تنفيذ الموازنة', permission: 'Reporting.ViewBudgetExecution' },
       { path: '/reporting/revenue-collections', label: 'سجل التحصيلات', permission: 'Reporting.ViewRevenueCollections' },
       { path: '/reporting/disbursement-register', label: 'سجل الصرف', permission: 'Reporting.ViewDisbursementRegister' },
-      { path: '/reporting/availability-snapshot', label: 'لقطة التوفر', permission: 'Reporting.ViewAvailabilitySnapshot' },
       { path: '/reporting/trial-balance', label: 'ميزان المراجعة', permission: 'Reporting.ViewTrialBalance' },
-      { path: '/reporting/financial-statements/balance-sheet', label: 'الميزانية العمومية', permission: 'Reporting.ViewFinancialStatements' },
-      { path: '/reporting/financial-statements/income-statement', label: 'قائمة الدخل', permission: 'Reporting.ViewFinancialStatements' },
-      { path: '/reporting/financial-statements/cash-flow', label: 'قائمة التدفقات النقدية', permission: 'Reporting.ViewFinancialStatements' },
-      { path: '/reporting/financial-statements/general-ledger', label: 'دفتر الأستاذ العام', permission: 'Reporting.ViewFinancialStatements' },
+      { path: '/reporting/financial-statements/balance-sheet', label: 'الميزانية العمومية', permission: 'Accounting.Reports.BalanceSheet' },
+      { path: '/reporting/financial-statements/income-statement', label: 'قائمة الدخل', permission: 'Accounting.Reports.IncomeStatement' },
+      { path: '/reporting/financial-statements/cash-flow', label: 'قائمة التدفقات النقدية', permission: 'Accounting.Reports.CashFlow' },
+      { path: '/reporting/financial-statements/general-ledger', label: 'دفتر الأستاذ العام', permission: 'Accounting.Reports.GeneralLedger' },
     ],
   },
   {
@@ -102,6 +102,21 @@ export const moduleGroups: ModuleGroup[] = [
       { path: '/inventory/item-categories', label: 'تصنيفات الأصناف', permission: 'ItemCategories.View' },
       { path: '/inventory/units', label: 'الوحدات', permission: 'Units.View' },
       { path: '/inventory/warehouses', label: 'المستودعات', permission: 'Warehouses.View' },
+      { path: '/inventory/locations', label: 'المواقع', permission: 'Locations.View' },
+    ],
+  },
+  {
+    label: 'الأصول',
+    items: [
+      { path: '/assets', label: 'سجل الأصول', permission: 'Assets.View' },
+      { path: '/assets/asset-groups', label: 'مجموعات الأصول', permission: 'AssetGroups.View' },
+      { path: '/assets/attributes', label: 'تعريفات المواصفات', permission: 'AssetGroups.View' },
+      { path: '/assets/transfers', label: 'نقل الأصول', permission: 'AssetTransfers.View' },
+      { path: '/assets/depreciation', label: 'الإهلاك', permission: 'AssetDepreciation.View' },
+      { path: '/assets/disposals', label: 'التخلص', permission: 'AssetDisposals.View' },
+      { path: '/assets/revaluations', label: 'التقييمات', permission: 'AssetRevaluations.View' },
+      { path: '/assets/impairments', label: 'الإنخفاض', permission: 'AssetImpairments.View' },
+      { path: '/assets/counts', label: 'الجرد', permission: 'AssetCounts.View' },
     ],
   },
 ];

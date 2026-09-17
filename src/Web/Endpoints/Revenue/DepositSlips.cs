@@ -1,142 +1,70 @@
-using ERP_Government.Application.Revenue.Common.DTOs;
-using ERP_Government.Application.Revenue.Commands.DepositSlips.CreateDepositSlip;
-using ERP_Government.Application.Revenue.Commands.DepositSlips.AddVoucherToSlip;
-using ERP_Government.Application.Revenue.Commands.DepositSlips.RemoveVoucherFromSlip;
-using ERP_Government.Application.Revenue.Commands.DepositSlips.ApproveDepositSlip;
-using ERP_Government.Application.Revenue.Queries.DepositSlips.GetDepositSlips;
-using ERP_Government.Application.Revenue.Queries.DepositSlips.GetDepositSlipById;
-using ERP_Government.Application.Revenue.Queries.Statements.GetMonthlyStatement;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Application.Revenue.Commands.DepositSlips.ApproveDepositSlip47;
+using ERP_Government.Application.Revenue.Commands.DepositSlips.ApproveDepositSlip48;
+using ERP_Government.Application.Revenue.Commands.DepositSlips.CreateDepositSlip47;
+using ERP_Government.Application.Revenue.Commands.DepositSlips.CreateDepositSlip48;
+using ERP_Government.Application.Revenue.Common.DTOs;
+using ERP_Government.Web.Infrastructure;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ERP_Government.Web.Endpoints.Revenue;
 
 public class DepositSlips : IEndpointGroup
 {
-    public static string? RoutePrefix => "/api/Revenue/DepositSlips";
-
-    public static void Map(RouteGroupBuilder groupBuilder)
+    public static void Map(RouteGroupBuilder group)
     {
-        groupBuilder.MapGet("/", GetDepositSlips)
-            .Produces<List<DepositSlipDto>>()
-            .RequireAuthorization(PermissionCodes.DepositSlipsView);
-
-        groupBuilder.MapGet("/{id:int}", GetDepositSlipById)
-            .Produces<DepositSlipDto?>()
-            .RequireAuthorization(PermissionCodes.DepositSlipsView);
-
-        groupBuilder.MapGet("/monthly-statement", GetMonthlyStatement)
-            .Produces<MonthlyStatementDto>()
-            .RequireAuthorization(PermissionCodes.DepositSlipsView);
-
-        groupBuilder.MapPost("/", CreateDepositSlip)
-            .Produces<int>(StatusCodes.Status201Created)
-            .Produces(StatusCodes.Status400BadRequest)
-            .RequireAuthorization(PermissionCodes.DepositSlipsCreate);
-
-        groupBuilder.MapPost("/{id:int}/add-voucher", AddVoucherToSlip)
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status400BadRequest)
-            .RequireAuthorization(PermissionCodes.DepositSlipsUpdate);
-
-        groupBuilder.MapPost("/{id:int}/remove-voucher", RemoveVoucherFromSlip)
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status400BadRequest)
-            .RequireAuthorization(PermissionCodes.DepositSlipsUpdate);
-
-        groupBuilder.MapPost("/{id:int}/approve", ApproveDepositSlip)
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status400BadRequest)
-            .RequireAuthorization(PermissionCodes.DepositSlipsApprove);
+        group.MapPost("/slip47", HandleCreateSlip47)
+            .RequireAuthorization(PermissionCodes.DepositSlipsCreate)
+            .Produces<Result<DepositSlip47Dto>>();
+        group.MapPost("/slip47/{id:int}/approve", HandleApproveSlip47)
+            .RequireAuthorization(PermissionCodes.DepositSlipsApprove)
+            .Produces<Result>();
+        group.MapPost("/slip48", HandleCreateSlip48)
+            .RequireAuthorization(PermissionCodes.DepositSlipsCreate)
+            .Produces<Result<DepositSlip48Dto>>();
+        group.MapPost("/slip48/{id:int}/approve", HandleApproveSlip48)
+            .RequireAuthorization(PermissionCodes.DepositSlipsApprove)
+            .Produces<Result>();
     }
 
-    [EndpointSummary("Get all deposit slips")]
-    public static async Task<IResult> GetDepositSlips(
-        [FromServices] ISender sender,
-        [AsParameters] GetDepositSlipsQuery query)
-    {
-        var result = await sender.Send(query);
-        if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
-        return Results.Ok(result.Value);
-    }
-
-    [EndpointSummary("Get deposit slip by ID")]
-    public static async Task<IResult> GetDepositSlipById(
-        [FromServices] ISender sender,
-        int id)
-    {
-        var result = await sender.Send(new GetDepositSlipByIdQuery { Id = id });
-        if (!result.Succeeded)
-            return Results.NotFound();
-        return Results.Ok(result.Value);
-    }
-
-    [EndpointSummary("Get monthly collections statement")]
-    public static async Task<IResult> GetMonthlyStatement(
-        [FromServices] ISender sender,
-        [AsParameters] GetMonthlyStatementQuery query)
-    {
-        var result = await sender.Send(query);
-        if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
-        return Results.Ok(result.Value);
-    }
-
-    [EndpointSummary("Create a new deposit slip")]
-    public static async Task<IResult> CreateDepositSlip(
-        [FromServices] ISender sender,
-        [FromBody] CreateDepositSlipCommand command)
+    private static async Task<IResult> HandleCreateSlip47(
+        ISender sender,
+        CreateDepositSlip47Command command)
     {
         var result = await sender.Send(command);
-        if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
-        return Results.Created($"/api/DepositSlips/{result.Value}", result.Value);
+        return result.Succeeded ? Results.Ok(result) : Results.BadRequest(result);
     }
 
-    [EndpointSummary("Add voucher to deposit slip")]
-    public static async Task<IResult> AddVoucherToSlip(
-        [FromServices] ISender sender,
+    private static async Task<IResult> HandleApproveSlip47(
+        ISender sender,
         int id,
-        [FromBody] AddVoucherToSlipCommand command)
-    {
-        if (id != command.SlipId)
-            return Results.BadRequest("ID mismatch.");
-
-        var result = await sender.Send(command);
-        if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
-        return Results.NoContent();
-    }
-
-    [EndpointSummary("Remove voucher from deposit slip")]
-    public static async Task<IResult> RemoveVoucherFromSlip(
-        [FromServices] ISender sender,
-        int id,
-        [FromBody] RemoveVoucherFromSlipCommand command)
-    {
-        if (id != command.SlipId)
-            return Results.BadRequest("ID mismatch.");
-
-        var result = await sender.Send(command);
-        if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
-        return Results.NoContent();
-    }
-
-    [EndpointSummary("Approve deposit slip (Treasury manager)")]
-    public static async Task<IResult> ApproveDepositSlip(
-        [FromServices] ISender sender,
-        int id,
-        [FromBody] ApproveDepositSlipCommand command)
+        ApproveDepositSlip47Command command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.BadRequest(Result.Failure(["Route ID does not match command ID."]));
 
         var result = await sender.Send(command);
-        if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
-        return Results.NoContent();
+        return result.Succeeded ? Results.Ok(result) : Results.BadRequest(result);
+    }
+
+    private static async Task<IResult> HandleCreateSlip48(
+        ISender sender,
+        CreateDepositSlip48Command command)
+    {
+        var result = await sender.Send(command);
+        return result.Succeeded ? Results.Ok(result) : Results.BadRequest(result);
+    }
+
+    private static async Task<IResult> HandleApproveSlip48(
+        ISender sender,
+        int id,
+        ApproveDepositSlip48Command command)
+    {
+        if (id != command.Id)
+            return Results.BadRequest(Result.Failure(["Route ID does not match command ID."]));
+
+        var result = await sender.Send(command);
+        return result.Succeeded ? Results.Ok(result) : Results.BadRequest(result);
     }
 }

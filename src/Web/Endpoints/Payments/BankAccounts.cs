@@ -50,11 +50,12 @@ public class BankAccounts : IEndpointGroup
     }
 
     [EndpointSummary("Get bank account by ID")]
-    public static async Task<BankAccountDto?> GetBankAccountById(
+    public static async Task<IResult> GetBankAccountById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetBankAccountByIdQuery { Id = id });
+        var result = await sender.Send(new GetBankAccountByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new bank account")]
@@ -64,7 +65,7 @@ public class BankAccounts : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -75,11 +76,15 @@ public class BankAccounts : IEndpointGroup
         [FromBody] UpdateBankAccountCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -90,7 +95,11 @@ public class BankAccounts : IEndpointGroup
         [FromBody] ActivateBankAccountCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         await sender.Send(command);
         return Results.NoContent();
@@ -103,7 +112,11 @@ public class BankAccounts : IEndpointGroup
         [FromBody] DeactivateBankAccountCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         await sender.Send(command);
         return Results.NoContent();

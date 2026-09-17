@@ -1,10 +1,9 @@
 using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.FinancialSettings.Common.Services;
+using ERP_Government.Application.Parties.Common;
 using ERP_Government.Application.Procurement.Commands.PurchaseRequests.CreatePurchaseRequest;
 using ERP_Government.Application.Procurement.Commands.PurchaseRequests.SubmitPurchaseRequest;
 using ERP_Government.Application.Procurement.Commands.PurchaseRequests.ApprovePurchaseRequest;
-using ERP_Government.Application.Procurement.Commands.RequestForQuotations.CreateRFQ;
-using ERP_Government.Application.Procurement.Commands.RequestForQuotations.PublishRFQ;
 using ERP_Government.Application.Procurement.Commands.Quotations.CreateQuotation;
 using ERP_Government.Application.Procurement.Commands.Quotations.StartEvaluation;
 using ERP_Government.Application.Procurement.Commands.Quotations.CompleteEvaluation;
@@ -17,9 +16,11 @@ using ERP_Government.Application.Procurement.Commands.PurchaseOrders.UpdatePurch
 using ERP_Government.Application.Procurement.Commands.PurchaseOrders.ClosePurchaseOrder;
 using ERP_Government.Application.Procurement.Commands.PurchaseOrders.CancelPurchaseOrder;
 using ERP_Government.Domain.Procurement.Enums;
+using ERP_Government.Domain.Security.Entities;
 using ERP_Government.Domain.Committees.Entities;
 using ERP_Government.Domain.Committees.Enums;
 using ERP_Government.Infrastructure.Data;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using NUnit.Framework;
@@ -32,6 +33,9 @@ public class PurchaseOrderTests
 {
     private ApplicationDbContext _dbContext = null!;
     private Mock<IDocumentSequenceService> _seqMock = null!;
+    private Mock<IDocumentStatusLogger> _statusLoggerMock = null!;
+    private Mock<IUser> _userMock = null!;
+    private Mock<IPublisher> _publisherMock = null!;
     private int _quotationId;
 
     [SetUp]
@@ -44,6 +48,10 @@ public class PurchaseOrderTests
 
         _seqMock = new Mock<IDocumentSequenceService>();
         _seqMock.Setup(s => s.GenerateNextNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync("DOC-000001");
+        _statusLoggerMock = new Mock<IDocumentStatusLogger>();
+        _userMock = new Mock<IUser>();
+        _userMock.Setup(u => u.Id).Returns(1);
+        _publisherMock = new Mock<IPublisher>();
 
         _dbContext.Users.Add(new Domain.Security.Entities.User { Id = 1, Login = "test", IsActive = true });
         _dbContext.Committees.Add(new Committee
@@ -68,18 +76,16 @@ public class PurchaseOrderTests
         await new SubmitPurchaseRequestCommandHandler(_dbContext).Handle(new SubmitPurchaseRequestCommand(prResult.Value!), CancellationToken.None);
         await new ApprovePurchaseRequestCommandHandler(_dbContext).Handle(new ApprovePurchaseRequestCommand(prResult.Value!), CancellationToken.None);
 
-        var rfqResult = await new CreateRFQCommandHandler(_dbContext, _seqMock.Object)
-            .Handle(new CreateRFQCommand(PurchaseRequestId: prResult.Value!, DeadlineDate: DateTime.UtcNow.AddDays(10), CurrencyCode: null, TermsAndConditions: null, Notes: null, SupplierPartyIds: new List<int> { 1 }), CancellationToken.None);
-
-        await new PublishRFQCommandHandler(_dbContext).Handle(new PublishRFQCommand(rfqResult.Value!), CancellationToken.None);
-
         var quotResult = await new CreateQuotationCommandHandler(_dbContext, _seqMock.Object)
-            .Handle(new CreateQuotationCommand(RFQId: rfqResult.Value!, RFQSupplierId: 1, SupplierPartyId: 1, QuotationDate: DateTime.UtcNow, ValidUntil: null, CurrencyCode: null, ExchangeRate: null, ShippingCost: null, OtherCharges: null, PaymentTerms: null, DeliveryTerms: null, LeadTimeDays: null, WarrantyPeriodMonths: null, Notes: null,
+            .Handle(new CreateQuotationCommand(
+                SupplierPartyId: 1, QuotationDate: DateTime.UtcNow, ValidUntil: null, CurrencyCode: null,
+                ExchangeRate: null, ShippingCost: null, OtherCharges: null, PaymentTerms: null, DeliveryTerms: null,
+                LeadTimeDays: null, WarrantyPeriodMonths: null, Notes: null,
                 Lines: new List<QuotationLineDto> { new(PurchaseRequestDetailId: 1, ItemId: 1, UnitId: 1, Quantity: 10, UnitPrice: 950m, DiscountPercent: null, TaxPercent: null, Notes: null) }), CancellationToken.None);
 
-        await new StartEvaluationCommandHandler(_dbContext).Handle(new StartEvaluationCommand(rfqResult.Value!), CancellationToken.None);
-        var quot = await _dbContext.Quotations.FirstAsync(q => q.RFQId == rfqResult.Value!);
-        await new CompleteEvaluationCommandHandler(_dbContext).Handle(new CompleteEvaluationCommand(quot.Id, 85m, 90m, null), CancellationToken.None);
+        await new StartEvaluationCommandHandler(_dbContext).Handle(new StartEvaluationCommand(quotResult.Value!), CancellationToken.None);
+        var quot = await _dbContext.Quotations.FindAsync(quotResult.Value!);
+        await new CompleteEvaluationCommandHandler(_dbContext).Handle(new CompleteEvaluationCommand(quot!.Id, 85m, 90m, null), CancellationToken.None);
         await new SelectQuotationCommandHandler(_dbContext).Handle(new SelectQuotationCommand(quot.Id, "Best"), CancellationToken.None);
 
         _quotationId = quotResult.Value!;
@@ -114,7 +120,10 @@ public class PurchaseOrderTests
     public async Task ApprovePO_Draft_ShouldTransitionToApproved()
     {
         var id = await CreateValidPO();
-        var result = await new ApprovePurchaseOrderCommandHandler(_dbContext)
+        await new SubmitPurchaseOrderCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object)
+            .Handle(new SubmitPurchaseOrderCommand(id), CancellationToken.None);
+
+        var result = await new ApprovePurchaseOrderCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object, _publisherMock.Object)
             .Handle(new ApprovePurchaseOrderCommand(id), CancellationToken.None);
 
         result.Succeeded.ShouldBeTrue();
@@ -126,10 +135,12 @@ public class PurchaseOrderTests
     public async Task IssuePO_Approved_ShouldTransitionToIssued()
     {
         var id = await CreateValidPO();
-        await new ApprovePurchaseOrderCommandHandler(_dbContext)
+        await new SubmitPurchaseOrderCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object)
+            .Handle(new SubmitPurchaseOrderCommand(id), CancellationToken.None);
+        await new ApprovePurchaseOrderCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object, _publisherMock.Object)
             .Handle(new ApprovePurchaseOrderCommand(id), CancellationToken.None);
 
-        var result = await new IssuePurchaseOrderCommandHandler(_dbContext)
+        var result = await new IssuePurchaseOrderCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object)
             .Handle(new IssuePurchaseOrderCommand(id), CancellationToken.None);
 
         result.Succeeded.ShouldBeTrue();
@@ -141,7 +152,7 @@ public class PurchaseOrderTests
     public async Task CancelPO_Draft_ShouldTransitionToCancelled()
     {
         var id = await CreateValidPO();
-        var result = await new CancelPurchaseOrderCommandHandler(_dbContext)
+        var result = await new CancelPurchaseOrderCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object)
             .Handle(new CancelPurchaseOrderCommand(id), CancellationToken.None);
 
         result.Succeeded.ShouldBeTrue();
@@ -153,7 +164,7 @@ public class PurchaseOrderTests
     public async Task SubmitPO_Draft_ShouldTransitionToSubmitted()
     {
         var id = await CreateValidPO();
-        var result = await new SubmitPurchaseOrderCommandHandler(_dbContext)
+        var result = await new SubmitPurchaseOrderCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object)
             .Handle(new SubmitPurchaseOrderCommand(id), CancellationToken.None);
 
         result.Succeeded.ShouldBeTrue();
@@ -184,29 +195,33 @@ public class PurchaseOrderTests
     public async Task ClosePO_Issued_ShouldTransitionToClosed()
     {
         var id = await CreateValidPO();
-        await new SubmitPurchaseOrderCommandHandler(_dbContext)
+        await new SubmitPurchaseOrderCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object)
             .Handle(new SubmitPurchaseOrderCommand(id), CancellationToken.None);
-        await new ApprovePurchaseOrderCommandHandler(_dbContext)
+        await new ApprovePurchaseOrderCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object, _publisherMock.Object)
             .Handle(new ApprovePurchaseOrderCommand(id), CancellationToken.None);
-        await new IssuePurchaseOrderCommandHandler(_dbContext)
+        await new IssuePurchaseOrderCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object)
             .Handle(new IssuePurchaseOrderCommand(id), CancellationToken.None);
 
-        var result = await new ClosePurchaseOrderCommandHandler(_dbContext)
+        var po = await _dbContext.PurchaseOrders.FindAsync(id);
+        po!.Status = PurchaseOrderStatus.PartiallyReceived;
+        await _dbContext.SaveChangesAsync();
+
+        var result = await new ClosePurchaseOrderCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object)
             .Handle(new ClosePurchaseOrderCommand(id, "Completed"), CancellationToken.None);
 
         result.Succeeded.ShouldBeTrue();
-        var po = await _dbContext.PurchaseOrders.FindAsync(id);
-        po!.Status.ShouldBe(PurchaseOrderStatus.Closed);
+        var closedPo = await _dbContext.PurchaseOrders.FindAsync(id);
+        closedPo!.Status.ShouldBe(PurchaseOrderStatus.Closed);
     }
 
     [Test]
     public async Task SubmitPO_NonDraft_ShouldFail()
     {
         var id = await CreateValidPO();
-        await new SubmitPurchaseOrderCommandHandler(_dbContext)
+        await new SubmitPurchaseOrderCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object)
             .Handle(new SubmitPurchaseOrderCommand(id), CancellationToken.None);
 
-        var result = await new SubmitPurchaseOrderCommandHandler(_dbContext)
+        var result = await new SubmitPurchaseOrderCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object)
             .Handle(new SubmitPurchaseOrderCommand(id), CancellationToken.None);
 
         result.Succeeded.ShouldBeFalse();
@@ -217,7 +232,7 @@ public class PurchaseOrderTests
     {
         var id = await CreateValidPO();
 
-        var result = await new ApprovePurchaseOrderCommandHandler(_dbContext)
+        var result = await new ApprovePurchaseOrderCommandHandler(_dbContext, _statusLoggerMock.Object, _userMock.Object, _publisherMock.Object)
             .Handle(new ApprovePurchaseOrderCommand(id), CancellationToken.None);
 
         result.Succeeded.ShouldBeFalse();

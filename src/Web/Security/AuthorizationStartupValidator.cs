@@ -1,69 +1,92 @@
-using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace ERP_Government.Web.Security;
 
 /// <summary>
-/// Validates authorization coverage across all Minimal API endpoint groups.
-/// Uses reflection to inspect endpoint metadata without creating temporary routes.
-/// Satisfies FR-08: No endpoint shall be accidentally excluded from authorization enforcement.
+/// Validates authorization metadata across all registered endpoints at startup.
+/// Startup fails when an endpoint references an unregistered policy or a named policy
+/// lacks a permission requirement or authentication requirement.
 /// </summary>
-public sealed class AuthorizationStartupValidator
+public sealed class AuthorizationStartupValidator(ILogger<AuthorizationStartupValidator> logger)
 {
-    private readonly ILogger<AuthorizationStartupValidator> _logger;
-
-    public AuthorizationStartupValidator(ILogger<AuthorizationStartupValidator> logger)
-    {
-        _logger = logger;
-    }
-
-    /// <summary>
-    /// Scans endpoint group types and logs authorization coverage summary.
-    /// </summary>
     public void Validate(WebApplication app)
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        var endpointGroupTypes = assembly.GetExportedTypes()
-            .Where(t => t is { IsAbstract: false, IsInterface: false }
-                     && t.IsAssignableTo(typeof(IEndpointGroup)))
-            .ToList();
+        var policyProvider = app.Services.GetRequiredService<IAuthorizationPolicyProvider>();
+        var endpoints = app.Services.GetRequiredService<EndpointDataSource>().Endpoints;
 
-        var totalGroups = endpointGroupTypes.Count;
-        var groupsWithAuth = 0;
-        var groupNames = new List<string>();
+        var missingPolicies = new List<string>();
+        var invalidPolicies = new List<string>();
+        var anonymousApiEndpoints = new List<string>();
+        var checkedPolicies = new HashSet<string>(StringComparer.Ordinal);
 
-        foreach (var groupType in endpointGroupTypes)
+        foreach (var endpoint in endpoints)
         {
-            var groupName = groupType.Name;
-            var mapMethod = groupType.GetMethod(nameof(IEndpointGroup.Map));
-            if (mapMethod == null) continue;
+            var authorizeData = endpoint.Metadata.GetOrderedMetadata<IAuthorizeData>();
+            var displayName = endpoint.DisplayName ?? endpoint.ToString() ?? "(unknown)";
 
-            // Check if the Map method body references RequireAuthorization
-            var methodBody = mapMethod.GetMethodBody();
-            if (methodBody != null)
+            if (authorizeData.Count == 0)
             {
-                // Simple heuristic: if the type has any method referencing authorization patterns
-                var il = methodBody.GetILAsByteArray();
-                if (il != null)
+                if (IsApiRoute(endpoint))
+                    anonymousApiEndpoints.Add(displayName);
+                continue;
+            }
+
+            foreach (var data in authorizeData)
+            {
+                if (string.IsNullOrWhiteSpace(data.Policy))
+                    continue;
+
+                if (!checkedPolicies.Add(data.Policy))
+                    continue;
+
+                var policy = policyProvider.GetPolicyAsync(data.Policy).GetAwaiter().GetResult();
+                if (policy is null)
                 {
-                    groupsWithAuth++;
-                    groupNames.Add(groupName);
+                    missingPolicies.Add($"{data.Policy} ({displayName})");
+                    continue;
                 }
+
+                if (!policy.Requirements.OfType<PermissionRequirement>().Any())
+                    invalidPolicies.Add($"{data.Policy}: no permission requirement ({displayName})");
+
+                if (!policy.Requirements.OfType<DenyAnonymousAuthorizationRequirement>().Any())
+                    invalidPolicies.Add($"{data.Policy}: does not require authentication ({displayName})");
             }
         }
 
-        _logger.LogInformation(
-            "Authorization validation: {Groups} endpoint groups discovered, {WithAuth} appear to have authorization",
-            totalGroups,
-            groupsWithAuth);
+        if (missingPolicies.Count > 0)
+        {
+            throw new InvalidOperationException(
+                "Endpoints reference unregistered authorization policies: " + string.Join("; ", missingPolicies));
+        }
 
-        _logger.LogInformation(
-            "Endpoint groups: {Groups}",
-            string.Join(", ", endpointGroupTypes.Select(t => t.Name)));
+        if (invalidPolicies.Count > 0)
+        {
+            throw new InvalidOperationException(
+                "Authorization policies are missing required enforcement: " + string.Join("; ", invalidPolicies));
+        }
 
-        _logger.LogInformation("Authorization validation PASSED: All endpoint groups registered successfully");
+        if (anonymousApiEndpoints.Count > 0)
+        {
+            logger.LogWarning(
+                "API endpoints registered without authorization metadata (verify intent): {Endpoints}",
+                string.Join("; ", anonymousApiEndpoints));
+        }
+
+        logger.LogInformation(
+            "Authorization validation PASSED: {PolicyCount} permission policies resolved across {EndpointCount} endpoints",
+            checkedPolicies.Count,
+            endpoints.Count);
+    }
+
+    private static bool IsApiRoute(Microsoft.AspNetCore.Http.Endpoint endpoint)
+    {
+        var pattern = (endpoint as RouteEndpoint)?.RoutePattern.RawText ?? string.Empty;
+        return pattern.StartsWith("/api", StringComparison.OrdinalIgnoreCase);
     }
 }

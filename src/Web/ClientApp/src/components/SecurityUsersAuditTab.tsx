@@ -1,13 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/Button';
 import { usersAuditClient } from '@/features/security/users/client';
+import { getQueryErrorMessage } from '@/shared/api/query-error';
 
 interface AuditTabProps {
   userId: number;
 }
 
 export function AuditTab({ userId }: AuditTabProps) {
-  const { data: entries = [], isLoading, isError: isEntriesError, refetch: refetchEntries } = useQuery({
+  const { data: entries = [], isLoading, isError: isEntriesError, error: entriesError, refetch: refetchEntries } = useQuery({
     queryKey: ['users', userId, 'audit'],
     queryFn: () => usersAuditClient.list(userId),
     enabled: userId > 0,
@@ -19,9 +20,9 @@ export function AuditTab({ userId }: AuditTabProps) {
 
   if (isEntriesError) {
     return (
-      <div className="p-4 text-center">
-        <p className="text-sm text-[var(--color-error)]">فشل تحميل البيانات</p>
-        <Button variant="outline" size="sm" className="mt-2" onClick={() => refetchEntries()}>إعادة المحاولة</Button>
+      <div className="p-4 text-center flex flex-col items-center gap-2">
+        <p className="text-sm text-[var(--color-error)]">{getQueryErrorMessage(entriesError)}</p>
+        <Button variant="outline" size="sm" onClick={() => refetchEntries()}>إعادة المحاولة</Button>
       </div>
     );
   }

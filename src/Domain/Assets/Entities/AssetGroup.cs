@@ -1,3 +1,4 @@
+using ERP_Government.Domain.Accounting.Entities;
 using ERP_Government.Domain.Common;
 
 namespace ERP_Government.Domain.Assets.Entities;
@@ -8,13 +9,10 @@ public class AssetGroup : BaseAuditableEntity
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public int? ParentAssetGroupId { get; set; }
-    public int? AccountAssetId { get; set; }
-    public int? AccountDepreciationId { get; set; }
-    public int? AccountExpenseId { get; set; }
-    public int? AccountAccumulatedDepreciationId { get; set; }
-    public int? AccountDisposalId { get; set; }
-    public int? AccountRevaluationId { get; set; }
-    public int? AccountImpairmentId { get; set; }
+    public int? AssetAccountId { get; set; }
+    public int? AccumulatedDepreciationAccountId { get; set; }
+    public int? DepreciationExpenseAccountId { get; set; }
+    public int? DisposalAccountId { get; set; }
     public string DepreciationMethod { get; set; } = string.Empty;
     public decimal? DepreciationRate { get; set; }
     public int? DefaultUsefulLifeYears { get; set; }
@@ -25,4 +23,8 @@ public class AssetGroup : BaseAuditableEntity
     public byte[] RowVersion { get; set; } = [];
 
     public AssetGroup? ParentAssetGroup { get; set; }
+    public Account? AssetAccount { get; set; }
+    public Account? AccumulatedDepreciationAccount { get; set; }
+    public Account? DepreciationExpenseAccount { get; set; }
+    public Account? DisposalAccount { get; set; }
 }

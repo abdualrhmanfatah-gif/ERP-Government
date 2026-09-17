@@ -5,6 +5,7 @@ using ERP_Government.Application.FinancialSettings.Queries.DocumentSequences.Get
 using ERP_Government.Application.FinancialSettings.Queries.DocumentSequences.GetDocumentSequences;
 using ERP_Government.Application.Common.Security;
 using MediatR;
+using ERP_Government.Web.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ERP_Government.Web.Endpoint.FinancialSettings;
@@ -46,11 +47,12 @@ public class DocumentSequences : IEndpointGroup
     }
 
     [EndpointSummary("Get document sequence by ID")]
-    public static async Task<DocumentSequenceDto?> GetDocumentSequenceById(
+    public static async Task<IResult> GetDocumentSequenceById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetDocumentSequenceByIdQuery { Id = id });
+        var result = await sender.Send(new GetDocumentSequenceByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new document sequence")]
@@ -60,7 +62,7 @@ public class DocumentSequences : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -71,11 +73,15 @@ public class DocumentSequences : IEndpointGroup
         [FromBody] UpdateDocumentSequenceCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -86,7 +92,7 @@ public class DocumentSequences : IEndpointGroup
     {
         var result = await sender.Send(new UpdateDocumentSequenceCommand { Id = id, IsActive = false });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

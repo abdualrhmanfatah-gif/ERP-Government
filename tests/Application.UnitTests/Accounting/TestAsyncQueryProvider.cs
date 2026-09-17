@@ -62,10 +62,12 @@ internal class TestAsyncQueryProvider<TEntity> : IAsyncQueryProvider
         }
 
         var taskType = typeof(TResult);
-        if (result is not null && taskType.IsGenericType && taskType.GetGenericTypeDefinition() == typeof(Task<>))
+        if (taskType.IsGenericType && taskType.GetGenericTypeDefinition() == typeof(Task<>))
         {
             var elementType = taskType.GetGenericArguments()[0];
-            var converted = Convert.ChangeType(result, elementType);
+            var converted = result is not null
+                ? Convert.ChangeType(result, elementType)
+                : (elementType.IsValueType ? Activator.CreateInstance(elementType) : null);
             return (TResult)typeof(Task)
                 .GetMethod(nameof(Task.FromResult))!
                 .MakeGenericMethod(elementType)

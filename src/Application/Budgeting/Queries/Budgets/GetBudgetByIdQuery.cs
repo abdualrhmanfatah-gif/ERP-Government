@@ -1,4 +1,6 @@
 using ERP_Government.Application.Budgeting.Common;
+using ERP_Government.Application.Common.Errors;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Domain.Budgeting.Enums;
 using Microsoft.Extensions.Logging;
@@ -6,14 +8,14 @@ using Microsoft.Extensions.Logging;
 namespace ERP_Government.Application.Budgeting.Queries.Budgets;
 
 [Authorize(Policy = PermissionCodes.BudgetsView)]
-public record GetBudgetByIdQuery(int Id) : IRequest<BudgetDto>;
+public record GetBudgetByIdQuery(int Id) : IRequest<Result<BudgetDto>>;
 
 public class GetBudgetByIdQueryHandler(
     IApplicationDbContext context,
     IMapper mapper,
-    ILogger<GetBudgetByIdQueryHandler> logger) : IRequestHandler<GetBudgetByIdQuery, BudgetDto>
+    ILogger<GetBudgetByIdQueryHandler> logger) : IRequestHandler<GetBudgetByIdQuery, Result<BudgetDto>>
 {
-    public async Task<BudgetDto> Handle(
+    public async Task<Result<BudgetDto>> Handle(
         GetBudgetByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -27,10 +29,10 @@ public class GetBudgetByIdQueryHandler(
         if (entity is null)
         {
             logger.LogWarning("Budget not found for Id={Id}", request.Id);
-            throw new ERP_Government.Application.Common.Exceptions.NotFoundException(nameof(Domain.Budgeting.Entities.Budget), request.Id);
+            return Result<BudgetDto>.Failure(ErrorCodes.Budgets.BudgetNotFound, ErrorCategory.NotFound, $"Budget with ID {request.Id} not found.");
         }
 
         logger.LogInformation("Budget found for Id={Id}", request.Id);
-        return mapper.Map<BudgetDto>(entity);
+        return Result<BudgetDto>.Success(mapper.Map<BudgetDto>(entity));
     }
 }

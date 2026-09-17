@@ -58,11 +58,12 @@ public class Roles : IEndpointGroup
     }
 
     [EndpointSummary("Get role by ID")]
-    public static async Task<SecurityRoleDto?> GetRoleById(
+    public static async Task<IResult> GetRoleById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetRoleByIdQuery { Id = id });
+        var result = await sender.Send(new GetRoleByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new role")]
@@ -72,7 +73,7 @@ public class Roles : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -83,11 +84,15 @@ public class Roles : IEndpointGroup
         [FromBody] UpdateRoleCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -98,7 +103,7 @@ public class Roles : IEndpointGroup
     {
         var result = await sender.Send(new DeleteRoleCommand { Id = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -118,11 +123,15 @@ public class Roles : IEndpointGroup
         [FromBody] AssignRolePermissionCommand command)
     {
         if (roleId != command.RoleId)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -134,7 +143,7 @@ public class Roles : IEndpointGroup
     {
         var result = await sender.Send(new RemoveRolePermissionCommand { RoleId = roleId, PermissionId = permissionId });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

@@ -3,6 +3,7 @@ using ERP_Government.Application.FinancialSettings.Commands.Currencies;
 using ERP_Government.Application.FinancialSettings.Queries.Currencies;
 using ERP_Government.Application.Common.Security;
 using MediatR;
+using ERP_Government.Web.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ERP_Government.Web.Endpoint.FinancialSettings;
@@ -53,11 +54,12 @@ public class Currencies : IEndpointGroup
     }
 
     [EndpointSummary("Get currency by ID")]
-    public static async Task<CurrencyDto?> GetCurrencyById(
+    public static async Task<IResult> GetCurrencyById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetCurrencyByIdQuery { Id = id });
+        var result = await sender.Send(new GetCurrencyByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Get ISO 4217 reference codes")]
@@ -75,7 +77,7 @@ public class Currencies : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -86,11 +88,15 @@ public class Currencies : IEndpointGroup
         [FromBody] UpdateCurrencyCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -101,11 +107,15 @@ public class Currencies : IEndpointGroup
         [FromBody] ActivateCurrencyCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -116,11 +126,15 @@ public class Currencies : IEndpointGroup
         [FromBody] DeactivateCurrencyCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

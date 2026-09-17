@@ -87,19 +87,21 @@ public class PaymentOrders : IEndpointGroup
     }
 
     [EndpointSummary("Get payment order by ID")]
-    public static async Task<PaymentOrderDto?> GetPaymentOrderById(
+    public static async Task<IResult> GetPaymentOrderById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetPaymentOrderByIdQuery { Id = id });
+        var result = await sender.Send(new GetPaymentOrderByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Get computed totals for a payment order")]
-    public static async Task<PaymentOrderTotalsDto?> GetPaymentOrderTotals(
+    public static async Task<IResult> GetPaymentOrderTotals(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetPaymentOrderTotalsQuery { Id = id });
+        var result = await sender.Send(new GetPaymentOrderTotalsQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Export payment order as PDF")]
@@ -109,14 +111,15 @@ public class PaymentOrders : IEndpointGroup
         int id)
     {
         var dto = await sender.Send(new GetPaymentOrderPrintQuery { Id = id });
-        if (dto is null) return Results.NotFound();
+        if (!dto.Succeeded)
+            return dto.ToProblemDetails();
 
         var stream = new MemoryStream();
-        await exporter.ExportAsync(dto, stream);
+        await exporter.ExportAsync(dto.Value!, stream);
         stream.Position = 0;
 
         return Results.File(stream, "application/pdf",
-            $"PaymentOrder-{dto.OrderNumber}.pdf");
+            $"PaymentOrder-{dto.Value!.OrderNumber}.pdf");
     }
 
     [EndpointSummary("Create a new payment order")]
@@ -126,7 +129,7 @@ public class PaymentOrders : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -137,11 +140,15 @@ public class PaymentOrders : IEndpointGroup
         [FromBody] UpdatePaymentOrderCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -152,11 +159,15 @@ public class PaymentOrders : IEndpointGroup
         [FromBody] SubmitPaymentOrderCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -167,11 +178,15 @@ public class PaymentOrders : IEndpointGroup
         [FromBody] ApprovePaymentOrderCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -182,11 +197,15 @@ public class PaymentOrders : IEndpointGroup
         [FromBody] RejectPaymentOrderCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -197,11 +216,15 @@ public class PaymentOrders : IEndpointGroup
         [FromBody] CancelPaymentOrderCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -212,11 +235,15 @@ public class PaymentOrders : IEndpointGroup
         [FromBody] SendToTreasuryCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -227,11 +254,15 @@ public class PaymentOrders : IEndpointGroup
         [FromBody] VoidPaymentOrderCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

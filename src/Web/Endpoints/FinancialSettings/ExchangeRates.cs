@@ -3,6 +3,7 @@ using ERP_Government.Application.FinancialSettings.Commands.ExchangeRates;
 using ERP_Government.Application.FinancialSettings.Queries.ExchangeRates;
 using ERP_Government.Application.Common.Security;
 using MediatR;
+using ERP_Government.Web.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ERP_Government.Web.Endpoint.FinancialSettings;
@@ -54,11 +55,12 @@ public class ExchangeRates : IEndpointGroup
     }
 
     [EndpointSummary("Get exchange rate by ID")]
-    public static async Task<ExchangeRateDto?> GetExchangeRateById(
+    public static async Task<IResult> GetExchangeRateById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetExchangeRateByIdQuery { Id = id });
+        var result = await sender.Send(new GetExchangeRateByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Lookup exchange rate for conversion")]
@@ -67,9 +69,9 @@ public class ExchangeRates : IEndpointGroup
         [AsParameters] LookupExchangeRateQuery query)
     {
         var result = await sender.Send(query);
-        if (result is null)
-            return Results.NotFound();
-        return Results.Ok(result);
+        return result.Succeeded
+            ? Results.Ok(result.Value!)
+            : result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new exchange rate")]
@@ -79,7 +81,7 @@ public class ExchangeRates : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -90,11 +92,15 @@ public class ExchangeRates : IEndpointGroup
         [FromBody] UpdateExchangeRateCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -105,11 +111,15 @@ public class ExchangeRates : IEndpointGroup
         [FromBody] ActivateExchangeRateCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -120,11 +130,15 @@ public class ExchangeRates : IEndpointGroup
         [FromBody] DeactivateExchangeRateCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

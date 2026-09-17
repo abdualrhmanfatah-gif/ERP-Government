@@ -1,7 +1,4 @@
 using ERP_Government.Application.Procurement.Commands.PurchaseRequests.CreatePurchaseRequest;
-using ERP_Government.Application.Procurement.Commands.RequestForQuotations.CreateRFQ;
-using ERP_Government.Application.Procurement.Commands.RequestForQuotations.PublishRFQ;
-using ERP_Government.Application.Procurement.Commands.RequestForQuotations.CloseRFQCollection;
 using ERP_Government.Application.Procurement.Commands.Quotations.CreateQuotation;
 using ERP_Government.Application.Procurement.Commands.Quotations.SubmitQuotation;
 using ERP_Government.Application.Procurement.Commands.Quotations.StartEvaluation;
@@ -32,7 +29,6 @@ public class PurchaseOrderLifecycleTests : TestBase
     private int _supplierId;
     private int _prId;
     private int _prDetailId;
-    private int _rfqId;
     private int _quotationId;
 
     [SetUp]
@@ -74,15 +70,8 @@ public class PurchaseOrderLifecycleTests : TestBase
         var prDetail = await TestApp.SendAsync(new ERP_Government.Application.Procurement.Queries.PurchaseRequests.GetPurchaseRequestById.GetPurchaseRequestByIdQuery(_prId));
         _prDetailId = prDetail.Details.First().Id;
 
-        var rfqResult = await TestApp.SendAsync(new CreateRFQCommand(
-            _prId, null, null, null, null, [_supplierId]));
-        rfqResult.Succeeded.ShouldBeTrue();
-        _rfqId = rfqResult.Value;
-        await TestApp.SendAsync(new PublishRFQCommand(_rfqId));
-        await TestApp.SendAsync(new CloseRFQCollectionCommand(_rfqId));
-
         var qResult = await TestApp.SendAsync(new CreateQuotationCommand(
-            _rfqId, 1, _supplierId, DateTime.UtcNow, null, null, null, null, null,
+            _supplierId, DateTime.UtcNow, null, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null,
             [new QuotationLineDto(_prDetailId, _itemId, _unitId, 10, 100m, null, null, null)]));
         qResult.Succeeded.ShouldBeTrue();

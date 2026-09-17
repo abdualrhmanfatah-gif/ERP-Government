@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using ERP_Government.Application.Budgeting.Commands.FinancialControl.GenerateFinalAccount;
 using ERP_Government.Application.Budgeting.Commands.FinancialControl.IssueFinalAccount;
 using ERP_Government.Application.Budgeting.Queries.FinancialControl.GetFinalAccount;
@@ -31,7 +32,7 @@ public class FinalAccounts : IEndpointGroup
         var result = await sender.Send(new GenerateFinalAccountCommand(request.FiscalYearId));
         return result.Succeeded && result.Value is not null
             ? Results.Ok(result.Value.ToResponse())
-            : Results.BadRequest(result.Errors);
+            : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleIssue(
@@ -39,7 +40,7 @@ public class FinalAccounts : IEndpointGroup
         int id)
     {
         var result = await sender.Send(new IssueFinalAccountCommand(id));
-        return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok() : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleGetById(
@@ -47,7 +48,11 @@ public class FinalAccounts : IEndpointGroup
         int id)
     {
         var result = await sender.Send(new GetFinalAccountQuery(id));
-        if (result is null) return Results.NotFound();
+        if (result is null) return Results.Problem(
+                detail: "Final account not found",
+                statusCode: StatusCodes.Status404NotFound,
+                title: "Not Found",
+                type: "about:blank");
 
         return Results.Ok(new FinalAccountResponse(
             result.Id,

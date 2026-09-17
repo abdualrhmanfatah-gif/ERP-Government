@@ -11,4 +11,5 @@ public class AssetDisposed : BaseEvent, IHasSourceEntity
     public int AssetId { get; init; }
     public decimal NetBookValue { get; init; }
     public decimal? SalePrice { get; init; }
+    public int PeriodId { get; init; }
 }

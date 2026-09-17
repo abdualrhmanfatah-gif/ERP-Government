@@ -2,6 +2,7 @@ using ERP_Government.Application.Budgeting.Commands.BudgetClassifications;
 using ERP_Government.Application.Budgeting.Common;
 using ERP_Government.Application.Budgeting.Queries.BudgetClassifications;
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -55,11 +56,12 @@ public class BudgetClassifications : IEndpointGroup
     }
 
     [EndpointSummary("Get budget classification by ID")]
-    public static async Task<BudgetClassificationDto> GetBudgetClassificationById(
+    public static async Task<IResult> GetBudgetClassificationById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetBudgetClassificationByIdQuery(id));
+        var result = await sender.Send(new GetBudgetClassificationByIdQuery(id));
+        return result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new budget classification")]
@@ -70,7 +72,7 @@ public class BudgetClassifications : IEndpointGroup
         var result = await sender.Send(new CreateBudgetClassificationCommand(
             body.Code, body.Name, body.ParentId));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Created($"/api/BudgetClassifications/{result.Value}", result.Value);
     }
 
@@ -83,7 +85,7 @@ public class BudgetClassifications : IEndpointGroup
         var result = await sender.Send(new UpdateBudgetClassificationCommand(
             id, body.Code, body.Name, body.ParentId, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -95,7 +97,7 @@ public class BudgetClassifications : IEndpointGroup
     {
         var result = await sender.Send(new ToggleBudgetClassificationActiveCommand(id, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

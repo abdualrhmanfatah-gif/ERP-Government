@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Badge, Button, DataGrid, FilterBar, FilterDate, FilterSelect, FormField, Input, Page } from '@/components/ui';
+import { Badge, Button, DataGrid, FilterBar, FilterDate, FilterSelect, Page } from '@/components/ui';
 import type { DataGridColumn } from '@/components/ui/DataGrid';
 import { Plus } from 'lucide-react';
-import { TreasuryCheckActionDialog } from '@/components/TreasuryCheckActionDialog';
+import { RevenueCheckClearDialog } from '@/components/RevenueCheckClearDialog';
+import { RevenueCheckBounceDialog } from '@/components/RevenueCheckBounceDialog';
 import { TreasuryChecksReplaceDialog } from '@/components/TreasuryChecksReplaceDialog';
 import { useChecksList, useCheckDetail } from '../hooks/useChecks';
 import { checkStatusLabels } from '../../shared/types';
@@ -154,18 +155,16 @@ export default function ChecksListPage() {
 
       {selectedCheckId && (
         <>
-          <TreasuryCheckActionDialog
+          <RevenueCheckClearDialog
             open={clearDialogOpen}
             onClose={() => { setClearDialogOpen(false); setSelectedCheckId(null); }}
             checkId={selectedCheckId}
-            action="clear"
             onCompleted={() => { setClearDialogOpen(false); setSelectedCheckId(null); }}
           />
-          <TreasuryCheckActionDialog
+          <RevenueCheckBounceDialog
             open={bounceDialogOpen}
             onClose={() => { setBounceDialogOpen(false); setSelectedCheckId(null); }}
             checkId={selectedCheckId}
-            action="bounce"
             onCompleted={() => { setBounceDialogOpen(false); setSelectedCheckId(null); }}
           />
           <TreasuryChecksReplaceDialog

@@ -26,7 +26,7 @@ public class Statements : IEndpointGroup
             result.FiscalYearId,
             result.FiscalYearName,
             result.Collections.Select(c => new CollectionLineResponse(
-                c.FundCode, c.FundName, c.Date, c.Amount, c.Source)).ToList(),
+                c.VoucherNumber, c.PartyName, c.Date, c.Amount, c.PaymentMethod)).ToList(),
             result.Subtotals,
             result.GrandTotal,
             result.IsClosed));
@@ -57,11 +57,11 @@ public record CollectionStatementResponse(
     bool IsClosed);
 
 public record CollectionLineResponse(
-    string FundCode,
-    string FundName,
+    string VoucherNumber,
+    string PartyName,
     DateOnly Date,
     decimal Amount,
-    string Source);
+    string PaymentMethod);
 
 public record DisbursementStatementResponse(
     int FiscalYearId,

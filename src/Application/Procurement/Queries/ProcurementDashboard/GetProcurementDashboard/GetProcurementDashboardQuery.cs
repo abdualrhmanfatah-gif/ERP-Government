@@ -1,7 +1,9 @@
 using ERP_Government.Domain.Procurement.Enums;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Procurement.Queries.ProcurementDashboard.GetProcurementDashboard;
 
+[Authorize]
 public record GetProcurementDashboardQuery() : IRequest<Result<ProcurementDashboardResponse>>;
 
 public record ProcurementDashboardResponse(

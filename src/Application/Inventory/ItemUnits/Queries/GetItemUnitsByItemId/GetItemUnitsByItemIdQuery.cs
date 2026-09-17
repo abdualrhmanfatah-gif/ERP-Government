@@ -1,7 +1,9 @@
 using ERP_Government.Domain.Inventory.Entities;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Inventory.ItemUnits.Queries.GetItemUnitsByItemId;
 
+[Authorize(Policy = PermissionCodes.ItemsView)]
 public record GetItemUnitsByItemIdQuery(int ItemId) : IRequest<IReadOnlyList<ItemUnit>>;
 
 public class GetItemUnitsByItemIdQueryHandler(

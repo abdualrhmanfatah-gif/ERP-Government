@@ -1,17 +1,19 @@
 using ERP_Government.Application.Budgeting.Common;
+using ERP_Government.Application.Common.Errors;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Domain.Budgeting.Enums;
 
 namespace ERP_Government.Application.Budgeting.Queries.BudgetItems;
 
 [Authorize(Policy = PermissionCodes.BudgetItemsView)]
-public record GetBudgetItemByIdQuery(int Id) : IRequest<BudgetItemDto>;
+public record GetBudgetItemByIdQuery(int Id) : IRequest<Result<BudgetItemDto>>;
 
 public class GetBudgetItemByIdQueryHandler(
     IApplicationDbContext context,
-    IMapper mapper) : IRequestHandler<GetBudgetItemByIdQuery, BudgetItemDto>
+    IMapper mapper) : IRequestHandler<GetBudgetItemByIdQuery, Result<BudgetItemDto>>
 {
-    public async Task<BudgetItemDto> Handle(
+    public async Task<Result<BudgetItemDto>> Handle(
         GetBudgetItemByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -20,7 +22,7 @@ public class GetBudgetItemByIdQueryHandler(
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (entity is null)
-            throw new ERP_Government.Application.Common.Exceptions.NotFoundException(nameof(Domain.Budgeting.Entities.BudgetItem), request.Id);
+            return Result<BudgetItemDto>.Failure(ErrorCodes.Budgets.BudgetNotFound, ErrorCategory.NotFound, $"Budget item with ID {request.Id} not found.");
 
         var dto = mapper.Map<BudgetItemDto>(entity);
 
@@ -49,7 +51,7 @@ public class GetBudgetItemByIdQueryHandler(
                 .Select(x => x.Name)
                 .FirstOrDefaultAsync(cancellationToken);
 
-        return dto;
+        return Result<BudgetItemDto>.Success(dto);
     }
 
     private static async Task<bool> ResolveAllowOverrun(

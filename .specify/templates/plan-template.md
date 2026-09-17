@@ -42,6 +42,11 @@
 
 [Gates determined based on constitution file]
 
+For changes touching failure paths, apply Constitution XIII and `docs/error-handling.md`:
+record affected paths, error classifications/contracts, presentation and recovery ownership,
+success compatibility, and verification evidence. Link existing gaps and any applicable decision
+record or verification exception. Mark genuinely unaffected items N/A with a reason.
+
 ## Project Structure
 
 ### Documentation (this feature)

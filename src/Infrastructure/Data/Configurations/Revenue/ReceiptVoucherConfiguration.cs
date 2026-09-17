@@ -10,52 +10,50 @@ public class ReceiptVoucherConfiguration : IEntityTypeConfiguration<ReceiptVouch
     {
         builder.ToTable("ReceiptVouchers");
 
-        builder.HasKey(e => e.Id);
+        builder.HasKey(v => v.Id);
 
-        builder.Property(e => e.VoucherNumber)
-            .HasMaxLength(20)
+        builder.Property(v => v.VoucherNumber)
+            .HasMaxLength(50)
             .IsRequired();
 
-        builder.Property(e => e.ReceivedFrom)
-            .HasMaxLength(200)
-            .IsRequired();
-
-        builder.Property(e => e.Notes)
-            .HasMaxLength(500);
-
-        builder.Property(e => e.CancellationReason)
-            .HasMaxLength(500);
-
-        builder.Property(e => e.PaymentMethod)
-            .IsRequired();
-
-        builder.Property(e => e.Status)
-            .IsRequired();
-
-        builder.Property(e => e.RowVersion)
-            .IsRowVersion();
-
-        builder.HasIndex(e => e.VoucherNumber)
+        builder.HasIndex(v => v.VoucherNumber)
             .IsUnique();
 
-        builder.HasIndex(e => e.PartyId);
+        builder.Property(v => v.ReceivedFrom)
+            .HasMaxLength(200);
 
-        builder.HasIndex(e => e.Status);
+        builder.Property(v => v.Notes)
+            .HasMaxLength(500);
 
-        builder.HasIndex(e => e.VoucherDate);
+        builder.Property(v => v.CancellationReason)
+            .HasMaxLength(500);
 
-        builder.HasIndex(e => e.DepositSlipId);
+        builder.Property(v => v.RowVersion)
+            .IsRowVersion();
 
-        builder.HasOne(e => e.Party)
+        builder.HasOne(v => v.CollectionOrder)
+            .WithMany(o => o.ReceiptVouchers)
+            .HasForeignKey(v => v.CollectionOrderId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(v => v.Party)
             .WithMany()
-            .HasForeignKey(e => e.PartyId)
+            .HasForeignKey(v => v.PartyId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(e => e.DepositSlip)
+        builder.HasOne(v => v.DepositSlip47)
             .WithMany(s => s.ReceiptVouchers)
-            .HasForeignKey(e => e.DepositSlipId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .HasForeignKey(v => v.DepositSlip47Id)
+            .OnDelete(DeleteBehavior.SetNull);
 
-        builder.Ignore(e => e.DomainEvents);
+        builder.HasMany(v => v.Lines)
+            .WithOne(l => l.ReceiptVoucher)
+            .HasForeignKey(l => l.ReceiptVoucherId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(v => v.Checks)
+            .WithOne(c => c.ReceiptVoucher)
+            .HasForeignKey(c => c.ReceiptVoucherId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

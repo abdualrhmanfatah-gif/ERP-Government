@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import type { AccountDto } from '@/features/accounting/types';
 import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { StatusBadge } from '@/components/ui/StatusBadge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { Loading } from '@/components/ui/Loading';
 import { normalBalanceLabel } from '@/shared/utils/formatters';
 
@@ -18,6 +19,7 @@ interface AccountGridProps {
   loading?: boolean;
   error?: string;
   onRetry?: () => void;
+  emptyMessage?: string;
 }
 
 interface Column {
@@ -30,7 +32,7 @@ const columns: Column[] = [
   { key: 'code', header: 'الرمز', width: 120 },
   { key: 'name', header: 'الاسم', width: 250 },
   { key: 'accountGroupName', header: 'المجموعة', width: 150 },
-  { key: 'normalBalance', header: 'نوع الحساب ', width: 120 },
+  { key: 'normalBalance', header: 'نوع الحساب', width: 120 },
   { key: 'level', header: 'المستوى', width: 80 },
   { key: 'isPostable', header: 'قابل للترحيل', width: 100 },
   { key: 'isActive', header: 'نشط', width: 80 },
@@ -84,7 +86,7 @@ function TreeRow({
         onFocus={() => setFocusedId(node.data.id!)}
         className={[
           'cursor-pointer outline-none transition-colors duration-150',
-          isFocused ? 'outline-2 outline-[var(--color-secondary)] outline-offset-[-2px]' : '',
+          isFocused ? 'outline-2 outline-[var(--color-focus-ring)] outline-offset-[-2px]' : '',
           index % 2 === 0 ? 'bg-[var(--color-surface-container-lowest)]' : 'bg-[color-mix(in_srgb,var(--color-surface-container-high)_20%,transparent)]',
           'hover:bg-[var(--color-surface-container-low)]',
         ].filter(Boolean).join(' ')}
@@ -93,14 +95,14 @@ function TreeRow({
           <td
             key={col.key}
             className={[
-              'px-3 py-2.5 border-b border-[var(--color-border-container)]',
+              'px-3 py-2.5 border-b border-[var(--color-container-border)]',
               idx === 0 ? 'text-end' : 'text-start',
               (col.key === 'code' || col.key === 'level') ? 'tabular-nums' : '',
             ].filter(Boolean).join(' ')}
             style={idx === 0 ? { paddingInlineStart: `${1.5 + depth * 1.25}rem` } : undefined}
           >
             {idx === 0 ? (
-              <span className="inline-flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1.5" dir="ltr">
                 {hasChildren ? (
                   <Button
                     variant="ghost"
@@ -119,9 +121,9 @@ function TreeRow({
             ) : col.key === 'isPostable' ? (
               node.data.isPostable ? 'نعم' : 'لا'
             ) : col.key === 'isActive' ? (
-              <Badge variant={node.data.isActive ? 'success' : 'default'}>
+              <StatusBadge variant={node.data.isActive ? 'active' : 'inactive'}>
                 {node.data.isActive ? 'نشط' : 'غير نشط'}
-              </Badge>
+              </StatusBadge>
             ) : (
               String((node.data as Record<string, unknown>)[col.key] ?? '—')
             )}
@@ -167,7 +169,7 @@ function buildTree(accounts: AccountDto[]): TreeNode[] {
   return roots;
 }
 
-export function AccountGrid({ data, loading, error, onRetry }: AccountGridProps) {
+export function AccountGrid({ data, loading, error, onRetry, emptyMessage }: AccountGridProps) {
   const [expanded, setExpanded] = useState<Set<number>>(() => {
     const initial = new Set<number>();
     for (const acc of data) {
@@ -288,20 +290,11 @@ export function AccountGrid({ data, loading, error, onRetry }: AccountGridProps)
   }
 
   if (error) {
-    return (
-      <div role="alert" className="p-12 text-center text-[var(--color-error)]">
-        {error}
-        {onRetry ? (
-          <Button variant="destructive" size="sm" onClick={onRetry} className="mt-3">
-            إعادة المحاولة
-          </Button>
-        ) : null}
-      </div>
-    );
+    return <ErrorState message={error} onRetry={onRetry} />;
   }
 
   if (data.length === 0) {
-    return <EmptyState message="لا توجد حسابات" />;
+    return <EmptyState message={emptyMessage ?? 'لا توجد حسابات'} />;
   }
 
   return (
@@ -310,7 +303,12 @@ export function AccountGrid({ data, loading, error, onRetry }: AccountGridProps)
         <Button variant="outline" size="sm" onClick={expandAll}>توسيع الكل</Button>
         <Button variant="outline" size="sm" onClick={collapseAll}>طي الكل</Button>
       </div>
-      <div className="overflow-x-auto border-2 border-[var(--color-primary-container)] rounded-lg shadow-md">
+      <div
+        role="region"
+        aria-label="جدول دليل الحسابات — منطقة قابلة للتمرير"
+        tabIndex={0}
+        className="overflow-x-auto border-2 border-[var(--color-primary-container)] rounded-lg shadow-md focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+      >
         <table
           ref={tableRef}
           role="tree"
@@ -321,7 +319,7 @@ export function AccountGrid({ data, loading, error, onRetry }: AccountGridProps)
           <thead>
             <tr>
               {columns.map((col) => (
-                <th key={col.key} scope="col" className={`px-3 py-2.5 font-semibold text-xs uppercase tracking-wide text-white bg-[var(--color-primary)] border-b-2 border-[var(--color-primary-container)] whitespace-nowrap ${col.key === 'code' ? 'text-end' : 'text-start'}`} style={{ width: col.width }}>
+                <th key={col.key} scope="col" className={`px-3 py-2.5 font-semibold text-xs uppercase tracking-wide text-[var(--color-on-primary)] bg-[var(--color-primary)] border-b-2 border-[var(--color-primary-container)] whitespace-nowrap ${col.key === 'code' ? 'text-end' : 'text-start'}`} style={{ width: col.width }}>
                   {col.header}
                 </th>
               ))}

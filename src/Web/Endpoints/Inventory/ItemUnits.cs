@@ -42,7 +42,7 @@ public class ItemUnits : IEndpointGroup
         var result = await sender.Send(request.ToCommand(itemId));
         return result.Succeeded
             ? Results.Created($"/api/Items/{itemId}/units/{result.Value}", result.Value)
-            : Results.BadRequest(result.Errors);
+            : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleUpdate(
@@ -52,7 +52,7 @@ public class ItemUnits : IEndpointGroup
         UpdateItemUnitRequest request)
     {
         var result = await sender.Send(request.ToCommand(id, itemId));
-        return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok() : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleDelete(
@@ -61,7 +61,7 @@ public class ItemUnits : IEndpointGroup
         int id)
     {
         var result = await sender.Send(new RemoveItemUnitCommand(id, itemId));
-        return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok() : result.ToProblemDetails();
     }
 }
 

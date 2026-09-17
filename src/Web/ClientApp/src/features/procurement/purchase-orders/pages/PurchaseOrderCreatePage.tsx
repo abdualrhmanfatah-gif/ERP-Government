@@ -7,6 +7,7 @@ import {
   usePurchaseRequestDetail, useQuotationDetail,
 } from '../shared/catalog-hooks';
 import { handleLifecycleError } from '@/shared/api/result-to-ui';
+import { getQueryErrorMessage } from '@/shared/api/query-error';
 import { ProcurementPurchaseOrdersForm } from '@/components/ProcurementPurchaseOrdersForm';
 import type { CreatePurchaseOrderFormData } from '../shared/schemas';
 
@@ -100,7 +101,8 @@ export default function PurchaseOrderCreatePage() {
 
   if (isLoading) return <Page title="إنشاء أمر شراء"><Skeleton className="h-96" /></Page>;
   if (suppliersQuery.error || itemsQuery.error || unitsQuery.error) {
-    return <Page title="خطأ"><ErrorState message="فشل تحميل البيانات" onRetry={() => { suppliersQuery.refetch(); itemsQuery.refetch(); unitsQuery.refetch(); }} /></Page>;
+    const firstError = suppliersQuery.error || itemsQuery.error || unitsQuery.error;
+    return <Page title="خطأ"><ErrorState message={getQueryErrorMessage(firstError)} onRetry={() => { suppliersQuery.refetch(); itemsQuery.refetch(); unitsQuery.refetch(); }} /></Page>;
   }
 
   function handleSubmit(data: CreatePurchaseOrderFormData) {

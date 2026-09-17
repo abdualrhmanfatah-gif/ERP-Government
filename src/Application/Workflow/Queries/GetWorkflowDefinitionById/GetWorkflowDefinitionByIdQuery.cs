@@ -1,23 +1,27 @@
+using ERP_Government.Application.Common.Errors;
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Shared.Workflow;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Workflow.Queries.GetWorkflowDefinitionById;
 
-public class GetWorkflowDefinitionByIdQuery : IRequest<WorkflowDefinitionDto?>
+[Authorize(Policy = PermissionCodes.WorkflowDefinitionsView)]
+public class GetWorkflowDefinitionByIdQuery : IRequest<Result<WorkflowDefinitionDto>>
 {
     public int Id { get; init; }
 }
 
 public class GetWorkflowDefinitionByIdQueryHandler(
-    IApplicationDbContext context) : IRequestHandler<GetWorkflowDefinitionByIdQuery, WorkflowDefinitionDto?>
+    IApplicationDbContext context) : IRequestHandler<GetWorkflowDefinitionByIdQuery, Result<WorkflowDefinitionDto>>
 {
-    public async Task<WorkflowDefinitionDto?> Handle(
+    public async Task<Result<WorkflowDefinitionDto>> Handle(
         GetWorkflowDefinitionByIdQuery request,
         CancellationToken cancellationToken)
     {
-        return await context.WorkflowDefinitions
+        var dto = await context.WorkflowDefinitions
             .Include(d => d.Steps)
             .Where(d => d.Id == request.Id)
             .Select(d => new WorkflowDefinitionDto
@@ -49,5 +53,10 @@ public class GetWorkflowDefinitionByIdQueryHandler(
                 }).ToList()
             })
             .FirstOrDefaultAsync(cancellationToken);
+
+        if (dto is null)
+            return Result<WorkflowDefinitionDto>.Failure(ErrorCodes.Workflow.DefinitionNotFound, ErrorCategory.NotFound, $"Workflow definition with ID {request.Id} not found.");
+
+        return Result<WorkflowDefinitionDto>.Success(dto);
     }
 }

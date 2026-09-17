@@ -55,7 +55,7 @@ export function FormField({
       </div>
 
       {description && !error && (
-        <p id={descriptionId} className="text-body-sm text-[var(--color-on-surface-variant)]">
+        <p id={descriptionId} className="text-xs text-[var(--color-on-surface-variant)]">
           {description}
         </p>
       )}
@@ -64,7 +64,7 @@ export function FormField({
         <p
           id={errorId}
           role="alert"
-          className="text-body-sm text-[var(--color-error)]"
+          className="text-xs text-[var(--color-error)]"
         >
           {error}
         </p>

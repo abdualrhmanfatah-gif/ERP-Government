@@ -1,17 +1,21 @@
 using System.Text.Json;
+using ERP_Government.Application.Common.Errors;
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Payments.Common.DTOs;
 using ERP_Government.Domain.Security.Enums;
 using Microsoft.EntityFrameworkCore;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Payments.Queries.DisbursementRequests.GetDisbursementRequestById;
 
-public record GetDisbursementRequestByIdQuery(int Id) : IRequest<DisbursementRequestDetailDto?>;
+[Authorize(Policy = PermissionCodes.DisbursementRequestsView)]
+public record GetDisbursementRequestByIdQuery(int Id) : IRequest<Result<DisbursementRequestDetailDto>>;
 
 public class GetDisbursementRequestByIdQueryHandler(
-    IApplicationDbContext context) : IRequestHandler<GetDisbursementRequestByIdQuery, DisbursementRequestDetailDto?>
+    IApplicationDbContext context) : IRequestHandler<GetDisbursementRequestByIdQuery, Result<DisbursementRequestDetailDto>>
 {
-    public async Task<DisbursementRequestDetailDto?> Handle(
+    public async Task<Result<DisbursementRequestDetailDto>> Handle(
         GetDisbursementRequestByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -19,7 +23,7 @@ public class GetDisbursementRequestByIdQueryHandler(
             .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
 
         if (entity is null)
-            return null;
+            return Result<DisbursementRequestDetailDto>.Failure(ErrorCodes.Payments.DisbursementRequestNotFound, ErrorCategory.NotFound, $"Disbursement request with ID {request.Id} not found.");
 
         var linkedOrder = entity.AccrualJournalEntryId.HasValue
             ? await context.PaymentOrders
@@ -62,7 +66,7 @@ public class GetDisbursementRequestByIdQueryHandler(
             accrualEntryNumber = accrualEntry?.EntryNumber;
         }
 
-        return new DisbursementRequestDetailDto(
+        return Result<DisbursementRequestDetailDto>.Success(new DisbursementRequestDetailDto(
             entity.Id,
             entity.RequestNumber,
             entity.RequestedById,
@@ -80,6 +84,6 @@ public class GetDisbursementRequestByIdQueryHandler(
             linkedOrder?.PaymentOrderNumber,
             entity.AccrualJournalEntryId,
             accrualEntryNumber,
-            approvals);
+            approvals));
     }
 }

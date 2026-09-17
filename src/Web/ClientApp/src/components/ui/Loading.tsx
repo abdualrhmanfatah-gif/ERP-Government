@@ -18,7 +18,7 @@ export function Loading({ text = 'جاري التحميل…', fullPage = false 
     >
       <span
         aria-hidden="true"
-        className="inline-block w-8 h-8 border-[3px] border-[var(--color-border-container)] border-t-[var(--color-primary)] rounded-full animate-spin"
+        className="inline-block w-8 h-8 border-[3px] border-[var(--color-container-border)] border-t-[var(--color-primary)] rounded-full animate-spin"
       />
       <span className="text-sm text-[var(--color-on-surface-variant)]">{text}</span>
     </div>

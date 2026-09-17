@@ -34,8 +34,8 @@ export function JournalEntryCreatePage() {
       }
     >
       <AccountingJournalEntryForm
+        mode="create"
         onSuccess={(id) => navigate(`/accounting/journal-entries/${id}`)}
-        onCancel={() => navigate('/accounting/journal-entries')}
         onStateChange={setFormState}
       />
     </Page>

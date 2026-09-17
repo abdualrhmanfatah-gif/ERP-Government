@@ -1,4 +1,6 @@
+using ERP_Government.Application.Common.Errors;
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Domain.Security.Entities;
 using ERP_Government.Domain.Workflow.Entities;
 using ERP_Government.Domain.Workflow.Enums;
@@ -6,10 +8,12 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Workflow.Commands.AdvanceWorkflowInstance;
 
-public class AdvanceWorkflowInstanceCommand : IRequest<Unit>
+[Authorize(Policy = PermissionCodes.WorkflowInstancesExecute)]
+public class AdvanceWorkflowInstanceCommand : IRequest<Result>
 {
     public int InstanceId { get; init; }
     public int StepId { get; init; }
@@ -34,14 +38,14 @@ public class AdvanceWorkflowInstanceCommandValidator : AbstractValidator<Advance
 
 public class AdvanceWorkflowInstanceCommandHandler(
     IApplicationDbContext context,
-    IUser user) : IRequestHandler<AdvanceWorkflowInstanceCommand, Unit>
+    IUser user) : IRequestHandler<AdvanceWorkflowInstanceCommand, Result>
 {
-    public async Task<Unit> Handle(
+    public async Task<Result> Handle(
         AdvanceWorkflowInstanceCommand request,
         CancellationToken cancellationToken)
     {
         if (user.Id is not int userId)
-            throw new InvalidOperationException("User identity is required for this operation.");
+            return Result.Failure(ErrorCodes.Workflow.IdentityRequired, ErrorCategory.Authorization, "User identity is required for this operation.");
 
         var instance = await context.WorkflowInstances
             .Include(i => i.Definition)
@@ -49,15 +53,14 @@ public class AdvanceWorkflowInstanceCommandHandler(
             .FirstOrDefaultAsync(i => i.Id == request.InstanceId, cancellationToken);
 
         if (instance?.Definition == null)
-            throw new InvalidOperationException($"Workflow instance with ID {request.InstanceId} not found.");
+            return Result.Failure(ErrorCodes.Workflow.InstanceNotFound, ErrorCategory.NotFound, $"Workflow instance with ID {request.InstanceId} not found.");
 
         if (instance.Status != WorkflowInstanceStatus.InProgress.ToString())
-            throw new InvalidOperationException($"Workflow instance is not in progress. Current status: {instance.Status}.");
+            return Result.Failure(ErrorCodes.Workflow.InstanceNotInProgress, ErrorCategory.BusinessRule, $"Workflow instance is not in progress. Current status: {instance.Status}.");
 
-        // Verify step belongs to this instance's definition
         var currentStep = instance.Definition.Steps.FirstOrDefault(s => s.Id == instance.CurrentStepId);
         if (currentStep == null || currentStep.Id != request.StepId)
-            throw new InvalidOperationException($"Step {request.StepId} is not the current step of this workflow instance.");
+            return Result.Failure(ErrorCodes.Workflow.StepNotFound, ErrorCategory.BusinessRule, $"Step {request.StepId} is not the current step of this workflow instance.");
 
         // Find next step based on decision
         WorkflowStep? nextStep = null;
@@ -138,6 +141,6 @@ public class AdvanceWorkflowInstanceCommandHandler(
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return Unit.Value;
+        return Result.Success();
     }
 }

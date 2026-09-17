@@ -52,11 +52,12 @@ public class WorkflowInstances : IEndpointGroup
     }
 
     [EndpointSummary("Get workflow instance by ID")]
-    public static async Task<WorkflowInstanceDto?> GetWorkflowInstanceById(
+    public static async Task<IResult> GetWorkflowInstanceById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetWorkflowInstanceByIdQuery { Id = id });
+        var result = await sender.Send(new GetWorkflowInstanceByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Start a new workflow instance")]

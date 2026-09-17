@@ -2,6 +2,7 @@ using ERP_Government.Application.Organization.Common.DTOs;
 using ERP_Government.Application.Organization.Commands.OrganizationalUnits;
 using ERP_Government.Application.Organization.Queries.OrganizationalUnits;
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,11 +45,12 @@ public class OrganizationalUnits : IEndpointGroup
     }
 
     [EndpointSummary("Get organizational unit by ID")]
-    public static async Task<OrganizationalUnitDto> GetOrganizationalUnitById(
+    public static async Task<IResult> GetOrganizationalUnitById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetOrganizationalUnitByIdQuery { Id = id });
+        var result = await sender.Send(new GetOrganizationalUnitByIdQuery { Id = id });
+        return result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new organizational unit")]
@@ -58,7 +60,7 @@ public class OrganizationalUnits : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -77,7 +79,7 @@ public class OrganizationalUnits : IEndpointGroup
             IsActive = body.IsActive
         });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -88,7 +90,7 @@ public class OrganizationalUnits : IEndpointGroup
     {
         var result = await sender.Send(new DeleteOrganizationalUnitCommand { Id = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

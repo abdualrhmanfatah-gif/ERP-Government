@@ -6,6 +6,7 @@ import { AccountGrid } from '@/components/AccountingAccountGrid';
 import { useAccountsList } from '../hooks/useAccountsList';
 import { useAccountGroups } from '../hooks/useAccountGroups';
 import { activeStatusLabels } from '@/shared/constants/labels';
+import { getQueryErrorMessage } from '@/shared/api/query-error';
 
 export function AccountsListPage() {
   const navigate = useNavigate();
@@ -88,8 +89,9 @@ export function AccountsListPage() {
       <AccountGrid
         data={filtered}
         loading={isLoading}
-        error={error ? 'فشل تحميل البيانات' : undefined}
+        error={error ? getQueryErrorMessage(error) : undefined}
         onRetry={() => refetch()}
+        emptyMessage={hasFilters ? 'لا توجد نتائج مطابقة لمعايير البحث' : 'لا توجد حسابات'}
       />
     </Page>
   );

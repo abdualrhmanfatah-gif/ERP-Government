@@ -14,6 +14,7 @@ using System.Text;
 namespace ERP_Government.Application.Security.Commands.Users;
 
 // Create session after login — records IP, UserAgent, hashes
+[Authorize]
 public class CreateUserSessionCommand : IRequest<Result<int>>
 {
     public int UserId { get; init; }

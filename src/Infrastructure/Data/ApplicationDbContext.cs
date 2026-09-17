@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Domain.Accounting.Entities;
 using ERP_Government.Domain.Common;
@@ -64,8 +64,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Journal> Journals => Set<Journal>();
     public DbSet<JournalEntry> JournalEntries => Set<JournalEntry>();
     public DbSet<JournalEntryLine> JournalEntryLines => Set<JournalEntryLine>();
-    public DbSet<PostingRule> PostingRules => Set<PostingRule>();
-    public DbSet<PostingRuleLine> PostingRuleLines => Set<PostingRuleLine>();
     public DbSet<JournalEntryTemplate> JournalEntryTemplates => Set<JournalEntryTemplate>();
     public DbSet<JournalEntryTemplateLine> JournalEntryTemplateLines => Set<JournalEntryTemplateLine>();
     public DbSet<RecurringEntry> RecurringEntries => Set<RecurringEntry>();
@@ -113,24 +111,32 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<CommitteeMember> CommitteeMembers => Set<CommitteeMember>();
     public DbSet<CommitteeAssignment> CommitteeAssignments => Set<CommitteeAssignment>();
 
-    // Module 9: Revenue
-    public DbSet<RevenueReceipt> RevenueReceipts => Set<RevenueReceipt>();
-    public DbSet<RevenueReceiptLine> RevenueReceiptLines => Set<RevenueReceiptLine>();
+    // Module 10: Revenue
+    public DbSet<RevenueClaim> RevenueClaims => Set<RevenueClaim>();
+    public DbSet<CollectionOrder> CollectionOrders => Set<CollectionOrder>();
     public DbSet<ReceiptVoucher> ReceiptVouchers => Set<ReceiptVoucher>();
     public DbSet<ReceiptVoucherLine> ReceiptVoucherLines => Set<ReceiptVoucherLine>();
     public DbSet<Check> Checks => Set<Check>();
-    public DbSet<DepositSlip> DepositSlips => Set<DepositSlip>();
+    public DbSet<DepositSlip47> DepositSlips47 => Set<DepositSlip47>();
+    public DbSet<DepositSlip48> DepositSlips48 => Set<DepositSlip48>();
 
     // Module 10: Assets (Target)
     public DbSet<AssetGroup> AssetGroups => Set<AssetGroup>();
     public DbSet<Asset> Assets => Set<Asset>();
-    public DbSet<AssetMovement> AssetMovements => Set<AssetMovement>();
+    public DbSet<AssetTransaction> AssetTransactions => Set<AssetTransaction>();
+    public DbSet<AssetTransferDetail> AssetTransferDetails => Set<AssetTransferDetail>();
+    public DbSet<AssetDisposalDetail> AssetDisposalDetails => Set<AssetDisposalDetail>();
+    public DbSet<AssetRevaluationDetail> AssetRevaluationDetails => Set<AssetRevaluationDetail>();
+    public DbSet<AssetImpairmentDetail> AssetImpairmentDetails => Set<AssetImpairmentDetail>();
+    public DbSet<AssetDepreciationRun> AssetDepreciationRuns => Set<AssetDepreciationRun>();
     public DbSet<DepreciationSchedule> DepreciationSchedules => Set<DepreciationSchedule>();
-    public DbSet<AssetRevaluation> AssetRevaluations => Set<AssetRevaluation>();
-    public DbSet<AssetImpairment> AssetImpairments => Set<AssetImpairment>();
-    public DbSet<AssetDisposal> AssetDisposals => Set<AssetDisposal>();
+    public DbSet<DepreciationRun> DepreciationRuns => Set<DepreciationRun>();
+    public DbSet<DepreciationScheduleLine> DepreciationScheduleLines => Set<DepreciationScheduleLine>();
     public DbSet<AssetPhysicalCount> AssetPhysicalCounts => Set<AssetPhysicalCount>();
     public DbSet<AssetPhysicalCountDetail> AssetPhysicalCountDetails => Set<AssetPhysicalCountDetail>();
+    public DbSet<AssetAttributeDefinition> AssetAttributeDefinitions => Set<AssetAttributeDefinition>();
+    public DbSet<AssetGroupAttribute> AssetGroupAttributes => Set<AssetGroupAttribute>();
+    public DbSet<AssetAttributeValue> AssetAttributeValues => Set<AssetAttributeValue>();
 
     // Module 11: Inventory (Target)
     public DbSet<Location> Locations => Set<Location>();

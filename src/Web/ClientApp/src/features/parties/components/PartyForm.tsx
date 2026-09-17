@@ -1,7 +1,17 @@
 import { useState } from 'react';
-import { Button, Input, Select, Textarea } from '@/components/ui';
-import { PartyType, PARTY_TYPE_LABELS, type CreatePartyCommand } from '../shared/types';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Alert, Button, Card, Input, Select, Textarea } from '@/components/ui';
+import { handleApiError } from '@/shared/api/result-to-ui';
+import { PARTY_TYPE_LABELS, type CreatePartyCommand } from '../shared/types';
 import { partiesClient } from '../shared/client';
+import {
+  EMPTY_PARTY_FORM,
+  partyFormSchema,
+  toCreatePartyCommand,
+  toPartyFormValues,
+  type PartyFormValues,
+} from '../shared/schemas';
 
 const partyTypeOptions = Object.entries(PARTY_TYPE_LABELS).map(([value, label]) => ({
   value,
@@ -10,230 +20,167 @@ const partyTypeOptions = Object.entries(PARTY_TYPE_LABELS).map(([value, label]) 
 
 interface PartyFormProps {
   initialData?: CreatePartyCommand;
-  onSubmit: (data: CreatePartyCommand) => void;
+  onSubmit: (data: CreatePartyCommand) => Promise<unknown>;
+  onSuccess?: (result: unknown) => void;
   onCancel: () => void;
   isPending?: boolean;
-  readOnly?: boolean;
-  onEdit?: () => void;
 }
 
 export function PartyForm({
   initialData,
   onSubmit,
+  onSuccess,
   onCancel,
   isPending = false,
-  readOnly = false,
-  onEdit,
 }: PartyFormProps) {
-  const [form, setForm] = useState<CreatePartyCommand>(
-    initialData ?? {
-      partyType: PartyType.Supplier,
-      nameAr: '',
-    }
-  );
+  const {
+    register,
+    handleSubmit,
+    setError,
+    getValues,
+    formState: { errors, isSubmitting },
+  } = useForm<PartyFormValues>({
+    resolver: zodResolver(partyFormSchema),
+    defaultValues: initialData ? toPartyFormValues(initialData) : EMPTY_PARTY_FORM,
+  });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [taxDuplicateWarning, setTaxDuplicateWarning] = useState(false);
+  const pending = isPending || isSubmitting;
 
-  function updateField<K extends keyof CreatePartyCommand>(field: K, value: CreatePartyCommand[K]) {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: '' }));
-    if (field === 'taxNumber') setTaxDuplicateWarning(false);
-  }
-
-  async function handleTaxNumberBlur() {
-    const taxNumber = form.taxNumber?.trim();
+  async function checkTaxDuplicate() {
+    const taxNumber = getValues('taxNumber')?.trim();
     if (!taxNumber) {
       setTaxDuplicateWarning(false);
       return;
     }
     try {
-      const exists = await partiesClient.checkDuplicateTaxNumber(taxNumber);
-      setTaxDuplicateWarning(exists);
+      setTaxDuplicateWarning(await partiesClient.checkDuplicateTaxNumber(taxNumber));
     } catch {
       setTaxDuplicateWarning(false);
     }
   }
 
-  function validate(): boolean {
-    const e: Record<string, string> = {};
-    if (!form.nameAr.trim()) e.nameAr = 'الاسم بالعربية مطلوب';
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!validate()) return;
-    onSubmit(form);
-  }
-
-  if (readOnly) {
-    return (
-      <div className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">بيانات المورد</h3>
-          {onEdit && (
-            <Button variant="outline" size="sm" onClick={onEdit}>
-              تعديل
-            </Button>
-          )}
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-[var(--color-on-surface-variant)]">النوع:</span>{' '}
-            <span>{PARTY_TYPE_LABELS[initialData!.partyType]}</span>
-          </div>
-          <div>
-            <span className="text-[var(--color-on-surface-variant)]">الاسم بالعربية:</span>{' '}
-            <span>{initialData!.nameAr}</span>
-          </div>
-          {initialData!.nameEn && (
-            <div>
-              <span className="text-[var(--color-on-surface-variant)]">الاسم بالإنجليزية:</span>{' '}
-              <span>{initialData!.nameEn}</span>
-            </div>
-          )}
-          {initialData!.taxNumber && (
-            <div>
-              <span className="text-[var(--color-on-surface-variant)]">الرقم الضريبي:</span>{' '}
-              <span dir="ltr">{initialData!.taxNumber}</span>
-            </div>
-          )}
-          {initialData!.nationalId && (
-            <div>
-              <span className="text-[var(--color-on-surface-variant)]">الهوية الوطنية:</span>{' '}
-              <span dir="ltr">{initialData!.nationalId}</span>
-            </div>
-          )}
-          {initialData!.phone && (
-            <div>
-              <span className="text-[var(--color-on-surface-variant)]">الهاتف:</span>{' '}
-              <span dir="ltr">{initialData!.phone}</span>
-            </div>
-          )}
-          {initialData!.email && (
-            <div>
-              <span className="text-[var(--color-on-surface-variant)]">البريد الإلكتروني:</span>{' '}
-              <span>{initialData!.email}</span>
-            </div>
-          )}
-          {initialData!.address && (
-            <div className="md:col-span-2">
-              <span className="text-[var(--color-on-surface-variant)]">العنوان:</span>{' '}
-              <span>{initialData!.address}</span>
-            </div>
-          )}
-          {initialData!.notes && (
-            <div className="md:col-span-2 pt-2 border-t border-[var(--color-outline-variant)]">
-              <span className="text-[var(--color-on-surface-variant)]">ملاحظات:</span>{' '}
-              <span>{initialData!.notes}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
+  async function submit(values: PartyFormValues) {
+    try {
+      const result = await onSubmit(toCreatePartyCommand(values));
+      onSuccess?.(result);
+    } catch (err) {
+      handleApiError(err, setError);
+    }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] p-6" aria-label="بيانات المورد">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <Select
-            label="النوع *"
-            value={String(form.partyType)}
-            onChange={(e) => updateField('partyType', Number(e.target.value) as PartyType)}
-            options={partyTypeOptions}
-          />
-        </div>
+    <form
+      onSubmit={handleSubmit(submit)}
+      aria-label="بيانات الطرف"
+      className="flex flex-col gap-6"
+    >
+      <Card className="flex flex-col gap-8">
+        <section className="flex flex-col gap-4">
+          <h3 className="text-label-md font-semibold text-[var(--color-on-surface)]">البيانات الأساسية</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Select
+              label="النوع"
+              required
+              options={partyTypeOptions}
+              error={errors.partyType?.message}
+              disabled={pending}
+              {...register('partyType', { valueAsNumber: true })}
+            />
+            <Input
+              label="الاسم بالعربية"
+              type="text"
+              required
+              error={errors.nameAr?.message}
+              disabled={pending}
+              {...register('nameAr')}
+            />
+            <Input
+              label="الاسم بالإنجليزية"
+              type="text"
+              dir="ltr"
+              error={errors.nameEn?.message}
+              disabled={pending}
+              {...register('nameEn')}
+            />
+          </div>
+        </section>
 
-        <div>
-          <Input
-            label="الاسم بالعربية *"
-            type="text"
-            value={form.nameAr}
-            onChange={(e) => updateField('nameAr', e.target.value)}
-            required
-          />
-          {errors.nameAr && <p className="text-xs text-[var(--color-error)] mt-1">{errors.nameAr}</p>}
-        </div>
+        <section className="flex flex-col gap-4">
+          <h3 className="text-label-md font-semibold text-[var(--color-on-surface)]">بيانات التواصل</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Input
+                label="الرقم الضريبي"
+                type="text"
+                dir="ltr"
+                error={errors.taxNumber?.message}
+                disabled={pending}
+                {...register('taxNumber', { onBlur: checkTaxDuplicate })}
+              />
+              {taxDuplicateWarning && !errors.taxNumber ? (
+                <p className="text-xs text-[var(--color-warning)] mt-1">تنبيه: رقم ضريبي مسجل مسبقاً</p>
+              ) : null}
+            </div>
+            <Input
+              label="الهوية الوطنية"
+              type="text"
+              dir="ltr"
+              error={errors.nationalId?.message}
+              disabled={pending}
+              {...register('nationalId')}
+            />
+            <Input
+              label="الهاتف"
+              type="text"
+              dir="ltr"
+              error={errors.phone?.message}
+              disabled={pending}
+              {...register('phone')}
+            />
+            <Input
+              label="البريد الإلكتروني"
+              type="email"
+              dir="ltr"
+              error={errors.email?.message}
+              disabled={pending}
+              {...register('email')}
+            />
+          </div>
+        </section>
 
-        <div>
-          <Input
-            label="الاسم بالإنجليزية"
-            type="text"
-            value={form.nameEn ?? ''}
-            onChange={(e) => updateField('nameEn', e.target.value || undefined)}
-          />
-        </div>
+        <section className="flex flex-col gap-4">
+          <h3 className="text-label-md font-semibold text-[var(--color-on-surface)]">العنوان والملاحظات</h3>
+          <div className="grid grid-cols-1 gap-6">
+            <Input
+              label="العنوان"
+              type="text"
+              error={errors.address?.message}
+              disabled={pending}
+              {...register('address')}
+            />
+            <Textarea
+              label="ملاحظات"
+              rows={3}
+              error={errors.notes?.message}
+              disabled={pending}
+              {...register('notes')}
+            />
+          </div>
+        </section>
+      </Card>
 
-        <div>
-          <Input
-            label="الرقم الضريبي"
-            type="text"
-            value={form.taxNumber ?? ''}
-            onChange={(e) => updateField('taxNumber', e.target.value || undefined)}
-            onBlur={handleTaxNumberBlur}
-          />
-          {errors.taxNumber && <p className="text-xs text-[var(--color-error)] mt-1">{errors.taxNumber}</p>}
-          {taxDuplicateWarning && !errors.taxNumber && (
-            <p className="text-xs text-[var(--color-warning)] mt-1">تنبيه: رقم ضريبي مسجل مسبقاً</p>
-          )}
-        </div>
+      {errors.root?.message ? (
+        <Alert variant="error" role="alert">
+          {errors.root.message}
+        </Alert>
+      ) : null}
 
-        <div>
-          <Input
-            label="الهوية الوطنية"
-            type="text"
-            value={form.nationalId ?? ''}
-            onChange={(e) => updateField('nationalId', e.target.value || undefined)}
-          />
-        </div>
-
-        <div>
-          <Input
-            label="الهاتف"
-            type="text"
-            value={form.phone ?? ''}
-            onChange={(e) => updateField('phone', e.target.value || undefined)}
-          />
-        </div>
-
-        <div>
-          <Input
-            label="البريد الإلكتروني"
-            type="email"
-            value={form.email ?? ''}
-            onChange={(e) => updateField('email', e.target.value || undefined)}
-          />
-        </div>
-
-        <div>
-          <Input
-            label="العنوان"
-            type="text"
-            value={form.address ?? ''}
-            onChange={(e) => updateField('address', e.target.value || undefined)}
-          />
-        </div>
-
-        <div className="md:col-span-2">
-          <Textarea
-            label="ملاحظات"
-            value={form.notes ?? ''}
-            onChange={(e) => updateField('notes', e.target.value || undefined)}
-            rows={3}
-          />
-        </div>
-      </div>
-
-      {errors.submit && <p className="text-sm text-[var(--color-error)] mt-4">{errors.submit}</p>}
-
-      <div className="flex justify-end gap-2 mt-6">
-        <Button variant="ghost" type="button" onClick={onCancel}>
+      <div className="flex justify-end gap-2">
+        <Button variant="ghost" type="button" onClick={onCancel} disabled={pending}>
           إلغاء
         </Button>
-        <Button variant="primary" type="submit" disabled={isPending} loading={isPending}>
+        <Button variant="primary" type="submit" disabled={pending} loading={pending}>
           حفظ
         </Button>
       </div>

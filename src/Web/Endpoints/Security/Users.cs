@@ -103,7 +103,9 @@ public class Users : IEndpointGroup
         int id)
     {
         var result = await sender.Send(new GetUserByIdQuery { Id = id });
-        return result is not null ? Results.Ok(result) : Results.NotFound();
+        return result.Succeeded
+            ? Results.Ok(result.Value!)
+            : result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new user")]
@@ -113,7 +115,7 @@ public class Users : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Created($"/api/Users/{result.Value}", result.Value);
     }
 
@@ -124,11 +126,15 @@ public class Users : IEndpointGroup
         [FromBody] UpdateUserCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -139,7 +145,7 @@ public class Users : IEndpointGroup
     {
         var result = await sender.Send(new DeactivateUserCommand { Id = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -150,7 +156,7 @@ public class Users : IEndpointGroup
     {
         var result = await sender.Send(new ReactivateUserCommand { Id = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -175,7 +181,7 @@ public class Users : IEndpointGroup
         });
 
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Created($"/api/Users/{id}/sessions/{result.Value}", result.Value);
     }
 
@@ -212,7 +218,7 @@ public class Users : IEndpointGroup
         });
 
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Created($"/api/Users/{domainUser.Id}/sessions/{result.Value}", result.Value);
     }
 
@@ -232,7 +238,7 @@ public class Users : IEndpointGroup
     {
         var result = await sender.Send(new RevokeSessionCommand { UserId = id, SessionId = sessionId });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -243,7 +249,7 @@ public class Users : IEndpointGroup
     {
         var result = await sender.Send(new RevokeAllSessionsCommand { UserId = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -254,7 +260,7 @@ public class Users : IEndpointGroup
     {
         var result = await sender.Send(new ResetFailedLoginAttemptsCommand { Id = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -266,11 +272,15 @@ public class Users : IEndpointGroup
         [FromBody] SetUserRoleCommand command)
     {
         if (id != command.UserId)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -290,11 +300,15 @@ public class Users : IEndpointGroup
         [FromBody] AssignUserPermissionCommand command)
     {
         if (id != command.UserId)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -306,7 +320,7 @@ public class Users : IEndpointGroup
     {
         var result = await sender.Send(new RemoveUserPermissionCommand { UserId = id, PermissionId = permissionId });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

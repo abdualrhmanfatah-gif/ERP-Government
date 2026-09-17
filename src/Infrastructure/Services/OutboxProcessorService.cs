@@ -29,6 +29,9 @@ public class OutboxProcessorService : BackgroundService
         TimeSpan.FromMinutes(10)
     ];
 
+    private static readonly TimeSpan LeaseDuration = TimeSpan.FromMinutes(15);
+    private static readonly TimeSpan HeartbeatInterval = TimeSpan.FromMinutes(5);
+
     public OutboxProcessorService(
         IServiceProvider serviceProvider,
         ILogger<OutboxProcessorService> logger,
@@ -48,6 +51,7 @@ public class OutboxProcessorService : BackgroundService
         {
             try
             {
+                await RecoverStalledMessagesAsync(stoppingToken);
                 await ProcessMessagesAsync(stoppingToken);
                 await CleanupProcessedMessagesAsync(stoppingToken);
             }
@@ -62,14 +66,38 @@ public class OutboxProcessorService : BackgroundService
         _logger.LogInformation("OutboxProcessorService stopping");
     }
 
+    private async Task RecoverStalledMessagesAsync(CancellationToken cancellationToken)
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
+
+        var stalledMessages = await context.OutboxMessages
+            .Where(m => m.Status == OutboxMessageStatus.Processing
+                     && m.LeaseExpiry != null
+                     && m.LeaseExpiry < DateTimeOffset.UtcNow)
+            .ToListAsync(cancellationToken);
+
+        if (stalledMessages.Count == 0) return;
+
+        foreach (var message in stalledMessages)
+        {
+            message.Status = OutboxMessageStatus.Pending;
+            message.LeaseExpiry = null;
+            _logger.LogWarning("Recovered stalled outbox message {Id} (lease expired)", message.Id);
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
     private async Task ProcessMessagesAsync(CancellationToken cancellationToken)
     {
         using var scope = _serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
 
+        var now = DateTimeOffset.UtcNow;
         var messages = await context.OutboxMessages
             .Where(m => m.Status == OutboxMessageStatus.Pending
-                     && (m.NextRetryAt == null || m.NextRetryAt <= DateTimeOffset.UtcNow))
+                     && (m.NextRetryAt == null || m.NextRetryAt <= now))
             .OrderBy(m => m.CreatedAt)
             .Take(_options.BatchSize)
             .ToListAsync(cancellationToken);
@@ -80,8 +108,34 @@ public class OutboxProcessorService : BackgroundService
 
         foreach (var message in messages)
         {
-            await ProcessSingleMessageAsync(message, context, cancellationToken);
+            var claimed = await ClaimMessageAsync(message, context, cancellationToken);
+            if (claimed)
+            {
+                await ProcessSingleMessageAsync(message, context, cancellationToken);
+            }
         }
+    }
+
+    private async Task<bool> ClaimMessageAsync(
+        OutboxMessage message,
+        IApplicationDbContext context,
+        CancellationToken cancellationToken)
+    {
+        if (message.Status != OutboxMessageStatus.Pending) return false;
+
+        message.Status = OutboxMessageStatus.Processing;
+        message.LeaseExpiry = DateTimeOffset.UtcNow.Add(LeaseDuration);
+        await context.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
+    private async Task RenewLeaseAsync(
+        OutboxMessage message,
+        IApplicationDbContext context,
+        CancellationToken cancellationToken)
+    {
+        message.LeaseExpiry = DateTimeOffset.UtcNow.Add(LeaseDuration);
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     private async Task ProcessSingleMessageAsync(
@@ -89,8 +143,9 @@ public class OutboxProcessorService : BackgroundService
         IApplicationDbContext context,
         CancellationToken cancellationToken)
     {
-        message.Status = OutboxMessageStatus.Processing;
-        await context.SaveChangesAsync(cancellationToken);
+        var startTime = DateTimeOffset.UtcNow;
+        using var heartbeatCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var heartbeatTask = StartHeartbeatAsync(message, context, heartbeatCts.Token);
 
         try
         {
@@ -106,14 +161,13 @@ public class OutboxProcessorService : BackgroundService
                 throw new InvalidOperationException($"Deserialization returned null for type: {message.TypeName}");
             }
 
-            // Publish via MediatR — this is where the actual event handling happens
-            // Use scoped provider because handlers (PostingPipelineHandler) are scoped
             using var scope = _serviceProvider.CreateScope();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             await mediator.Publish(payload, cancellationToken);
 
             message.Status = OutboxMessageStatus.Processed;
             message.ProcessedAt = DateTimeOffset.UtcNow;
+            message.LeaseExpiry = null;
             message.ErrorMessage = null;
 
             _logger.LogDebug("Outbox message {Id} published successfully", message.Id);
@@ -124,6 +178,7 @@ public class OutboxProcessorService : BackgroundService
 
             message.RetryCount++;
             message.ErrorMessage = ex.Message;
+            message.LeaseExpiry = null;
 
             if (message.RetryCount >= _options.MaxRetries)
             {
@@ -137,8 +192,38 @@ public class OutboxProcessorService : BackgroundService
                 message.NextRetryAt = DateTimeOffset.UtcNow.Add(GetBackoffDelay(message.RetryCount));
             }
         }
+        finally
+        {
+            await heartbeatCts.CancelAsync();
+            try { await heartbeatTask; } catch (OperationCanceledException) { }
+        }
 
         await context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task StartHeartbeatAsync(
+        OutboxMessage message,
+        IApplicationDbContext context,
+        CancellationToken cancellationToken)
+    {
+        using var timer = new PeriodicTimer(HeartbeatInterval);
+        while (await timer.WaitForNextTickAsync(cancellationToken))
+        {
+            try
+            {
+                await RenewLeaseAsync(message, context, cancellationToken);
+                _logger.LogDebug("Renewed lease for outbox message {Id}", message.Id);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to renew lease for outbox message {Id}", message.Id);
+                break;
+            }
+        }
     }
 
     private async Task CleanupProcessedMessagesAsync(CancellationToken cancellationToken)
@@ -164,5 +249,4 @@ public class OutboxProcessorService : BackgroundService
         var index = Math.Min(retryCount - 1, BackoffSchedule.Length - 1);
         return BackoffSchedule[index];
     }
-
 }

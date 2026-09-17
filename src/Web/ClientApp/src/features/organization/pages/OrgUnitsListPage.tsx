@@ -6,6 +6,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useOrganizationalUnits, useDeleteOrgUnit } from '../hooks';
 import { useState } from 'react';
 import { getActiveStatusLabel } from '@/shared/constants/labels';
+import { getQueryErrorMessage } from '@/shared/api/query-error';
 
 export function OrgUnitsListPage() {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ export function OrgUnitsListPage() {
         ]}
         data={orgUnits}
         loading={isLoading}
-        error={error ? 'فشل تحميل البيانات' : undefined}
+        error={error ? getQueryErrorMessage(error) : undefined}
         onRetry={() => refetch()}
         rowKey={(r) => String(r.id)}
         emptyMessage="لا توجد وحدات تنظيمية"

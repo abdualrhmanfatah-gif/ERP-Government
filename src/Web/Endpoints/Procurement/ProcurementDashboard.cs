@@ -8,6 +8,7 @@ public class ProcurementDashboard : IEndpointGroup
     public static void Map(RouteGroupBuilder group)
     {
         group.MapGet("/", HandleGetDashboard)
+            .RequireAuthorization()
             .Produces<ProcurementDashboardResponse>();
     }
 
@@ -16,6 +17,6 @@ public class ProcurementDashboard : IEndpointGroup
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetProcurementDashboardQuery(), cancellationToken);
-        return result.Succeeded ? Results.Ok(result.Value) : Results.BadRequest(result.Errors);
+        return result.Succeeded ? Results.Ok(result.Value) : result.ToProblemDetails();
     }
 }

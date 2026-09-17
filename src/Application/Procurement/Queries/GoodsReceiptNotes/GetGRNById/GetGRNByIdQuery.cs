@@ -1,8 +1,10 @@
 using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Domain.Procurement.Enums;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Procurement.Queries.GoodsReceiptNotes.GetGRNById;
 
+[Authorize(Policy = PermissionCodes.GoodsReceiptsView)]
 public record GetGRNByIdQuery(int Id) : IRequest<Result<GRNDetailResponse>>;
 
 public record GRNDetailResponse(

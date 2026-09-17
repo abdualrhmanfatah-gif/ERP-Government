@@ -6,7 +6,17 @@ namespace ERP_Government.Infrastructure.Services;
 
 public static class OfficialPdfTemplate
 {
-    public static readonly Color PrimaryAccentColor = Color.FromHex("#1E5B3C");
+    private const float RepublicImageHeight = 20;
+    private const float MinistryImageHeight = 20;
+    private const float LogoHeight = 70;
+    private const float OrganizationFontSize = 10;
+    private const float DepartmentFontSize = 9;
+    private const float InfoFontSize = 9;
+    private const float TitleFontSize = 13;
+    private const float MetaFontSize = 8.5f;
+    private const float FooterFontSize = 8f;
+    private const float HeaderBorderWidth = 1.5f;
+    private const float CellBorderWidth = 1f;
 
     public static void ComposeOfficialHeader(
         IContainer header,
@@ -20,25 +30,34 @@ public static class OfficialPdfTemplate
         {
             column.Item().Row(row =>
             {
-                row.RelativeItem(1.2f).Column(rightCol =>
+                row.RelativeItem(1.2f).PaddingRight(5).Column(rightCol =>
                 {
                     rightCol.Spacing(2);
-                    rightCol.Item().AlignCenter().Text(ReportBranding.GovernmentLine)
-                        .FontSize(11).Bold().FontColor(Colors.Black);
-                    rightCol.Item().AlignCenter().Text("وزارة الداخلية")
-                        .FontSize(11).Bold().FontColor(Colors.Black);
+
+                    if (ReportBranding.RepublicHeaderPath is not null
+                        && File.Exists(ReportBranding.RepublicHeaderPath))
+                        rightCol.Item().AlignCenter().Height(RepublicImageHeight)
+                            .Image(ReportBranding.RepublicHeaderPath).FitArea();
+
+                    if (ReportBranding.MinistryHeaderPath is not null
+                        && File.Exists(ReportBranding.MinistryHeaderPath))
+                        rightCol.Item().AlignCenter().Height(MinistryImageHeight)
+                            .Image(ReportBranding.MinistryHeaderPath).FitArea();
+
                     if (!string.IsNullOrWhiteSpace(ReportBranding.OrganizationName))
                         rightCol.Item().AlignCenter().Text(ReportBranding.OrganizationName)
-                            .FontSize(10).Bold().FontColor(Colors.Black);
+                            .FontSize(OrganizationFontSize).Bold().FontColor(Colors.Black);
+
                     if (!string.IsNullOrWhiteSpace(ReportBranding.DepartmentName))
                         rightCol.Item().AlignCenter().Text(ReportBranding.DepartmentName)
-                            .FontSize(9).Bold().FontColor(Colors.Black);
+                            .FontSize(DepartmentFontSize).Bold().FontColor(Colors.Black);
                 });
 
                 row.RelativeItem(0.8f).Column(centerCol =>
                 {
-                    if (ReportBranding.LogoPath is not null)
-                        centerCol.Item().AlignCenter().Height(50)
+                    if (ReportBranding.LogoPath is not null
+                        && File.Exists(ReportBranding.LogoPath))
+                        centerCol.Item().AlignCenter().Height(LogoHeight)
                             .Image(ReportBranding.LogoPath).FitArea();
                 });
 
@@ -49,20 +68,20 @@ public static class OfficialPdfTemplate
                         info.Spacing(4);
                         info.Item().Row(r =>
                         {
-                            r.AutoItem().Text("التاريخ : ").FontSize(9).Bold();
+                            r.AutoItem().Text("التاريخ : ").FontSize(InfoFontSize).Bold();
                             r.RelativeItem().AlignRight()
-                                .Text($"{DateTime.Now:yyyy/MM/dd}م").FontSize(9).Bold();
+                                .Text($"{generatedAt:yyyy/MM/dd}م").FontSize(InfoFontSize).Bold();
                         });
                         info.Item().Row(r =>
                         {
-                            r.AutoItem().Text("الرقم : ").FontSize(9).Bold();
+                            r.AutoItem().Text("الرقم : ").FontSize(InfoFontSize).Bold();
                             r.RelativeItem().AlignBottom().PaddingBottom(2)
                                 .BorderBottom(1).BorderColor(Colors.Black)
                                 .Text(orderNumber ?? string.Empty);
                         });
                         info.Item().Row(r =>
                         {
-                            r.AutoItem().Text("المرجع : ").FontSize(9).Bold();
+                            r.AutoItem().Text("المرجع : ").FontSize(InfoFontSize).Bold();
                             r.RelativeItem().AlignBottom().PaddingBottom(2)
                                 .BorderBottom(1).BorderColor(Colors.Black);
                         });
@@ -70,22 +89,20 @@ public static class OfficialPdfTemplate
                 });
             });
 
-            column.Item().PaddingTop(6)
-                .Element(e => e.BorderBottom(1.5f).BorderColor(PrimaryAccentColor));
-            column.Item().PaddingTop(2)
-                .Element(e => e.BorderBottom(0.5f).BorderColor(PrimaryAccentColor));
+            column.Item().PaddingTop(4)
+                .LineHorizontal(1).LineColor(Colors.Black);
 
             column.Item().PaddingTop(6).AlignCenter()
-                .Text(reportName).FontSize(13).Bold().FontColor(Colors.Black);
+                .Text(reportName).FontSize(TitleFontSize).Bold().FontColor(Colors.Black);
 
             column.Item().PaddingTop(2).AlignCenter()
                 .Text($"العملة: {currency}  |  تاريخ الإنشاء: {generatedAt:yyyy-MM-dd HH:mm}")
-                .FontSize(8.5f).FontColor(Colors.Grey.Darken2);
+                .FontSize(MetaFontSize).FontColor(Colors.Black);
 
             if (!string.IsNullOrEmpty(dataWarning))
             {
                 column.Item().PaddingTop(2).AlignCenter()
-                    .Text(dataWarning).FontSize(8.5f).Bold().FontColor(Colors.Orange.Darken2);
+                    .Text(dataWarning).FontSize(MetaFontSize).Bold().FontColor(Colors.Black);
             }
         });
     }
@@ -96,14 +113,14 @@ public static class OfficialPdfTemplate
         {
             row.RelativeItem().AlignRight()
                 .Text($"صادر عن: {ReportBranding.OrganizationName}")
-                .FontSize(8f).FontColor(Colors.Grey.Darken1);
+                .FontSize(FooterFontSize).FontColor(Colors.Black);
             row.AutoItem().PaddingHorizontal(10).AlignCenter()
                 .Text(text =>
                 {
-                    text.Span("صفحة ").FontSize(8f).FontColor(Colors.Grey.Darken1);
-                    text.CurrentPageNumber().FontSize(8f).FontColor(Colors.Grey.Darken1);
-                    text.Span(" من ").FontSize(8f).FontColor(Colors.Grey.Darken1);
-                    text.TotalPages().FontSize(8f).FontColor(Colors.Grey.Darken1);
+                    text.Span("صفحة ").FontSize(FooterFontSize).FontColor(Colors.Black);
+                    text.CurrentPageNumber().FontSize(FooterFontSize).FontColor(Colors.Black);
+                    text.Span(" من ").FontSize(FooterFontSize).FontColor(Colors.Black);
+                    text.TotalPages().FontSize(FooterFontSize).FontColor(Colors.Black);
                 });
             row.RelativeItem();
         });
@@ -112,26 +129,26 @@ public static class OfficialPdfTemplate
     public static IContainer HeaderCellStyle(IContainer container)
     {
         return container.Background("#F3F4F6")
-            .BorderBottom(1.5f).BorderColor(Colors.Grey.Darken2)
+            .BorderBottom(HeaderBorderWidth).BorderColor(Colors.Black)
             .PaddingVertical(5).PaddingHorizontal(5).AlignMiddle().AlignCenter();
     }
 
     public static IContainer CellStyle(IContainer container)
     {
-        return container.BorderBottom(1f).BorderColor(Colors.Grey.Lighten2)
+        return container.BorderBottom(CellBorderWidth).BorderColor(Colors.Black)
             .PaddingVertical(4).PaddingHorizontal(5).AlignMiddle();
     }
 
     public static IContainer NumberCellStyle(IContainer container)
     {
-        return container.BorderBottom(1f).BorderColor(Colors.Grey.Lighten2)
+        return container.BorderBottom(CellBorderWidth).BorderColor(Colors.Black)
             .PaddingVertical(4).PaddingHorizontal(5).AlignMiddle().AlignCenter();
     }
 
     public static IContainer FooterCellStyle(IContainer container)
     {
         return container.Background("#E5E7EB")
-            .BorderTop(1.5f).BorderColor(Colors.Grey.Darken2)
+            .BorderTop(HeaderBorderWidth).BorderColor(Colors.Black)
             .PaddingVertical(5).PaddingHorizontal(5).AlignMiddle().AlignCenter();
     }
 }

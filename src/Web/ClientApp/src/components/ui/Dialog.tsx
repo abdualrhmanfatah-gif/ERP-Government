@@ -8,9 +8,10 @@ interface DialogProps {
   title: string;
   children: ReactNode;
   footer?: ReactNode;
+  className?: string;
 }
 
-export function Dialog({ open, onClose, title, children, footer }: DialogProps) {
+export function Dialog({ open, onClose, title, children, footer, className }: DialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
@@ -38,11 +39,13 @@ export function Dialog({ open, onClose, title, children, footer }: DialogProps) 
       aria-modal="true"
       aria-labelledby={titleId}
       className={cn(
-        'backdrop:bg-black/50 m-auto p-0 w-full max-w-dialog rounded-lg border-0 shadow-transient bg-[var(--color-surface-container-lowest)] text-[var(--color-on-surface)]'
+        'm-auto p-0 w-full max-w-dialog rounded-lg border-0 shadow-transient bg-[var(--color-surface-container-lowest)] text-[var(--color-on-surface)]',
+        className?.includes('max-w-') ? '' : 'max-w-dialog',
+        className
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border-container)]">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-container-border)]">
         <h2
           id={titleId}
           className="text-base font-semibold leading-normal m-0"
@@ -64,7 +67,7 @@ export function Dialog({ open, onClose, title, children, footer }: DialogProps) 
 
       {/* Footer */}
       {footer ? (
-        <div className="flex justify-end items-center gap-2 px-6 py-3 border-t border-[var(--color-border-container)]">
+        <div className="flex justify-end items-center gap-2 px-6 py-3 border-t border-[var(--color-container-border)]">
           {footer}
         </div>
       ) : null}

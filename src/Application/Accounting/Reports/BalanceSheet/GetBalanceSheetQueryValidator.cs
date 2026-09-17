@@ -13,6 +13,11 @@ public class GetBalanceSheetQueryValidator : AbstractValidator<GetBalanceSheetQu
             .When(x => !string.IsNullOrEmpty(x.AsOfDate))
             .WithMessage("Invalid date format. Use YYYY-MM-DD.");
 
+        RuleFor(x => x.AsOfDate)
+            .Must(date => DateOnly.TryParse(date, out var parsed) && parsed <= DateOnly.FromDateTime(DateTime.Today))
+            .When(x => !string.IsNullOrEmpty(x.AsOfDate))
+            .WithMessage("As of date cannot be in the future.");
+
         RuleFor(x => x.FiscalPeriodId)
             .GreaterThan(0)
             .When(x => x.FiscalPeriodId.HasValue)

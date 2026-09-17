@@ -10,6 +10,7 @@ import {
   type GeneralLedgerDto,
   type TrialBalanceReportDto,
 } from '@/web-api-client';
+import { api } from '@/shared/api';
 import { reportingKeys } from '@/shared/api/query-keys';
 import type { FinancialStatementFilters, GeneralLedgerFilters } from '../shared/types';
 
@@ -22,7 +23,12 @@ export function useBalanceSheet(filters: FinancialStatementFilters | null) {
   return useQuery({
     queryKey: reportingKeys.balanceSheet(filters),
     queryFn: (): Promise<BalanceSheetDto> =>
-      reportsClient.balanceSheet(filters!.asOfDate, filters!.fiscalPeriodId),
+      api.get<BalanceSheetDto>('/api/Reports/balance-sheet', {
+        params: {
+          AsOfDate: filters!.asOfDate,
+          FiscalPeriodId: filters!.fiscalPeriodId,
+        },
+      }),
     enabled: filters !== null,
   });
 }

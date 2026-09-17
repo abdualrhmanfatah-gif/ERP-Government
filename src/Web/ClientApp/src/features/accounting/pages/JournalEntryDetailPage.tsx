@@ -14,7 +14,7 @@ import { useFiscalYearByDate } from '../hooks/useFiscalYearByDate';
 import { ReverseDialog } from '@/components/AccountingReverseDialog';
 import { ApprovalsPanel } from '@/components/DocumentsApprovalsPanel';
 import { AttachmentsPanel } from '@/components/DocumentsAttachmentsPanel';
-import { AccountingJournalEntryDetail } from '@/components/AccountingJournalEntryDetail';
+import { AccountingJournalEntryForm } from '@/components/AccountingJournalEntryForm';
 import { StatusBadge } from '@/components/AccountingStatusBadge';
 import { Page, Button, Card, Badge } from '@/components/ui';
 import { formatDate, toDateInput } from '@/shared/utils/formatters';
@@ -31,10 +31,6 @@ function getActionsForStatus(status: string) {
 }
 
 const actionLabels: Record<string, string> = { submit: 'إرسال للمراجعة', approve: 'موافقة', post: 'تسجيل', reverse: 'عكس', cancel: 'إلغاء' };
-const permissionMap: Record<string, string> = {
-  submit: 'Accounting.JournalEntries.Submit', approve: 'Accounting.JournalEntries.Approve',
-  post: 'Accounting.JournalEntries.Post', reverse: 'Accounting.JournalEntries.Reverse', cancel: 'Accounting.JournalEntries.Cancel',
-};
 
 export function JournalEntryDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -118,7 +114,7 @@ export function JournalEntryDetailPage() {
     <>
       <Button
         type="submit"
-        form="journal-entry-detail-form"
+        form="journal-entry-form"
         variant="primary"
         disabled={!editState.canSave || editState.isSaving}
         loading={editState.isSaving}
@@ -131,7 +127,7 @@ export function JournalEntryDetailPage() {
     </>
   ) : (
     <>
-      {!entry.isSystemGenerated && actions.map((action) => {
+      {actions.map((action) => {
         const isLoading = loadingMap[action];
         const handler = handlerMap[action];
         const actionPermissions: Record<string, boolean> = {
@@ -205,13 +201,15 @@ export function JournalEntryDetailPage() {
       )}
 
       <div className="space-y-6">
-        <AccountingJournalEntryDetail
+        <AccountingJournalEntryForm
           key={`${entry.rowVersion ?? entry.id}-${editState.isEditing ? 'edit' : 'view'}`}
+          mode={editState.isEditing ? 'edit' : 'detail'}
           entry={entry}
-          editing={editState.isEditing}
-          onToggleEditing={(editing) => setEditState({ ...editState, isEditing: editing })}
           onStateChange={handleStateChange}
-          onSaved={() => refetch()}
+          onSaved={() => {
+            setEditState((prev) => ({ ...prev, isEditing: false }));
+            refetch();
+          }}
         />
 
         {/* ربط العكس */}

@@ -1,22 +1,24 @@
+using ERP_Government.Application.Common.Errors;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Application.Payments.Common.DTOs;
 
 namespace ERP_Government.Application.Payments.Queries.BankAccounts.GetBankAccountById;
 
 [Authorize(Policy = PermissionCodes.BankAccountsView)]
-public class GetBankAccountByIdQuery : IRequest<BankAccountDto?>
+public class GetBankAccountByIdQuery : IRequest<Result<BankAccountDto>>
 {
     public int Id { get; init; }
 }
 
 public class GetBankAccountByIdQueryHandler(
-    IApplicationDbContext context) : IRequestHandler<GetBankAccountByIdQuery, BankAccountDto?>
+    IApplicationDbContext context) : IRequestHandler<GetBankAccountByIdQuery, Result<BankAccountDto>>
 {
-    public async Task<BankAccountDto?> Handle(
+    public async Task<Result<BankAccountDto>> Handle(
         GetBankAccountByIdQuery request,
         CancellationToken cancellationToken)
     {
-        return await context.BankAccounts
+        var dto = await context.BankAccounts
             .Where(x => x.Id == request.Id)
             .Select(x => new BankAccountDto
             {
@@ -41,5 +43,10 @@ public class GetBankAccountByIdQueryHandler(
                 IsActive = x.IsActive
             })
             .FirstOrDefaultAsync(cancellationToken);
+
+        if (dto is null)
+            return Result<BankAccountDto>.Failure(ErrorCodes.Payments.BankAccountNotFound, ErrorCategory.NotFound, $"Bank account with ID {request.Id} not found.");
+
+        return Result<BankAccountDto>.Success(dto);
     }
 }

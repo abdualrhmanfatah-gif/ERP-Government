@@ -2,6 +2,7 @@ using ERP_Government.Application.Organization.Common.DTOs;
 using ERP_Government.Application.Organization.Commands.Projects;
 using ERP_Government.Application.Organization.Queries.Projects;
 using ERP_Government.Application.Common.Security;
+using ERP_Government.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,11 +45,12 @@ public class Projects : IEndpointGroup
     }
 
     [EndpointSummary("Get project by ID")]
-    public static async Task<ProjectDto> GetProjectById(
+    public static async Task<IResult> GetProjectById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetProjectByIdQuery { Id = id });
+        var result = await sender.Send(new GetProjectByIdQuery { Id = id });
+        return result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new project")]
@@ -58,7 +60,7 @@ public class Projects : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -82,7 +84,7 @@ public class Projects : IEndpointGroup
             IsActive = body.IsActive
         });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -93,7 +95,7 @@ public class Projects : IEndpointGroup
     {
         var result = await sender.Send(new DeleteProjectCommand { Id = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

@@ -1,6 +1,6 @@
 /**
  * Design Tokens — Single Source of Truth
- * Authority: docs/analysis/00-governance/DESIGN-SYSTEM-INSTITUTIONAL-PROTOCOL.md
+ * Agent-facing design reference: DESIGN.md (repository root).
  *
  * All design values MUST originate from this file.
  * Do NOT invent colors, fonts, spacing, radii, or shadows.
@@ -179,15 +179,29 @@ export const semanticColors = {
   // ── Semantic ───────────────────────────────────────────────────────────────
   success: primitives.green[500],
   successBg: primitives.green[50],
+  successHover: primitives.green[600],
+  onSuccess: primitives.white,
+  successContainer: primitives.green[50],
+  onSuccessContainer: primitives.green[800],
   warning: primitives.yellow[500],
   warningBg: primitives.yellow[50],
+  warningContainer: primitives.yellow[50],
+  onWarningContainer: primitives.yellow[700],
+  onWarning: primitives.white,
   info: primitives.blue[500],
   infoBg: primitives.blue[50],
+  infoHover: primitives.blue[600],
+  onInfo: primitives.white,
+  infoContainer: primitives.blue[50],
+  onInfoContainer: primitives.blue[800],
   link: primitives.blue[500],
 
   // ── Focus ──────────────────────────────────────────────────────────────────
   focusRing: primitives.gold[500],
   focusHalo: primitives.gold[100],
+
+  // ── Overlay ────────────────────────────────────────────────────────────────
+  overlay: 'rgb(0 0 0 / 0.5)',
 
   // ── Disabled ───────────────────────────────────────────────────────────────
   disabledBg: '#f1f5f9',
@@ -243,15 +257,29 @@ export const semanticColorsDark = {
   // ── Semantic ───────────────────────────────────────────────────────────────
   success: primitives.green[100],
   successBg: primitives.green[700],
+  successHover: primitives.green[200],
+  onSuccess: primitives.green[900],
+  successContainer: primitives.green[700],
+  onSuccessContainer: primitives.green[50],
   warning: primitives.yellow[100],
   warningBg: primitives.yellow[700],
+  warningContainer: primitives.yellow[700],
+  onWarningContainer: primitives.yellow[50],
+  onWarning: primitives.yellow[950],
   info: primitives.blue[100],
   infoBg: primitives.blue[700],
+  infoHover: primitives.blue[200],
+  onInfo: primitives.blue[950],
+  infoContainer: primitives.blue[700],
+  onInfoContainer: primitives.blue[50],
   link: primitives.navy[100],
 
   // ── Focus ──────────────────────────────────────────────────────────────────
   focusRing: primitives.gold[200],
   focusHalo: primitives.gold[700],
+
+  // ── Overlay ────────────────────────────────────────────────────────────────
+  overlay: 'rgb(0 0 0 / 0.6)',
 
   // ── Disabled ───────────────────────────────────────────────────────────────
   disabledBg: primitives.navy[400],
@@ -268,6 +296,10 @@ export const statusColors = {
   approved: { bg: primitives.green[50], fg: primitives.green[500] },
   active: { bg: primitives.blue[50], fg: primitives.blue[500] },
   closed: { bg: '#e2e8f0', fg: '#1e293b' },
+  /** Inactive — semantically distinct from draft (not yet started) and closed (lifecycle ended).
+   *  Stone palette provides a warm-neutral tone that is visually distinguishable from
+   *  the cooler slate tones used by draft and closed. Light contrast: ~4.9:1 (WCAG AA). */
+  inactive: { bg: '#f5f5f4', fg: '#57534e' },
 } as const;
 
 export const statusColorsDark = {
@@ -276,6 +308,8 @@ export const statusColorsDark = {
   approved: { bg: primitives.green[700], fg: primitives.green[100] },
   active: { bg: primitives.blue[700], fg: primitives.blue[100] },
   closed: { bg: '#1e293b', fg: '#cbd5e1' },
+  /** Inactive dark — stone-800 bg / stone-300 fg. Contrast: ~4.6:1 (WCAG AA). */
+  inactive: { bg: '#292524', fg: '#d6d3d1' },
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -614,9 +648,30 @@ export const sizing = {
 export const borders = {
   container: `1px solid ${semanticColors.containerBorder}`,
   containerDark: `1px solid #233144`,
-  divider: `1px solid ${primitives.slate[50]}`,
+  divider: `1px solid ${semanticColors.outlineVariant}`,
   control: `1px solid ${semanticColors.outlineVariant}`,
   input: `1px solid ${semanticColors.inputBorder}`,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 3B. DENSITY ROLES — per page type (spec FR-020, design-token-contract §3)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const density = {
+  /** Lists and document/transaction detail pages */
+  compact: {
+    controlHeight: '36px',
+    fieldGap: '0.5rem',
+    sectionSpacing: '1rem',
+    tableCellPaddingBlock: '0.5rem',
+  },
+  /** Create/edit forms */
+  comfortable: {
+    controlHeight: '44px',
+    fieldGap: '1rem',
+    sectionSpacing: '1.5rem',
+    tableCellPaddingBlock: '0.75rem',
+  },
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -647,6 +702,7 @@ export const tokens = {
   layout,
   sizing,
   borders,
+  density,
 } as const;
 
 export type Tokens = typeof tokens;

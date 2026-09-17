@@ -1,7 +1,9 @@
 using ERP_Government.Domain.Inventory.Entities;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Inventory.ItemCategories.Queries.GetItemCategories;
 
+[Authorize(Policy = PermissionCodes.ItemCategoriesView)]
 public record GetItemCategoriesQuery(
     string? Search = null,
     bool? IsActive = null) : IRequest<IReadOnlyList<ItemCategory>>;

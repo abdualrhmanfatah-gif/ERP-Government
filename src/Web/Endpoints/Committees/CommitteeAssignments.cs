@@ -47,11 +47,12 @@ public class CommitteeAssignments : IEndpointGroup
     }
 
     [EndpointSummary("Get committee assignment by ID")]
-    public static async Task<CommitteeAssignmentDto?> GetCommitteeAssignmentById(
+    public static async Task<IResult> GetCommitteeAssignmentById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetCommitteeAssignmentByIdQuery { Id = id });
+        var result = await sender.Send(new GetCommitteeAssignmentByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a committee assignment")]
@@ -61,7 +62,7 @@ public class CommitteeAssignments : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -72,11 +73,15 @@ public class CommitteeAssignments : IEndpointGroup
         [FromBody] UpdateAssignmentStatusCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -87,11 +92,15 @@ public class CommitteeAssignments : IEndpointGroup
         [FromBody] RecordSignatureCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

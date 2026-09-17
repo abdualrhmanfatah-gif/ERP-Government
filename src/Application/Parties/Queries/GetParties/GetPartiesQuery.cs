@@ -1,8 +1,10 @@
 using ERP_Government.Domain.Parties.Entities;
 using ERP_Government.Domain.Parties.Enums;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Parties.Queries.GetParties;
 
+[Authorize(Policy = PermissionCodes.PartiesView)]
 public record GetPartiesQuery(
     PartyType? PartyType = null,
     bool? IsActive = null,

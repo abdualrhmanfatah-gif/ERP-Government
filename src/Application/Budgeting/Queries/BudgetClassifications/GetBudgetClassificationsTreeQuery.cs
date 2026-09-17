@@ -35,7 +35,7 @@ public class GetBudgetClassificationsTreeQueryHandler(
             }
         }
 
-        SetLevel(roots, 0);
+        SetLevel(roots, 1);
 
         return roots;
     }

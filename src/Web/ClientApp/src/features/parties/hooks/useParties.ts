@@ -47,7 +47,7 @@ export function useUpdateParty(id: number) {
 export function useTogglePartyActive(id: number) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: () => partiesClient.toggleActive(id),
+    mutationFn: (targetId?: number) => partiesClient.toggleActive(targetId ?? id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: partiesKeys.detail(id) });
       qc.invalidateQueries({ queryKey: partiesKeys.lists() });

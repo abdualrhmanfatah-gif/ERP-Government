@@ -1,7 +1,9 @@
 using ERP_Government.Domain.Procurement.Enums;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Procurement.Queries.PurchaseOrders.GetPurchaseOrders;
 
+[Authorize(Policy = PermissionCodes.PurchaseOrdersView)]
 public record GetPurchaseOrdersQuery(
     int? PurchaseRequestId = null,
     int? QuotationId = null,

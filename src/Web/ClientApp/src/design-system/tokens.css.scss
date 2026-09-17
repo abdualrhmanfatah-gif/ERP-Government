@@ -34,13 +34,25 @@
   --color-surface-tint: #455f88;
   --color-success: #166534;
   --color-success-bg: #dcfce7;
+  --color-success-hover: #15803d;
+  --color-on-success: #ffffff;
+  --color-success-container: #dcfce7;
+  --color-on-success-container: #0f3d21;
   --color-warning: #854d0e;
   --color-warning-bg: #fef9c3;
+  --color-warning-container: #fef9c3;
+  --color-on-warning-container: #422006;
+  --color-on-warning: #ffffff;
   --color-info: #1d4ed8;
   --color-info-bg: #dbeafe;
+  --color-info-hover: #1e40af;
+  --color-on-info: #ffffff;
+  --color-info-container: #dbeafe;
+  --color-on-info-container: #1e3078;
   --color-link: #1d4ed8;
   --color-focus-ring: #755b00;
   --color-focus-halo: #fed255;
+  --color-overlay: rgb(0 0 0 / 0.5);
   --color-disabled-bg: #f1f5f9;
   --color-disabled-fg: #94a3b8;
 
@@ -73,6 +85,8 @@
   --status-active-fg: #1d4ed8;
   --status-closed-bg: #e2e8f0;
   --status-closed-fg: #1e293b;
+  --status-inactive-bg: #f5f5f4;
+  --status-inactive-fg: #57534e;
 
   --chart-1: #002045;
   --chart-2: #755b00;
@@ -262,8 +276,17 @@
   --page-gutter: 1.5rem;
   --container-padding: 2rem;
 
+  --density-compact-control-height: 36px;
+  --density-compact-field-gap: 0.5rem;
+  --density-compact-section-spacing: 1rem;
+  --density-compact-table-cell-padding-block: 0.5rem;
+  --density-comfortable-control-height: 44px;
+  --density-comfortable-field-gap: 1rem;
+  --density-comfortable-section-spacing: 1.5rem;
+  --density-comfortable-table-cell-padding-block: 0.75rem;
+
   --border-container: 1px solid #c8d0dc;
-  --border-divider: 1px solid #f8f9ff;
+  --border-divider: 1px solid #a8adb8;
   --border-control: 1px solid #a8adb8;
   --border-input: 1px solid #636870;
 }
@@ -301,13 +324,25 @@
   --color-surface-tint: #adc7f7;
   --color-success: #86efac;
   --color-success-bg: #14532d;
+  --color-success-hover: #4ade80;
+  --color-on-success: #0a2715;
+  --color-success-container: #14532d;
+  --color-on-success-container: #dcfce7;
   --color-warning: #fde047;
   --color-warning-bg: #422006;
+  --color-warning-container: #422006;
+  --color-on-warning-container: #fef9c3;
+  --color-on-warning: #0f0701;
   --color-info: #93c5fd;
   --color-info-bg: #1e3a8a;
+  --color-info-hover: #60a5fa;
+  --color-on-info: #15204f;
+  --color-info-container: #1e3a8a;
+  --color-on-info-container: #dbeafe;
   --color-link: #86a0cd;
   --color-focus-ring: #ecc246;
   --color-focus-halo: #584400;
+  --color-overlay: rgb(0 0 0 / 0.6);
   --color-disabled-bg: #1a365d;
   --color-disabled-fg: #8e9099;
   --color-inverse-primary: #455f88;
@@ -341,6 +376,8 @@
   --status-active-fg: #93c5fd;
   --status-closed-bg: #1e293b;
   --status-closed-fg: #cbd5e1;
+  --status-inactive-bg: #292524;
+  --status-inactive-fg: #d6d3d1;
 
   --chart-1: #86a0cd;
   --chart-2: #ecc246;

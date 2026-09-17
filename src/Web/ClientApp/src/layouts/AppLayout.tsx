@@ -4,15 +4,13 @@ import { useAuth } from '../shared/hooks/useAuth';
 import { useUserProfile } from '../shared/hooks/useUserProfile';
 import { NotificationBell } from '../features/notifications';
 import { ThemeToggle } from '../components/ThemeToggle';
-import { Menu, X, User } from 'lucide-react';
+import { Menu, X, User, LogOut } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { TopNav } from './TopNav';
-import { Button } from '@/components/ui';
+import { Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const profileRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated, logout } = useAuth();
   const userProfile = useUserProfile();
   const location = useLocation();
@@ -35,21 +33,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   }, [sidebarOpen]);
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
-        setProfileOpen(false);
-      }
-    }
     function handleEscape(e: KeyboardEvent) {
       if (e.key === 'Escape') {
-        setProfileOpen(false);
         setSidebarOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleEscape);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     };
   }, []);
@@ -70,12 +60,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Main area */}
       <div className="flex-1 flex flex-col min-h-screen min-w-0">
         {/* Header — 64px sticky, z-30 per scale */}
-        <header className="h-16 sticky top-0 z-30 bg-[var(--color-primary)] border-b border-white/10 flex items-center px-4 sm:px-6 gap-3 sm:gap-4 shadow-sm">
+        <header className="h-16 sticky top-0 z-30 bg-[var(--color-primary)] border-b border-white/10 flex items-center px-3 sm:px-6 gap-2 sm:gap-3 shadow-sm min-w-0">
           {/* Mobile menu toggle */}
           <Button
             variant="header"
             size="icon"
-            className="lg:hidden"
+            className="lg:hidden shrink-0"
             aria-label={sidebarOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
             aria-expanded={sidebarOpen}
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -95,10 +85,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           {/* Top navigation — desktop dropdowns */}
           <TopNav />
 
-          <div className="flex-1" aria-hidden="true" />
+          <div className="flex-1 min-w-[4px]" aria-hidden="true" />
 
           {/* Right side actions */}
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0 ms-auto">
             {/* Notification bell */}
             <NotificationBell />
 
@@ -106,40 +96,39 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
             {/* User profile */}
             {isAuthenticated ? (
-              <div ref={profileRef} className="relative">
-                <Button
-                  variant="header"
-                  className="flex items-center gap-2"
-                  aria-label="حساب المستخدم"
-                  aria-expanded={profileOpen}
-                  onClick={() => { setProfileOpen(!profileOpen); }}
-                >
-                  <User size={18} />
-                  <span className="text-body-sm text-white/90 hidden sm:inline max-w-[12ch] truncate">{userProfile.name}</span>
-                </Button>
-                {profileOpen ? (
-                  <div
-                    role="menu"
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="header"
+                    className="flex items-center gap-2 cursor-pointer"
                     aria-label="حساب المستخدم"
-                    className="absolute end-0 sm:start-0 top-full mt-2 w-56 bg-[var(--color-surface)] rounded-xl shadow-xl border border-[var(--color-border-container)] z-50 overflow-hidden"
                   >
-                    <div className="px-4 py-3 border-b border-[var(--color-border-container)]">
-                      <div className="text-body-sm font-semibold text-[var(--color-on-surface)]">{userProfile.name}</div>
-                      {userProfile.role ? (
-                        <div className="text-label-sm text-[var(--color-on-surface-variant)] mt-0.5">{userProfile.role}</div>
-                      ) : null}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      role="menuitem"
-                      className="w-full text-start px-4 py-3 text-body-sm text-[var(--color-error)] hover:bg-[var(--color-surface-container-high)] transition-colors duration-200 cursor-pointer"
-                      onClick={() => { setProfileOpen(false); logout(); }}
-                    >
-                      تسجيل الخروج
-                    </Button>
+                    <User size={18} />
+                    <span className="text-body-sm text-white/90 hidden sm:inline max-w-[12ch] truncate">{userProfile.name}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  side="bottom"
+                  sideOffset={6}
+                  className="w-56 bg-[var(--color-surface)] border border-[var(--color-border-container)] shadow-xl rounded-xl py-1 z-50"
+                >
+                  <div className="px-4 py-3 border-b border-[var(--color-border-container)]">
+                    <div className="text-body-sm font-semibold text-[var(--color-on-surface)]">{userProfile.name}</div>
+                    {userProfile.role ? (
+                      <div className="text-label-sm text-[var(--color-on-surface-variant)] mt-0.5">{userProfile.role}</div>
+                    ) : null}
                   </div>
-                ) : null}
-              </div>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    className="w-full text-start px-4 py-2.5 text-body-sm cursor-pointer flex items-center gap-2"
+                    onClick={() => logout()}
+                  >
+                    <LogOut size={16} />
+                    <span>تسجيل الخروج</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : null}
           </div>
         </header>

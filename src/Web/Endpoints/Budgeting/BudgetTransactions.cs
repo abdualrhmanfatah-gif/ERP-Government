@@ -73,7 +73,9 @@ public class BudgetTransactions : IEndpointGroup
         int id)
     {
         var result = await sender.Send(new GetBudgetTransactionByIdQuery(id));
-        return result is not null ? Results.Ok(result) : Results.NotFound();
+        return result.Succeeded
+            ? Results.Ok(result.Value!)
+            : result.ToProblemDetails();
     }
 
     public static async Task<IResult> CreateBudgetTransaction(
@@ -84,7 +86,7 @@ public class BudgetTransactions : IEndpointGroup
             body.BudgetItemAllocationId, body.TransactionType, body.TransactionDate,
             body.Amount, body.Direction, body.DocumentType, body.DocumentId, body.Description));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Created($"/api/BudgetTransactions/{result.Value}", result.Value);
     }
 
@@ -95,7 +97,7 @@ public class BudgetTransactions : IEndpointGroup
     {
         var result = await sender.Send(new SubmitBudgetTransactionCommand(id, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -106,7 +108,7 @@ public class BudgetTransactions : IEndpointGroup
     {
         var result = await sender.Send(new ApproveBudgetTransactionCommand(id, body.RowVersion, body.Reason));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -117,7 +119,7 @@ public class BudgetTransactions : IEndpointGroup
     {
         var result = await sender.Send(new PostBudgetTransactionCommand(id, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -128,7 +130,7 @@ public class BudgetTransactions : IEndpointGroup
     {
         var result = await sender.Send(new CancelBudgetTransactionCommand(id, body.RowVersion, body.Reason));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -139,7 +141,7 @@ public class BudgetTransactions : IEndpointGroup
     {
         var result = await sender.Send(new ReverseBudgetTransactionCommand(id, body.RowVersion, body.Reason));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Created($"/api/BudgetTransactions/{result.Value}", result.Value);
     }
 }

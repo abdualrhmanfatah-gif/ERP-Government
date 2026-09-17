@@ -34,7 +34,11 @@ export function FileUploadZone({ onUpload, isUploading = false, disabled = false
 
   const validate = useCallback((file: File): string | null => {
     if (file.size > MAX_FILE_SIZE) return `حجم الملف يتجاوز ${formatFileSize(MAX_FILE_SIZE)}`;
-    if (Object.keys(ACCEPTED_TYPES).length > 0 && !ACCEPTED_TYPES[file.type]) {
+    const allowedExtensions = Object.values(ACCEPTED_TYPES).flat();
+    const extension = `.${getExtension(file.name)}`;
+    if (file.type) {
+      if (!ACCEPTED_TYPES[file.type]) return 'نوع الملف غير مدعوم';
+    } else if (!allowedExtensions.includes(extension)) {
       return 'نوع الملف غير مدعوم';
     }
     return null;

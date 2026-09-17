@@ -1,4 +1,4 @@
-﻿using ERP_Government.Domain.Common;
+using ERP_Government.Domain.Common;
 using ERP_Government.Domain.Accounting.Entities;
 using ERP_Government.Domain.Assets.Entities;
 using ERP_Government.Domain.Banking.Entities;
@@ -62,8 +62,6 @@ public interface IApplicationDbContext
     DbSet<Journal> Journals { get; }
     DbSet<JournalEntry> JournalEntries { get; }
     DbSet<JournalEntryLine> JournalEntryLines { get; }
-    DbSet<PostingRule> PostingRules { get; }
-    DbSet<PostingRuleLine> PostingRuleLines { get; }
     DbSet<JournalEntryTemplate> JournalEntryTemplates { get; }
     DbSet<JournalEntryTemplateLine> JournalEntryTemplateLines { get; }
     DbSet<RecurringEntry> RecurringEntries { get; }
@@ -112,23 +110,31 @@ public interface IApplicationDbContext
     DbSet<CommitteeAssignment> CommitteeAssignments { get; }
 
     // Module 10: Revenue
-    DbSet<RevenueReceipt> RevenueReceipts { get; }
-    DbSet<RevenueReceiptLine> RevenueReceiptLines { get; }
+    DbSet<RevenueClaim> RevenueClaims { get; }
+    DbSet<CollectionOrder> CollectionOrders { get; }
     DbSet<ReceiptVoucher> ReceiptVouchers { get; }
     DbSet<ReceiptVoucherLine> ReceiptVoucherLines { get; }
     DbSet<Check> Checks { get; }
-    DbSet<DepositSlip> DepositSlips { get; }
+    DbSet<DepositSlip47> DepositSlips47 { get; }
+    DbSet<DepositSlip48> DepositSlips48 { get; }
 
     // Module 11: Assets
     DbSet<AssetGroup> AssetGroups { get; }
     DbSet<Asset> Assets { get; }
-    DbSet<AssetMovement> AssetMovements { get; }
+    DbSet<AssetTransaction> AssetTransactions { get; }
+    DbSet<AssetTransferDetail> AssetTransferDetails { get; }
+    DbSet<AssetDisposalDetail> AssetDisposalDetails { get; }
+    DbSet<AssetRevaluationDetail> AssetRevaluationDetails { get; }
+    DbSet<AssetImpairmentDetail> AssetImpairmentDetails { get; }
+    DbSet<AssetDepreciationRun> AssetDepreciationRuns { get; }
     DbSet<DepreciationSchedule> DepreciationSchedules { get; }
-    DbSet<AssetRevaluation> AssetRevaluations { get; }
-    DbSet<AssetImpairment> AssetImpairments { get; }
-    DbSet<AssetDisposal> AssetDisposals { get; }
+    DbSet<DepreciationRun> DepreciationRuns { get; }
+    DbSet<DepreciationScheduleLine> DepreciationScheduleLines { get; }
     DbSet<AssetPhysicalCount> AssetPhysicalCounts { get; }
     DbSet<AssetPhysicalCountDetail> AssetPhysicalCountDetails { get; }
+    DbSet<AssetAttributeDefinition> AssetAttributeDefinitions { get; }
+    DbSet<AssetGroupAttribute> AssetGroupAttributes { get; }
+    DbSet<AssetAttributeValue> AssetAttributeValues { get; }
 
     // Module 12: Inventory
     DbSet<Location> Locations { get; }

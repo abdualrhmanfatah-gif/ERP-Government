@@ -6,6 +6,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useEmployees, useDeleteEmployee } from '../hooks';
 import { employeeStatusLabels } from '../types';
 import { useState } from 'react';
+import { getQueryErrorMessage } from '@/shared/api/query-error';
 
 export function EmployeesListPage() {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ export function EmployeesListPage() {
         ]}
         data={employees}
         loading={isLoading}
-        error={error ? 'فشل تحميل البيانات' : undefined}
+        error={error ? getQueryErrorMessage(error) : undefined}
         onRetry={() => refetch()}
         rowKey={(r) => String(r.id)}
         emptyMessage="لا يوجد موظفون"

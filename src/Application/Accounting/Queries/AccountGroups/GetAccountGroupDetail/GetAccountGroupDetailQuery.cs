@@ -1,22 +1,25 @@
 using ERP_Government.Application.Accounting.Common;
+using ERP_Government.Application.Common.Errors;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Accounting.Queries.AccountGroups.GetAccountGroupDetail;
 
 [Authorize(Policy = PermissionCodes.ChartOfAccountsRead)]
-public class GetAccountGroupDetailQuery : IRequest<AccountGroupDetailResponse?>
+public class GetAccountGroupDetailQuery : IRequest<Result<AccountGroupDetailResponse>>
 {
     public int Id { get; init; }
 }
 
 public class GetAccountGroupDetailQueryHandler(
     IApplicationDbContext context,
-    IMapper mapper) : IRequestHandler<GetAccountGroupDetailQuery, AccountGroupDetailResponse?>
+    IMapper mapper) : IRequestHandler<GetAccountGroupDetailQuery, Result<AccountGroupDetailResponse>>
 {
-    public async Task<AccountGroupDetailResponse?> Handle(GetAccountGroupDetailQuery request, CancellationToken cancellationToken)
+    public async Task<Result<AccountGroupDetailResponse>> Handle(GetAccountGroupDetailQuery request, CancellationToken cancellationToken)
     {
         var group = await context.AccountGroups.FindAsync(request.Id, cancellationToken);
-        if (group == null) return null;
+        if (group == null)
+            return Result<AccountGroupDetailResponse>.Failure(ErrorCodes.Accounting.AccountGroupNotFound, ErrorCategory.NotFound, $"Account group with ID {request.Id} not found.");
 
         var groupDto = mapper.Map<AccountGroupDto>(group);
 
@@ -55,12 +58,12 @@ public class GetAccountGroupDetailQueryHandler(
             })
             .ToListAsync(cancellationToken);
 
-        return new AccountGroupDetailResponse
+        return Result<AccountGroupDetailResponse>.Success(new AccountGroupDetailResponse
         {
             Group = groupDto,
             Children = childrenDtos,
             Accounts = accounts,
             Audit = audit
-        };
+        });
     }
 }

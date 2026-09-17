@@ -2,6 +2,12 @@
 
 Language for documents that authorize and execute government expenditure.
 
+## Revenue Collection
+
+**Cashier Cash Account (نقدية لدى أمين الصندوق)**:
+Asset account `1812` used for cash physically held by the cashier after a cash receipt is approved and before Form 47 deposits it to the bank. It is debited on cash revenue collection and credited when the cashier's custody is cleared by deposit.
+_Avoid_: Revenue account, bank account, `110101`
+
 **Beneficiary (المستفيد)**:
 Person or party for whose benefit a disbursement is authorized. Their name remains part of the historical authorization; they may be registered as a Party or identified by name alone. The beneficiary may differ from the person submitting the request.
 _Avoid_: Requester, supplier (unless describing a procurement supplier specifically)

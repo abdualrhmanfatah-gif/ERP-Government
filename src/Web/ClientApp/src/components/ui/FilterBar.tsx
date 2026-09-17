@@ -19,7 +19,7 @@ export function FilterBar({ children, label = 'البحث والتصفية', onC
       role="search"
       aria-label={label}
       className={cn(
-        'flex gap-3 flex-wrap items-center p-3 bg-[var(--color-surface-container-lowest)] border border-[var(--color-border-container)] rounded-xl shadow-sm',
+        'flex gap-3 flex-wrap items-center p-3 bg-[var(--color-surface-container-lowest)] border border-[var(--color-container-border)] rounded-xl shadow-sm',
         className
       )}
     >

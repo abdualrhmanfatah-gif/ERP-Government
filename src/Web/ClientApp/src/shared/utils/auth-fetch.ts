@@ -1,4 +1,4 @@
-import { getToken } from './auth-token';
+import { getToken, removeToken } from './auth-token';
 
 /**
  * Fetch wrapper that injects Authorization: Bearer header.
@@ -13,7 +13,21 @@ export async function authFetch(url: string, init?: RequestInit): Promise<Respon
   if (!headers.has('Accept')) {
     headers.set('Accept', 'application/json');
   }
-  return fetch(url, { ...init, headers });
+  const response = await fetch(url, { ...init, headers });
+
+  if (response.status === 401) {
+    handleSessionExpired();
+  }
+
+  return response;
+}
+
+export function handleSessionExpired(): void {
+  removeToken();
+  const currentPath = window.location.pathname;
+  if (currentPath !== '/login') {
+    window.location.href = `/login?return=${encodeURIComponent(currentPath)}`;
+  }
 }
 
 /**

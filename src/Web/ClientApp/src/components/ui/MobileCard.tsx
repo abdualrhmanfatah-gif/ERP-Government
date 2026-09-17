@@ -23,7 +23,7 @@ export function MobileCard({
   return (
     <div
       className={cn(
-        'bg-[var(--color-surface-container-lowest)] rounded-lg border border-[var(--color-border-container)] p-4',
+        'bg-[var(--color-surface-container-lowest)] rounded-lg border border-[var(--color-container-border)] p-4',
         onClick && 'cursor-pointer hover:bg-[var(--color-surface-container-low)] transition-colors duration-150',
         ariaSelected && 'bg-[color-mix(in_srgb,var(--color-primary-container)_10%,transparent)] border-e-3 border-e-[var(--color-primary)]',
         className

@@ -16,7 +16,7 @@ internal class GetRevenueCollectionsDetailQueryHandler(IApplicationDbContext dbC
             .Include(rv => rv.Lines)
             .Include(rv => rv.Checks)
             .Include(rv => rv.Party)
-            .Include(rv => rv.DepositSlip)
+            .Include(rv => rv.DepositSlip47)
             .FirstAsync(rv => rv.Id == request.ReceiptVoucherId, cancellationToken);
 
         var accountIds = voucher.Lines.Select(l => l.RevenueAccountId).ToList();
@@ -61,8 +61,8 @@ internal class GetRevenueCollectionsDetailQueryHandler(IApplicationDbContext dbC
             PartyName = voucher.Party?.NameAr ?? string.Empty,
             TotalAmount = voucher.Lines.Sum(l => l.Amount),
             PaymentMethod = voucher.PaymentMethod.ToString(),
-            DepositSlipNumber = voucher.DepositSlip?.SlipNumber,
-            DepositSlipStatus = voucher.DepositSlip?.Status.ToString(),
+            DepositSlipNumber = voucher.DepositSlip47?.SlipNumber,
+            DepositSlipStatus = voucher.DepositSlip47?.ApprovedAt.HasValue == true ? "Approved" : "Draft",
             Lines = lines,
             Checks = checks
         };

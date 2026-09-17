@@ -1,14 +1,18 @@
+using ERP_Government.Application.Common.Errors;
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Domain.Security.Entities;
 using ERP_Government.Domain.Workflow.Enums;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Workflow.Commands.CancelWorkflowInstance;
 
-public class CancelWorkflowInstanceCommand : IRequest<Unit>
+[Authorize(Policy = PermissionCodes.WorkflowInstancesExecute)]
+public class CancelWorkflowInstanceCommand : IRequest<Result>
 {
     public int InstanceId { get; init; }
     public string? Reason { get; init; }
@@ -25,23 +29,23 @@ public class CancelWorkflowInstanceCommandValidator : AbstractValidator<CancelWo
 
 public class CancelWorkflowInstanceCommandHandler(
     IApplicationDbContext context,
-    IUser user) : IRequestHandler<CancelWorkflowInstanceCommand, Unit>
+    IUser user) : IRequestHandler<CancelWorkflowInstanceCommand, Result>
 {
-    public async Task<Unit> Handle(
+    public async Task<Result> Handle(
         CancelWorkflowInstanceCommand request,
         CancellationToken cancellationToken)
     {
         if (user.Id is not int userId)
-            throw new InvalidOperationException("User identity is required for this operation.");
+            return Result.Failure(ErrorCodes.Workflow.IdentityRequired, ErrorCategory.Authorization, "User identity is required for this operation.");
 
         var instance = await context.WorkflowInstances
             .FirstOrDefaultAsync(i => i.Id == request.InstanceId, cancellationToken);
 
         if (instance == null)
-            throw new InvalidOperationException($"Workflow instance with ID {request.InstanceId} not found.");
+            return Result.Failure(ErrorCodes.Workflow.InstanceNotFound, ErrorCategory.NotFound, $"Workflow instance with ID {request.InstanceId} not found.");
 
         if (instance.Status != WorkflowInstanceStatus.InProgress.ToString())
-            throw new InvalidOperationException($"Workflow instance is not in progress. Current status: {instance.Status}.");
+            return Result.Failure(ErrorCodes.Workflow.InstanceNotInProgress, ErrorCategory.BusinessRule, $"Workflow instance is not in progress. Current status: {instance.Status}.");
 
         instance.Status = WorkflowInstanceStatus.Cancelled.ToString();
         instance.CompletedAt = DateTimeOffset.UtcNow;
@@ -82,6 +86,6 @@ public class CancelWorkflowInstanceCommandHandler(
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return Unit.Value;
+        return Result.Success();
     }
 }

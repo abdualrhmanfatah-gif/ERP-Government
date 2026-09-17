@@ -2,9 +2,11 @@ using ERP_Government.Application.Common.Interfaces;
 using ERP_Government.Application.Payments.Common.DTOs;
 using ERP_Government.Domain.Payments.Enums;
 using Microsoft.EntityFrameworkCore;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Payments.Queries.Payments.GetPayments;
 
+[Authorize(Policy = PermissionCodes.PaymentsView)]
 public record GetPaymentsQuery(
     PaymentStatus? Status = null,
     int? FundId = null,

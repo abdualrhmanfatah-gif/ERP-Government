@@ -3,6 +3,7 @@ using ERP_Government.Application.FinancialSettings.Commands.FiscalYears;
 using ERP_Government.Application.FinancialSettings.Queries.FiscalYears;
 using ERP_Government.Application.Common.Security;
 using MediatR;
+using ERP_Government.Web.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ERP_Government.Web.Endpoint.FinancialSettings;
@@ -53,11 +54,12 @@ public class FiscalYears : IEndpointGroup
     }
 
     [EndpointSummary("Get fiscal year by ID")]
-    public static async Task<FiscalYearDto?> GetFiscalYearById(
+    public static async Task<IResult> GetFiscalYearById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetFiscalYearByIdQuery { Id = id });
+        var result = await sender.Send(new GetFiscalYearByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new fiscal year")]
@@ -67,7 +69,7 @@ public class FiscalYears : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -78,11 +80,15 @@ public class FiscalYears : IEndpointGroup
         [FromBody] UpdateFiscalYearCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -93,7 +99,7 @@ public class FiscalYears : IEndpointGroup
     {
         var result = await sender.Send(new OpenFiscalYearCommand { Id = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -104,15 +110,16 @@ public class FiscalYears : IEndpointGroup
     {
         var result = await sender.Send(new CloseFiscalYearCommand { Id = id });
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
     [EndpointSummary("Get fiscal year and period by date")]
-    public static async Task<GetFiscalYearPeriodByDateResult?> GetFiscalYearPeriodByDate(
+    public static async Task<IResult> GetFiscalYearPeriodByDate(
         [FromServices] ISender sender,
         [FromQuery] DateTime date)
     {
-        return await sender.Send(new GetFiscalYearPeriodByDateQuery { Date = date });
+        var result = await sender.Send(new GetFiscalYearPeriodByDateQuery { Date = date });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 }

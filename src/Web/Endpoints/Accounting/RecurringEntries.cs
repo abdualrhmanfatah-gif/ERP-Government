@@ -52,11 +52,12 @@ public class RecurringEntries : IEndpointGroup
     }
 
     [EndpointSummary("Get recurring entry by ID")]
-    public static async Task<RecurringEntryDto?> GetRecurringEntryById(
+    public static async Task<IResult> GetRecurringEntryById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetRecurringEntryByIdQuery { Id = id });
+        var result = await sender.Send(new GetRecurringEntryByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new recurring entry")]
@@ -66,7 +67,7 @@ public class RecurringEntries : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Ok();
     }
 
@@ -77,11 +78,15 @@ public class RecurringEntries : IEndpointGroup
         [FromBody] PauseRecurringEntryCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -92,11 +97,15 @@ public class RecurringEntries : IEndpointGroup
         [FromBody] ResumeRecurringEntryCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -107,11 +116,15 @@ public class RecurringEntries : IEndpointGroup
         [FromBody] CancelRecurringEntryCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

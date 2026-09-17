@@ -182,7 +182,7 @@ export function DataGrid<T>({
                           : undefined
                       }
                       className={cn(
-                         'px-3 py-2.5 font-semibold text-sm uppercase tracking-wide text-white bg-[var(--color-primary)] border-e border-b border-[var(--color-primary-container)] whitespace-nowrap',
+                         'px-3 py-2.5 font-semibold text-sm uppercase tracking-wide text-[var(--color-on-primary)] bg-[var(--color-primary)] border-e border-b border-[var(--color-primary-container)] whitespace-nowrap',
                          alignMap[align],
                          canSort && 'cursor-pointer select-none hover:bg-[var(--color-primary-container)] transition-colors',
                         col?.headerClassName
@@ -231,7 +231,7 @@ export function DataGrid<T>({
                   } : undefined}
                   tabIndex={onRowClick ? 0 : undefined}
                   className={cn(
-                     striped && idx % 2 === 1 ? 'bg-[rgba(0,32,69,0.06)]' : 'bg-[var(--color-surface-container-lowest)]',
+                     striped && idx % 2 === 1 ? 'bg-[color-mix(in_srgb,var(--color-primary-container)_4%,transparent)]' : 'bg-[var(--color-surface-container-lowest)]',
                      isSelected && 'bg-[color-mix(in_srgb,var(--color-primary-container)_10%,transparent)] border-e-3 border-e-[var(--color-primary)] font-semibold',
                      onRowClick && 'cursor-pointer',
                      'transition-all duration-150 hover:bg-[color-mix(in_srgb,var(--color-primary-container)_5%,transparent)]'

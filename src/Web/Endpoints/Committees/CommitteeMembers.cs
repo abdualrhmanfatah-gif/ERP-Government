@@ -53,11 +53,12 @@ public class CommitteeMembers : IEndpointGroup
     }
 
     [EndpointSummary("Get committee member by ID")]
-    public static async Task<CommitteeMemberDto?> GetCommitteeMemberById(
+    public static async Task<IResult> GetCommitteeMemberById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetCommitteeMemberByIdQuery { Id = id });
+        var result = await sender.Send(new GetCommitteeMemberByIdQuery { Id = id });
+        return result.Succeeded ? Results.Ok(result.Value!) : result.ToProblemDetails();
     }
 
     [EndpointSummary("Add a member to a committee")]
@@ -67,7 +68,7 @@ public class CommitteeMembers : IEndpointGroup
     {
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -78,11 +79,15 @@ public class CommitteeMembers : IEndpointGroup
         [FromBody] UpdateCommitteeMemberCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -93,11 +98,15 @@ public class CommitteeMembers : IEndpointGroup
         [FromBody] RemoveCommitteeMemberCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -108,11 +117,15 @@ public class CommitteeMembers : IEndpointGroup
         [FromBody] ActivateMemberCommand command)
     {
         if (id != command.Id)
-            return Results.BadRequest("ID mismatch.");
+            return Results.Problem(
+                detail: "ID mismatch.",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Bad Request",
+                type: "about:blank");
 
         var result = await sender.Send(command);
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

@@ -46,7 +46,6 @@ export function useLocations() {
     queryKey: ['locations'],
     queryFn: () => api.get<{ id: number; name: string }[]>('/api/Locations'),
     staleTime: Infinity,
-    retry: false,
   });
 }
 

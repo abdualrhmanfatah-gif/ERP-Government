@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import {
   setToken, removeToken,
   setAuthUser, isAuthenticated as checkTokenValid,
@@ -11,6 +11,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  clearAuth: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -18,6 +19,11 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(() => checkTokenValid());
   const [isLoading] = useState(() => false);
+
+  const clearAuth = useCallback(() => {
+    removeToken();
+    setIsAuthenticated(false);
+  }, []);
 
   const login = async (email: string, password: string) => {
     const res = await fetch('/api/Users/login', {
@@ -43,8 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore — token is cleared regardless
     }
-    removeToken();
-    setIsAuthenticated(false);
+    clearAuth();
   };
 
   const register = async (_email: string, _password: string) => {
@@ -52,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, register, logout, clearAuth }}>
       {children}
     </AuthContext.Provider>
   );

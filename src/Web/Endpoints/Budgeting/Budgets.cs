@@ -5,6 +5,7 @@ using ERP_Government.Application.Budgeting.Queries.BudgetItems;
 using ERP_Government.Application.Budgeting.Queries.Budgets;
 using ERP_Government.Application.Common.Security;
 using ERP_Government.Domain.Budgeting.Enums;
+using ERP_Government.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -110,11 +111,12 @@ public class Budgets : IEndpointGroup
     }
 
     [EndpointSummary("Get budget by ID")]
-    public static async Task<BudgetDto> GetBudgetById(
+    public static async Task<IResult> GetBudgetById(
         [FromServices] ISender sender,
         int id)
     {
-        return await sender.Send(new GetBudgetByIdQuery(id));
+        var result = await sender.Send(new GetBudgetByIdQuery(id));
+        return result.ToProblemDetails();
     }
 
     [EndpointSummary("Create a new budget")]
@@ -125,7 +127,7 @@ public class Budgets : IEndpointGroup
         var result = await sender.Send(new CreateBudgetCommand(
             body.BudgetName, body.FiscalYearId, body.FundId, body.BudgetTypeId));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Created($"/api/Budgets/{result.Value}", result.Value);
     }
 
@@ -138,7 +140,7 @@ public class Budgets : IEndpointGroup
         var result = await sender.Send(new UpdateBudgetCommand(
             id, body.BudgetNumber, body.BudgetName, body.FiscalYearId, body.FundId, body.BudgetTypeId, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -150,7 +152,7 @@ public class Budgets : IEndpointGroup
     {
         var result = await sender.Send(new SubmitBudgetCommand(id, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -162,7 +164,7 @@ public class Budgets : IEndpointGroup
     {
         var result = await sender.Send(new ApproveBudgetCommand(id, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -174,7 +176,7 @@ public class Budgets : IEndpointGroup
     {
         var result = await sender.Send(new RejectBudgetCommand(id, body.RowVersion, body.Reason, body.Notes));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -186,7 +188,7 @@ public class Budgets : IEndpointGroup
     {
         var result = await sender.Send(new ActivateBudgetCommand(id, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -198,7 +200,7 @@ public class Budgets : IEndpointGroup
     {
         var result = await sender.Send(new SuspendBudgetCommand(id, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -210,7 +212,7 @@ public class Budgets : IEndpointGroup
     {
         var result = await sender.Send(new CloseBudgetCommand(id, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -222,7 +224,7 @@ public class Budgets : IEndpointGroup
     {
         var result = await sender.Send(new CancelBudgetCommand(id, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -253,7 +255,7 @@ public class Budgets : IEndpointGroup
         var result = await sender.Send(new CreateBudgetItemCommand(
             id, body.ItemCode, body.ItemName, body.ParentId, body.AccountId, body.FundId, body.CostCenterId, body.BudgetClassificationId, body.Remarks, body.AllowOverrun));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.Created($"/api/Budgets/{id}/items/{result.Value}", result.Value);
     }
 
@@ -267,7 +269,7 @@ public class Budgets : IEndpointGroup
         var result = await sender.Send(new UpdateBudgetItemCommand(
             itemId, body.ItemName, body.AccountId, body.CostCenterId, body.BudgetClassificationId, body.AllowOverrun, body.Remarks, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -279,7 +281,7 @@ public class Budgets : IEndpointGroup
     {
         var result = await sender.Send(new DeleteBudgetItemCommand(itemId));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 
@@ -293,7 +295,7 @@ public class Budgets : IEndpointGroup
         var result = await sender.Send(new MoveBudgetItemCommand(
             itemId, body.NewParentId, body.RowVersion));
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors);
+            return result.ToProblemDetails();
         return Results.NoContent();
     }
 }

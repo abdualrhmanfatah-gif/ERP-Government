@@ -60,6 +60,7 @@
     "generate-api": "nswag run /runtime:Net100",
     "generate-tokens": "npx tsx src/design-system/generate-tokens.ts",
     "design:lint": "designmd lint ../../../DESIGN.md",
-    "design:check": "designmd lint ../../../DESIGN.md && designmd diff ../../../DESIGN.md ../../../DESIGN.md"
+    "design:check": "designmd lint ../../../DESIGN.md && designmd diff ../../../DESIGN.md ../../../DESIGN.md",
+    "design:usage": "node scripts/check-token-usage.mjs"
   }
 }

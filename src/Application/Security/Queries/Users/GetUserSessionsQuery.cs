@@ -4,10 +4,12 @@ using ERP_Government.Application.Security.Common.DTOs;
 using MediatR;
 
 using Microsoft.EntityFrameworkCore;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Security.Queries.Users;
 
 // T019 — GetUserSessionsQuery
+[Authorize(Policy = PermissionCodes.UsersManageSessions)]
 public class GetUserSessionsQuery : IRequest<List<UserSessionDto>>
 {
     public int UserId { get; init; }

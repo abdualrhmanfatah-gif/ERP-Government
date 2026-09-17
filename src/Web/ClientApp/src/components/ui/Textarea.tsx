@@ -30,7 +30,7 @@ export function Textarea({ label, error, className, id, required, ...rest }: Tex
         aria-describedby={error ? errorId : undefined}
         required={required}
         className={cn(
-          'w-full rounded-lg border-2 border-[var(--color-border-input)] bg-[var(--color-surface-container-lowest)] px-3 py-2.5 text-sm text-[var(--color-on-surface)] placeholder:text-[var(--color-outline)] transition-colors duration-150 focus:outline-2 focus:outline-[var(--color-focus-ring)] focus:outline-offset-2 focus:ring-0 focus:shadow-[0_0_0_4px_var(--color-focus-halo)] disabled:bg-[var(--color-disabled-bg)] disabled:text-[var(--color-disabled-fg)] disabled:cursor-not-allowed min-h-[80px] resize-y',
+          'w-full rounded-lg border-2 border-[var(--color-input-border)] bg-[var(--color-surface-container-lowest)] px-3 py-2.5 text-sm text-[var(--color-on-surface)] placeholder:text-[var(--color-outline)] transition-colors duration-150 focus:outline-2 focus:outline-[var(--color-focus-ring)] focus:outline-offset-2 focus:ring-0 focus:shadow-[0_0_0_4px_var(--color-focus-halo)] disabled:bg-[var(--color-disabled-bg)] disabled:text-[var(--color-disabled-fg)] disabled:cursor-not-allowed min-h-[80px] resize-y',
           error && 'border-[var(--color-error)] focus:outline-[var(--color-error)] focus:shadow-[0_0_0_4px_var(--color-error-container)]',
           className
         )}

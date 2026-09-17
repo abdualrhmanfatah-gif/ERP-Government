@@ -15,7 +15,7 @@ public class CreateSupplierInvoiceCommandHandler(
         if (po is null)
             return Result<int>.Failure(["Purchase order not found."]);
 
-        var invoiceNumber = await documentSequenceService.GenerateNextNumberAsync("SINV", cancellationToken);
+        var invoiceNumber = await documentSequenceService.GenerateNextNumberAsync("SupplierInvoice", cancellationToken);
 
         var entity = new SupplierInvoice
         {

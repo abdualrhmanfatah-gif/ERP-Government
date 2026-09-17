@@ -1,14 +1,18 @@
+using ERP_Government.Application.Common.Errors;
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Domain.Security.Entities;
 using ERP_Government.Domain.Workflow.Enums;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Workflow.Commands.UpdateWorkflowDefinition;
 
-public class UpdateWorkflowDefinitionCommand : IRequest<Unit>
+[Authorize(Policy = PermissionCodes.WorkflowDefinitionsManage)]
+public class UpdateWorkflowDefinitionCommand : IRequest<Result>
 {
     public int Id { get; init; }
     public string? Description { get; init; }
@@ -29,20 +33,20 @@ public class UpdateWorkflowDefinitionCommandValidator : AbstractValidator<Update
 
 public class UpdateWorkflowDefinitionCommandHandler(
     IApplicationDbContext context,
-    IUser user) : IRequestHandler<UpdateWorkflowDefinitionCommand, Unit>
+    IUser user) : IRequestHandler<UpdateWorkflowDefinitionCommand, Result>
 {
-    public async Task<Unit> Handle(
+    public async Task<Result> Handle(
         UpdateWorkflowDefinitionCommand request,
         CancellationToken cancellationToken)
     {
         if (user.Id is not int userId)
-            throw new InvalidOperationException("User identity is required for this operation.");
+            return Result.Failure(ErrorCodes.Workflow.IdentityRequired, ErrorCategory.Authorization, "User identity is required for this operation.");
 
         var definition = await context.WorkflowDefinitions
             .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
 
         if (definition == null)
-            throw new InvalidOperationException($"Workflow definition with ID {request.Id} not found.");
+            return Result.Failure(ErrorCodes.Workflow.DefinitionNotFound, ErrorCategory.NotFound, $"Workflow definition with ID {request.Id} not found.");
 
         var oldDescription = definition.Description;
         var oldStatus = definition.Status;
@@ -83,6 +87,6 @@ public class UpdateWorkflowDefinitionCommandHandler(
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return Unit.Value;
+        return Result.Success();
     }
 }

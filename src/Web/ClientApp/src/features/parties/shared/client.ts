@@ -20,7 +20,12 @@ async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     let problemDetails: { status?: number; title?: string; detail?: string };
     try {
-      problemDetails = await response.json();
+      const body = await response.json();
+      if (Array.isArray(body)) {
+        problemDetails = { status: response.status, detail: body.join('\n') };
+      } else {
+        problemDetails = body;
+      }
     } catch {
       problemDetails = { status: response.status, detail: response.statusText };
     }

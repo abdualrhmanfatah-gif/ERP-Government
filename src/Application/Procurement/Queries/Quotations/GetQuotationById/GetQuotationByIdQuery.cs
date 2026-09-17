@@ -1,7 +1,9 @@
 using ERP_Government.Domain.Procurement.Enums;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Procurement.Queries.Quotations.GetQuotationById;
 
+[Authorize(Policy = PermissionCodes.QuotationsView)]
 public record GetQuotationByIdQuery(int Id) : IRequest<Result<QuotationDetailResponse>>;
 
 public record QuotationDetailResponse(

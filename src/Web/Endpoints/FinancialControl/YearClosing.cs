@@ -24,7 +24,7 @@ public class YearClosing : IEndpointGroup
         var result = await sender.Send(new LapseFiscalYearCommand(request.FiscalYearId));
         return result.Succeeded && result.Value is not null
             ? Results.Ok(result.Value.ToResponse())
-            : Results.BadRequest(result.Errors);
+            : result.ToProblemDetails();
     }
 
     private static async Task<IResult> HandleReopen(
@@ -34,7 +34,7 @@ public class YearClosing : IEndpointGroup
         var result = await sender.Send(new ReopenFiscalYearCommand(request.FiscalYearId));
         return result.Succeeded && result.Value is not null
             ? Results.Ok(result.Value.ToResponse())
-            : Results.BadRequest(result.Errors);
+            : result.ToProblemDetails();
     }
 }
 

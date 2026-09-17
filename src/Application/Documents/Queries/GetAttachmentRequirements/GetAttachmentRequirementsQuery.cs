@@ -1,7 +1,9 @@
 using ERP_Government.Domain.Security.Entities;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Documents.Queries.GetAttachmentRequirements;
 
+[Authorize]
 public record GetAttachmentRequirementsQuery(
     string DocumentType) : IRequest<IReadOnlyList<DocumentAttachmentRequirement>>;
 

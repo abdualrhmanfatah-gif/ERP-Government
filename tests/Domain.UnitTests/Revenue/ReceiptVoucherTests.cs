@@ -68,23 +68,6 @@ public class ReceiptVoucherTests
     }
 
     [Test]
-    public void Voucher_CanTransitionToPendingReview()
-    {
-        var voucher = new ReceiptVoucher
-        {
-            VoucherNumber = "RCV-000003",
-            VoucherDate = DateOnly.FromDateTime(DateTime.Today),
-            PartyId = 1,
-            PaymentMethod = PaymentMethod.Cash,
-            ReceivedFrom = "Test Party",
-            Status = ReceiptVoucherStatus.Draft
-        };
-
-        voucher.Status = ReceiptVoucherStatus.PendingReview;
-        voucher.Status.ShouldBe(ReceiptVoucherStatus.PendingReview);
-    }
-
-    [Test]
     public void Voucher_CanTransitionToApproved()
     {
         var voucher = new ReceiptVoucher
@@ -94,7 +77,7 @@ public class ReceiptVoucherTests
             PartyId = 1,
             PaymentMethod = PaymentMethod.Cash,
             ReceivedFrom = "Test Party",
-            Status = ReceiptVoucherStatus.PendingReview
+            Status = ReceiptVoucherStatus.Draft
         };
 
         voucher.Status = ReceiptVoucherStatus.Approved;
@@ -158,42 +141,5 @@ public class ReceiptVoucherTests
 
         check.Status.ShouldBe(CheckStatus.Bounced);
         check.BouncedAt.ShouldNotBeNull();
-    }
-
-    [Test]
-    public void DepositSlip_ShouldHaveDraftStatus()
-    {
-        var slip = new DepositSlip
-        {
-            SlipNumber = "DSL-000001",
-            SlipDate = DateOnly.FromDateTime(DateTime.Today),
-            FormType = FormType.Form47,
-            Status = DepositSlipStatus.Draft,
-            TotalAmount = 10000.00m
-        };
-
-        slip.Status.ShouldBe(DepositSlipStatus.Draft);
-        slip.FormType.ShouldBe(FormType.Form47);
-    }
-
-    [Test]
-    public void DepositSlip_CanTransitionToApproved()
-    {
-        var slip = new DepositSlip
-        {
-            SlipNumber = "DSL-000002",
-            SlipDate = DateOnly.FromDateTime(DateTime.Today),
-            FormType = FormType.Form47,
-            Status = DepositSlipStatus.Draft,
-            TotalAmount = 10000.00m
-        };
-
-        slip.Status = DepositSlipStatus.Approved;
-        slip.ApprovedById = 1;
-        slip.ApprovedAt = DateTimeOffset.UtcNow;
-
-        slip.Status.ShouldBe(DepositSlipStatus.Approved);
-        slip.ApprovedById.ShouldBe(1);
-        slip.ApprovedAt.ShouldNotBeNull();
     }
 }

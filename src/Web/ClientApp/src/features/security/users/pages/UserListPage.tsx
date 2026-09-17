@@ -7,6 +7,7 @@ import { FilterBar, FilterSearch, FilterSelect } from '@/components/ui';
 import { useUsers } from '../hooks';
 import { CreateUserDialog } from '@/components/SecurityUsersCreateDialog';
 import { activeStatusLabels, getActiveStatusLabel } from '@/shared/constants/labels';
+import { getQueryErrorMessage } from '@/shared/api/query-error';
 
 export function UserListPage() {
   const navigate = useNavigate();
@@ -78,7 +79,7 @@ export function UserListPage() {
         ]}
         data={users}
         loading={isLoading}
-        error={error ? 'فشل تحميل البيانات' : undefined}
+        error={error ? getQueryErrorMessage(error) : undefined}
         onRetry={() => refetch()}
         rowKey={(r) => String(r.id)}
         emptyMessage="لا يوجد مستخدمون"

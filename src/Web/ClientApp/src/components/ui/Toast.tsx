@@ -72,7 +72,7 @@ function ToastContainer({ toasts, onRemove }: { toasts: ToastItem[]; onRemove: (
     <div
       aria-live="polite"
       aria-label="إشعارات"
-      className="fixed top-4 start-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2 w-full max-w-sm pointer-events-none"
+      className="fixed top-4 inset-x-0 mx-auto z-[9999] flex flex-col gap-2 w-full max-w-sm px-4 pointer-events-none"
     >
       {toasts.map((toast) => (
         <ToastItemComponent key={toast.id} toast={toast} onRemove={onRemove} />
@@ -91,28 +91,28 @@ function ToastItemComponent({ toast, onRemove }: { toast: ToastItem; onRemove: (
 
   const colorMap: Record<NotificationType, { bg: string; border: string; icon: string; text: string }> = {
     success: {
-      bg: 'var(--color-success-container, #dcfce7)',
-      border: 'var(--color-success, #16a34a)',
-      icon: 'var(--color-success, #16a34a)',
-      text: 'var(--color-on-surface, #0d1c2f)',
+      bg: 'var(--color-success-container)',
+      border: 'var(--color-success)',
+      icon: 'var(--color-success)',
+      text: 'var(--color-on-success-container)',
     },
     error: {
-      bg: 'var(--color-error-container, #ffdad6)',
-      border: 'var(--color-error, #e53935)',
-      icon: 'var(--color-error, #e53935)',
-      text: 'var(--color-on-surface, #0d1c2f)',
+      bg: 'var(--color-error-container)',
+      border: 'var(--color-error)',
+      icon: 'var(--color-error)',
+      text: 'var(--color-on-error-container)',
     },
     warning: {
-      bg: 'var(--color-warning-container, #fef9c3)',
-      border: 'var(--color-warning, #ca8a04)',
-      icon: 'var(--color-warning, #ca8a04)',
-      text: 'var(--color-on-surface, #0d1c2f)',
+      bg: 'var(--color-warning-container)',
+      border: 'var(--color-warning)',
+      icon: 'var(--color-warning)',
+      text: 'var(--color-on-warning-container)',
     },
     info: {
-      bg: 'var(--color-info-container, #dbeafe)',
-      border: 'var(--color-info, #2563eb)',
-      icon: 'var(--color-info, #2563eb)',
-      text: 'var(--color-on-surface, #0d1c2f)',
+      bg: 'var(--color-info-container)',
+      border: 'var(--color-info)',
+      icon: 'var(--color-info)',
+      text: 'var(--color-on-info-container)',
     },
   };
 

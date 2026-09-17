@@ -1,0 +1,40 @@
+namespace ERP_Government.Application.Assets.AssetTransactions.Transfers.Common;
+
+public record AssetTransferListItemResponse(
+    int Id,
+    string DocumentNumber,
+    int AssetId,
+    string AssetCode,
+    string AssetName,
+    DateOnly TransactionDate,
+    string Status,
+    string? FromLocationName,
+    string? ToLocationName,
+    string? FromEmployeeName,
+    string? ToEmployeeName);
+
+public record AssetTransferDetailResponse(
+    int Id,
+    string DocumentNumber,
+    int AssetId,
+    string AssetCode,
+    string AssetName,
+    DateOnly TransactionDate,
+    string Status,
+    int CurrencyId,
+    string? Notes,
+    DateTimeOffset OccurredAt,
+    int? FromLocationId,
+    string? FromLocationName,
+    int? ToLocationId,
+    string? ToLocationName,
+    int? FromEmployeeId,
+    string? FromEmployeeName,
+    int? ToEmployeeId,
+    string? ToEmployeeName,
+    int? FromDepartmentId,
+    string? FromDepartmentName,
+    int? ToDepartmentId,
+    string? ToDepartmentName,
+    byte[] RowVersion,
+    byte[] AssetRowVersion);

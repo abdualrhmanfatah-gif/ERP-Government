@@ -1,27 +1,31 @@
+using ERP_Government.Application.Common.Errors;
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.Common.Models;
 using ERP_Government.Domain.Security.Entities;
 using ERP_Government.Shared.Workflow;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using ERP_Government.Application.Common.Security;
 
 namespace ERP_Government.Application.Workflow.Queries.GetWorkflowHistory;
 
-public class GetWorkflowHistoryQuery : IRequest<List<WorkflowHistoryDto>>
+[Authorize(Policy = PermissionCodes.WorkflowHistoryView)]
+public class GetWorkflowHistoryQuery : IRequest<Result<List<WorkflowHistoryDto>>>
 {
     public int InstanceId { get; init; }
 }
 
 public class GetWorkflowHistoryQueryHandler(
     IApplicationDbContext context,
-    IUser user) : IRequestHandler<GetWorkflowHistoryQuery, List<WorkflowHistoryDto>>
+    IUser user) : IRequestHandler<GetWorkflowHistoryQuery, Result<List<WorkflowHistoryDto>>>
 {
-    public async Task<List<WorkflowHistoryDto>> Handle(
+    public async Task<Result<List<WorkflowHistoryDto>>> Handle(
         GetWorkflowHistoryQuery request,
         CancellationToken cancellationToken)
     {
         if (user.Id is not int userId)
-            throw new InvalidOperationException("User identity is required for this operation.");
+            return Result<List<WorkflowHistoryDto>>.Failure(ErrorCodes.Workflow.IdentityRequired, ErrorCategory.Authorization, "User identity is required for this operation.");
 
         var results = await context.WorkflowHistory
             .Where(h => h.WorkflowInstanceId == request.InstanceId)
@@ -54,6 +58,6 @@ public class GetWorkflowHistoryQueryHandler(
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return results;
+        return Result<List<WorkflowHistoryDto>>.Success(results);
     }
 }
