@@ -33,7 +33,7 @@ public class UploadAttachmentCommandHandler(
             DocumentId = request.DocumentId,
             FileName = request.FileName,
             StoragePath = filePath,
-            MimeType = "application/octet-stream",
+            MimeType = MimeDetector.Detect(request.FileName),
             SizeBytes = (int)request.Content.Length,
             AttachmentTypeCode = request.AttachmentTypeCode,
             IsRequired = false,
