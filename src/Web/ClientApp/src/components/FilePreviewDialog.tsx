@@ -7,6 +7,7 @@ import { useFileBlob } from './file-preview/useFileBlob';
 import { PdfViewer } from './file-preview/PdfViewer';
 import { WordViewer } from './file-preview/WordViewer';
 import { ExcelViewer } from './file-preview/ExcelViewer';
+import { TextViewer } from './file-preview/TextViewer';
 import type { AttachmentRecord } from '@/features/documents/shared/types';
 import { formatFileSize } from '@/shared/utils/file-utils';
 
@@ -24,6 +25,16 @@ const WORD_TYPES = [
 const EXCEL_TYPES = [
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'application/vnd.ms-excel',
+  'text/csv',
+];
+const TEXT_TYPES = [
+  'text/plain',
+  'text/html',
+  'text/css',
+  'text/javascript',
+  'application/json',
+  'application/xml',
+  'text/xml',
 ];
 
 function isPdf(mime: string) {
@@ -34,6 +45,9 @@ function isWord(mime: string) {
 }
 function isExcel(mime: string) {
   return EXCEL_TYPES.includes(mime);
+}
+function isText(mime: string) {
+  return mime.startsWith('text/') || TEXT_TYPES.includes(mime);
 }
 function isImage(mime: string) {
   return mime.startsWith('image/');
@@ -60,6 +74,7 @@ export function FilePreviewDialog({ open, onClose, attachment }: FilePreviewDial
     if (isPdf(attachment.mimeType)) return <PdfViewer url={url} />;
     if (isWord(attachment.mimeType) && blob) return <WordViewer blob={blob} />;
     if (isExcel(attachment.mimeType) && blob) return <ExcelViewer blob={blob} />;
+    if (isText(attachment.mimeType) && blob) return <TextViewer blob={blob} />;
     if (isImage(attachment.mimeType))
       return (
         <div className="flex justify-center overflow-auto max-h-[70vh]">
