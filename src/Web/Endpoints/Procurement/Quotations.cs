@@ -32,7 +32,7 @@ public class Quotations : IEndpointGroup
             .RequireAuthorization(PermissionCodes.QuotationsCreate)
             .Produces<Result>();
         group.MapPatch("/{id:int}/submit", HandleSubmit)
-            .RequireAuthorization()
+            .RequireAuthorization(PermissionCodes.QuotationsCreate)
             .Produces<Result>();
         group.MapPatch("/{id:int}/start-evaluation", HandleStartEvaluation)
             .RequireAuthorization(PermissionCodes.QuotationsEvaluate)

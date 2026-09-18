@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ERP_Government.Application.Common.Interfaces;
+using ERP_Government.Application.Common.Security;
 using ERP_Government.Domain.BackgroundJobs.Enums;
 using ERP_Government.Web.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -14,17 +15,17 @@ public class BackgroundJobsEndpoints : IEndpointGroup
     {
         groupBuilder.MapGet("/", GetBackgroundJobs)
             .Produces<BackgroundJobsResponse>()
-            .RequireAuthorization();
+            .RequireAuthorization(PermissionCodes.BackgroundJobsView);
 
         groupBuilder.MapGet("/{id:int}/history", GetBackgroundJobHistory)
             .Produces<BackgroundJobHistoryResponse>()
-            .RequireAuthorization();
+            .RequireAuthorization(PermissionCodes.BackgroundJobsView);
 
         groupBuilder.MapPost("/{id:int}/cancel", CancelBackgroundJob)
             .Produces<CancelBackgroundJobResponse>()
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status409Conflict)
-            .RequireAuthorization();
+            .RequireAuthorization(PermissionCodes.BackgroundJobsManage);
     }
 
     private static async Task<IResult> GetBackgroundJobs(

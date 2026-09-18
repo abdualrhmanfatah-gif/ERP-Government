@@ -14,14 +14,7 @@ public static class ExcelHeaderWriter
     {
         var row = startRow;
 
-        var hasAnyImage = FileExists(ReportBranding.RepublicHeaderPath)
-            || FileExists(ReportBranding.MinistryHeaderPath)
-            || FileExists(ReportBranding.LogoPath);
-
-        if (hasAnyImage)
-        {
-            row = ComposeImageRow(worksheet, row);
-        }
+        row = ComposeImageRow(worksheet, row);
 
         if (!string.IsNullOrWhiteSpace(ReportBranding.OrganizationName))
         {
@@ -88,41 +81,50 @@ public static class ExcelHeaderWriter
     private static int ComposeImageRow(IXLWorksheet worksheet, int row)
     {
         var imageRow = row;
+        var hasImages = false;
 
-        if (FileExists(ReportBranding.RepublicHeaderPath))
-        {
-            var pic = worksheet.AddPicture(ReportBranding.RepublicHeaderPath)
-                .MoveTo(worksheet.Cell(imageRow, 1));
-            ScaleHeight(pic, HeaderImageMaxHeightPx);
-        }
+        if (TryAddImage(worksheet, ReportBranding.RepublicHeaderPath, "republic_header", imageRow, 1, HeaderImageMaxHeightPx))
+            hasImages = true;
 
-        if (FileExists(ReportBranding.MinistryHeaderPath))
-        {
-            var pic = worksheet.AddPicture(ReportBranding.MinistryHeaderPath)
-                .MoveTo(worksheet.Cell(imageRow + 1, 1));
-            ScaleHeight(pic, HeaderImageMaxHeightPx);
-        }
+        if (TryAddImage(worksheet, ReportBranding.MinistryHeaderPath, "ministry_header", imageRow + 1, 1, HeaderImageMaxHeightPx))
+            hasImages = true;
 
-        if (FileExists(ReportBranding.LogoPath))
-        {
-            var pic = worksheet.AddPicture(ReportBranding.LogoPath)
-                .MoveTo(worksheet.Cell(imageRow, 5));
-            ScaleHeight(pic, LogoMaxHeightPx);
-        }
+        if (TryAddImage(worksheet, ReportBranding.LogoPath, "logo", imageRow, 5, LogoMaxHeightPx))
+            hasImages = true;
 
-        return row + 3;
+        return hasImages ? row + 3 : row;
     }
 
-    private static void ScaleHeight(IXLPicture pic, int maxHeightPx)
+    private static bool TryAddImage(
+        IXLWorksheet worksheet,
+        string? filePath,
+        string imageId,
+        int row,
+        int col,
+        int maxHeightPx)
     {
-        if (pic.Height <= maxHeightPx)
-            return;
+        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+            return false;
 
-        var ratio = (double)maxHeightPx / pic.Height;
-        pic.Width = (int)(pic.Width * ratio);
-        pic.Height = maxHeightPx;
+        try
+        {
+            var bytes = File.ReadAllBytes(filePath);
+            using var stream = new MemoryStream(bytes);
+            var pic = worksheet.AddPicture(stream, XLPictureFormat.Png)
+                .MoveTo(worksheet.Cell(row, col));
+
+            if (pic.Height > maxHeightPx)
+            {
+                var ratio = (double)maxHeightPx / pic.Height;
+                pic.Width = (int)(pic.Width * ratio);
+                pic.Height = maxHeightPx;
+            }
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
-
-    private static bool FileExists(string? path)
-        => !string.IsNullOrEmpty(path) && File.Exists(path);
 }
