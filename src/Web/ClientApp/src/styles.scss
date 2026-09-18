@@ -13,7 +13,7 @@
 /* These styles consume CSS variables defined in tokens.css.scss.                 */
 /* Do NOT add hard-coded design values here.                                      */
 
-/* ── Header — REMOVED P0-6: AppLayout.tsx is single source (was #root > header fixed) ── */
+/* Header styles live in AppLayout.tsx — no CSS override needed here. */
 
 /* ── Nav brand ───────────────────────────────────────────────────────────────── */
 #root > header nav > ul:first-child a {
@@ -88,14 +88,14 @@
   }
 }
 
-/* ── Focus ring — Protocol Section 16 (double ring) ──────────────────────────── */
+/* ── Focus ring — double ring per accessibility spec ──────────────────────────── */
 :focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px var(--color-focus-halo);
 }
 
-/* ── Reduced motion — Protocol Section 33 ────────────────────────────────────── */
+/* ── Reduced motion — accessibility preference ────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -109,7 +109,7 @@
   color: var(--color-error);
 }
 
-/* ── Numerical typography — Protocol Section 7 ───────────────────────────────── */
+/* ── Numerical typography ────────────────────────────────────────────────────── */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }

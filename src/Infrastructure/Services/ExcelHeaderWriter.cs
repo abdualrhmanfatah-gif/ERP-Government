@@ -124,6 +124,7 @@ public static class ExcelHeaderWriter
         }
         catch
         {
+            // Image loading is non-fatal — report renders without logos gracefully.
             return false;
         }
     }
